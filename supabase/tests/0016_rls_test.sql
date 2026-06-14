@@ -6,12 +6,9 @@ select is( (select relrowsecurity from pg_class where relname='professionals'), 
 select is( (select relrowsecurity from pg_class where relname='documents'), true, 'RLS on documents');
 
 -- Fixtures: two professionals
-insert into auth.users (id, email) values
-  ('00000000-0000-0000-0000-0000000000a1','a@test.dev'),
-  ('00000000-0000-0000-0000-0000000000b2','b@test.dev');
-insert into users (id, email, account_type) values
-  ('00000000-0000-0000-0000-0000000000a1','a@test.dev','professional'),
-  ('00000000-0000-0000-0000-0000000000b2','b@test.dev','professional');
+insert into auth.users (id, email, raw_user_meta_data) values
+  ('00000000-0000-0000-0000-0000000000a1','a@test.dev','{"account_type":"professional"}'::jsonb),
+  ('00000000-0000-0000-0000-0000000000b2','b@test.dev','{"account_type":"professional"}'::jsonb);
 insert into professionals (user_id, full_name) values
   ('00000000-0000-0000-0000-0000000000a1','Pro A'),
   ('00000000-0000-0000-0000-0000000000b2','Pro B');

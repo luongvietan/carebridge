@@ -6,8 +6,8 @@ select has_table('booking_status_history');
 select has_table('booking_cancellations');
 
 -- Behavioural: snapshot totals are frozen
-insert into auth.users (id, email) values ('00000000-0000-0000-0000-0000000000c1','c1@test.dev');
-insert into users (id, email, account_type) values ('00000000-0000-0000-0000-0000000000c1','c1@test.dev','private_client');
+insert into auth.users (id, email, raw_user_meta_data)
+  values ('00000000-0000-0000-0000-0000000000c1','c1@test.dev','{"account_type":"private_client"}'::jsonb);
 insert into private_clients (id, user_id, full_name)
   values ('00000000-0000-0000-0000-0000000000d1','00000000-0000-0000-0000-0000000000c1','Client One');
 insert into professional_roles (id, code, name)
