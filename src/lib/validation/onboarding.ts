@@ -20,3 +20,18 @@ export const eligibilitySchema = z.object({
   trainingCurrent: z.boolean(),
 });
 export type EligibilityInput = z.infer<typeof eligibilitySchema>;
+
+export const profileSchema = z.object({
+  dateOfBirth: z.string().optional(),
+  addressLine1: z.string().min(1),
+  addressLine2: z.string().optional(),
+  city: z.string().min(1),
+  postcode: z.string().min(1),
+  nationalInsuranceNo: z.string().optional(),
+  professionalRoleId: z.string().uuid("Select your professional role"),
+  professionalSummary: z.string().optional(),
+  travelDistanceKm: z.coerce.number().int().min(0).max(1000).optional(),
+  hasDrivingLicence: z.boolean().optional(),
+  hasVehicle: z.boolean().optional(),
+});
+export type ProfileInput = z.infer<typeof profileSchema>;
