@@ -4,7 +4,7 @@ import { isAreaAllowed, roleHome, type AccountType } from "@/lib/auth/rbac";
 
 const GUARDED = ["/professional", "/client", "/organisation", "/admin"];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
   if (!GUARDED.some((a) => path === a || path.startsWith(a + "/"))) {
     return NextResponse.next();
@@ -43,5 +43,14 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/professional/:path*", "/client/:path*", "/organisation/:path*", "/admin/:path*"],
+  matcher: [
+    "/professional",
+    "/professional/:path*",
+    "/client",
+    "/client/:path*",
+    "/organisation",
+    "/organisation/:path*",
+    "/admin",
+    "/admin/:path*",
+  ],
 };
