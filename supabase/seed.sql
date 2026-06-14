@@ -51,3 +51,12 @@ insert into assessment_question_bank (id, professional_role_id, topic, question_
   ('00000000-0000-0000-0000-0000000a0007', null, 'health_safety', 'When you spot a workplace hazard you should:', '[{"key":"a","text":"Step over it"},{"key":"b","text":"Report and, if safe, mitigate it"},{"key":"c","text":"Wait for someone else"},{"key":"d","text":"Leave for the day"}]', 'b'),
   ('00000000-0000-0000-0000-0000000a0008', null, 'role_specific', 'If a task is outside your competence or scope you should:', '[{"key":"a","text":"Attempt it anyway"},{"key":"b","text":"Decline and escalate to an appropriate professional"},{"key":"c","text":"Guess"},{"key":"d","text":"Delegate to a client"}]', 'b')
 on conflict (id) do nothing;
+
+-- Required documents per role: every role must provide the key critical documents + photo ID.
+insert into compliance_requirements (professional_role_id, document_type_id)
+select r.id, d.id
+from professional_roles r
+join document_types d on d.code in
+  ('photo_id','right_to_work','enhanced_dbs','professional_registration',
+   'mandatory_training_certificate','professional_indemnity_insurance')
+on conflict (professional_role_id, document_type_id) do nothing;

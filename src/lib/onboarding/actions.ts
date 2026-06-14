@@ -117,3 +117,39 @@ export async function saveProfile(_prev: ProfileResult, formData: FormData): Pro
   if (error) return { error: error.message };
   return { ok: true };
 }
+
+export async function uploadDocument(
+  formData: FormData,
+): Promise<{ ok: true } | { error: string }> {
+  const professionalId = await ensureProfessional();
+  if (!professionalId) return { error: "You must be signed in." };
+
+  const documentTypeId = String(formData.get("documentTypeId") ?? "");
+  const file = formData.get("file");
+  if (!documentTypeId) return { error: "Missing document type." };
+  if (!(file instanceof File) || file.size === 0) return { error: "Choose a file to upload." };
+
+  const admin = createServiceClient();
+  const path = `${professionalId}/${documentTypeId}/${crypto.randomUUID()}-${file.name}`;
+  const { error: upErr } = await admin.storage
+    .from("documents")
+    .upload(path, file, { contentType: file.type, upsert: true });
+  if (upErr) return { error: `Upload failed: ${upErr.message}` };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const { error } = await admin.from("documents").insert({
+    professional_id: professionalId,
+    document_type_id: documentTypeId,
+    storage_path: path,
+    original_filename: file.name,
+    reference_number: (formData.get("referenceNumber") as string) || null,
+    issuing_body: (formData.get("issuingBody") as string) || null,
+    expiry_date: (formData.get("expiryDate") as string) || null,
+    uploaded_by: user?.id ?? null,
+  });
+  if (error) return { error: error.message };
+  return { ok: true };
+}
