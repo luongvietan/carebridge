@@ -1,5 +1,6 @@
 "use server";
 import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/service";
 import { eligibilitySchema } from "@/lib/validation/onboarding";
 import { eligibilityOutcome, type EligibilityOutcome } from "@/lib/compliance/requirements";
 
@@ -47,9 +48,11 @@ export async function submitEligibility(
   const professionalId = await ensureProfessional();
   if (!professionalId) return { error: "You must be signed in." };
 
-  const supabase = await createClient();
+  // Service client: ownership already verified via ensureProfessional (auth.uid's own row).
+  // eligibility_screenings has admin-only RLS, so privileged server-side write is required.
+  const admin = createServiceClient();
   const outcome = eligibilityOutcome(parsed.data.trainingCurrent);
-  const { error } = await supabase.from("eligibility_screenings").insert({
+  const { error } = await admin.from("eligibility_screenings").insert({
     professional_id: professionalId,
     employment_status: parsed.data.employmentStatus,
     training_current: parsed.data.trainingCurrent,
