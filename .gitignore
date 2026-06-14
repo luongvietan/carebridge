@@ -5,9 +5,9 @@ node_modules/
 .vercel/
 *.log
 next-env.d.ts
-/playwright-report/
-/test-results/
-/.playwright/
+playwright-report/
+test-results/
+.playwright/
 
 # build info
 tsconfig.tsbuildinfo

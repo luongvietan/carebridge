@@ -21,33 +21,34 @@
 
 ## 2. Repository & module layout (target)
 
+npm workspaces monorepo: the Next.js app lives in `apps/web`; DB infra, docs and CI stay at the root.
+
 ```
-carebridge-connect/
-├─ docs/                         # specs + per-subsystem plans (existing)
-├─ supabase/                     # migrations, tests, seed (S? DB layer — DONE)
-├─ src/
-│  ├─ app/
-│  │  ├─ (marketing)/            # public: home, about, services, faq, contact
-│  │  ├─ (legal)/                # privacy, terms
-│  │  ├─ (auth)/                 # login, register, verify, reset
-│  │  ├─ professional/           # professional area (onboarding, profile, docs, bookings)
-│  │  ├─ client/                 # private client area
-│  │  ├─ organisation/           # organisation area
-│  │  ├─ admin/                  # admin/founder dashboard
-│  │  └─ api/                    # route handlers (stripe webhooks, exports)
-│  ├─ lib/
-│  │  ├─ supabase/               # server/browser clients, typed schema
-│  │  ├─ auth/                   # session, role guards, RBAC middleware
-│  │  ├─ audit/                  # audit_log writer helper
-│  │  ├─ compliance/             # status/eligibility helpers
-│  │  ├─ rates/                  # rate-card lookup + booking snapshot builder
-│  │  ├─ stripe/                 # stripe client + payment intent helpers
-│  │  └─ export/                 # CSV/XLSX generators over v_export_* views
-│  ├─ components/                # shared UI (forms, tables, status badges)
-│  └─ types/                     # generated DB types, domain types
-├─ e2e/                          # Playwright specs
-└─ .github/workflows/ci.yml      # lint + unit + pgTAP + build
+carebridge-connect/                # workspace root (package.json: workspaces=["apps/*"])
+├─ apps/
+│  └─ web/                        # @carebridge/web — the Next.js app
+│     ├─ src/
+│     │  ├─ app/
+│     │  │  ├─ (marketing)/       # public: home, about, services, faq, contact
+│     │  │  ├─ (legal)/           # privacy, terms
+│     │  │  ├─ (auth)/            # login, register, verify, reset
+│     │  │  ├─ professional/      # professional area (onboarding, profile, docs, bookings)
+│     │  │  ├─ client/            # private client area
+│     │  │  ├─ organisation/      # organisation area
+│     │  │  ├─ admin/             # admin/founder dashboard
+│     │  │  └─ api/               # route handlers (stripe webhooks, exports)
+│     │  ├─ lib/                  # supabase, auth, audit, compliance, rates, stripe, export, …
+│     │  ├─ components/           # shared UI (forms, tables, status badges)
+│     │  └─ proxy.ts              # role-based route guard
+│     ├─ e2e/                     # Playwright specs
+│     └─ {next,tsconfig,eslint,postcss,vitest,playwright}.config + .env*
+├─ supabase/                      # migrations, tests, seed, config.toml (DB layer)
+├─ docs/                          # specs + per-subsystem plans
+├─ DESIGN.md                      # UI design reference (IBM Carbon)
+└─ .github/workflows/ci.yml       # npm ci → lint + test + build (web) + pgTAP (supabase)
 ```
+
+Root scripts delegate to the app (`dev/build/lint/test/e2e` → `-w @carebridge/web`) and the DB (`db:reset/db:test/db:push` → `supabase …`).
 
 **Boundary principle:** each role area owns its routes; shared domain logic lives in `src/lib/*` as small, single-responsibility modules (rates, compliance, audit, export) so it is unit-testable independently of React.
 
