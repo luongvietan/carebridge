@@ -8,3 +8,11 @@ export type EligibilityOutcome = "continue" | "pending";
 export function eligibilityOutcome(allTrainingCurrent: boolean): EligibilityOutcome {
   return allTrainingCurrent ? "continue" : "pending";
 }
+
+/**
+ * A professional is compliant when every critical document type required for their
+ * role has an approved document. No required critical types ⇒ vacuously compliant.
+ */
+export function isCompliant(requiredCriticalTypeIds: string[], approvedTypeIds: Set<string>): boolean {
+  return requiredCriticalTypeIds.every((id) => approvedTypeIds.has(id));
+}
