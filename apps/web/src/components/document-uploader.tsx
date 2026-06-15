@@ -28,7 +28,7 @@ function Badge({ status }: { status: string | null }) {
   );
 }
 
-const field = "rounded-none border-b border-[#8c8c8c] bg-[#f4f4f4] px-2 py-1.5 text-sm focus:border-[#0f62fe] focus:outline-none";
+const field = "rounded-none border-b border-[#8c8c8c] bg-[#f4f4f4] px-2 py-1.5 text-sm focus:border-[#198038] focus:outline-none";
 
 export function DocumentUploader({ items }: { items: DocItem[] }) {
   const router = useRouter();
@@ -64,7 +64,7 @@ export function DocumentUploader({ items }: { items: DocItem[] }) {
             <div className="flex items-center justify-between">
               <div>
                 <span className="font-semibold">{item.name}</span>
-                {item.critical && <span className="ml-2 text-xs text-[#0f62fe]">critical</span>}
+                {item.critical && <span className="ml-2 text-xs text-[#198038]">critical</span>}
               </div>
               <Badge status={item.status} />
             </div>

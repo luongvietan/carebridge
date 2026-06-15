@@ -12,7 +12,7 @@ export function OnboardingSteps({ current }: { current: number }) {
           <li
             key={label}
             className={`flex-1 px-4 py-3 ${
-              active ? "bg-white font-semibold text-[#0f62fe]" : done ? "bg-white text-[#161616]" : "bg-[#f4f4f4] text-[#8c8c8c]"
+              active ? "bg-white font-semibold text-[#198038]" : done ? "bg-white text-[#161616]" : "bg-[#f4f4f4] text-[#8c8c8c]"
             }`}
           >
             <span className="tabular-nums">{done ? "✓" : step}.</span> {label}

@@ -37,7 +37,7 @@ export default function EligibilityPage() {
           )}
           <Link
             href="/professional/onboarding/assessment"
-            className="mt-6 inline-block bg-[#0f62fe] px-4 py-3 text-sm text-white hover:bg-[#0050e6]"
+            className="mt-6 inline-block bg-[#198038] px-4 py-3 text-sm text-white hover:bg-[#0e6027]"
           >
             Continue to assessment →
           </Link>
@@ -87,7 +87,7 @@ export default function EligibilityPage() {
         <button
           type="submit"
           disabled={pending}
-          className="bg-[#0f62fe] px-4 py-3 text-sm text-white hover:bg-[#0050e6] disabled:opacity-50"
+          className="bg-[#198038] px-4 py-3 text-sm text-white hover:bg-[#0e6027] disabled:opacity-50"
         >
           {pending ? "Saving…" : "Continue"}
         </button>

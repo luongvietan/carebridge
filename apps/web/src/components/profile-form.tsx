@@ -4,7 +4,7 @@ import Link from "next/link";
 import { saveProfile, type ProfileResult } from "@/lib/onboarding/actions";
 import { OnboardingSteps } from "@/components/onboarding-steps";
 
-const field = "mt-1 w-full rounded-none border-b border-[#8c8c8c] bg-[#f4f4f4] px-3 py-2 text-sm focus:border-[#0f62fe] focus:outline-none";
+const field = "mt-1 w-full rounded-none border-b border-[#8c8c8c] bg-[#f4f4f4] px-3 py-2 text-sm focus:border-[#198038] focus:outline-none";
 
 type Role = { id: string; name: string };
 type Current = {
@@ -32,7 +32,7 @@ export function ProfileForm({ roles, current }: { roles: Role[]; current: Curren
           <h2 className="text-xl font-light">Profile saved</h2>
           <Link
             href="/professional/onboarding/documents"
-            className="mt-6 inline-block bg-[#0f62fe] px-4 py-3 text-sm text-white hover:bg-[#0050e6]"
+            className="mt-6 inline-block bg-[#198038] px-4 py-3 text-sm text-white hover:bg-[#0e6027]"
           >
             Continue to documents →
           </Link>
@@ -109,7 +109,7 @@ export function ProfileForm({ roles, current }: { roles: Role[]; current: Curren
         <button
           type="submit"
           disabled={pending}
-          className="bg-[#0f62fe] px-4 py-3 text-sm text-white hover:bg-[#0050e6] disabled:opacity-50"
+          className="bg-[#198038] px-4 py-3 text-sm text-white hover:bg-[#0e6027] disabled:opacity-50"
         >
           {pending ? "Saving…" : "Save profile"}
         </button>

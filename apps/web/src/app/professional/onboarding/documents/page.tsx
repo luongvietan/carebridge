@@ -28,7 +28,7 @@ export default async function DocumentsPage() {
           </p>
           <Link
             href="/professional/onboarding/profile"
-            className="mt-6 inline-block bg-[#0f62fe] px-4 py-3 text-sm text-white hover:bg-[#0050e6]"
+            className="mt-6 inline-block bg-[#198038] px-4 py-3 text-sm text-white hover:bg-[#0e6027]"
           >
             Go to profile →
           </Link>

@@ -53,14 +53,14 @@ export function ReviewQueue({ items }: { items: ReviewItem[] }) {
             </div>
             <div className="flex items-center gap-2 text-sm">
               {it.viewUrl && (
-                <a href={it.viewUrl} target="_blank" rel="noreferrer" className="text-[#0f62fe] underline">
+                <a href={it.viewUrl} target="_blank" rel="noreferrer" className="text-[#198038] underline">
                   View
                 </a>
               )}
               <button
                 onClick={() => decide(it.documentId, "approved")}
                 disabled={busy === it.documentId}
-                className="bg-[#0f62fe] px-3 py-1.5 text-white hover:bg-[#0050e6] disabled:opacity-50"
+                className="bg-[#198038] px-3 py-1.5 text-white hover:bg-[#0e6027] disabled:opacity-50"
               >
                 Approve
               </button>

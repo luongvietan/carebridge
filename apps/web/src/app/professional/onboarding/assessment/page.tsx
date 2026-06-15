@@ -59,7 +59,7 @@ export default function AssessmentPage() {
             <button
               onClick={begin}
               disabled={busy}
-              className="mt-6 bg-[#0f62fe] px-4 py-3 text-sm text-white hover:bg-[#0050e6] disabled:opacity-50"
+              className="mt-6 bg-[#198038] px-4 py-3 text-sm text-white hover:bg-[#0e6027] disabled:opacity-50"
             >
               {busy ? "Loading…" : "Begin assessment"}
             </button>
@@ -95,7 +95,7 @@ export default function AssessmentPage() {
             <button
               onClick={submit}
               disabled={busy || !allAnswered}
-              className="bg-[#0f62fe] px-4 py-3 text-sm text-white hover:bg-[#0050e6] disabled:opacity-50"
+              className="bg-[#198038] px-4 py-3 text-sm text-white hover:bg-[#0e6027] disabled:opacity-50"
             >
               {busy ? "Submitting…" : "Submit answers"}
             </button>
@@ -113,7 +113,7 @@ export default function AssessmentPage() {
                 <p className="mt-2 text-sm text-[#24a148]">Passed — the minimum is 80%.</p>
                 <Link
                   href="/professional/onboarding/profile"
-                  className="mt-6 inline-block bg-[#0f62fe] px-4 py-3 text-sm text-white hover:bg-[#0050e6]"
+                  className="mt-6 inline-block bg-[#198038] px-4 py-3 text-sm text-white hover:bg-[#0e6027]"
                 >
                   Continue to profile →
                 </Link>
@@ -123,7 +123,7 @@ export default function AssessmentPage() {
                 <p className="mt-2 text-sm text-[#da1e28]">Below the 80% pass mark. You may try again.</p>
                 <button
                   onClick={() => setPhase("intro")}
-                  className="mt-6 bg-[#0f62fe] px-4 py-3 text-sm text-white hover:bg-[#0050e6]"
+                  className="mt-6 bg-[#198038] px-4 py-3 text-sm text-white hover:bg-[#0e6027]"
                 >
                   Try again
                 </button>

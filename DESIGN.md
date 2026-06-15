@@ -1,10 +1,10 @@
 ---
 version: alpha
 name: IBM-design-analysis
-description: "An enterprise-marketing canvas faithful to Carbon Design System: white surfaces, charcoal type, IBM Blue (#0f62fe) as the single confident accent, and a deliberately flat-square aesthetic where corners stay at 0–4px. Type runs IBM Plex Sans at light weight 300 for display sizes (a brand signature) and 400/600 for body and emphasis. Cards live as thin-bordered tiles with no shadow; sections separate via subtle gray rows. The chrome is square, the typography is light, and the only color in the system is one assertive blue — the result reads as old-world enterprise gravitas reframed for the cloud era."
+description: "A Carbon-grounded healthcare system: white surfaces, charcoal type, a confident healthcare green (#198038) as the single brand accent (replacing IBM Blue), and a flat-square in-app aesthetic where corners stay at 0–4px. Type runs IBM Plex Sans at light weight 300 for display sizes and 400/600 for body and emphasis. In-app cards are thin-bordered tiles with no shadow; the public marketing site expresses the same green brand more warmly (forest-green hero, rounded cards, real photography per the BrightLife/Design-3 direction). The brand colour is unified across app and marketing; only the surface treatment differs."
 
 colors:
-  primary: "#0f62fe"
+  primary: "#198038"
   on-primary: "#ffffff"
   ink: "#161616"
   ink-muted: "#525252"
@@ -18,13 +18,15 @@ colors:
   inverse-ink-muted: "#c6c6c6"
   hairline: "#e0e0e0"
   hairline-strong: "#161616"
-  blue-60: "#0043ce"
-  blue-80: "#002d9c"
-  blue-hover: "#0050e6"
+  green-70: "#0e6027"
+  green-80: "#044317"
+  green-hover: "#0e6027"
+  forest: "#114a32"
+  green-soft: "#e6f4ea"
   semantic-success: "#24a148"
   semantic-warning: "#f1c21b"
   semantic-error: "#da1e28"
-  semantic-info: "#0f62fe"
+  semantic-info: "#0043ce"
 
 typography:
   display-xl:
