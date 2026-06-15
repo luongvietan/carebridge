@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { acceptBooking, declineBooking } from "@/lib/bookings/actions";
+import { acceptBooking, declineBooking, completeBooking } from "@/lib/bookings/actions";
 
 type BookingRow = {
   id: string;
@@ -81,15 +81,47 @@ function BookingActions({
   );
 }
 
-function BookingTable({ rows, showActions, eligible, onRefresh }: {
+function CompleteControl({ bookingId, onDone }: { bookingId: string; onDone: () => void }) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleComplete() {
+    if (!window.confirm("Mark this booking as completed?")) return;
+    setBusy(true);
+    setError(null);
+    const result = await completeBooking(bookingId);
+    setBusy(false);
+    if ("error" in result) setError(result.error);
+    else onDone();
+  }
+
+  return (
+    <div className="flex flex-col items-end gap-1">
+      {error && <span className="text-xs text-[#da1e28]">{error}</span>}
+      <button
+        type="button"
+        onClick={handleComplete}
+        disabled={busy}
+        className="bg-[#198038] px-3 py-1.5 text-sm text-white hover:bg-[#0e6027] disabled:opacity-50"
+      >
+        {busy ? "Saving…" : "Mark completed"}
+      </button>
+    </div>
+  );
+}
+
+function BookingTable({ rows, showActions, showComplete, eligible, onRefresh }: {
   rows: BookingRow[];
   showActions?: boolean;
+  showComplete?: boolean;
   eligible?: boolean;
   onRefresh: () => void;
 }) {
   if (rows.length === 0) {
     return <p className="mt-3 text-sm text-[#525252]">None.</p>;
   }
+
+  const hasActionsCol = showActions || showComplete;
 
   return (
     <div className="mt-4 overflow-x-auto border border-[#e0e0e0]">
@@ -100,7 +132,7 @@ function BookingTable({ rows, showActions, eligible, onRefresh }: {
             <th className="p-3 font-medium">Location</th>
             <th className="p-3 font-medium">Status</th>
             <th className="p-3 font-medium">Payout</th>
-            {showActions && <th className="p-3 font-medium" />}
+            {hasActionsCol && <th className="p-3 font-medium" />}
           </tr>
         </thead>
         <tbody className="divide-y divide-[#e0e0e0]">
@@ -114,9 +146,14 @@ function BookingTable({ rows, showActions, eligible, onRefresh }: {
                 </span>
               </td>
               <td className="p-3">{formatMoney(b.total_payout)}</td>
-              {showActions && (
+              {hasActionsCol && (
                 <td className="p-3 text-right">
-                  <BookingActions bookingId={b.id} eligible={!!eligible} onDone={onRefresh} />
+                  {showActions && (
+                    <BookingActions bookingId={b.id} eligible={!!eligible} onDone={onRefresh} />
+                  )}
+                  {showComplete && (
+                    <CompleteControl bookingId={b.id} onDone={onRefresh} />
+                  )}
                 </td>
               )}
             </tr>
@@ -149,7 +186,7 @@ export function ProfessionalBookings({
 
       <section className="mt-12">
         <h2 className="text-xl font-light">My bookings</h2>
-        <BookingTable rows={active} onRefresh={() => router.refresh()} />
+        <BookingTable rows={active} showComplete onRefresh={() => router.refresh()} />
       </section>
 
       <section className="mt-12">

@@ -1,10 +1,13 @@
 import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/service";
 import Link from "next/link";
 import { BookingCancelButton } from "@/components/booking-cancel-button";
+import { PayNowButton } from "@/components/pay-now-button";
 
 export const dynamic = "force-dynamic";
 
 const CANCELLABLE = new Set(["open", "accepted", "assigned"]);
+const PAYABLE = new Set(["accepted", "assigned"]);
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" });
@@ -17,6 +20,8 @@ function formatMoney(amount: number | null) {
 
 export default async function OrganisationBookingsPage() {
   const supabase = await createClient();
+  const admin = createServiceClient();
+
   const [{ data: bookings }, { data: roles }] = await Promise.all([
     supabase
       .from("bookings")
@@ -28,6 +33,26 @@ export default async function OrganisationBookingsPage() {
   ]);
 
   const roleNames = new Map((roles ?? []).map((r) => [r.id, r.name]));
+
+  // Load latest payment status per booking via service client (payments is admin-RLS).
+  const bookingIds = (bookings ?? []).map((b) => b.id);
+  const paymentStatusByBooking = new Map<string, string>();
+  if (bookingIds.length > 0) {
+    const { data: payments } = await admin
+      .from("payments")
+      .select("booking_id, status, created_at")
+      .in("booking_id", bookingIds)
+      .order("created_at", { ascending: false });
+
+    // Pick the most recent payment per booking.
+    const seen = new Set<string>();
+    for (const p of payments ?? []) {
+      if (!seen.has(p.booking_id)) {
+        paymentStatusByBooking.set(p.booking_id, p.status);
+        seen.add(p.booking_id);
+      }
+    }
+  }
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-10">
@@ -53,25 +78,42 @@ export default async function OrganisationBookingsPage() {
                 <th className="p-3 font-medium">Role</th>
                 <th className="p-3 font-medium">Status</th>
                 <th className="p-3 font-medium">Total</th>
+                <th className="p-3 font-medium">Payment</th>
                 <th className="p-3 font-medium" />
               </tr>
             </thead>
             <tbody className="divide-y divide-[#e0e0e0]">
-              {bookings.map((b) => (
-                <tr key={b.id}>
-                  <td className="p-3">{formatDate(b.scheduled_start)}</td>
-                  <td className="p-3">{roleNames.get(b.professional_role_id) ?? b.professional_role_id}</td>
-                  <td className="p-3">
-                    <span className="bg-[#f4f4f4] px-2 py-0.5 text-xs text-[#525252]">
-                      {b.status.replace(/_/g, " ")}
-                    </span>
-                  </td>
-                  <td className="p-3">{formatMoney(b.total_client_charge)}</td>
-                  <td className="p-3 text-right">
-                    {CANCELLABLE.has(b.status) && <BookingCancelButton bookingId={b.id} />}
-                  </td>
-                </tr>
-              ))}
+              {bookings.map((b) => {
+                const payStatus = paymentStatusByBooking.get(b.id) ?? null;
+                const needsPay = PAYABLE.has(b.status) && payStatus !== "succeeded";
+                return (
+                  <tr key={b.id}>
+                    <td className="p-3">{formatDate(b.scheduled_start)}</td>
+                    <td className="p-3">{roleNames.get(b.professional_role_id) ?? b.professional_role_id}</td>
+                    <td className="p-3">
+                      <span className="bg-[#f4f4f4] px-2 py-0.5 text-xs text-[#525252]">
+                        {b.status.replace(/_/g, " ")}
+                      </span>
+                    </td>
+                    <td className="p-3">{formatMoney(b.total_client_charge)}</td>
+                    <td className="p-3">
+                      {payStatus ? (
+                        <span className="bg-[#f4f4f4] px-2 py-0.5 text-xs text-[#525252]">
+                          {payStatus.replace(/_/g, " ")}
+                        </span>
+                      ) : (
+                        <span className="text-[#525252]">—</span>
+                      )}
+                    </td>
+                    <td className="p-3 text-right">
+                      <span className="inline-flex flex-col items-end gap-1">
+                        {needsPay && <PayNowButton bookingId={b.id} />}
+                        {CANCELLABLE.has(b.status) && <BookingCancelButton bookingId={b.id} />}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

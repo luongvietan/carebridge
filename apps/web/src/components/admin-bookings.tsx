@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { assignBooking, cancelBooking } from "@/lib/bookings/actions";
+import { assignBooking, cancelBooking, completeBooking, markNoShow } from "@/lib/bookings/actions";
 
 type AdminBooking = {
   id: string;
@@ -121,6 +121,64 @@ function CancelControl({ bookingId, onDone }: { bookingId: string; onDone: () =>
   );
 }
 
+function CompleteControl({ bookingId, onDone }: { bookingId: string; onDone: () => void }) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleComplete() {
+    if (!window.confirm("Mark this booking as completed?")) return;
+    setBusy(true);
+    setError(null);
+    const result = await completeBooking(bookingId);
+    setBusy(false);
+    if ("error" in result) setError(result.error);
+    else onDone();
+  }
+
+  return (
+    <div className="flex flex-col items-end gap-1">
+      {error && <span className="text-xs text-[#da1e28]">{error}</span>}
+      <button
+        type="button"
+        onClick={handleComplete}
+        disabled={busy}
+        className="bg-[#198038] px-3 py-1.5 text-sm text-white hover:bg-[#0e6027] disabled:opacity-50"
+      >
+        {busy ? "Saving…" : "Mark completed"}
+      </button>
+    </div>
+  );
+}
+
+function NoShowControl({ bookingId, onDone }: { bookingId: string; onDone: () => void }) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleNoShow() {
+    if (!window.confirm("Mark this booking as no-show?")) return;
+    setBusy(true);
+    setError(null);
+    const result = await markNoShow(bookingId);
+    setBusy(false);
+    if ("error" in result) setError(result.error);
+    else onDone();
+  }
+
+  return (
+    <div className="flex flex-col items-end gap-1">
+      {error && <span className="text-xs text-[#da1e28]">{error}</span>}
+      <button
+        type="button"
+        onClick={handleNoShow}
+        disabled={busy}
+        className="border border-[#8c8c8c] px-3 py-1.5 text-sm hover:bg-[#f4f4f4] disabled:opacity-50"
+      >
+        {busy ? "Saving…" : "No-show"}
+      </button>
+    </div>
+  );
+}
+
 export function AdminBookings({
   bookings,
   professionals,
@@ -166,7 +224,11 @@ export function AdminBookings({
                     />
                   )}
                   {!TERMINAL.has(b.status) && (
-                    <CancelControl bookingId={b.id} onDone={() => router.refresh()} />
+                    <>
+                      <CompleteControl bookingId={b.id} onDone={() => router.refresh()} />
+                      <NoShowControl bookingId={b.id} onDone={() => router.refresh()} />
+                      <CancelControl bookingId={b.id} onDone={() => router.refresh()} />
+                    </>
                   )}
                 </div>
               </td>
