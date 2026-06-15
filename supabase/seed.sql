@@ -60,3 +60,16 @@ join document_types d on d.code in
   ('photo_id','right_to_work','enhanced_dbs','professional_registration',
    'mandatory_training_certificate','professional_indemnity_insurance')
 on conflict (professional_role_id, document_type_id) do nothing;
+
+-- One active, effective-dated rate card per role so booking creation can resolve a snapshot.
+insert into rate_cards (professional_role_id, client_charge_rate, professional_payout_rate, platform_fee_type, currency)
+select r.id, 40.00, 28.00, 'derived', 'GBP'
+from professional_roles r
+where not exists (
+  select 1 from rate_cards rc where rc.professional_role_id = r.id and rc.effective_to is null
+);
+
+-- Fix booking_request copy: sent to the requester on create, not to professionals.
+update notification_templates
+   set body = 'Your booking request ({{booking_id}}) has been submitted.'
+ where type = 'booking_request';
