@@ -1,4 +1,5 @@
 import { AboutIntroSection } from "@/components/about-intro-section";
+import { ImportantInfoCallout } from "@/components/important-info-callout";
 import { ComplianceShowcase } from "@/components/compliance-showcase";
 import { CtaBanner } from "@/components/cta-banner";
 import { HomeFaqSection } from "@/components/home-faq-section";
@@ -52,6 +53,8 @@ export default function HomePage() {
             ))}
           </div>
         </section>
+
+        <ImportantInfoCallout />
 
         <TestimonialsSection />
 
