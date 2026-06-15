@@ -16,6 +16,30 @@ export default async function AdminHome() {
       <DashboardGrid
         cards={[
           {
+            href: "/admin/users",
+            title: "Users",
+            description: "Search and manage professionals, status actions and compliance filters.",
+            cta: "Manage users",
+          },
+          {
+            href: "/admin/accounts",
+            title: "All accounts",
+            description: "Suspend or deactivate any account role across the platform.",
+            cta: "Manage accounts",
+          },
+          {
+            href: "/admin/rates",
+            title: "Rate cards",
+            description: "View and amend effective-dated rate cards by professional role.",
+            cta: "Manage rate cards",
+          },
+          {
+            href: "/admin/finance",
+            title: "Finance",
+            description: "Review transactions, payments and revenue across bookings.",
+            cta: "Open finance",
+          },
+          {
             href: "/admin/compliance",
             title: "Compliance",
             description: "Review professional documents, expiry alerts and verification status.",
