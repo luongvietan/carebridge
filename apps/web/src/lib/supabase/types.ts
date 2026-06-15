@@ -1933,6 +1933,18 @@ export type Database = {
       }
     }
     Functions: {
+      amend_rate_card: {
+        Args: {
+          p_admin_id: string
+          p_charge: number
+          p_currency: string
+          p_fee_type: string
+          p_fee_value: number
+          p_payout: number
+          p_role_id: string
+        }
+        Returns: string
+      }
       fn_run_compliance_sweep: { Args: never; Returns: undefined }
       get_payout_last4: { Args: { p_professional_id: string }; Returns: string }
       is_admin: { Args: never; Returns: boolean }
