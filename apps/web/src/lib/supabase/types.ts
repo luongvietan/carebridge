@@ -1,4 +1,4 @@
-﻿export type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -62,6 +62,13 @@ export type Database = {
             columns: ["attempt_id"]
             isOneToOne: false
             referencedRelation: "assessment_attempts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessment_answers_attempt_id_fkey"
+            columns: ["attempt_id"]
+            isOneToOne: false
+            referencedRelation: "v_export_assessments"
             referencedColumns: ["id"]
           },
           {
@@ -515,10 +522,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "bookings_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "v_export_organisations"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "bookings_private_client_id_fkey"
             columns: ["private_client_id"]
             isOneToOne: false
             referencedRelation: "private_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_private_client_id_fkey"
+            columns: ["private_client_id"]
+            isOneToOne: false
+            referencedRelation: "v_export_clients"
             referencedColumns: ["id"]
           },
           {
@@ -1763,6 +1784,19 @@ export type Database = {
       }
     }
     Views: {
+      v_export_assessments: {
+        Row: {
+          attempt_number: number | null
+          completed_at: string | null
+          full_name: string | null
+          id: string | null
+          passed: boolean | null
+          role: string | null
+          score: number | null
+          started_at: string | null
+        }
+        Relationships: []
+      }
       v_export_audit: {
         Row: {
           action: string | null
@@ -1812,6 +1846,36 @@ export type Database = {
         }
         Relationships: []
       }
+      v_export_clients: {
+        Row: {
+          city: string | null
+          created_at: string | null
+          email_contact: string | null
+          full_name: string | null
+          id: string | null
+          phone: string | null
+          postcode: string | null
+        }
+        Insert: {
+          city?: string | null
+          created_at?: string | null
+          email_contact?: string | null
+          full_name?: string | null
+          id?: string | null
+          phone?: string | null
+          postcode?: string | null
+        }
+        Update: {
+          city?: string | null
+          created_at?: string | null
+          email_contact?: string | null
+          full_name?: string | null
+          id?: string | null
+          phone?: string | null
+          postcode?: string | null
+        }
+        Relationships: []
+      }
       v_export_compliance: {
         Row: {
           document_type: string | null
@@ -1825,6 +1889,45 @@ export type Database = {
           verification_status:
             | Database["public"]["Enums"]["document_status"]
             | null
+        }
+        Relationships: []
+      }
+      v_export_organisations: {
+        Row: {
+          billing_email: string | null
+          city: string | null
+          contact_person: string | null
+          cqc_registration_number: string | null
+          created_at: string | null
+          email_contact: string | null
+          id: string | null
+          organisation_name: string | null
+          phone: string | null
+          postcode: string | null
+        }
+        Insert: {
+          billing_email?: string | null
+          city?: string | null
+          contact_person?: string | null
+          cqc_registration_number?: string | null
+          created_at?: string | null
+          email_contact?: string | null
+          id?: string | null
+          organisation_name?: string | null
+          phone?: string | null
+          postcode?: string | null
+        }
+        Update: {
+          billing_email?: string | null
+          city?: string | null
+          contact_person?: string | null
+          cqc_registration_number?: string | null
+          created_at?: string | null
+          email_contact?: string | null
+          id?: string | null
+          organisation_name?: string | null
+          phone?: string | null
+          postcode?: string | null
         }
         Relationships: []
       }
@@ -1873,6 +1976,43 @@ export type Database = {
           },
           {
             foreignKeyName: "payments_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "v_platform_revenue"
+            referencedColumns: ["booking_id"]
+          },
+        ]
+      }
+      v_export_payouts: {
+        Row: {
+          amount: number | null
+          booking_id: string | null
+          currency: string | null
+          full_name: string | null
+          id: string | null
+          method: string | null
+          paid_at: string | null
+          recorded_at: string | null
+          reference: string | null
+          status: Database["public"]["Enums"]["payout_status"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payouts_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payouts_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "v_export_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payouts_booking_id_fkey"
             columns: ["booking_id"]
             isOneToOne: false
             referencedRelation: "v_platform_revenue"
@@ -1939,7 +2079,7 @@ export type Database = {
           p_charge: number
           p_currency: string
           p_fee_type: string
-          p_fee_value: number | null
+          p_fee_value: number
           p_payout: number
           p_role_id: string
         }
