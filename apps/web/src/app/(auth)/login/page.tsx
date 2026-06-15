@@ -31,9 +31,15 @@ export default function LoginPage() {
     }
     const { data: row } = await supabase
       .from("users")
-      .select("account_type")
+      .select("account_type, account_status")
       .eq("id", data.user.id)
       .single();
+    if (row && row.account_status !== "active") {
+      await supabase.auth.signOut();
+      setError("Your account is suspended. Please contact CareBridge Connect.");
+      setPending(false);
+      return;
+    }
     router.push(roleHome((row?.account_type ?? "private_client") as AccountType));
     router.refresh();
   }
