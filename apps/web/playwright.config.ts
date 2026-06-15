@@ -7,6 +7,9 @@ const LOCAL = {
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0",
   SUPABASE_SERVICE_ROLE_KEY:
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU",
+  STRIPE_WEBHOOK_SECRET: "whsec_test_carebridge",
+  /** Dummy key so the Stripe SDK initialises (constructEvent does not make network calls). */
+  STRIPE_SECRET_KEY: "sk_test_carebridge_e2e",
 } as const;
 
 const e2eEnv = {
@@ -15,6 +18,10 @@ const e2eEnv = {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? LOCAL.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   SUPABASE_SERVICE_ROLE_KEY:
     process.env.SUPABASE_SERVICE_ROLE_KEY ?? LOCAL.SUPABASE_SERVICE_ROLE_KEY,
+  STRIPE_WEBHOOK_SECRET:
+    process.env.STRIPE_WEBHOOK_SECRET ?? LOCAL.STRIPE_WEBHOOK_SECRET,
+  STRIPE_SECRET_KEY:
+    process.env.STRIPE_SECRET_KEY ?? LOCAL.STRIPE_SECRET_KEY,
 };
 
 // Ensure test helpers (service client) use the same project as the dev server.
