@@ -1,5 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { createCustomer } from "./client";
+import { createCustomer, stripe } from "./client";
+
+describe("stripe()", () => {
+  it("throws when STRIPE_SECRET_KEY is not set", () => {
+    expect(() => stripe()).toThrow("STRIPE_SECRET_KEY is not set");
+  });
+});
 
 // With no STRIPE_SECRET_KEY in the test env, createCustomer returns a deterministic stub.
 describe("createCustomer (stub mode, no STRIPE_SECRET_KEY)", () => {
