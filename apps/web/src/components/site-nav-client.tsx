@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -15,17 +16,14 @@ const links = [
 
 export function BrandMark({ size = 40 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 40 40" fill="none" aria-hidden>
-      <rect width="40" height="40" rx="10" fill="#E6F4EA" />
-      <path d="M14 26V14h4v4h4v-4h4v12h-4v-4h-4v4h-4z" fill="#0c6e4f" opacity="0.85" />
-      <path
-        d="M22 10c3 2 5 5 5 9 0 1.2-.3 2.3-.8 3.2-.5.9-1.2 1.6-2 2.1"
-        stroke="#7ed7a0"
-        strokeWidth="2.2"
-        strokeLinecap="round"
-      />
-      <path d="M24 12c1.5 1.8 2.2 3.8 2 6-.1 1-.5 1.9-1.1 2.6" fill="#198038" opacity="0.35" />
-    </svg>
+    <Image
+      src="/logo.svg"
+      alt="CareBridge Connect"
+      width={size}
+      height={size}
+      priority
+      className="shrink-0"
+    />
   );
 }
 
