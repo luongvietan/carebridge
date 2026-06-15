@@ -167,3 +167,33 @@ export const testimonials: Testimonial[] = [
     photo: marketingImages.portraits.familyCarer,
   },
 ];
+
+/** Short disclaimer line shown in the global footer on every page. */
+export const regulatoryDisclaimer =
+  "CareBridge Connect is a healthcare marketplace and is not a CQC-registered provider. It does not provide regulated personal care services.";
+
+/** Non-regulated services available through the platform. */
+export const supportedServices = [
+  "Companionship",
+  "Wellbeing support",
+  "Sitting services",
+  "Hospital discharge support",
+  "Community support",
+  "Chaperoning",
+  "Appointment support",
+  "Respite support",
+] as const;
+
+/** Full "Important information" disclaimer used on the /disclaimer page and inline callouts. */
+export const importantInformation = {
+  heading: "Important information",
+  intro:
+    "CareBridge Connect is a healthcare marketplace connecting clients and organisations with independent healthcare professionals.",
+  paragraphs: [
+    "CareBridge Connect is not currently a CQC-registered provider and does not provide regulated personal care services.",
+    "Healthcare Assistants (HCAs) and Support Workers engaged through the platform must not provide regulated personal care services through CareBridge Connect. Their services are limited to companionship, wellbeing support, sitting services, hospital discharge support, community support, chaperoning, appointment support, respite support and other non-regulated activities.",
+    "Registered Nurses and other appropriately qualified healthcare professionals may provide services that fall within their professional scope of practice, subject to verification and compliance requirements.",
+  ],
+  audienceLabel:
+    "The platform is intended for private clients, healthcare organisations, supported living services, care providers and healthcare facilities seeking access to verified healthcare professionals.",
+} as const;
