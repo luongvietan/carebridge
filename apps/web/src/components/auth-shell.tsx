@@ -2,7 +2,6 @@ import Image from "next/image";
 import type { ReactNode } from "react";
 import { BackLink } from "@/components/back-link";
 import { SiteFooter } from "@/components/site-footer";
-import { SiteNav } from "@/components/site-nav";
 import { marketingImages } from "@/data/marketing-images";
 import { marketingCard } from "@/lib/marketing-ui";
 
@@ -16,7 +15,6 @@ export function AuthShell({ children, wide = false }: AuthShellProps) {
 
   return (
     <>
-      <SiteNav />
       <div className="mx-auto max-w-7xl px-5 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
         <div
           className={`grid overflow-hidden ${marketingCard} bg-white shadow-[0_8px_30px_-12px_rgba(15,38,28,0.12)] lg:grid-cols-2`}
