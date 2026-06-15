@@ -8,15 +8,15 @@ describe("buildProfessionalFilters", () => {
   it("trims text and coerces maxTravelKm", () => {
     expect(buildProfessionalFilters({ text: " jane ", maxTravelKm: "25" })).toEqual({ text: "jane", maxTravelKm: 25 });
   });
-  it("passes through enums, role, postcode, availability, docs", () => {
+  it("passes through enums, role, postcode, docs", () => {
     expect(
       buildProfessionalFilters({
         professionalStatus: "active", complianceStatus: "approved", roleId: "r1",
-        postcode: "E1 6AN ", availability: "weekends", requireValidDocs: true,
+        postcode: "E1 6AN ", requireValidDocs: true,
       }),
     ).toEqual({
       professionalStatus: "active", complianceStatus: "approved", roleId: "r1",
-      postcode: "E1 6AN", availability: "weekends", requireValidDocs: true,
+      postcode: "E1 6AN", requireValidDocs: true,
     });
   });
   it("ignores non-positive or NaN travel distance", () => {

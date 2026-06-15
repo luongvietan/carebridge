@@ -48,7 +48,6 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
   const [roleId, setRoleId] = useState(searchParams.get("roleId") ?? "");
   const [postcode, setPostcode] = useState(searchParams.get("postcode") ?? "");
   const [maxTravelKm, setMaxTravelKm] = useState(searchParams.get("maxTravelKm") ?? "");
-  const [availability, setAvailability] = useState(searchParams.get("availability") ?? "");
   const [requireValidDocs, setRequireValidDocs] = useState(
     searchParams.get("requireValidDocs") === "true",
   );
@@ -62,7 +61,6 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
       roleId,
       postcode,
       maxTravelKm,
-      availability,
       requireValidDocs,
     };
     const params = new URLSearchParams();
@@ -74,7 +72,6 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
     if (criteria.maxTravelKm !== "" && criteria.maxTravelKm !== undefined) {
       params.set("maxTravelKm", String(criteria.maxTravelKm));
     }
-    if (criteria.availability) params.set("availability", criteria.availability);
     if (criteria.requireValidDocs) params.set("requireValidDocs", "true");
     const qs = params.toString();
     router.push(qs ? `/admin/users?${qs}` : "/admin/users");
@@ -162,18 +159,6 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
             placeholder="25"
             className={`${INPUT_CLASS} w-24`}
           />
-        </label>
-        <label className="flex flex-col gap-1 text-[#525252]">
-          Availability
-          <select
-            value={availability}
-            onChange={(e) => setAvailability(e.target.value)}
-            className={SELECT_CLASS}
-          >
-            <option value="">Any</option>
-            <option value="weekdays">Weekdays</option>
-            <option value="weekends">Weekends</option>
-          </select>
         </label>
         <label className="flex items-center gap-2 self-end pb-1 text-[#525252]">
           <input

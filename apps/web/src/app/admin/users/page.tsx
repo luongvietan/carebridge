@@ -28,31 +28,6 @@ function formatLabel(value: string) {
   return value.replace(/_/g, " ");
 }
 
-function intersectIds(a: string[], b: string[]): string[] {
-  const set = new Set(b);
-  return a.filter((id) => set.has(id));
-}
-
-const AVAILABILITY_DAYS: Record<string, number[]> = {
-  weekdays: [1, 2, 3, 4, 5],
-  weekends: [0, 6],
-};
-
-async function getAvailabilityProfessionalIds(
-  admin: ServiceClient,
-  availability: string,
-): Promise<string[]> {
-  const days = AVAILABILITY_DAYS[availability];
-  if (!days) return [];
-
-  const { data } = await admin
-    .from("professional_availability")
-    .select("professional_id")
-    .in("day_of_week", days);
-
-  return [...new Set((data ?? []).map((row) => row.professional_id))];
-}
-
 /** Professionals with all role-critical docs approved and not expired. */
 async function getProfessionalsWithValidDocs(admin: ServiceClient): Promise<string[]> {
   const today = new Date().toISOString().slice(0, 10);
@@ -108,14 +83,8 @@ async function fetchProfessionals(
 ): Promise<ProfessionalRow[]> {
   let idFilter: string[] | null = null;
 
-  if (filters.availability) {
-    const ids = await getAvailabilityProfessionalIds(admin, filters.availability);
-    idFilter = ids;
-  }
-
   if (filters.requireValidDocs) {
-    const ids = await getProfessionalsWithValidDocs(admin);
-    idFilter = idFilter !== null ? intersectIds(idFilter, ids) : ids;
+    idFilter = await getProfessionalsWithValidDocs(admin);
   }
 
   if (idFilter !== null && idFilter.length === 0) {
@@ -185,7 +154,6 @@ function criteriaFromSearchParams(
     roleId: pick("roleId"),
     postcode: pick("postcode"),
     maxTravelKm: pick("maxTravelKm"),
-    availability: pick("availability"),
     requireValidDocs: pick("requireValidDocs") === "true",
   };
 }
@@ -211,7 +179,7 @@ export default async function AdminUsersPage({
       <p className="text-sm tracking-wide text-[#525252] uppercase">Admin</p>
       <h1 className="mt-1 text-3xl font-light">Professionals</h1>
       <p className="mt-2 text-sm text-[#525252]">
-        Search and filter professionals by status, location, availability and compliance.
+        Search and filter professionals by status, location and compliance.
       </p>
 
       <UserFilters roles={roles ?? []} />
