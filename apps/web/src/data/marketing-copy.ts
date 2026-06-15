@@ -9,22 +9,22 @@ export const professionalRoles = [
   {
     title: "Registered Nurses",
     description:
-      "NMC-registered nurses for clinical care, medication management, assessments and complex support in home and residential settings.",
+      "NMC-registered nurses providing clinical care, medication management and assessments within their professional scope of practice, subject to verification and compliance requirements.",
   },
   {
     title: "Healthcare Assistants",
     description:
-      "Experienced HCAs supporting personal care, mobility, daily living and day-to-day wellbeing.",
+      "Experienced HCAs providing companionship, wellbeing support, sitting services and appointment or community support — non-regulated activities only.",
   },
   {
     title: "Support Workers",
     description:
-      "Trained support workers for community care, residential and supported-living placements.",
+      "Trained support workers providing companionship, community support, chaperoning and respite support — non-regulated activities only.",
   },
   {
     title: "Physiotherapists",
     description:
-      "HCPC-registered physiotherapists for rehabilitation, mobility programmes and recovery support.",
+      "HCPC-registered physiotherapists for rehabilitation and mobility programmes within their professional scope of practice.",
   },
 ] as const;
 

@@ -43,11 +43,11 @@ const values = [
 const audiences = [
   [
     "Private clients",
-    "Individuals and families creating booking requests for trusted care at home.",
+    "Individuals and families creating booking requests for verified, non-regulated support.",
   ],
   [
     "Organisations",
-    "Care homes, supported-living providers and healthcare organisations needing compliant cover.",
+    "Healthcare organisations, supported living services, care providers and healthcare facilities needing access to verified professionals.",
   ],
   [
     "Professionals",
