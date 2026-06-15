@@ -9,7 +9,10 @@ export function CtaBanner() {
 
   return (
     <section className={`${marketingSection} pb-4 pt-0`}>
-      <div className={`relative min-h-[320px] overflow-hidden ${marketingCard} sm:min-h-[360px] lg:min-h-[380px]`}>
+      <div
+        data-reveal
+        className={`relative min-h-[320px] overflow-hidden ${marketingCard} sm:min-h-[360px] lg:min-h-[380px]`}
+      >
         <Image
           src={ctaBanner.src}
           alt={ctaBanner.alt}

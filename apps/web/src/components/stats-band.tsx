@@ -18,10 +18,14 @@ export function StatsBand() {
         />
 
         <div className="relative px-6 py-10 sm:px-10 sm:py-12 lg:px-12 lg:py-14">
-          <div className="grid grid-cols-2 divide-x divide-y divide-white/15 sm:grid-cols-4 sm:divide-y-0">
+          <div
+            data-reveal-stagger
+            className="grid grid-cols-2 divide-x divide-y divide-white/15 sm:grid-cols-4 sm:divide-y-0"
+          >
             {stats.map((stat) => (
               <div
                 key={stat.label}
+                data-reveal-child
                 className="flex flex-col items-center justify-center px-4 py-6 text-center sm:py-2"
               >
                 <p className="text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-[2.75rem]">

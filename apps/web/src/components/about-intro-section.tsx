@@ -13,7 +13,7 @@ export function AboutIntroSection() {
 
   return (
     <section className={marketingSection}>
-      <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between lg:gap-12">
+      <div data-reveal className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between lg:gap-12">
         <h2 className={`max-w-3xl leading-tight ${marketingHeading}`}>
           A secure healthcare marketplace — only suitable, verified professionals join
           our platform
@@ -39,9 +39,13 @@ export function AboutIntroSection() {
         </div>
       </div>
 
-      <div className="mt-12 grid grid-cols-12 items-center gap-4 sm:gap-5 lg:mt-16 lg:gap-6 xl:gap-8">
+      <div
+        data-reveal-stagger
+        className="mt-12 grid grid-cols-12 items-center gap-4 sm:gap-5 lg:mt-16 lg:gap-6 xl:gap-8"
+      >
         {/* Ảnh nhỏ — cột hẹp */}
         <div
+          data-reveal-child
           className={`${imageShell} col-span-5 h-[220px] sm:h-[260px] lg:col-span-3 lg:h-[340px]`}
         >
           <Image
@@ -55,6 +59,7 @@ export function AboutIntroSection() {
 
         {/* Ảnh to — cột rộng */}
         <div
+          data-reveal-child
           className={`${imageShell} col-span-7 h-[280px] sm:h-[340px] lg:col-span-4 lg:h-[460px]`}
         >
           <Image
@@ -67,7 +72,7 @@ export function AboutIntroSection() {
         </div>
 
         {/* Text */}
-        <div className="col-span-12 flex flex-col justify-center pt-2 lg:col-span-5 lg:pt-0">
+        <div data-reveal-child className="col-span-12 flex flex-col justify-center pt-2 lg:col-span-5 lg:pt-0">
           <p className="text-[15px] leading-[1.7] text-[#33433a] sm:text-base sm:leading-relaxed">
             CareBridge Connect provides a secure, compliant onboarding journey for healthcare
             professionals and a straightforward booking process for private clients and

@@ -53,6 +53,7 @@ export function ComplianceShowcase() {
   return (
     <section className={marketingSection}>
       <div
+        data-reveal
         className={`grid items-center gap-10 rounded-[28px] ${marketingSurface} p-6 sm:gap-12 sm:rounded-[32px] sm:p-10 lg:grid-cols-2 lg:p-12`}
       >
         <div>

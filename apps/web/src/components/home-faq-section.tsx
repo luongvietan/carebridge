@@ -11,7 +11,7 @@ export function HomeFaqSection() {
 
   return (
     <section className={marketingSection}>
-      <div className="text-center">
+      <div data-reveal className="text-center">
         <h2 className={marketingHeading}>Frequently asked questions</h2>
         <p className={marketingSubheading}>
           Clear answers about verification, booking requests, compliance blocking and data export
@@ -19,8 +19,11 @@ export function HomeFaqSection() {
         </p>
       </div>
 
-      <div className="mt-12 grid gap-8 lg:grid-cols-[minmax(280px,340px)_1fr] lg:items-start">
-        <div className="flex flex-col rounded-[28px] bg-gradient-to-b from-[#0c6e4f] to-[#7ed7a0] px-8 py-10 text-white sm:rounded-[32px] sm:px-10 sm:py-12">
+      <div data-reveal-stagger className="mt-12 grid gap-8 lg:grid-cols-[minmax(280px,340px)_1fr] lg:items-start">
+        <div
+          data-reveal-child
+          className="flex flex-col rounded-[28px] bg-gradient-to-b from-[#0c6e4f] to-[#7ed7a0] px-8 py-10 text-white sm:rounded-[32px] sm:px-10 sm:py-12"
+        >
           <Icon icon={MessageQuestionIcon} size={48} color="#ffffff" strokeWidth={1.75} />
           <h3 className="mt-6 text-2xl font-bold leading-tight sm:text-[1.75rem]">
             Do you have more questions?
@@ -37,7 +40,7 @@ export function HomeFaqSection() {
           </Link>
         </div>
 
-        <div className="space-y-3">
+        <div data-reveal-child className="space-y-3">
           {faqs.slice(0, 5).map((faq, index) => {
             const isOpen = openIndex === index;
 

@@ -43,6 +43,7 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
   if (featured && photo) {
     return (
       <figure
+        data-reveal-child
         className={`flex flex-col rounded-[28px] ${marketingSurface} p-4 sm:flex-row sm:items-stretch sm:p-5 lg:col-span-2 lg:p-6`}
       >
         <div className="shrink-0 sm:flex sm:items-stretch">
@@ -73,7 +74,10 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
   }
 
   return (
-    <figure className={`flex flex-col rounded-[28px] ${marketingSurface} p-6 lg:col-span-1`}>
+    <figure
+      data-reveal-child
+      className={`flex flex-col rounded-[28px] ${marketingSurface} p-6 lg:col-span-1`}
+    >
       <Icon icon={QuoteUpIcon} size={32} color="#0c6e4f" strokeWidth={1.75} />
       <blockquote className="mt-4 flex-1 text-sm leading-relaxed text-[#445049]">{quote}</blockquote>
       <div className="mt-6 flex items-end justify-between gap-4">
@@ -90,12 +94,12 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
 export function TestimonialsSection() {
   return (
     <section className={marketingSection}>
-      <div className="text-center">
+      <div data-reveal className="text-center">
         <h2 className={marketingHeading}>{testimonialsSection.heading}</h2>
         <p className={marketingSubheading}>{testimonialsSection.subheading}</p>
       </div>
 
-      <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <div data-reveal-stagger className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {testimonials.map((testimonial) => (
           <TestimonialCard key={testimonial.name} testimonial={testimonial} />
         ))}

@@ -19,14 +19,17 @@ function ServiceCard({
   return (
     <Link
       href="/services"
-      className="group block rounded-[28px] bg-white p-3 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.12)] transition hover:shadow-[0_16px_40px_-12px_rgba(25,128,56,0.2)] sm:rounded-[32px] sm:p-4"
+      data-reveal-child
+      data-service-card
+      className="group block rounded-[28px] bg-white p-3 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.12)] sm:rounded-[32px] sm:p-4"
     >
       <div className="relative aspect-[4/3] overflow-hidden rounded-[20px] sm:rounded-3xl">
         <Image
           src={image}
           alt={alt}
           fill
-          className="object-cover transition duration-500 group-hover:scale-105"
+          data-service-image
+          className="object-cover"
           sizes="(max-width: 1024px) 100vw, 33vw"
         />
         <span className="absolute bottom-3 right-3 grid h-10 w-10 place-items-center rounded-full bg-white text-[#445049] shadow-md transition group-hover:scale-105">
@@ -42,7 +45,7 @@ function ServiceCard({
 export function ServicesOfferSection() {
   return (
     <section className={marketingSection}>
-      <div className="text-center">
+      <div data-reveal className="text-center">
         <h2 className={marketingHeading}>Professional roles we cover</h2>
         <p className={`${marketingSubheading} max-w-lg`}>
           Registered nurses, healthcare assistants, support workers and physiotherapists —
@@ -50,7 +53,7 @@ export function ServicesOfferSection() {
         </p>
       </div>
 
-      <div className="mt-10 grid gap-6 sm:mt-12 lg:grid-cols-3">
+      <div data-reveal-stagger className="mt-10 grid gap-6 sm:mt-12 lg:grid-cols-3">
         {professionalRoles.slice(0, 3).map((service, i) => {
           const img = marketingImages.roleCards[i];
           return (
