@@ -1,0 +1,182 @@
+"use client";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { assignBooking, cancelBooking } from "@/lib/bookings/actions";
+
+type AdminBooking = {
+  id: string;
+  status: string;
+  booking_type: string;
+  scheduled_start: string;
+  professional_role_id: string;
+  assigned_professional_id: string | null;
+  professional_roles: { name: string } | null;
+  total_client_charge: number | null;
+};
+
+type Professional = {
+  id: string;
+  full_name: string;
+  professional_role_id: string | null;
+  can_accept_bookings: boolean | null;
+};
+
+const TERMINAL = new Set(["completed", "cancelled", "no_show"]);
+
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" });
+}
+
+function formatMoney(amount: number | null) {
+  if (amount == null) return "—";
+  return new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format(amount);
+}
+
+function AssignControl({
+  bookingId,
+  roleId,
+  professionals,
+  onDone,
+}: {
+  bookingId: string;
+  roleId: string;
+  professionals: Professional[];
+  onDone: () => void;
+}) {
+  const eligible = professionals.filter(
+    (p) => p.professional_role_id === roleId && !!p.can_accept_bookings,
+  );
+  const [selected, setSelected] = useState(eligible[0]?.id ?? "");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleAssign() {
+    if (!selected) return;
+    setBusy(true);
+    setError(null);
+    const result = await assignBooking(bookingId, selected);
+    setBusy(false);
+    if ("error" in result) setError(result.error);
+    else onDone();
+  }
+
+  if (eligible.length === 0) {
+    return <span className="text-xs text-[#525252]">No eligible professionals</span>;
+  }
+
+  return (
+    <div className="flex flex-col items-end gap-1">
+      {error && <span className="text-xs text-[#da1e28]">{error}</span>}
+      <div className="flex items-center gap-2">
+        <select
+          value={selected}
+          onChange={(e) => setSelected(e.target.value)}
+          className="border-b border-[#8c8c8c] bg-[#f4f4f4] px-2 py-1 text-sm focus:border-[#198038] focus:outline-none"
+        >
+          {eligible.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.full_name}
+            </option>
+          ))}
+        </select>
+        <button
+          type="button"
+          onClick={handleAssign}
+          disabled={busy || !selected}
+          className="bg-[#198038] px-3 py-1.5 text-sm text-white hover:bg-[#0e6027] disabled:opacity-50"
+        >
+          {busy ? "Assigning…" : "Assign"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function CancelControl({ bookingId, onDone }: { bookingId: string; onDone: () => void }) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleCancel() {
+    if (!window.confirm("Cancel this booking?")) return;
+    setBusy(true);
+    setError(null);
+    const result = await cancelBooking(bookingId);
+    setBusy(false);
+    if ("error" in result) setError(result.error);
+    else onDone();
+  }
+
+  return (
+    <div className="flex flex-col items-end gap-1">
+      {error && <span className="text-xs text-[#da1e28]">{error}</span>}
+      <button
+        type="button"
+        onClick={handleCancel}
+        disabled={busy}
+        className="border border-[#da1e28] px-3 py-1.5 text-sm text-[#da1e28] hover:bg-[#fff1f1] disabled:opacity-50"
+      >
+        {busy ? "Cancelling…" : "Cancel"}
+      </button>
+    </div>
+  );
+}
+
+export function AdminBookings({
+  bookings,
+  professionals,
+}: {
+  bookings: AdminBooking[];
+  professionals: Professional[];
+}) {
+  const router = useRouter();
+
+  return (
+    <div className="mt-8 overflow-x-auto border border-[#e0e0e0]">
+      <table className="w-full text-sm">
+        <thead className="border-b border-[#e0e0e0] bg-[#f4f4f4] text-left">
+          <tr>
+            <th className="p-3 font-medium">Date</th>
+            <th className="p-3 font-medium">Role</th>
+            <th className="p-3 font-medium">Type</th>
+            <th className="p-3 font-medium">Status</th>
+            <th className="p-3 font-medium">Total</th>
+            <th className="p-3 font-medium">Actions</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-[#e0e0e0]">
+          {bookings.map((b) => (
+            <tr key={b.id}>
+              <td className="p-3">{formatDate(b.scheduled_start)}</td>
+              <td className="p-3">{b.professional_roles?.name ?? b.professional_role_id}</td>
+              <td className="p-3">{b.booking_type.replace(/_/g, " ")}</td>
+              <td className="p-3">
+                <span className="bg-[#f4f4f4] px-2 py-0.5 text-xs text-[#525252]">
+                  {b.status.replace(/_/g, " ")}
+                </span>
+              </td>
+              <td className="p-3">{formatMoney(b.total_client_charge)}</td>
+              <td className="p-3">
+                <div className="flex flex-col items-end gap-2">
+                  {b.status === "open" && (
+                    <AssignControl
+                      bookingId={b.id}
+                      roleId={b.professional_role_id}
+                      professionals={professionals}
+                      onDone={() => router.refresh()}
+                    />
+                  )}
+                  {!TERMINAL.has(b.status) && (
+                    <CancelControl bookingId={b.id} onDone={() => router.refresh()} />
+                  )}
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {bookings.length === 0 && (
+        <p className="p-6 text-sm text-[#525252]">No bookings yet.</p>
+      )}
+    </div>
+  );
+}
