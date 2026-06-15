@@ -38,10 +38,11 @@ export async function POST(req: NextRequest) {
   if (!payment) return new Response("no payment row", { status: 200 });
   if (payment.status === status) return new Response("already reconciled", { status: 200 });
 
-  await admin
+  const { error: updateErr } = await admin
     .from("payments")
-    .update({ status, paid_at: status === "succeeded" ? new Date().toISOString() : null })
+    .update({ status, ...(status === "succeeded" ? { paid_at: new Date().toISOString() } : {}) })
     .eq("id", payment.id);
+  if (updateErr) return new Response("db error", { status: 500 });
   await admin.from("audit_log").insert({
     actor_type: "system",
     action: `payment.${status}`,
