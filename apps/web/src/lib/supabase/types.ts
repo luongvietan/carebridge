@@ -274,6 +274,45 @@ export type Database = {
           },
         ]
       }
+      booking_declines: {
+        Row: {
+          booking_id: string
+          declined_at: string
+          id: string
+          professional_id: string
+          reason: string | null
+        }
+        Insert: {
+          booking_id: string
+          declined_at?: string
+          id?: string
+          professional_id: string
+          reason?: string | null
+        }
+        Update: {
+          booking_id?: string
+          declined_at?: string
+          id?: string
+          professional_id?: string
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_declines_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_declines_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       booking_status_history: {
         Row: {
           booking_id: string
