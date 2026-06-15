@@ -43,7 +43,7 @@ export async function startCheckout(bookingId: string): Promise<PaymentActionRes
   if (!paymentId) {
     const { data: created, error } = await admin
       .from("payments")
-      .insert({ booking_id: bookingId, payer_user_id: user.id, amount: booking.total_client_charge, currency: booking.snap_currency, status: "pending" })
+      .insert({ booking_id: bookingId, payer_user_id: user.id, amount: Number(booking.total_client_charge), currency: booking.snap_currency, status: "pending" })
       .select("id")
       .single();
     if (error || !created) return { error: error?.message ?? "Could not start payment." };

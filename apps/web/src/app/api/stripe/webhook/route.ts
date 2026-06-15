@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
   const status = paymentStatusForEvent(event.type);
   if (!status) return new Response("ignored", { status: 200 });
 
-  const obj = event.data.object as Record<string, unknown>;
+  const obj = event.data.object as unknown as Record<string, unknown>;
   const intentId =
     (obj.payment_intent as string | undefined) ??
     (event.type.startsWith("payment_intent.") ? (obj.id as string) : undefined);

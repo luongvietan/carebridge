@@ -305,10 +305,31 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "booking_declines_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "v_export_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_declines_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "v_platform_revenue"
+            referencedColumns: ["booking_id"]
+          },
+          {
             foreignKeyName: "booking_declines_professional_id_fkey"
             columns: ["professional_id"]
             isOneToOne: false
             referencedRelation: "professionals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_declines_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "v_export_professionals"
             referencedColumns: ["id"]
           },
         ]
@@ -1910,7 +1931,18 @@ export type Database = {
     }
     Functions: {
       fn_run_compliance_sweep: { Args: never; Returns: undefined }
+      get_payout_last4: { Args: { p_professional_id: string }; Returns: string }
       is_admin: { Args: never; Returns: boolean }
+      set_payout_details: {
+        Args: {
+          p_account_name: string
+          p_account_number: string
+          p_key: string
+          p_professional_id: string
+          p_sort_code: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       account_type: "professional" | "private_client" | "organisation" | "admin"
