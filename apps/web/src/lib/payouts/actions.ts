@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { requireAdmin } from "@/lib/auth/admin";
 import { nextPayoutStatus, type PayoutStatus } from "./record";
+import { sendNotification } from "@/lib/notifications/send";
 
 export type PayoutResult = { ok: true } | { error: string };
 
@@ -54,6 +55,10 @@ export async function recordPayout(bookingId: string): Promise<PayoutResult> {
   });
   if (error) return { error: error.message };
   await admin.from("audit_log").insert({ actor_user_id: adminId, actor_type: "admin", action: "payout.recorded", entity_type: "booking", entity_id: bookingId });
+  const { data: proRow } = await admin.from("professionals").select("user_id").eq("id", booking.assigned_professional_id).maybeSingle();
+  if (proRow?.user_id) {
+    await sendNotification("payout_recorded", proRow.user_id, { booking_id: bookingId, amount: String(booking.total_payout) });
+  }
   return { ok: true };
 }
 

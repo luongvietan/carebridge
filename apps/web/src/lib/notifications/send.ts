@@ -2,7 +2,10 @@ import { createServiceClient } from "@/lib/supabase/service";
 
 export type NotificationType =
   | "booking_request" | "booking_confirmation" | "booking_cancellation"
-  | "assessment_result" | "compliance_approval";
+  | "assessment_result" | "compliance_approval"
+  | "payment_receipt" | "payout_recorded"
+  | "registration_confirmation" | "email_verification"
+  | "compliance_expiry_reminder" | "password_reset";
 
 export type ChannelSender = (msg: { to: string; subject: string; body: string }) => Promise<void>;
 

@@ -3,6 +3,7 @@ import type Stripe from "stripe";
 import { stripe } from "@/lib/stripe/client";
 import { paymentStatusForEvent } from "@/lib/stripe/events";
 import { createServiceClient } from "@/lib/supabase/service";
+import { sendNotification } from "@/lib/notifications/send";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -32,7 +33,7 @@ export async function POST(req: NextRequest) {
   const admin = createServiceClient();
   const { data: payment } = await admin
     .from("payments")
-    .select("id, status")
+    .select("id, status, payer_user_id, booking_id")
     .eq("stripe_payment_intent_id", intentId)
     .maybeSingle();
   if (!payment) return new Response("no payment row", { status: 200 });
@@ -50,6 +51,10 @@ export async function POST(req: NextRequest) {
     entity_id: payment.id,
     summary: event.type,
   });
+
+  if (status === "succeeded" && payment.payer_user_id) {
+    await sendNotification("payment_receipt", payment.payer_user_id, { booking_id: payment.booking_id ?? "" });
+  }
 
   return new Response("ok", { status: 200 });
 }
