@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildBookingInsert, hoursBetween } from "./create";
+import { buildBookingInsert, hoursBetween, isFutureStart } from "./create";
 import type { RateCard } from "@/lib/rates/snapshot";
 
 const rc: RateCard = {
@@ -26,6 +26,19 @@ const input = {
 describe("hoursBetween", () => {
   it("computes fractional hours", () => {
     expect(hoursBetween("2026-07-01T09:00:00Z", "2026-07-01T12:30:00Z")).toBe(3.5);
+  });
+});
+
+describe("isFutureStart", () => {
+  const now = new Date("2026-06-15T12:00:00.000Z");
+  it("accepts a start after now", () => {
+    expect(isFutureStart("2026-06-15T12:00:01.000Z", now)).toBe(true);
+  });
+  it("rejects a start in the past", () => {
+    expect(isFutureStart("2026-06-15T11:59:59.000Z", now)).toBe(false);
+  });
+  it("rejects a start equal to now", () => {
+    expect(isFutureStart("2026-06-15T12:00:00.000Z", now)).toBe(false);
   });
 });
 

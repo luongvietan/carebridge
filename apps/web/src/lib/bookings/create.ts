@@ -32,6 +32,11 @@ export function hoursBetween(startIso: string, endIso: string): number {
   return Math.round((ms / 3_600_000) * 100) / 100;
 }
 
+/** True when the booking start is strictly in the future. */
+export function isFutureStart(startIso: string, now: Date = new Date()): boolean {
+  return new Date(startIso).getTime() > now.getTime();
+}
+
 export function buildBookingInsert(input: CreateBookingInput, rateCard: RateCard): BookingInsert {
   const hasClient = !!input.privateClientId;
   const hasOrg = !!input.organisationId;

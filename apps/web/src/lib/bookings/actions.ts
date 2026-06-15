@@ -2,7 +2,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { requireAdmin } from "@/lib/auth/admin";
-import { buildBookingInsert, type CreateBookingInput } from "./create";
+import { buildBookingInsert, isFutureStart, type CreateBookingInput } from "./create";
 import type { RateCard } from "@/lib/rates/snapshot";
 import { applyTransition, type Actor } from "./transitions";
 import { canAccept } from "./eligibility";
@@ -85,6 +85,10 @@ export async function createBooking(form: unknown): Promise<BookingActionResult>
     return { error: "You cannot create a booking for this account type." };
   }
 
+  if (!isFutureStart(formData.scheduledStart)) {
+    return { error: "Booking start must be in the future." };
+  }
+
   const table = formData.requesterType === "client" ? "private_clients" : "organisations";
   const { data: profile } = await admin.from(table).select("id").eq("user_id", user.id).maybeSingle();
   if (!profile) return { error: `Complete your ${formData.requesterType} profile first.` };
@@ -125,6 +129,7 @@ export async function createBooking(form: unknown): Promise<BookingActionResult>
   if (error || !booking) return { error: error?.message ?? "Could not create booking." };
 
   await admin.from("booking_status_history").insert({ booking_id: booking.id, to_status: "open", changed_by: user.id });
+  await admin.from("audit_log").insert({ actor_user_id: user.id, actor_type: "user", action: "booking.created", entity_type: "booking", entity_id: booking.id });
   await sendNotification("booking_request", user.id, { booking_id: booking.id });
   return { ok: true, id: booking.id };
 }
@@ -164,6 +169,7 @@ export async function acceptBooking(bookingId: string): Promise<BookingActionRes
   if (!updated || updated.length === 0) return { error: "This booking has already been taken." };
 
   await admin.from("booking_status_history").insert({ booking_id: bookingId, from_status: "open", to_status: "accepted", changed_by: user.id });
+  await admin.from("audit_log").insert({ actor_user_id: user.id, actor_type: "user", action: "booking.accepted", entity_type: "booking", entity_id: bookingId });
   await sendNotification("booking_confirmation", booking.requester_user_id, { booking_id: bookingId });
   await sendNotification("booking_confirmation", user.id, { booking_id: bookingId });
   return { ok: true };
@@ -265,6 +271,7 @@ export async function cancelBooking(bookingId: string, reason?: string): Promise
   if (error) return { error: error.message };
   if (!updated || updated.length === 0) return { error: "This booking has already been cancelled." };
   await admin.from("booking_status_history").insert({ booking_id: bookingId, from_status: fromStatus, to_status: "cancelled", changed_by: user.id, reason: reason ?? null });
+  await admin.from("audit_log").insert({ actor_user_id: user.id, actor_type: actor === "admin" ? "admin" : "user", action: "booking.cancelled", entity_type: "booking", entity_id: bookingId, summary: reason ?? null });
   await admin.from("booking_cancellations").insert({
     booking_id: bookingId, cancelled_by: user.id, cancelled_role: actor, is_last_minute: isLastMinute, reason: reason ?? null,
   });
