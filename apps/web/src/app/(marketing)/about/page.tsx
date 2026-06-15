@@ -1,17 +1,18 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import { CtaBanner } from "@/components/cta-banner";
 import { CtaPillLink } from "@/components/cta-pill-link";
+import { ImportantInfoCallout } from "@/components/important-info-callout";
 import { MarketingPageHero } from "@/components/marketing-page-hero";
 import { MarketingPageMotion } from "@/components/motion/marketing-page-motion";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteNav } from "@/components/site-nav";
 import { StatsBand } from "@/components/stats-band";
-import { aboutFeatures, siteTagline } from "@/data/marketing-copy";
+import { aboutContent } from "@/data/legal-copy";
 import { marketingImages } from "@/data/marketing-images";
 import {
   marketingCardShadow,
-  marketingDecorativeNumber,
   marketingHeading,
   marketingSection,
   marketingSubheading,
@@ -21,45 +22,13 @@ import { CheckmarkCircle01Icon, Icon } from "@/components/ui/icon";
 
 export const metadata: Metadata = { title: "About — CareBridge Connect" };
 
-const values = [
-  [
-    "Compliance first",
-    "Only suitable, verified professionals are approved. Eligibility screening, competency assessment and document verification happen before the first booking.",
-  ],
-  [
-    "Safety & trust",
-    "Enhanced DBS, Right to Work, professional registration (NMC/HCPC), indemnity insurance and mandatory training are tracked continuously.",
-  ],
-  [
-    "Data ownership",
-    "CareBridge Connect Ltd can export all platform data — profiles, bookings, compliance records and payments — in CSV or Excel at any time.",
-  ],
-  [
-    "Built to scale",
-    "New roles, services and locations can be added without rebuilding the platform — designed for long-term operational control.",
-  ],
-] as const;
-
-const audiences = [
-  [
-    "Private clients",
-    "Individuals and families creating booking requests for verified, non-regulated support.",
-  ],
-  [
-    "Organisations",
-    "Healthcare organisations, supported living services, care providers and healthcare facilities needing access to verified professionals.",
-  ],
-  [
-    "Professionals",
-    "Registered nurses, HCAs, support workers and physiotherapists seeking verified work.",
-  ],
-] as const;
-
 const imageShell =
   "relative overflow-hidden rounded-[28px] shadow-[0_16px_40px_-16px_rgba(15,38,28,0.28)] sm:rounded-[32px]";
 
 export default function AboutPage() {
   const { about } = marketingImages;
+  const { welcome, mission, vision, commitment, verification, importantInfo, founder } =
+    aboutContent;
 
   return (
     <MarketingPageMotion>
@@ -67,8 +36,8 @@ export default function AboutPage() {
 
       <MarketingPageHero
         badge="About CareBridge Connect"
-        title="A healthcare marketplace built on trust"
-        description={siteTagline}
+        title="Welcome to CareBridge Connect"
+        description="A healthcare marketplace connecting community clients, families and organisations with trusted healthcare professionals across the United Kingdom."
         image={marketingImages.pageHero.about}
       />
 
@@ -76,12 +45,12 @@ export default function AboutPage() {
 
       <main>
         <section className={marketingSection}>
-          <div data-reveal className="text-center">
-            <h2 className={marketingHeading}>Our mission</h2>
-            <p className={`${marketingSubheading} max-w-2xl`}>
-              We connect verified healthcare professionals with private clients and organisations
-              through a secure, compliant marketplace.
-            </p>
+          <div data-reveal className="mx-auto max-w-3xl text-center">
+            {welcome.paragraphs.map((paragraph) => (
+              <p key={paragraph} className="mt-4 text-[15px] leading-relaxed text-[#33433a] sm:text-base">
+                {paragraph}
+              </p>
+            ))}
           </div>
 
           <div
@@ -118,31 +87,17 @@ export default function AboutPage() {
               data-reveal-child
               className="col-span-12 flex flex-col justify-center pt-2 lg:col-span-5 lg:pt-0"
             >
-              <p className="text-[15px] leading-[1.7] text-[#33433a] sm:text-base sm:leading-relaxed">
-                Professionals complete eligibility screening, an online competency assessment (80%
-                pass mark, up to three attempts) and document uploads before administrators approve
-                their profile. Expired credentials automatically restrict new bookings until
-                re-approved.
+              <h2 className="text-xl font-bold text-[#0c4a35] sm:text-2xl">{mission.heading}</h2>
+              <p className="mt-4 text-[15px] leading-relaxed text-[#33433a] sm:text-base">
+                {mission.text}
               </p>
 
-              <ul className="mt-7 space-y-3.5 sm:mt-8">
-                {aboutFeatures.map((feature) => (
-                  <li key={feature} className="flex items-start gap-3">
-                    <Icon
-                      icon={CheckmarkCircle01Icon}
-                      size={22}
-                      color="#0c6e4f"
-                      strokeWidth={1.75}
-                      className="mt-0.5 shrink-0"
-                    />
-                    <span className="text-sm font-medium leading-snug text-[#0c4a35] sm:text-[15px]">
-                      {feature}
-                    </span>
-                  </li>
-                ))}
-              </ul>
+              <h2 className="mt-8 text-xl font-bold text-[#0c4a35] sm:text-2xl">{vision.heading}</h2>
+              <p className="mt-4 text-[15px] leading-relaxed text-[#33433a] sm:text-base">
+                {vision.text}
+              </p>
 
-              <div className="mt-8 sm:mt-9">
+              <div className="mt-8">
                 <CtaPillLink href="/register" shadow="lg">
                   Get started
                 </CtaPillLink>
@@ -154,56 +109,98 @@ export default function AboutPage() {
         <section className={`${marketingSection} pt-0`}>
           <div
             data-reveal
-            className={`grid gap-10 rounded-[28px] ${marketingSurface} p-6 sm:rounded-[32px] sm:p-10 lg:grid-cols-2 lg:items-center lg:p-12`}
+            className={`rounded-[28px] ${marketingSurface} p-6 sm:rounded-[32px] sm:p-10`}
           >
-            <div>
-              <h2 className={marketingHeading}>Who we serve</h2>
-              <p className={`mt-4 ${marketingSubheading} mx-0 max-w-none text-left`}>
-                Three audiences, one compliant marketplace — from families arranging non-regulated
-                support to organisations needing verified cover at scale.
-              </p>
-            </div>
-
-            <div data-reveal-stagger className="space-y-4">
-              {audiences.map(([title, description]) => (
-                <div
-                  key={title}
-                  data-reveal-child
-                  className={`rounded-2xl bg-white p-6 ${marketingCardShadow}`}
-                >
-                  <h3 className="font-bold text-[#0c4a35]">{title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-[#5b6a62]">{description}</p>
-                </div>
+            <h2 className={marketingHeading}>{commitment.heading}</h2>
+            <p className="mt-4 text-sm leading-relaxed text-[#5b6a62] sm:text-base">
+              {commitment.intro}
+            </p>
+            <ul className="mt-6 space-y-3">
+              {commitment.bullets.map((bullet) => (
+                <li key={bullet} className="flex items-start gap-3">
+                  <Icon
+                    icon={CheckmarkCircle01Icon}
+                    size={22}
+                    color="#0c6e4f"
+                    strokeWidth={1.75}
+                    className="mt-0.5 shrink-0"
+                  />
+                  <span className="text-sm font-medium leading-snug text-[#0c4a35] sm:text-[15px]">
+                    {bullet}
+                  </span>
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
         </section>
 
         <section className={marketingSection}>
           <div data-reveal className="text-center">
-            <h2 className={marketingHeading}>What we stand for</h2>
-            <p className={marketingSubheading}>
-              Principles that guide every verification, booking and compliance decision on the
-              platform.
-            </p>
+            <h2 className={marketingHeading}>{verification.heading}</h2>
+            <p className={`${marketingSubheading} max-w-2xl`}>{verification.intro}</p>
           </div>
 
-          <div data-reveal-stagger className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {values.map(([title, description], i) => (
+          <div data-reveal-stagger className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {verification.bullets.map((item) => (
               <div
-                key={title}
+                key={item}
                 data-reveal-child
-                className={`rounded-[28px] bg-white p-7 ${marketingCardShadow} sm:rounded-[32px]`}
+                className={`rounded-2xl bg-white p-5 text-sm font-medium text-[#0c4a35] ${marketingCardShadow}`}
               >
-                <span className={`text-5xl font-bold ${marketingDecorativeNumber}`}>
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <h3 className="mt-3 text-lg font-bold text-[#0c4a35] sm:text-xl">{title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-[#5b6a62]">{description}</p>
+                {item}
               </div>
             ))}
           </div>
         </section>
+
+        <section className={`${marketingSection} pt-0`}>
+          <div
+            data-reveal
+            className={`rounded-[28px] border-2 border-[#0c6e4f]/25 ${marketingSurface} p-6 sm:rounded-[32px] sm:p-10`}
+          >
+            <h2 className={marketingHeading}>{importantInfo.heading}</h2>
+            <div className="mt-6 space-y-4">
+              {importantInfo.paragraphs.map((paragraph) => (
+                <p key={paragraph} className="text-sm leading-relaxed text-[#5b6a62] sm:text-base">
+                  {paragraph}
+                </p>
+              ))}
+            </div>
+            <Link
+              href="/disclaimer"
+              className="mt-6 inline-block text-sm font-semibold text-[#0c6e4f] hover:underline"
+            >
+              Read the full disclaimer →
+            </Link>
+          </div>
+        </section>
+
+        <section className={marketingSection}>
+          <div
+            data-reveal
+            className={`rounded-[28px] bg-white p-8 ${marketingCardShadow} sm:rounded-[32px] sm:p-12`}
+          >
+            <h2 className={marketingHeading}>{founder.heading}</h2>
+            <blockquote className="mt-5 border-l-4 border-[#0c6e4f] pl-5">
+              {founder.quote.split("\n\n").map((paragraph) => (
+                <p
+                  key={paragraph}
+                  className="mt-4 text-sm leading-relaxed text-[#5b6a62] first:mt-0 sm:text-base"
+                >
+                  {paragraph}
+                </p>
+              ))}
+            </blockquote>
+            <div className="mt-8 border-t border-[#e7efe9] pt-6">
+              <p className="font-bold text-[#0c4a35]">{founder.name}</p>
+              <p className="mt-1 text-sm text-[#5b6a62]">{founder.title}</p>
+              <p className="text-sm text-[#5b6a62]">{founder.company}</p>
+              <p className="mt-4 text-sm font-semibold text-[#0c6e4f]">{founder.tagline}</p>
+            </div>
+          </div>
+        </section>
+
+        <ImportantInfoCallout />
 
         <CtaBanner />
       </main>

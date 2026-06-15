@@ -171,7 +171,10 @@ function RegisterForm({ mode }: { mode: RegisterMode }) {
           <input type="checkbox" name="acceptedTerms" required className="mt-1 accent-[#198038]" />{" "}
           <span>
             I accept the{" "}
-            <Link href="/terms" className="font-medium text-[#0c6e4f] hover:underline">
+            <Link
+              href={isProfessional ? "/terms/professionals" : "/terms/clients"}
+              className="font-medium text-[#0c6e4f] hover:underline"
+            >
               Terms
             </Link>{" "}
             and{" "}

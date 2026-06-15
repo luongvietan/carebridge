@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import { SiteNav } from "@/components/site-nav";
 import { SiteFooter } from "@/components/site-footer";
-import { importantInformation, supportedServices } from "@/data/marketing-copy";
+import {
+  emergencyDisclaimer,
+  importantInformation,
+  supportedServices,
+} from "@/data/marketing-copy";
 
 export const metadata: Metadata = {
   title: "Important information & disclaimer — CareBridge Connect",
@@ -22,6 +26,11 @@ export default function DisclaimerPage() {
           </p>
         ))}
 
+        <div className="mt-8 rounded-xl border border-[#f5c6cb] bg-[#fff5f5] px-5 py-4">
+          <h2 className="text-lg font-semibold text-[#8b2e2e]">Emergency services</h2>
+          <p className="mt-2 leading-relaxed text-[#8b2e2e]">{emergencyDisclaimer}</p>
+        </div>
+
         <h2 className="mt-10 text-xl font-semibold text-[#0f261c]">Services we support</h2>
         <p className="mt-3 leading-relaxed text-[#5b6a62]">
           Services available through the platform are limited to the following non-regulated
@@ -30,7 +39,9 @@ export default function DisclaimerPage() {
         <ul className="mt-4 grid gap-2 sm:grid-cols-2">
           {supportedServices.map((service) => (
             <li key={service} className="flex items-start gap-2 text-[#5b6a62]">
-              <span aria-hidden className="mt-1 text-[#0c6e4f]">•</span>
+              <span aria-hidden className="mt-1 text-[#0c6e4f]">
+                •
+              </span>
               <span>{service}</span>
             </li>
           ))}

@@ -5,6 +5,12 @@ import { marketingImages } from "./marketing-images";
 export const siteTagline =
   "A secure, compliant healthcare marketplace connecting verified professionals with private clients and organisations.";
 
+export const heroHeadline =
+  "Connecting Clients and Organisations with Verified Healthcare Professionals within the Communities.";
+
+export const heroSubheadline =
+  "A healthcare marketplace — verified nurses, healthcare assistants, support workers and physiotherapists, screened, assessed and continuously monitored for compliance.";
+
 export const professionalRoles = [
   {
     title: "Registered Nurses",
@@ -14,12 +20,12 @@ export const professionalRoles = [
   {
     title: "Healthcare Assistants",
     description:
-      "Experienced HCAs providing companionship, wellbeing support, sitting services and appointment or community support — non-regulated activities only.",
+      "Experienced HCAs providing companionship, wellbeing support, appointment and community access, sitting services and other non-regulated support activities. They do not provide regulated personal care services through CareBridge Connect.",
   },
   {
     title: "Support Workers",
     description:
-      "Trained support workers providing companionship, community support, chaperoning and respite support — non-regulated activities only.",
+      "Support Workers provide companionship, community access, appointment support, wellbeing support, respite sitting services and other non-regulated support activities.",
   },
   {
     title: "Physiotherapists",
@@ -170,30 +176,36 @@ export const testimonials: Testimonial[] = [
 
 /** Short disclaimer line shown in the global footer on every page. */
 export const regulatoryDisclaimer =
-  "CareBridge Connect is a healthcare marketplace and is not a CQC-registered provider. It does not provide regulated personal care services.";
+  "CareBridge Connect is a non-CQC regulated healthcare marketplace. It is not a domiciliary care agency and is not currently registered with the Care Quality Commission (CQC). It does not directly provide regulated personal care services.";
+
+/** Emergency services notice — shown in footer, disclaimer page and inline callouts. */
+export const emergencyDisclaimer =
+  "CareBridge Connect is not an emergency healthcare service. In an emergency, contact emergency services (999) or attend your nearest Emergency Department.";
 
 /** Non-regulated services available through the platform. */
 export const supportedServices = [
   "Companionship",
-  "Wellbeing support",
-  "Sitting services",
-  "Hospital discharge support",
-  "Community support",
-  "Chaperoning",
+  "Community access",
   "Appointment support",
-  "Respite support",
+  "Wellbeing support",
+  "Respite sitting services",
+  "Hospital discharge support",
+  "Chaperoning",
+  "Overnight support",
 ] as const;
 
 /** Full "Important information" disclaimer used on the /disclaimer page and inline callouts. */
 export const importantInformation = {
   heading: "Important information",
   intro:
-    "CareBridge Connect is a healthcare marketplace connecting clients and organisations with independent healthcare professionals.",
+    "CareBridge Connect is a non-CQC regulated healthcare marketplace connecting clients and organisations with independent healthcare professionals.",
   paragraphs: [
-    "CareBridge Connect is not currently a CQC-registered provider and does not provide regulated personal care services.",
-    "Healthcare Assistants (HCAs) and Support Workers engaged through the platform must not provide regulated personal care services through CareBridge Connect. Their services are limited to companionship, wellbeing support, sitting services, hospital discharge support, community support, chaperoning, appointment support, respite support and other non-regulated activities.",
+    "CareBridge Connect is not a domiciliary care agency and is not currently registered with the Care Quality Commission (CQC). We do not directly provide regulated personal care services, nursing services, treatment, or care.",
+    "Support Workers provide companionship, community access, appointment support, wellbeing support, respite sitting services and other non-regulated support activities. Healthcare Assistants provide companionship, wellbeing support, appointment and community access, sitting services and other non-regulated support activities. Neither role may provide regulated personal care services on behalf of CareBridge Connect.",
+    "Support Workers and Healthcare Assistants may provide personal care when working directly for, or under the direction of, an appropriately CQC-regulated organisation where such duties form part of their authorised role.",
     "Registered Nurses and other appropriately qualified healthcare professionals may provide services that fall within their professional scope of practice, subject to verification and compliance requirements.",
+    "Where regulated care services are required, clients should seek support from an appropriately regulated provider.",
   ],
   audienceLabel:
-    "The platform is intended for private clients, healthcare organisations, supported living services, care providers and healthcare facilities seeking access to verified healthcare professionals.",
+    "The platform primarily serves community clients, families, healthcare organisations, care homes, supported living providers, private healthcare services, and other organisations seeking access to verified healthcare professionals.",
 } as const;

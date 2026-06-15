@@ -5,7 +5,7 @@ import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { CtaPillLink } from "@/components/cta-pill-link";
-import { ctaLabels, registerLinks } from "@/data/marketing-copy";
+import { ctaLabels, heroHeadline, heroSubheadline, registerLinks, regulatoryDisclaimer } from "@/data/marketing-copy";
 import { marketingImages } from "@/data/marketing-images";
 import { Icon, StarIcon } from "@/components/ui/icon";
 import { marketingCard, marketingSectionShell } from "@/lib/marketing-ui";
@@ -97,16 +97,19 @@ export function HeroSection() {
           <div className="mt-auto max-w-2xl pb-2 pt-10 sm:pb-4 lg:max-w-3xl">
             <h1
               data-hero-title
-              className="text-[2.35rem] font-bold leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-[3.5rem]"
+              className="text-[2rem] font-bold leading-[1.08] tracking-tight text-white sm:text-4xl lg:text-[2.75rem]"
             >
-              Compliant healthcare staffing, <span className="text-[#7ed7a0]">simplified</span>
+              {heroHeadline}
             </h1>
             <p
               data-hero-desc
               className="mt-5 max-w-xl text-base leading-relaxed text-white/80 sm:text-lg"
             >
-              Connect with verified nurses, healthcare assistants, support workers and
-              physiotherapists — screened, assessed and continuously monitored for compliance.
+              {heroSubheadline}
+            </p>
+
+            <p className="mt-4 max-w-xl rounded-xl border border-white/20 bg-black/30 px-4 py-3 text-sm leading-relaxed text-white/90 backdrop-blur-sm">
+              {regulatoryDisclaimer}
             </p>
 
             <div data-hero-cta className="mt-7 flex flex-wrap gap-3 sm:gap-4">

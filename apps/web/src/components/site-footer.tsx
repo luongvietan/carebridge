@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { marketingImages } from "@/data/marketing-images";
-import { regulatoryDisclaimer } from "@/data/marketing-copy";
+import { emergencyDisclaimer, regulatoryDisclaimer } from "@/data/marketing-copy";
 import {
   ArrowUp01Icon,
   Call02Icon,
@@ -122,9 +122,10 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <p className="mt-8 max-w-3xl text-xs leading-relaxed text-white/45">
-          {regulatoryDisclaimer}
-        </p>
+        <div className="mt-8 space-y-3 rounded-xl border border-white/15 bg-white/5 px-5 py-4">
+          <p className="max-w-3xl text-sm leading-relaxed text-white/80">{regulatoryDisclaimer}</p>
+          <p className="max-w-3xl text-sm leading-relaxed text-white/70">{emergencyDisclaimer}</p>
+        </div>
         <p className="mt-3 text-xs text-white/40">
           © {new Date().getFullYear()} CareBridge Connect Ltd. All rights reserved.
         </p>
