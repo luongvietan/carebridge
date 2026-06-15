@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { ForwardLink } from "@/components/forward-link";
 import { professionalRoles } from "@/data/marketing-copy";
 import { marketingImages } from "@/data/marketing-images";
 import { ArrowUpRight01Icon, Icon } from "@/components/ui/icon";
@@ -71,9 +72,9 @@ export function ServicesOfferSection() {
       <p className="mx-auto mt-8 max-w-2xl text-center text-sm text-[#5b6a62]">
         Physiotherapists (HCPC-registered) are also available for rehabilitation and mobility
         programmes.{" "}
-        <Link href="/services" className="font-semibold text-[#0c6e4f] hover:underline">
-          View all four roles →
-        </Link>
+        <ForwardLink href="/services" className="text-sm text-[#0c6e4f] hover:underline">
+          View all four roles
+        </ForwardLink>
       </p>
     </section>
   );

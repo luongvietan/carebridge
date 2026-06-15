@@ -3,6 +3,9 @@
 import { useActionState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { AuthShell } from "@/components/auth-shell";
+import { BackLink } from "@/components/back-link";
+import { ArrowRight01Icon, Icon } from "@/components/ui/icon";
 import {
   ctaLabels,
   registerLinks,
@@ -10,9 +13,7 @@ import {
   siteTagline,
 } from "@/data/marketing-copy";
 import { signUp, type SignUpResult } from "@/lib/auth/actions";
-
-const inputClass =
-  "mt-1.5 w-full rounded-xl border border-[#dbe7e0] bg-white px-4 py-2.5 text-sm text-[#0c4a35] placeholder:text-[#9aa8a0] focus:border-[#198038] focus:outline-none focus:ring-2 focus:ring-[#198038]/15";
+import { marketingButtonPrimary, marketingCardShadow, marketingInput } from "@/lib/marketing-ui";
 
 type RegisterMode = "professional" | "client";
 
@@ -23,9 +24,15 @@ function parseMode(value: string | null): RegisterMode | null {
 
 function RegisterChoice() {
   return (
-    <main className="mx-auto max-w-3xl px-5 py-12 sm:py-16">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold tracking-tight text-[#0c4a35] sm:text-4xl">
+    <AuthShell wide>
+      <div className="lg:hidden">
+        <BackLink href="/" className="text-[#5b6a62] hover:text-[#198038]">
+          Back to home
+        </BackLink>
+      </div>
+
+      <div className="mt-4 text-center lg:mt-0">
+        <h1 className="text-2xl font-bold tracking-tight text-[#0c4a35] sm:text-3xl">
           Get started with CareBridge Connect
         </h1>
         <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-[#5b6a62] sm:text-base">
@@ -38,7 +45,7 @@ function RegisterChoice() {
           <Link
             key={path.id}
             href={path.href}
-            className="group flex flex-col rounded-[28px] border border-[#e7efe9] bg-white p-7 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.12)] transition hover:border-[#198038] hover:shadow-[0_16px_40px_-12px_rgba(25,128,56,0.2)] sm:p-8"
+            className={`group flex flex-col rounded-[28px] border border-[#e7efe9] bg-white p-7 ${marketingCardShadow} transition hover:border-[#198038] hover:shadow-[0_16px_40px_-12px_rgba(25,128,56,0.2)] sm:p-8`}
           >
             <span className="inline-flex w-fit rounded-full bg-[#e6f4ea] px-3 py-1 text-xs font-semibold uppercase tracking-wide text-[#198038]">
               {path.id === "professional" ? "For professionals" : "For clients"}
@@ -47,7 +54,7 @@ function RegisterChoice() {
             <p className="mt-3 flex-1 text-sm leading-relaxed text-[#5b6a62]">{path.description}</p>
             <span className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[#0c6e4f] group-hover:underline">
               Continue
-              <span aria-hidden>→</span>
+              <Icon icon={ArrowRight01Icon} size={16} strokeWidth={2} aria-hidden />
             </span>
           </Link>
         ))}
@@ -59,7 +66,7 @@ function RegisterChoice() {
           Sign in
         </Link>
       </p>
-    </main>
+    </AuthShell>
   );
 }
 
@@ -69,8 +76,14 @@ function RegisterForm({ mode }: { mode: RegisterMode }) {
 
   if (state && "ok" in state) {
     return (
-      <main className="mx-auto max-w-md px-5 py-12 sm:py-16">
-        <h1 className="text-2xl font-bold text-[#0c4a35]">Check your email</h1>
+      <AuthShell>
+        <div className="lg:hidden">
+          <BackLink href="/" className="text-[#5b6a62] hover:text-[#198038]">
+            Back to home
+          </BackLink>
+        </div>
+
+        <h1 className="mt-4 text-2xl font-bold text-[#0c4a35] lg:mt-0">Check your email</h1>
         <p className="mt-3 text-sm leading-relaxed text-[#5b6a62]">
           We&apos;ve sent a confirmation link. Confirm your email, then{" "}
           <Link href="/login" className="font-semibold text-[#0c6e4f] hover:underline">
@@ -78,18 +91,24 @@ function RegisterForm({ mode }: { mode: RegisterMode }) {
           </Link>
           .
         </p>
-      </main>
+      </AuthShell>
     );
   }
 
   return (
-    <main className="mx-auto max-w-md px-5 py-12 sm:py-16">
-      <Link
+    <AuthShell>
+      <div className="lg:hidden">
+        <BackLink href="/" className="text-[#5b6a62] hover:text-[#198038]">
+          Back to home
+        </BackLink>
+      </div>
+
+      <BackLink
         href="/register"
-        className="text-sm font-medium text-[#5b6a62] transition hover:text-[#198038]"
+        className="mt-4 text-[#5b6a62] hover:text-[#198038] lg:mt-0"
       >
-        ← All registration options
-      </Link>
+        All registration options
+      </BackLink>
 
       <h1 className="mt-6 text-2xl font-bold text-[#0c4a35] sm:text-3xl">
         {isProfessional ? ctaLabels.joinProfessional : ctaLabels.createBookingRequest}
@@ -138,15 +157,15 @@ function RegisterForm({ mode }: { mode: RegisterMode }) {
 
         <label className="block text-sm font-medium text-[#33433a]">
           Full name
-          <input name="fullName" required className={inputClass} />
+          <input name="fullName" required className={marketingInput} />
         </label>
         <label className="block text-sm font-medium text-[#33433a]">
           Email
-          <input type="email" name="email" required className={inputClass} />
+          <input type="email" name="email" required className={marketingInput} />
         </label>
         <label className="block text-sm font-medium text-[#33433a]">
           Password
-          <input type="password" name="password" required minLength={8} className={inputClass} />
+          <input type="password" name="password" required minLength={8} className={marketingInput} />
         </label>
         <label className="flex items-start gap-2.5 text-sm text-[#445049]">
           <input type="checkbox" name="acceptedTerms" required className="mt-1 accent-[#198038]" />{" "}
@@ -162,11 +181,7 @@ function RegisterForm({ mode }: { mode: RegisterMode }) {
           </span>
         </label>
         {state && "error" in state && <p className="text-sm text-red-600">{state.error}</p>}
-        <button
-          type="submit"
-          disabled={pending}
-          className="w-full rounded-full bg-[#198038] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#0e6027] disabled:opacity-50"
-        >
+        <button type="submit" disabled={pending} className={`w-full ${marketingButtonPrimary}`}>
           {pending ? "Creating…" : "Create account"}
         </button>
       </form>
@@ -198,7 +213,7 @@ function RegisterForm({ mode }: { mode: RegisterMode }) {
           Sign in
         </Link>
       </p>
-    </main>
+    </AuthShell>
   );
 }
 

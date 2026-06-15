@@ -1,9 +1,22 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { PageHero } from "@/components/page-hero";
-import { SiteNav } from "@/components/site-nav";
+import Image from "next/image";
+import { CtaBanner } from "@/components/cta-banner";
+import { CtaPillLink } from "@/components/cta-pill-link";
+import { MarketingPageHero } from "@/components/marketing-page-hero";
+import { MarketingPageMotion } from "@/components/motion/marketing-page-motion";
 import { SiteFooter } from "@/components/site-footer";
-import { siteTagline } from "@/data/marketing-copy";
+import { SiteNav } from "@/components/site-nav";
+import { StatsBand } from "@/components/stats-band";
+import { aboutFeatures, siteTagline } from "@/data/marketing-copy";
+import { marketingImages } from "@/data/marketing-images";
+import {
+  marketingCardShadow,
+  marketingHeading,
+  marketingSection,
+  marketingSubheading,
+  marketingSurface,
+} from "@/lib/marketing-ui";
+import { CheckmarkCircle01Icon, Icon } from "@/components/ui/icon";
 
 export const metadata: Metadata = { title: "About — CareBridge Connect" };
 
@@ -24,86 +37,177 @@ const values = [
     "Built to scale",
     "New roles, services and locations can be added without rebuilding the platform — designed for long-term operational control.",
   ],
-];
+] as const;
+
+const audiences = [
+  [
+    "Private clients",
+    "Individuals and families creating booking requests for trusted care at home.",
+  ],
+  [
+    "Organisations",
+    "Care homes, supported-living providers and healthcare organisations needing compliant cover.",
+  ],
+  [
+    "Professionals",
+    "Registered nurses, HCAs, support workers and physiotherapists seeking verified work.",
+  ],
+] as const;
+
+const imageShell =
+  "relative overflow-hidden rounded-[28px] shadow-[0_16px_40px_-16px_rgba(15,38,28,0.28)] sm:rounded-[32px]";
 
 export default function AboutPage() {
+  const { about } = marketingImages;
+
   return (
-    <>
+    <MarketingPageMotion>
       <SiteNav />
-      <PageHero
+
+      <MarketingPageHero
+        badge="About CareBridge Connect"
         title="A healthcare marketplace built on trust"
         description={siteTagline}
+        image={marketingImages.pageHero.about}
       />
 
-      <main className="mx-auto max-w-5xl px-5">
-        <section className="grid gap-10 py-16 lg:grid-cols-2">
-          <div>
-            <h2 className="text-2xl font-semibold tracking-tight text-[#0c4a35]">Our mission</h2>
-            <p className="mt-4 text-[#5b6a62]">
+      <StatsBand />
+
+      <main>
+        <section className={marketingSection}>
+          <div data-reveal className="text-center">
+            <h2 className={marketingHeading}>Our mission</h2>
+            <p className={`${marketingSubheading} max-w-2xl`}>
               We connect verified healthcare professionals with private clients and organisations
-              through a secure, compliant marketplace — so every booking request is matched to
-              staff who are screened, assessed and continuously monitored.
-            </p>
-            <p className="mt-4 text-[#5b6a62]">
-              Professionals complete eligibility screening, an online competency assessment (80%
-              pass mark, up to three attempts) and document uploads before administrators approve
-              their profile. Expired credentials automatically restrict new bookings until
-              re-approved.
+              through a secure, compliant marketplace.
             </p>
           </div>
-          <div className="rounded-3xl bg-gradient-to-br from-[#11512f] to-[#0c3a25] p-8 text-white">
-            <p className="text-sm text-[#bcd8c7]">Who we serve</p>
-            <div className="mt-5 space-y-5">
-              {[
-                [
-                  "Private clients",
-                  "Individuals and families creating booking requests for trusted care at home.",
-                ],
-                [
-                  "Organisations",
-                  "Care homes, supported-living providers and healthcare organisations needing compliant cover.",
-                ],
-                [
-                  "Professionals",
-                  "Registered nurses, HCAs, support workers and physiotherapists seeking verified work.",
-                ],
-              ].map(([t, d]) => (
-                <div key={t} className="border-t border-white/15 pt-5 first:border-0 first:pt-0">
-                  <h3 className="font-semibold">{t}</h3>
-                  <p className="mt-1 text-sm text-[#9fc4ad]">{d}</p>
+
+          <div
+            data-reveal-stagger
+            className="mt-12 grid grid-cols-12 items-center gap-4 sm:gap-5 lg:mt-16 lg:gap-6 xl:gap-8"
+          >
+            <div
+              data-reveal-child
+              className={`${imageShell} col-span-5 h-[220px] sm:h-[260px] lg:col-span-3 lg:h-[340px]`}
+            >
+              <Image
+                src={about.primary.src}
+                alt={about.primary.alt}
+                fill
+                className="object-cover object-top"
+                sizes="(max-width: 1024px) 38vw, 220px"
+              />
+            </div>
+
+            <div
+              data-reveal-child
+              className={`${imageShell} col-span-7 h-[280px] sm:h-[340px] lg:col-span-4 lg:h-[460px]`}
+            >
+              <Image
+                src={about.secondary.src}
+                alt={about.secondary.alt}
+                fill
+                className="object-cover"
+                sizes="(max-width: 1024px) 58vw, 380px"
+              />
+            </div>
+
+            <div
+              data-reveal-child
+              className="col-span-12 flex flex-col justify-center pt-2 lg:col-span-5 lg:pt-0"
+            >
+              <p className="text-[15px] leading-[1.7] text-[#33433a] sm:text-base sm:leading-relaxed">
+                Professionals complete eligibility screening, an online competency assessment (80%
+                pass mark, up to three attempts) and document uploads before administrators approve
+                their profile. Expired credentials automatically restrict new bookings until
+                re-approved.
+              </p>
+
+              <ul className="mt-7 space-y-3.5 sm:mt-8">
+                {aboutFeatures.map((feature) => (
+                  <li key={feature} className="flex items-start gap-3">
+                    <Icon
+                      icon={CheckmarkCircle01Icon}
+                      size={22}
+                      color="#0c6e4f"
+                      strokeWidth={1.75}
+                      className="mt-0.5 shrink-0"
+                    />
+                    <span className="text-sm font-medium leading-snug text-[#0c4a35] sm:text-[15px]">
+                      {feature}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="mt-8 sm:mt-9">
+                <CtaPillLink href="/register" shadow="lg">
+                  Get started
+                </CtaPillLink>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className={`${marketingSection} pt-0`}>
+          <div
+            data-reveal
+            className={`grid gap-10 rounded-[28px] ${marketingSurface} p-6 sm:rounded-[32px] sm:p-10 lg:grid-cols-2 lg:items-center lg:p-12`}
+          >
+            <div>
+              <h2 className={marketingHeading}>Who we serve</h2>
+              <p className={`mt-4 ${marketingSubheading} mx-0 max-w-none text-left`}>
+                Three audiences, one compliant marketplace — from families arranging home care to
+                organisations needing verified cover at scale.
+              </p>
+            </div>
+
+            <div data-reveal-stagger className="space-y-4">
+              {audiences.map(([title, description]) => (
+                <div
+                  key={title}
+                  data-reveal-child
+                  className={`rounded-2xl bg-white p-6 ${marketingCardShadow}`}
+                >
+                  <h3 className="font-bold text-[#0c4a35]">{title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-[#5b6a62]">{description}</p>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        <section className="pb-16">
-          <h2 className="text-2xl font-semibold tracking-tight text-[#0c4a35]">What we stand for</h2>
-          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {values.map(([t, d]) => (
-              <div key={t} className="rounded-2xl border border-[#e7efe9] bg-white p-6">
-                <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#e6f4ea] text-[#198038]">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12l5 5L20 6" /></svg>
+        <section className={marketingSection}>
+          <div data-reveal className="text-center">
+            <h2 className={marketingHeading}>What we stand for</h2>
+            <p className={marketingSubheading}>
+              Principles that guide every verification, booking and compliance decision on the
+              platform.
+            </p>
+          </div>
+
+          <div data-reveal-stagger className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {values.map(([title, description], i) => (
+              <div
+                key={title}
+                data-reveal-child
+                className={`rounded-[28px] bg-white p-7 ${marketingCardShadow} sm:rounded-[32px]`}
+              >
+                <span className="text-5xl font-bold text-[#e6f4ea]">
+                  {String(i + 1).padStart(2, "0")}
                 </span>
-                <h3 className="mt-4 font-semibold text-[#0c4a35]">{t}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-[#5b6a62]">{d}</p>
+                <h3 className="mt-3 text-lg font-bold text-[#0c4a35] sm:text-xl">{title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-[#5b6a62]">{description}</p>
               </div>
             ))}
           </div>
         </section>
 
-        <section className="mb-4 rounded-3xl bg-gradient-to-r from-[#11512f] to-[#198038] px-8 py-12 text-center text-white">
-          <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Join CareBridge Connect</h2>
-          <p className="mx-auto mt-3 max-w-lg text-[#cdebd7]">
-            Register as a verified professional, or create a booking request as a client or
-            organisation.
-          </p>
-          <Link href="/register" className="mt-7 inline-block rounded-full bg-white px-6 py-3 text-sm font-semibold text-[#0c3a25] transition hover:bg-[#eafaf0]">
-            Get started
-          </Link>
-        </section>
+        <CtaBanner />
       </main>
+
       <SiteFooter />
-    </>
+    </MarketingPageMotion>
   );
 }

@@ -57,7 +57,30 @@ export const marketingImages = {
       src: pexels(6235047, 600, 450),
       alt: "Support worker assisting a client in the community",
     },
+    {
+      src: pexels(5215024, 600, 450),
+      alt: "Physiotherapist guiding a client through rehabilitation exercises",
+    },
   ],
+
+  pageHero: {
+    about: {
+      src: pexels(4386464, 1600, 700),
+      alt: "Healthcare professional in a clinical care environment",
+    },
+    services: {
+      src: unsplash("photo-1576091160550-2173dba999ef", 1600, 700),
+      alt: "Registered nurse in a care setting",
+    },
+    faq: {
+      src: pexels(7659572, 1600, 700),
+      alt: "Healthcare professional reviewing information on a tablet",
+    },
+    auth: {
+      src: pexels(7551657, 1200, 900),
+      alt: "Healthcare assistant providing personal care",
+    },
+  },
 
   compliance: {
     main: {
