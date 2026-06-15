@@ -1,5 +1,10 @@
 export const faqs = [
   {
+    question: "Is CareBridge Connect a CQC-registered care provider?",
+    answer:
+      "No. CareBridge Connect is a healthcare marketplace connecting clients and organisations with independent healthcare professionals. It is not currently a CQC-registered provider and does not provide regulated personal care services. Services are limited to companionship, wellbeing support, sitting services, hospital discharge support, community support, chaperoning, appointment support, respite support and other non-regulated activities.",
+  },
+  {
     question: "How are professionals verified?",
     answer:
       "Every professional completes eligibility screening, an online competency assessment and document uploads. Administrators review Enhanced DBS, Right to Work, professional registration (NMC/HCPC), indemnity insurance, mandatory training and references before approval.",
