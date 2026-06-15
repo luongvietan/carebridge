@@ -33,7 +33,7 @@ export const marketingImages = {
     },
     secondary: {
       src: pexels(7551657, 700, 500),
-      alt: "Healthcare assistant providing personal care at home",
+      alt: "Healthcare assistant providing companionship and wellbeing support",
     },
   },
   aboutAvatars: [
@@ -78,7 +78,7 @@ export const marketingImages = {
     },
     auth: {
       src: pexels(7551657, 1200, 900),
-      alt: "Healthcare assistant providing personal care",
+      alt: "Healthcare assistant providing companionship support",
     },
   },
 
