@@ -34,7 +34,7 @@ export default defineConfig({
   timeout: 90_000,
   fullyParallel: false,
   retries: 0,
-  reporter: "list",
+  reporter: [["list"], ["html", { open: "never" }]],
   use: { baseURL: "http://127.0.0.1:3000" },
   webServer: {
     command: "npx next dev -H 127.0.0.1 -p 3000",
@@ -44,5 +44,11 @@ export default defineConfig({
     timeout: 180_000,
     env: e2eEnv,
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  projects: [
+    { name: "chromium", use: { ...devices["Desktop Chrome"] } },
+    { name: "firefox", use: { ...devices["Desktop Firefox"] }, testMatch: /matrix[\\/].*\.spec\.ts/ },
+    { name: "webkit", use: { ...devices["Desktop Safari"] }, testMatch: /matrix[\\/].*\.spec\.ts/ },
+    { name: "Mobile Chrome", use: { ...devices["Pixel 7"] }, testMatch: /matrix[\\/].*\.spec\.ts/ },
+    { name: "Mobile Safari", use: { ...devices["iPhone 14"] }, testMatch: /matrix[\\/].*\.spec\.ts/ },
+  ],
 });
