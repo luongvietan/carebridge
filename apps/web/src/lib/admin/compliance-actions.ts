@@ -1,24 +1,9 @@
 "use server";
-import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
+import { requireAdmin } from "@/lib/auth/admin";
 import { isCompliant } from "@/lib/compliance/requirements";
 
 export type ReviewDecision = "approved" | "rejected" | "further_info_required";
-
-/** Returns the caller's user id if they are an admin/founder, else null. */
-async function requireAdmin(): Promise<string | null> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
-  const { data: row } = await supabase
-    .from("users")
-    .select("account_type, is_founder")
-    .eq("id", user.id)
-    .maybeSingle();
-  return row && (row.account_type === "admin" || row.is_founder) ? user.id : null;
-}
 
 export async function runComplianceSweep(): Promise<{ ok: true } | { error: string }> {
   const adminId = await requireAdmin();
