@@ -36,7 +36,7 @@ describe("sendNotification", () => {
         };
       }
       if (table === "notifications") {
-        let insertedId = "n1";
+        const insertedId = "n1";
         return {
           insert: () => ({
             select: () => ({
