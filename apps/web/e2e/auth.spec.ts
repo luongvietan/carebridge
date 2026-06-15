@@ -25,7 +25,7 @@ test("professional registers, confirms, logs in and reaches their area", async (
   const email = `pro_${Date.now()}@test.dev`;
   const api = await request.newContext();
 
-  await page.goto("/register");
+  await page.goto("/register?as=professional");
   await page.locator('input[name="fullName"]').fill("E2E Pro");
   await page.locator('input[name="email"]').fill(email);
   await page.locator('input[name="password"]').fill("password123");

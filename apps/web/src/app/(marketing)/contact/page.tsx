@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PageHero } from "@/components/page-hero";
 import { SiteNav } from "@/components/site-nav";
 import { SiteFooter } from "@/components/site-footer";
 
@@ -17,15 +18,10 @@ export default function ContactPage() {
   return (
     <>
       <SiteNav />
-      <section className="bg-[#f3f9f5]">
-        <div className="mx-auto max-w-4xl px-5 py-16 text-center">
-          <p className="text-sm font-semibold tracking-wide text-[#198038] uppercase">Contact us</p>
-          <h1 className="mt-2 text-4xl font-semibold tracking-tight text-[#0f261c]">We&apos;d love to hear from you</h1>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-[#5b6a62]">
-            Questions about joining, booking, or compliance? Send us a message and we&apos;ll get back to you.
-          </p>
-        </div>
-      </section>
+      <PageHero
+        title="We'd love to hear from you"
+        description="Questions about joining as a professional, creating a booking request, or how compliance works? Send us a message and we'll get back to you."
+      />
 
       <main className="mx-auto max-w-5xl px-5 py-16">
         <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr]">
@@ -75,7 +71,10 @@ export default function ContactPage() {
             ))}
             <div className="rounded-2xl bg-gradient-to-br from-[#11512f] to-[#0c3a25] p-6 text-white">
               <p className="font-semibold">Looking to join?</p>
-              <p className="mt-1.5 text-sm text-[#bcd8c7]">Professionals and clients can register directly — no need to contact us first.</p>
+              <p className="mt-1.5 text-sm text-[#bcd8c7]">
+                Professionals complete onboarding online. Clients and organisations can register
+                and create booking requests directly — no need to contact us first.
+              </p>
             </div>
           </div>
         </div>

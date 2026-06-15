@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Sans } from "next/font/google";
+import { siteTagline } from "@/data/marketing-copy";
 import "./globals.css";
 
 const plex = IBM_Plex_Sans({
@@ -10,8 +11,7 @@ const plex = IBM_Plex_Sans({
 
 export const metadata: Metadata = {
   title: "CareBridge Connect",
-  description:
-    "Healthcare staffing marketplace connecting verified professionals with private clients and organisations.",
+  description: siteTagline,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

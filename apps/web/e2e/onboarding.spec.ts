@@ -29,7 +29,7 @@ async function confirmationLink(api: APIRequestContext, email: string): Promise<
 }
 
 async function registerConfirmLogin(page: Page, api: APIRequestContext, email: string) {
-  await page.goto("/register");
+  await page.goto("/register?as=professional");
   await page.locator('input[name="fullName"]').fill("E2E Pro");
   await page.locator('input[name="email"]').fill(email);
   await page.locator('input[name="password"]').fill("password123");
