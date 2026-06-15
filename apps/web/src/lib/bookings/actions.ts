@@ -11,6 +11,29 @@ import { createBookingSchema } from "@/lib/validation/bookings";
 
 export type BookingActionResult = { ok: true; id?: string } | { error: string };
 
+const REQUESTER_ACCOUNT: Record<"client" | "organisation", "private_client" | "organisation"> = {
+  client: "private_client",
+  organisation: "organisation",
+};
+
+function toRateCard(row: {
+  id: string;
+  client_charge_rate: number;
+  professional_payout_rate: number;
+  platform_fee_type: string;
+  platform_fee_value: number | null;
+  currency: string;
+}): RateCard {
+  return {
+    id: row.id,
+    client_charge_rate: Number(row.client_charge_rate),
+    professional_payout_rate: Number(row.professional_payout_rate),
+    platform_fee_type: row.platform_fee_type as RateCard["platform_fee_type"],
+    platform_fee_value: row.platform_fee_value != null ? Number(row.platform_fee_value) : null,
+    currency: row.currency.trim(),
+  };
+}
+
 async function authUser() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -52,6 +75,16 @@ export async function createBooking(form: unknown): Promise<BookingActionResult>
   if (!user) return { error: "You must be signed in." };
   const admin = createServiceClient();
 
+  const { data: account } = await admin
+    .from("users")
+    .select("account_type, is_founder")
+    .eq("id", user.id)
+    .maybeSingle();
+  const expectedType = REQUESTER_ACCOUNT[formData.requesterType];
+  if (!account?.is_founder && account?.account_type !== expectedType) {
+    return { error: "You cannot create a booking for this account type." };
+  }
+
   const table = formData.requesterType === "client" ? "private_clients" : "organisations";
   const { data: profile } = await admin.from(table).select("id").eq("user_id", user.id).maybeSingle();
   if (!profile) return { error: `Complete your ${formData.requesterType} profile first.` };
@@ -78,7 +111,7 @@ export async function createBooking(form: unknown): Promise<BookingActionResult>
         locationPostcode: formData.locationPostcode,
         notes: formData.notes,
       } satisfies CreateBookingInput,
-      rateCard as RateCard,
+      toRateCard(rateCard),
     );
   } catch (e) {
     return { error: (e as Error).message };
@@ -140,8 +173,26 @@ export async function declineBooking(bookingId: string, reason?: string): Promis
   const user = await authUser();
   if (!user) return { error: "You must be signed in." };
   const admin = createServiceClient();
-  const { data: prof } = await admin.from("professionals").select("id").eq("user_id", user.id).maybeSingle();
+  const { data: prof } = await admin
+    .from("professionals")
+    .select("id, professional_role_id")
+    .eq("user_id", user.id)
+    .maybeSingle();
   if (!prof) return { error: "Professional profile not found." };
+
+  const { data: booking } = await admin
+    .from("bookings")
+    .select("status, professional_role_id")
+    .eq("id", bookingId)
+    .maybeSingle();
+  if (!booking) return { error: "Booking not found." };
+
+  const t = applyTransition(booking.status, "decline", "professional");
+  if (!t.ok) return { error: t.error };
+  if (prof.professional_role_id !== booking.professional_role_id) {
+    return { error: "This booking is for a different professional role." };
+  }
+
   const { error } = await admin
     .from("booking_declines")
     .upsert({ booking_id: bookingId, professional_id: prof.id, reason: reason ?? null }, { onConflict: "booking_id,professional_id" });
@@ -204,9 +255,16 @@ export async function cancelBooking(bookingId: string, reason?: string): Promise
   if (!t.ok) return { error: t.error };
 
   const isLastMinute = new Date(booking.scheduled_start).getTime() - Date.now() < 24 * 3_600_000;
-  const { error } = await admin.from("bookings").update({ status: "cancelled" }).eq("id", bookingId);
+  const fromStatus = booking.status;
+  const { data: updated, error } = await admin
+    .from("bookings")
+    .update({ status: "cancelled" })
+    .eq("id", bookingId)
+    .eq("status", fromStatus)
+    .select("id");
   if (error) return { error: error.message };
-  await admin.from("booking_status_history").insert({ booking_id: bookingId, from_status: booking.status, to_status: "cancelled", changed_by: user.id, reason: reason ?? null });
+  if (!updated || updated.length === 0) return { error: "This booking has already been cancelled." };
+  await admin.from("booking_status_history").insert({ booking_id: bookingId, from_status: fromStatus, to_status: "cancelled", changed_by: user.id, reason: reason ?? null });
   await admin.from("booking_cancellations").insert({
     booking_id: bookingId, cancelled_by: user.id, cancelled_role: actor, is_last_minute: isLastMinute, reason: reason ?? null,
   });

@@ -28,8 +28,22 @@ export async function saveClientProfile(_prev: AccountResult, formData: FormData
   const user = await currentUser();
   if (!user) return { error: "You must be signed in." };
 
-  const customer = await createCustomer({ email: parsed.data.emailContact ?? user.email, name: parsed.data.fullName });
   const admin = createServiceClient();
+  const { data: existing } = await admin
+    .from("private_clients")
+    .select("stripe_customer_id")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  let stripeCustomerId = existing?.stripe_customer_id ?? null;
+  if (!stripeCustomerId) {
+    const customer = await createCustomer({
+      email: parsed.data.emailContact ?? user.email,
+      name: parsed.data.fullName,
+    });
+    stripeCustomerId = customer.id;
+  }
+
   const { error } = await admin.from("private_clients").upsert(
     {
       user_id: user.id,
@@ -40,7 +54,7 @@ export async function saveClientProfile(_prev: AccountResult, formData: FormData
       address_line2: parsed.data.addressLine2 ?? null,
       city: parsed.data.city ?? null,
       postcode: parsed.data.postcode ?? null,
-      stripe_customer_id: customer.id,
+      stripe_customer_id: stripeCustomerId,
     },
     { onConflict: "user_id" },
   );
@@ -64,11 +78,22 @@ export async function saveOrganisationProfile(_prev: AccountResult, formData: Fo
   const user = await currentUser();
   if (!user) return { error: "You must be signed in." };
 
-  const customer = await createCustomer({
-    email: parsed.data.billingEmail ?? user.email,
-    name: parsed.data.organisationName,
-  });
   const admin = createServiceClient();
+  const { data: existing } = await admin
+    .from("organisations")
+    .select("stripe_customer_id")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  let stripeCustomerId = existing?.stripe_customer_id ?? null;
+  if (!stripeCustomerId) {
+    const customer = await createCustomer({
+      email: parsed.data.billingEmail ?? user.email,
+      name: parsed.data.organisationName,
+    });
+    stripeCustomerId = customer.id;
+  }
+
   const { error } = await admin.from("organisations").upsert(
     {
       user_id: user.id,
@@ -81,7 +106,7 @@ export async function saveOrganisationProfile(_prev: AccountResult, formData: Fo
       postcode: parsed.data.postcode ?? null,
       cqc_registration_number: parsed.data.cqcRegistrationNumber ?? null,
       billing_email: parsed.data.billingEmail ?? null,
-      stripe_customer_id: customer.id,
+      stripe_customer_id: stripeCustomerId,
     },
     { onConflict: "user_id" },
   );
