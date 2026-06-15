@@ -2,7 +2,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { clientSchema, organisationSchema } from "@/lib/validation/accounts";
-import { createCustomer } from "@/lib/payments/stripe";
+import { createCustomer } from "@/lib/stripe/client";
 
 export type AccountResult = { ok: true } | { error: string } | null;
 
