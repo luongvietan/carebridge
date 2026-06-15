@@ -35,7 +35,7 @@ async function registerConfirmLogin(page: Page, api: APIRequestContext, email: s
   await page.locator('input[name="password"]').fill("password123");
   await page.locator('input[name="acceptedTerms"]').check();
   await page.getByRole("button", { name: /create account/i }).click();
-  await expect(page.getByText(/check your email/i)).toBeVisible();
+  await expect(page.getByRole("heading", { name: /check your email/i })).toBeVisible();
   await page.goto(await confirmationLink(api, email));
   await page.goto("/login");
   await page.locator('input[name="email"]').fill(email);
@@ -208,4 +208,68 @@ test("admin approving the final critical document activates the professional", a
   await sb.auth.admin.deleteUser(proUser.user!.id);
   await sb.auth.admin.deleteUser(adminUser.user!.id);
   void pendingDocId;
+});
+
+test("professional cannot download another professional's document from storage", async () => {
+  const sb = service();
+  const { createClient } = await import("@supabase/supabase-js");
+  const stamp = Date.now();
+  const ownerEmail = `docowner_${stamp}@test.dev`;
+  const otherEmail = `docother_${stamp}@test.dev`;
+
+  const ownerUserId = (
+    await sb.auth.admin.createUser({
+      email: ownerEmail,
+      password: "password123",
+      email_confirm: true,
+      user_metadata: { account_type: "professional", full_name: "Doc Owner" },
+    })
+  ).data.user!.id;
+
+  const otherUserId = (
+    await sb.auth.admin.createUser({
+      email: otherEmail,
+      password: "password123",
+      email_confirm: true,
+      user_metadata: { account_type: "professional", full_name: "Doc Other" },
+    })
+  ).data.user!.id;
+
+  await new Promise((r) => setTimeout(r, 1200));
+
+  const { data: ownerProf, error: ownerErr } = await sb
+    .from("professionals")
+    .insert({ user_id: ownerUserId, full_name: "Doc Owner" })
+    .select("id")
+    .single();
+  expect(ownerErr, JSON.stringify(ownerErr)).toBeNull();
+  await sb.from("professionals").insert({ user_id: otherUserId, full_name: "Doc Other" });
+
+  const { data: docType } = await sb.from("document_types").select("id").limit(1).single();
+  const storagePath = `${ownerProf!.id}/dbs/test-${stamp}.pdf`;
+  await sb.from("documents").insert({
+    professional_id: ownerProf!.id,
+    document_type_id: docType!.id,
+    storage_path: storagePath,
+    verification_status: "pending_review",
+  });
+
+  const anonClient = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  );
+  const { error: signInErr } = await anonClient.auth.signInWithPassword({
+    email: otherEmail,
+    password: "password123",
+  });
+  expect(signInErr).toBeNull();
+
+  const { data: blob, error: dlErr } = await anonClient.storage.from("documents").download(storagePath);
+  expect(dlErr).toBeTruthy();
+  expect(blob).toBeNull();
+
+  await sb.from("documents").delete().eq("professional_id", ownerProf!.id);
+  await sb.from("professionals").delete().in("user_id", [ownerUserId, otherUserId]);
+  await sb.auth.admin.deleteUser(ownerUserId);
+  await sb.auth.admin.deleteUser(otherUserId);
 });

@@ -51,7 +51,7 @@ export default function LoginPage() {
         Access your CareBridge Connect account — professionals, clients and organisations.
       </p>
 
-      <form onSubmit={onSubmit} className="mt-8 space-y-5">
+      <form method="post" onSubmit={onSubmit} className="mt-8 space-y-5">
         <label className="block text-sm font-medium text-[#33433a]">
           Email
           <input type="email" name="email" required className={marketingInput} />
