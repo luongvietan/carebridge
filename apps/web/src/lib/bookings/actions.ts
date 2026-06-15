@@ -284,3 +284,55 @@ export async function cancelBooking(bookingId: string, reason?: string): Promise
   if (recipient) await sendNotification("booking_cancellation", recipient, { booking_id: bookingId });
   return { ok: true };
 }
+
+/** Professional (own booking) or admin marks a booking completed. */
+export async function completeBooking(bookingId: string): Promise<BookingActionResult> {
+  const user = await authUser();
+  if (!user) return { error: "You must be signed in." };
+  const admin = createServiceClient();
+  const isAdmin = !!(await requireAdmin());
+
+  const { data: booking } = await admin
+    .from("bookings")
+    .select("status, assigned_professional_id")
+    .eq("id", bookingId)
+    .single();
+  if (!booking) return { error: "Booking not found." };
+
+  let actor: Actor = "admin";
+  if (!isAdmin) {
+    const { data: prof } = await admin.from("professionals").select("id").eq("user_id", user.id).maybeSingle();
+    if (!prof || prof.id !== booking.assigned_professional_id) return { error: "This is not your booking." };
+    actor = "professional";
+  }
+
+  const t = applyTransition(booking.status, "complete", actor);
+  if (!t.ok) return { error: t.error };
+
+  const { data: updated, error } = await admin
+    .from("bookings").update({ status: "completed" }).eq("id", bookingId).eq("status", booking.status).select("id");
+  if (error) return { error: error.message };
+  if (!updated || updated.length === 0) return { error: "This booking is no longer in a completable state." };
+
+  await admin.from("booking_status_history").insert({ booking_id: bookingId, from_status: booking.status, to_status: "completed", changed_by: user.id });
+  await admin.from("audit_log").insert({ actor_user_id: user.id, actor_type: isAdmin ? "admin" : "user", action: "booking.completed", entity_type: "booking", entity_id: bookingId });
+  return { ok: true };
+}
+
+/** Admin marks an accepted/assigned booking as a no-show. */
+export async function markNoShow(bookingId: string): Promise<BookingActionResult> {
+  const adminId = await requireAdmin();
+  if (!adminId) return { error: "Administrator access required." };
+  const admin = createServiceClient();
+  const { data: booking } = await admin.from("bookings").select("status").eq("id", bookingId).single();
+  if (!booking) return { error: "Booking not found." };
+  const t = applyTransition(booking.status, "no_show", "admin");
+  if (!t.ok) return { error: t.error };
+  const { data: updated, error } = await admin
+    .from("bookings").update({ status: "no_show" }).eq("id", bookingId).eq("status", booking.status).select("id");
+  if (error) return { error: error.message };
+  if (!updated || updated.length === 0) return { error: "This booking is no longer in a no-show-able state." };
+  await admin.from("booking_status_history").insert({ booking_id: bookingId, from_status: booking.status, to_status: "no_show", changed_by: adminId });
+  await admin.from("audit_log").insert({ actor_user_id: adminId, actor_type: "admin", action: "booking.no_show", entity_type: "booking", entity_id: bookingId });
+  return { ok: true };
+}
