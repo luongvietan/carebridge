@@ -1,4 +1,4 @@
-export type Json =
+﻿export type Json =
   | string
   | number
   | boolean
@@ -1727,6 +1727,7 @@ export type Database = {
       }
       users: {
         Row: {
+          account_status: Database["public"]["Enums"]["account_status"]
           account_type: Database["public"]["Enums"]["account_type"]
           created_at: string
           email: string
@@ -1737,6 +1738,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          account_status?: Database["public"]["Enums"]["account_status"]
           account_type: Database["public"]["Enums"]["account_type"]
           created_at?: string
           email: string
@@ -1747,6 +1749,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          account_status?: Database["public"]["Enums"]["account_status"]
           account_type?: Database["public"]["Enums"]["account_type"]
           created_at?: string
           email?: string
@@ -1945,6 +1948,7 @@ export type Database = {
       }
     }
     Enums: {
+      account_status: "active" | "suspended" | "deactivated"
       account_type: "professional" | "private_client" | "organisation" | "admin"
       assessment_topic:
         | "safeguarding"
@@ -2127,6 +2131,7 @@ export const Constants = {
   },
   public: {
     Enums: {
+      account_status: ["active", "suspended", "deactivated"],
       account_type: ["professional", "private_client", "organisation", "admin"],
       assessment_topic: [
         "safeguarding",
