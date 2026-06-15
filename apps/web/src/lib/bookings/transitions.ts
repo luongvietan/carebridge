@@ -24,6 +24,8 @@ const RULES: Rule[] = [
   { from: "accepted", action: "start", actors: ["admin", "professional"], to: "in_progress" },
   { from: "confirmed", action: "start", actors: ["admin", "professional"], to: "in_progress" },
   { from: "in_progress", action: "complete", actors: ["admin", "professional"], to: "completed" },
+  { from: "accepted", action: "complete", actors: ["professional", "admin"], to: "completed" },
+  { from: "assigned", action: "complete", actors: ["professional", "admin"], to: "completed" },
   { from: "accepted", action: "no_show", actors: ["admin"], to: "no_show" },
   { from: "assigned", action: "no_show", actors: ["admin"], to: "no_show" },
 ];

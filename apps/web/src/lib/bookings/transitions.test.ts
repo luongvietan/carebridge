@@ -21,4 +21,13 @@ describe("applyTransition", () => {
   it("rejects cancelling a cancelled booking", () => {
     expect(applyTransition("cancelled", "cancel", "admin").ok).toBe(false);
   });
+  it("professional completes an accepted booking", () => {
+    expect(applyTransition("accepted", "complete", "professional")).toEqual({ ok: true, to: "completed" });
+  });
+  it("admin completes an assigned booking", () => {
+    expect(applyTransition("assigned", "complete", "admin")).toEqual({ ok: true, to: "completed" });
+  });
+  it("rejects completing an open booking", () => {
+    expect(applyTransition("open", "complete", "professional").ok).toBe(false);
+  });
 });
