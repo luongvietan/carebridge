@@ -22,6 +22,7 @@
 - After a migration that changes DB shape used by typed `.from()/.rpc()` calls, REGENERATE types: `SUPABASE_ACCESS_TOKEN=dummy npx supabase gen types typescript --db-url "postgresql://postgres:postgres@127.0.0.1:54322/postgres" > apps/web/src/lib/supabase/types.ts` (else `next build` fails — this bit S3a). Commit the regenerated types with the migration's task.
 - `audit_log.actor_type` ∈ 'user'|'admin'|'system'.
 - Commit after every task. End commit messages with `Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>`.
+- **Task order:** Tasks 1–14 sequential; then **Task 16** (nav — pages must exist); then **Task 15** (E2E).
 
 ## File structure
 
@@ -36,14 +37,16 @@ src/lib/admin/rate-actions.ts        # amendRateCard (admin action)
 src/app/(auth)/login/page.tsx        # + account_status gate (modify)
 src/proxy.ts                         # + account_status guard (modify)
 src/app/suspended/page.tsx           # public "account suspended" page
+src/app/admin/page.tsx               # + Users, Accounts, Rates, Finance cards (modify)
 src/app/admin/users/page.tsx         src/app/admin/users/[id]/page.tsx
 src/app/admin/accounts/page.tsx      src/app/admin/rates/page.tsx
+src/lib/auth/role-nav.ts             # + Users, Accounts, Rates, Finance nav items (modify)
 src/components/user-filters.tsx  status-action-form.tsx  account-status-control.tsx  amend-rate-form.tsx
 supabase/migrations/0028_account_status.sql
 supabase/migrations/0029_amend_rate_card_fn.sql
 supabase/tests/0029_account_status_test.sql
 supabase/tests/0030_amend_rate_card_test.sql
-e2e/admin-governance.spec.ts
+apps/web/e2e/admin-governance.spec.ts
 ```
 
 ---
@@ -457,6 +460,12 @@ const REASON_CODES = [
 ] as const;
 type ReasonCode = (typeof REASON_CODES)[number];
 
+/** Actions that change status away from active/reinstate — require a reason for audit. */
+const PUNITIVE: StatusActionType[] = [
+  "suspend", "full_suspension", "booking_restriction", "compliance_hold",
+  "under_investigation", "reject", "remove",
+];
+
 export type StatusActionResult = { ok: true } | { error: string };
 
 export async function applyProfessionalStatusAction(
@@ -466,6 +475,12 @@ export async function applyProfessionalStatusAction(
 ): Promise<StatusActionResult> {
   const adminId = await requireAdmin();
   if (!adminId) return { error: "Administrator access required." };
+  if (PUNITIVE.includes(action)) {
+    if (!details.reasonCode) return { error: "A reason code is required for this action." };
+    if (details.reasonCode === "other" && !details.reasonText?.trim()) {
+      return { error: "Please describe the reason when selecting 'other'." };
+    }
+  }
   if (details.reasonCode && !REASON_CODES.includes(details.reasonCode as ReasonCode)) {
     return { error: "Invalid reason code." };
   }
@@ -599,12 +614,14 @@ A form whose fields map to `ProfessionalFilterCriteria` (text; professionalStatu
 - [ ] **Step 2: List page** (`admin/users/page.tsx`, server component, service client)
 Read `searchParams`, pass them through `buildProfessionalFilters` (from `@/lib/admin/search`), and build the query:
 - base: `admin.from("professionals").select("id, full_name, professional_status, compliance_status, professional_role_id, postcode, travel_distance_km, professional_roles(name), users:user_id(email, account_status)")`.
-- `text` → `.or("full_name.ilike.%TXT%,...")` (and filter by email client-side or via the joined users — simplest: ilike on full_name; note email search may need an RPC, for MVP ilike full_name and also fetch users.email to display).
+- `text` → match **name or email** on one query: `.or(\`full_name.ilike.%${txt}%,users.email.ilike.%${txt}%\`)` (PostgREST filter on the embedded `users` join). If the builder rejects nested `or`, fallback: collect user ids with `users.email ilike`, then `.or(\`full_name.ilike.%${txt}%,user_id.in.(${ids})\`)`.
 - `professionalStatus`/`complianceStatus`/`roleId` → `.eq(...)`.
 - `postcode` → `.ilike("postcode", "PC%")`; `maxTravelKm` → `.gte("travel_distance_km", km)`.
 - `availability` → join filter on `professional_availability` (fetch professional ids matching, then `.in`).
-- `requireValidDocs` → professionals whose required critical docs are all approved and unexpired (reuse the compliance logic: fetch ids via a query on `documents`/`compliance_requirements`, then `.in`). If this proves complex, implement it as a follow-up filter applied in-memory over the page's result set and note it.
-Render a table: name, role, professional_status, compliance_status, account_status, with a link to `/admin/users/[id]`. Put `<UserFilters />` above it.
+- `requireValidDocs` → **required in this task** (not deferred): for each role's critical `compliance_requirements`, find professionals where every required doc type has an `approved` row with `expiry_date` null or ≥ today (mirror the doc-fetch pattern in `compliance-actions.ts` / `isCompliant`). Pre-query matching professional ids, then `.in("id", ids)`.
+Render a table: name, email, role, professional_status, compliance_status, account_status, with a link to `/admin/users/[id]`. Put `<UserFilters />` above it.
+
+**Search scope (MVP):** all filter fields in `ProfessionalFilterCriteria` must work server-side in this task — no in-memory-only filters. E2E (Task 15) covers status filter; email + doc-validity behaviour is covered by unit tests + manual smoke if PostgREST nesting is awkward.
 
 - [ ] **Step 3: Verify** `npm run lint`, `npm run build` pass.
 - [ ] **Step 4: Commit** `git add apps/web/src/app/admin/users/page.tsx apps/web/src/components/user-filters.tsx && git commit -m "feat(app): admin professional list with search filters"`
@@ -616,7 +633,7 @@ Render a table: name, role, professional_status, compliance_status, account_stat
 **Files:** Create `apps/web/src/app/admin/users/[id]/page.tsx`, `apps/web/src/components/status-action-form.tsx`, `apps/web/src/components/account-status-control.tsx`
 
 - [ ] **Step 1: Status action form** (`status-action-form.tsx`, `"use client"`)
-Props: `{ professionalId: string; currentStatus: ProfessionalStatus }`. Use `allowedActions(currentStatus)` (from `@/lib/admin/status-machine`) to populate the action `<select>` (only legal actions). Fields: action, reason code `<select>` (the 13 reason codes), reason text, internal notes, review date. On submit call `applyProfessionalStatusAction(professionalId, action, {...})`; show error or `router.refresh()`.
+Props: `{ professionalId: string; currentStatus: ProfessionalStatus }`. Use `allowedActions(currentStatus)` (from `@/lib/admin/status-machine`) to populate the action `<select>` (only legal actions). Fields: action, reason code `<select>` (the 13 reason codes), reason text, internal notes, review date. For punitive actions (`suspend`, `full_suspension`, `booking_restriction`, `compliance_hold`, `under_investigation`, `reject`, `remove`), mark reason code **required** in the UI; when reason is `other`, require reason text — mirrors Task 8 server validation. On submit call `applyProfessionalStatusAction(professionalId, action, {...})`; show error or `router.refresh()`.
 
 - [ ] **Step 2: Account status control** (`account-status-control.tsx`, `"use client"`)
 Props: `{ userId: string; current: AccountStatus }`. Buttons/select to set `suspended`/`deactivated`/`active` per `canSetAccountStatus` legality; calls `setAccountStatus(userId, next, reason)`; error or refresh.
@@ -657,15 +674,40 @@ For each active role: load the current active card (`effective_to is null`) and 
 
 **Files:** Create `apps/web/e2e/admin-governance.spec.ts`
 
+> Run **after Task 16** so nav links and all pages exist.
+
 - [ ] **Step 1: Write the E2E spec** (model on `e2e/bookings.spec.ts` for admin login + service-client fixtures)
 Cover:
-1. **Suspend/reinstate professional:** seed an `active`+`approved` professional (so `can_accept_bookings` is true). Admin logs in, visits `/admin/users/[id]`, applies `suspend` with a reason → assert DB `professional_status='temporarily_suspended'` and `can_accept_bookings=false` and a `professional_status_actions` row exists. Then `reinstate` → `active`, `can_accept_bookings=true`.
-2. **Suspend a client account:** seed a confirmed client user. Admin sets that user's `account_status='suspended'` (via `/admin/accounts`). Then attempt to log in as that client → assert the login shows the suspended message and does NOT reach `/client`. (Use a fresh browser context for the client login.)
-3. **Amend rate card:** seed a role with an active rate card and an existing booking carrying frozen `snap_*`. Admin amends the role's rate via `/admin/rates` → assert a new active card exists with the new values AND the existing booking's `total_client_charge`/`snap_client_charge_rate` are unchanged.
-4. **Search:** seed two professionals with different statuses; visit `/admin/users?professionalStatus=temporarily_suspended` → assert only the suspended one is listed.
+1. **Suspend/reinstate professional:** seed an `active`+`approved` professional (so `can_accept_bookings` is true). Admin logs in, visits `/admin/users/[id]`, applies `suspend` with a reason code → assert DB `professional_status='temporarily_suspended'` and `can_accept_bookings=false` and a `professional_status_actions` row exists with non-null `reason_code`. Then `reinstate` → `active`, `can_accept_bookings=true`.
+2. **Suspend a client account (login block):** seed a confirmed client user. Admin sets that user's `account_status='suspended'` (via `/admin/accounts`). In a **fresh** browser context, attempt to log in as that client → assert the login shows the suspended message and does NOT reach `/client`.
+3. **Suspend a client account (guard redirect):** using the **same client session** from a prior login (before suspend), admin suspends the account. Client context (still authenticated) navigates to `/client` → assert URL is `/suspended` (proxy guard, Task 10). Confirms enforcement for existing sessions, not just new logins.
+4. **Amend rate card:** seed a role with an active rate card and an existing booking carrying frozen `snap_*`. Admin amends the role's rate via `/admin/rates` → assert a new active card exists with the new values AND the existing booking's `total_client_charge`/`snap_client_charge_rate` are unchanged.
+5. **Search:** seed two professionals with different statuses; visit `/admin/users?professionalStatus=temporarily_suspended` → assert only the suspended one is listed.
 Clean up created auth users/rows at the end.
 - [ ] **Step 2: Run** repo root `npx supabase db reset`; kill stale port 3000; `cd apps/web && npm run e2e` → all pass.
 - [ ] **Step 3: Commit** `git add apps/web/e2e/admin-governance.spec.ts && git commit -m "test(app): admin governance E2E (suspension, account status, rate amend, search)"`
+
+---
+
+## Task 16: Admin navigation (dashboard + nav)
+
+**Files:** Modify `apps/web/src/app/admin/page.tsx`, `apps/web/src/lib/auth/role-nav.ts`
+
+> Run **after Task 14**, **before Task 15** (E2E).
+
+Spec §3 requires cross-links so new governance pages are discoverable. S3a added Finance pages but neither the dashboard nor `ROLE_NAV` lists them yet — wire everything in one pass.
+
+- [ ] **Step 1: Dashboard cards** — extend `DashboardGrid` on `admin/page.tsx` with cards for:
+  - **Users** → `/admin/users` — search and manage professionals.
+  - **All accounts** → `/admin/accounts` — suspend/deactivate any role.
+  - **Rate cards** → `/admin/rates` — effective-dated rate amendments.
+  - **Finance** → `/admin/finance` — transactions and revenue (shipped in S3a).
+  Keep existing Compliance and Bookings cards.
+
+- [ ] **Step 2: Role nav** — add matching entries to `ROLE_NAV.admin` in `role-nav.ts`: Users, Accounts, Rates, Finance (after Bookings or grouped logically). Keep existing Dashboard, Compliance, Bookings.
+
+- [ ] **Step 3: Verify** `npm run lint`, `npm run build` pass.
+- [ ] **Step 4: Commit** `git add apps/web/src/app/admin/page.tsx apps/web/src/lib/auth/role-nav.ts && git commit -m "feat(app): admin nav links for governance and finance pages"`
 
 ---
 
@@ -678,12 +720,15 @@ Clean up created auth users/rows at the end.
 
 ## Acceptance (from spec)
 
-Admins suspend/reinstate/deactivate any account (enforced at login + guard); apply the full professional status workflow with reason codes + audit trail (non-active auto-blocks bookings); search/filter professionals across all criteria; amend effective-dated rate cards atomically without altering past bookings — all audited.
+Admins suspend/reinstate/deactivate any account (enforced at **login and route guard**, including active sessions); apply the full professional status workflow with **mandatory reason codes on punitive actions** + audit trail (non-active auto-blocks bookings); search/filter professionals across all criteria (name, email, status, role, location, availability, doc validity); amend effective-dated rate cards atomically without altering past bookings — all audited. Governance pages reachable from admin dashboard and nav (Task 16).
 
 ## Notes / open checks for the implementer
 
-- The professional status FROM-matrix in `status-machine.ts` is a PROPOSED default — flagged for Ana; keep it isolated in that one module.
+- The professional status FROM-matrix in `status-machine.ts` is a PROPOSED default — flagged for Ana; keep it isolated in that one module. Do not ship to production until Ana signs off (logic can ship behind admin-only UI in dev/staging).
+- **Punitive actions** (`suspend`, `full_suspension`, `booking_restriction`, `compliance_hold`, `under_investigation`, `reject`, `remove`) require `reasonCode`; `other` also requires `reasonText` (Task 8 + form validation in Task 12).
 - Run `npm run build` (full type-check) before declaring each action/page task done — `npm run lint` alone did NOT catch type errors in S3a.
 - Regenerate `types.ts` after the 0028 and 0029 migrations (Tasks 1 and 6) or typed `.from("users")`/`.rpc("amend_rate_card")` calls will fail the build.
 - `requireAdmin` reads `users.account_type`/`is_founder`; an admin whose own `account_status` were ever non-active would be guard-redirected — but `setAccountStatus` refuses to suspend admin/founder accounts, so this can't happen via the UI.
+- Login (Task 10) shows one message for both `suspended` and `deactivated`; `/suspended` page copy covers both — intentional for MVP.
+- `amend_rate_card` concurrent calls: a losing transaction fails on `uq_rate_card_active` or `rate_margin_ok` — no retry needed; surface the error to the admin.
 - Confirm `professional_status_actions` accepts the columns used (`action_type, reason_code, reason_text, internal_notes, review_date, resulting_status, applied_by`) — verified against migration 0007.
