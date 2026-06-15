@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { requireAdmin } from "@/lib/auth/admin";
 import { buildBookingInsert, type CreateBookingInput } from "./create";
+import type { RateCard } from "@/lib/rates/snapshot";
 import { applyTransition, type Actor } from "./transitions";
 import { canAccept } from "./eligibility";
 import { sendNotification } from "@/lib/notifications/send";
@@ -77,7 +78,7 @@ export async function createBooking(form: unknown): Promise<BookingActionResult>
         locationPostcode: formData.locationPostcode,
         notes: formData.notes,
       } satisfies CreateBookingInput,
-      rateCard,
+      rateCard as RateCard,
     );
   } catch (e) {
     return { error: (e as Error).message };
