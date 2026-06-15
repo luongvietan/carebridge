@@ -99,9 +99,7 @@ export function HeroSection() {
               data-hero-title
               className="text-[2.35rem] font-bold leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-[3.5rem]"
             >
-              Compliant healthcare staffing,
-              <br />
-              simplified
+              Compliant healthcare staffing, <span className="text-[#7ed7a0]">simplified</span>
             </h1>
             <p
               data-hero-desc

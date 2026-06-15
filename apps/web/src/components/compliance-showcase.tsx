@@ -74,7 +74,7 @@ export function ComplianceShowcase() {
                   key={item.title}
                   className={`overflow-hidden rounded-2xl transition ${
                     isOpen
-                      ? "bg-gradient-to-r from-[#0c6e4f] to-[#7ed7a0] text-white"
+                      ? "bg-[#0c6e4f] text-white"
                       : "bg-white text-[#0c4a35]"
                   }`}
                 >

@@ -17,7 +17,7 @@ export const marketingInput =
   "mt-1.5 w-full rounded-xl border border-[#dbe7e0] bg-white px-4 py-2.5 text-sm text-[#0c4a35] placeholder:text-[#9aa8a0] focus:border-[#198038] focus:outline-none focus:ring-2 focus:ring-[#198038]/15";
 
 export const marketingButtonPrimary =
-  "rounded-full bg-gradient-to-r from-[#0c6e4f] to-[#7ed7a0] px-6 py-3 text-sm font-semibold text-white transition hover:from-[#0a5c42] hover:to-[#6bc98f] disabled:opacity-50";
+  "rounded-full bg-[#0c6e4f] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#0a5c42] disabled:opacity-50";
 
 export const marketingCardShadow =
   "shadow-[0_8px_30px_-12px_rgba(15,38,28,0.12)]";
