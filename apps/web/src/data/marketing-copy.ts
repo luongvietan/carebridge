@@ -65,7 +65,7 @@ export const complianceFeatures = [
     title: "Personalised staffing programmes",
     bullets: [
       "Booking requests matched across four roles — nurses, HCAs, support workers and physiotherapists.",
-      "Flexible cover for private clients, care homes, supported-living providers and healthcare organisations.",
+      "Flexible cover for private clients, healthcare organisations, supported living services, care providers and healthcare facilities.",
     ],
   },
   {

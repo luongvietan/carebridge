@@ -159,8 +159,8 @@ export default function AboutPage() {
             <div>
               <h2 className={marketingHeading}>Who we serve</h2>
               <p className={`mt-4 ${marketingSubheading} mx-0 max-w-none text-left`}>
-                Three audiences, one compliant marketplace — from families arranging home care to
-                organisations needing verified cover at scale.
+                Three audiences, one compliant marketplace — from families arranging non-regulated
+                support to organisations needing verified cover at scale.
               </p>
             </div>
 
