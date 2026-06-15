@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { marketingImages } from "@/data/marketing-images";
+import { regulatoryDisclaimer } from "@/data/marketing-copy";
 import {
   ArrowUp01Icon,
   Call02Icon,
@@ -91,8 +92,8 @@ export function SiteFooter() {
               Terms &amp; conditions
             </Link>
             <span aria-hidden>|</span>
-            <Link href="/" className="transition hover:text-white">
-              Sitemap
+            <Link href="/disclaimer" className="transition hover:text-white">
+              Important information
             </Link>
             <span aria-hidden>|</span>
             <Link href="/privacy" className="transition hover:text-white">
@@ -121,7 +122,10 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <p className="mt-8 text-xs text-white/40">
+        <p className="mt-8 max-w-3xl text-xs leading-relaxed text-white/45">
+          {regulatoryDisclaimer}
+        </p>
+        <p className="mt-3 text-xs text-white/40">
           © {new Date().getFullYear()} CareBridge Connect Ltd. All rights reserved.
         </p>
       </div>
