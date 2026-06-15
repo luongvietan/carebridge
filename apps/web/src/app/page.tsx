@@ -10,7 +10,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { StatsBand } from "@/components/stats-band";
 import { TestimonialsSection } from "@/components/testimonials-section";
 import { onboardingSteps } from "@/data/marketing-copy";
-import { marketingHeading, marketingSection, marketingSubheading } from "@/lib/marketing-ui";
+import { marketingDecorativeNumber, marketingHeading, marketingSection, marketingSubheading } from "@/lib/marketing-ui";
 
 export default function HomePage() {
   return (
@@ -43,7 +43,7 @@ export default function HomePage() {
                 data-reveal-child
                 className="rounded-[28px] bg-white p-7 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.12)] sm:rounded-[32px]"
               >
-                <span className="text-5xl font-bold text-[#e6f4ea]">
+                <span className={`text-5xl font-bold ${marketingDecorativeNumber}`}>
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <h3 className="mt-3 text-lg font-bold text-[#0c4a35] sm:text-xl">{step.title}</h3>

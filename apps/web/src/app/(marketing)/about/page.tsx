@@ -11,6 +11,7 @@ import { aboutFeatures, siteTagline } from "@/data/marketing-copy";
 import { marketingImages } from "@/data/marketing-images";
 import {
   marketingCardShadow,
+  marketingDecorativeNumber,
   marketingHeading,
   marketingSection,
   marketingSubheading,
@@ -194,7 +195,7 @@ export default function AboutPage() {
                 data-reveal-child
                 className={`rounded-[28px] bg-white p-7 ${marketingCardShadow} sm:rounded-[32px]`}
               >
-                <span className="text-5xl font-bold text-[#e6f4ea]">
+                <span className={`text-5xl font-bold ${marketingDecorativeNumber}`}>
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <h3 className="mt-3 text-lg font-bold text-[#0c4a35] sm:text-xl">{title}</h3>

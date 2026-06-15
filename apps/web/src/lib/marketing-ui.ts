@@ -21,3 +21,5 @@ export const marketingButtonPrimary =
 
 export const marketingCardShadow =
   "shadow-[0_8px_30px_-12px_rgba(15,38,28,0.12)]";
+
+export const marketingDecorativeNumber = "text-[#198038]/45";
