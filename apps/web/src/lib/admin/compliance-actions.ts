@@ -2,6 +2,7 @@
 import { createServiceClient } from "@/lib/supabase/service";
 import { requireAdmin } from "@/lib/auth/admin";
 import { isCompliant } from "@/lib/compliance/requirements";
+import { sendNotification } from "@/lib/notifications/send";
 
 export type ReviewDecision = "approved" | "rejected" | "further_info_required";
 
@@ -104,6 +105,14 @@ async function recomputeCompliance(professionalId: string, adminId: string): Pro
         entity_id: professionalId,
         summary: "Compliance approved — professional activated",
       });
+      const { data: profUser } = await admin
+        .from("professionals")
+        .select("user_id")
+        .eq("id", professionalId)
+        .single();
+      if (profUser?.user_id) {
+        await sendNotification("compliance_approval", profUser.user_id, { professional_id: professionalId });
+      }
     }
   } else {
     await admin.from("professionals").update({ compliance_status: "pending_review" }).eq("id", professionalId);

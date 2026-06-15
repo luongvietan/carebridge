@@ -3,6 +3,7 @@ import { createServiceClient } from "@/lib/supabase/service";
 import { ensureProfessional } from "@/lib/onboarding/actions";
 import { pickQuestions } from "./selection";
 import { scorePercent, isPass, nextAttemptState, MAX_ATTEMPTS } from "./scoring";
+import { sendNotification } from "@/lib/notifications/send";
 
 const QUESTIONS_PER_ATTEMPT = 8;
 
@@ -128,6 +129,19 @@ export async function submitAttempt(
       .from("professionals")
       .update({ assessment_locked_until: state.lockUntil.toISOString().slice(0, 10) })
       .eq("id", professionalId);
+  }
+
+  const { data: profRow } = await admin
+    .from("professionals")
+    .select("user_id")
+    .eq("id", professionalId)
+    .single();
+  if (profRow?.user_id) {
+    await sendNotification("assessment_result", profRow.user_id, {
+      score,
+      passed: passed ? "yes" : "no",
+      attempt_number: attempt.attempt_number,
+    });
   }
 
   return {
