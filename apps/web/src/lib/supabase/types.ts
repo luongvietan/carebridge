@@ -1939,7 +1939,7 @@ export type Database = {
           p_charge: number
           p_currency: string
           p_fee_type: string
-          p_fee_value: number
+          p_fee_value: number | null
           p_payout: number
           p_role_id: string
         }
