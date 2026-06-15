@@ -33,5 +33,6 @@ export const ROLE_NAV: Record<AccountType, RoleNavItem[]> = {
     { href: "/admin/accounts", label: "Accounts" },
     { href: "/admin/rates", label: "Rates" },
     { href: "/admin/finance", label: "Finance" },
+    { href: "/admin/reports", label: "Reports" },
   ],
 };
