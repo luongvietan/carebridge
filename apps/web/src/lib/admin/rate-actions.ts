@@ -17,7 +17,7 @@ export async function amendRateCard(roleId: string, newRates: NewRate): Promise<
     p_charge: v.rate.clientChargeRate,
     p_payout: v.rate.professionalPayoutRate,
     p_fee_type: v.rate.platformFeeType,
-    p_fee_value: v.rate.platformFeeValue,
+    p_fee_value: v.rate.platformFeeValue ?? 0,
     p_currency: v.rate.currency,
     p_admin_id: adminId,
   });
