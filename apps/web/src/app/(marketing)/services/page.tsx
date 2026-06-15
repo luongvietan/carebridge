@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { CtaBanner } from "@/components/cta-banner";
+import { ImportantInfoCallout } from "@/components/important-info-callout";
 import { CtaPillLink } from "@/components/cta-pill-link";
 import { MarketingPageHero } from "@/components/marketing-page-hero";
 import { MarketingPageMotion } from "@/components/motion/marketing-page-motion";
 import { RoleCard } from "@/components/role-card";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteNav } from "@/components/site-nav";
-import { onboardingSteps, professionalRoles } from "@/data/marketing-copy";
+import { onboardingSteps, professionalRoles, supportedServices } from "@/data/marketing-copy";
 import { marketingImages } from "@/data/marketing-images";
 import {
   marketingCardShadow,
@@ -59,6 +60,31 @@ export default function ServicesPage() {
 
         <section className={`${marketingSection} pt-0`}>
           <div data-reveal className="text-center">
+            <h2 className={marketingHeading}>Services we support</h2>
+            <p className={`${marketingSubheading} max-w-2xl`}>
+              Engagements are limited to companionship and other non-regulated activities.
+              CareBridge Connect does not provide regulated personal care services.
+            </p>
+          </div>
+
+          <div data-reveal-stagger className="mx-auto mt-10 grid max-w-3xl gap-3 sm:grid-cols-2">
+            {supportedServices.map((service) => (
+              <div
+                key={service}
+                data-reveal-child
+                className={`rounded-2xl bg-white p-5 text-sm font-medium text-[#0c4a35] ${marketingCardShadow}`}
+              >
+                {service}
+              </div>
+            ))}
+          </div>
+          <p className="mx-auto mt-6 max-w-2xl text-center text-sm text-[#5b6a62]">
+            …and other non-regulated activities.
+          </p>
+        </section>
+
+        <section className={`${marketingSection} pt-0`}>
+          <div data-reveal className="text-center">
             <h2 className={marketingHeading}>How it works</h2>
             <p className={marketingSubheading}>
               From onboarding to booking — a clear path for professionals, private clients and
@@ -104,6 +130,8 @@ export default function ServicesPage() {
             </div>
           </div>
         </section>
+
+        <ImportantInfoCallout />
 
         <CtaBanner />
       </main>
