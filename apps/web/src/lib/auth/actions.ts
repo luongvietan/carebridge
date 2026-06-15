@@ -1,9 +1,16 @@
 "use server";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { registerSchema } from "@/lib/validation/auth";
 
 export type SignUpResult = { ok: true } | { error: string } | null;
+
+export async function signOut(): Promise<void> {
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  redirect("/login");
+}
 
 export async function signUp(_prev: SignUpResult, formData: FormData): Promise<SignUpResult> {
   const parsed = registerSchema.safeParse({

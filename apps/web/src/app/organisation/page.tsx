@@ -1,3 +1,4 @@
+import { DashboardGrid } from "@/components/dashboard-grid";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function OrganisationHome() {
@@ -5,11 +6,29 @@ export default async function OrganisationHome() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
   return (
-    <main className="mx-auto max-w-3xl p-8">
-      <h1 className="text-2xl font-bold">Organisation dashboard</h1>
-      <p className="mt-2 text-slate-600">Signed in as {user?.email}.</p>
-      <p className="mt-4 text-sm text-slate-500">Booking requests arrive in a later subsystem.</p>
+    <main className="mx-auto max-w-4xl px-4 py-10">
+      <p className="text-sm tracking-wide text-[#525252] uppercase">Organisation</p>
+      <h1 className="mt-1 text-3xl font-light">Dashboard</h1>
+      {user?.email && <p className="mt-2 text-sm text-[#525252]">Signed in as {user.email}</p>}
+
+      <DashboardGrid
+        cards={[
+          {
+            href: "/organisation/register",
+            title: "Your profile",
+            description: "Set up organisation details, contacts and billing information.",
+            cta: "Manage profile",
+          },
+          {
+            href: "/organisation/bookings",
+            title: "Bookings",
+            description: "Request staff cover and manage bookings across your sites.",
+            cta: "View bookings",
+          },
+        ]}
+      />
     </main>
   );
 }
