@@ -66,6 +66,8 @@ export async function recordPayout(bookingId: string): Promise<PayoutResult> {
 export async function markPayoutPaid(payoutId: string, method: string, reference: string): Promise<PayoutResult> {
   const adminId = await requireAdmin();
   if (!adminId) return { error: "Administrator access required." };
+  const ALLOWED_METHODS = ["bank_transfer", "bacs", "faster_payments", "cheque"];
+  if (!ALLOWED_METHODS.includes(method)) return { error: "Invalid payout method." };
   const admin = createServiceClient();
   const { data: payout } = await admin.from("payouts").select("id, status").eq("id", payoutId).single();
   if (!payout) return { error: "Payout not found." };

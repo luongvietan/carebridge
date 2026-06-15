@@ -25,33 +25,32 @@ export async function POST(req: NextRequest) {
   if (!status) return new Response("ignored", { status: 200 });
 
   const obj = event.data.object as unknown as Record<string, unknown>;
+  const metadata = obj.metadata as Record<string, string> | undefined;
+  const paymentIdMeta = metadata?.payment_id;
   const intentId =
-    (obj.payment_intent as string | undefined) ??
+    (typeof obj.payment_intent === "string" ? obj.payment_intent : undefined) ??
     (event.type.startsWith("payment_intent.") ? (obj.id as string) : undefined);
-  if (!intentId) return new Response("no intent", { status: 200 });
 
   const admin = createServiceClient();
-  const { data: payment } = await admin
-    .from("payments")
-    .select("id, status, payer_user_id, booking_id")
-    .eq("stripe_payment_intent_id", intentId)
-    .maybeSingle();
+  const sel = "id, status, payer_user_id, booking_id, stripe_payment_intent_id";
+  let payment: { id: string; status: string; payer_user_id: string | null; booking_id: string | null; stripe_payment_intent_id: string | null } | null = null;
+  if (paymentIdMeta) {
+    ({ data: payment } = await admin.from("payments").select(sel).eq("id", paymentIdMeta).maybeSingle());
+  } else if (intentId) {
+    ({ data: payment } = await admin.from("payments").select(sel).eq("stripe_payment_intent_id", intentId).maybeSingle());
+  }
   if (!payment) return new Response("no payment row", { status: 200 });
   if (payment.status === status) return new Response("already reconciled", { status: 200 });
 
-  const { error: updateErr } = await admin
-    .from("payments")
-    .update({ status, ...(status === "succeeded" ? { paid_at: new Date().toISOString() } : {}) })
-    .eq("id", payment.id);
+  const patch: { status: typeof status; paid_at?: string; stripe_payment_intent_id?: string } = { status };
+  if (status === "succeeded") patch.paid_at = new Date().toISOString();
+  if (intentId && !payment.stripe_payment_intent_id) patch.stripe_payment_intent_id = intentId;
+  const { error: updateErr } = await admin.from("payments").update(patch).eq("id", payment.id);
   if (updateErr) return new Response("db error", { status: 500 });
-  await admin.from("audit_log").insert({
-    actor_type: "system",
-    action: `payment.${status}`,
-    entity_type: "payment",
-    entity_id: payment.id,
-    summary: event.type,
-  });
 
+  await admin.from("audit_log").insert({
+    actor_type: "system", action: `payment.${status}`, entity_type: "payment", entity_id: payment.id, summary: event.type,
+  });
   if (status === "succeeded" && payment.payer_user_id) {
     await sendNotification("payment_receipt", payment.payer_user_id, { booking_id: payment.booking_id ?? "" });
   }

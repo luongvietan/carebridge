@@ -1,4 +1,6 @@
+import { redirect } from "next/navigation";
 import { createServiceClient } from "@/lib/supabase/service";
+import { requireAdmin } from "@/lib/auth/admin";
 import { RecordPayoutButton, MarkPayoutPaidForm } from "@/components/payout-actions";
 
 export const dynamic = "force-dynamic";
@@ -9,6 +11,7 @@ function formatMoney(amount: number | null | undefined) {
 }
 
 export default async function AdminPayoutsPage() {
+  if (!(await requireAdmin())) redirect("/login");
   const admin = createServiceClient();
 
   // 1. Completed bookings with a succeeded payment and NO payout yet.

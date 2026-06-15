@@ -1,4 +1,6 @@
+import { redirect } from "next/navigation";
 import { createServiceClient } from "@/lib/supabase/service";
+import { requireAdmin } from "@/lib/auth/admin";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +18,7 @@ export default async function AdminFinancePage({
 }: {
   searchParams: Promise<{ from?: string; to?: string }>;
 }) {
+  if (!(await requireAdmin())) redirect("/login");
   const { from, to } = await searchParams;
   const admin = createServiceClient();
 

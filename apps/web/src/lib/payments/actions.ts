@@ -79,7 +79,11 @@ export async function refundPayment(paymentId: string): Promise<PaymentActionRes
   if (payment.status !== "succeeded") return { error: "Only a succeeded payment can be refunded." };
   if (!payment.stripe_payment_intent_id) return { error: "No Stripe payment intent on this payment." };
 
-  await stripe().refunds.create({ payment_intent: payment.stripe_payment_intent_id });
+  try {
+    await stripe().refunds.create({ payment_intent: payment.stripe_payment_intent_id });
+  } catch (e) {
+    return { error: `Refund failed: ${(e as Error).message}` };
+  }
   await admin.from("audit_log").insert({ actor_user_id: adminId, actor_type: "admin", action: "payment.refund_requested", entity_type: "payment", entity_id: paymentId });
   return { ok: true };
 }

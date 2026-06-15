@@ -3,6 +3,7 @@ import { paymentStatusForEvent } from "./events";
 
 describe("paymentStatusForEvent", () => {
   it("maps success events to succeeded", () => {
+    expect(paymentStatusForEvent("checkout.session.completed")).toBe("succeeded");
     expect(paymentStatusForEvent("payment_intent.succeeded")).toBe("succeeded");
   });
   it("maps failure to failed and refund to refunded", () => {
@@ -11,6 +12,5 @@ describe("paymentStatusForEvent", () => {
   });
   it("returns null for unhandled events", () => {
     expect(paymentStatusForEvent("invoice.paid")).toBeNull();
-    expect(paymentStatusForEvent("checkout.session.completed")).toBeNull();
   });
 });

@@ -348,6 +348,68 @@ test("payout recording: admin records payout and marks it paid via UI", async ({
   await sb.auth.admin.deleteUser(pro.userId);
 });
 
+test("webhook: checkout.session.completed reconciles via metadata.payment_id and backfills intent id", async ({ request }) => {
+  const sb = service();
+  const stamp = Date.now() + 3;
+  const roleId = await rnRoleId(sb);
+  const client = await seedClient(sb, stamp);
+  const pro = await seedEligiblePro(sb, stamp + 1, roleId);
+  const csId = `cs_test_${stamp}`;
+  const intentId = `pi_cs_${stamp}`;
+
+  const booking = await seedBooking(sb, {
+    requesterUserId: client.userId,
+    privateClientId: client.clientId,
+    professionalRoleId: roleId,
+    proId: pro.proId,
+    initialStatus: "accepted",
+    locationAddress: `CheckoutTest ${stamp}`,
+  });
+
+  // Insert a payments row with stripe_payment_intent_id = null (intent not yet known at session creation)
+  const { data: pmtData, error: pmtErr } = await sb
+    .from("payments")
+    .insert({
+      booking_id: booking.id,
+      payer_user_id: client.userId,
+      stripe_payment_intent_id: null,
+      amount: Number(booking.total_payout),
+      status: "pending",
+    })
+    .select("id")
+    .single();
+  if (pmtErr || !pmtData) throw pmtErr ?? new Error("payments insert");
+  const paymentId = pmtData.id as string;
+
+  // POST a checkout.session.completed event with metadata.payment_id set
+  const { payload, header } = signedEvent("checkout.session.completed", {
+    id: csId,
+    payment_intent: intentId,
+    metadata: { payment_id: paymentId, booking_id: booking.id },
+  });
+  const res = await request.post("/api/stripe/webhook", {
+    headers: { "stripe-signature": header, "content-type": "application/json" },
+    data: payload,
+  });
+  expect(res.status()).toBe(200);
+
+  const { data: after } = await sb
+    .from("payments")
+    .select("status, paid_at, stripe_payment_intent_id")
+    .eq("id", paymentId)
+    .single();
+  expect(after?.status).toBe("succeeded");
+  expect(after?.paid_at).not.toBeNull();
+  // Intent id must have been backfilled from the event
+  expect(after?.stripe_payment_intent_id).toBe(intentId);
+
+  // Cleanup
+  await sb.from("payments").delete().eq("id", paymentId);
+  await sb.from("bookings").delete().eq("id", booking.id);
+  await sb.auth.admin.deleteUser(client.userId);
+  await sb.auth.admin.deleteUser(pro.userId);
+});
+
 test("webhook: charge.refunded sets payment status to refunded", async ({ request }) => {
   const sb = service();
   const stamp = Date.now() + 2;
