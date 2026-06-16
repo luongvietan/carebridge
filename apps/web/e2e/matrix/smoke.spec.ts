@@ -58,7 +58,7 @@ test("admin downloads a CSV export from the reports page", async ({ page }) => {
 
     const [download] = await Promise.all([
       page.waitForEvent("download"),
-      page.getByRole("link", { name: "CSV" }).first().click(),
+      page.getByRole("link", { name: "Download Professionals as CSV" }).click(),
     ]);
     expect(download.suggestedFilename()).toMatch(/^carebridge-.*\.csv$/);
   } finally {

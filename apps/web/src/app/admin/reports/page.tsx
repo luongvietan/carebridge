@@ -55,16 +55,31 @@ export default async function AdminReportsPage({
               </tr>
             </thead>
             <tbody className="divide-y divide-[#e0e0e0]">
-              {(Object.keys(DATASETS) as DatasetName[]).map((name) => (
-                <tr key={name}>
-                  <td className="p-3">{DATASETS[name].label}</td>
-                  <td className="p-3">
-                    <a className="text-[#198038] underline" href={`/api/export/${name}?format=csv`}>CSV</a>
-                    <span className="px-2 text-[#8c8c8c]">·</span>
-                    <a className="text-[#198038] underline" href={`/api/export/${name}?format=xlsx`}>Excel</a>
-                  </td>
-                </tr>
-              ))}
+              {(Object.keys(DATASETS) as DatasetName[]).map((name) => {
+                const label = DATASETS[name].label;
+                return (
+                  <tr key={name}>
+                    <td className="p-3">{label}</td>
+                    <td className="p-3">
+                      <a
+                        className="text-[#198038] underline"
+                        href={`/api/export/${name}?format=csv`}
+                        aria-label={`Download ${label} as CSV`}
+                      >
+                        CSV
+                      </a>
+                      <span className="px-2 text-[#8c8c8c]">·</span>
+                      <a
+                        className="text-[#198038] underline"
+                        href={`/api/export/${name}?format=xlsx`}
+                        aria-label={`Download ${label} as Excel`}
+                      >
+                        Excel
+                      </a>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

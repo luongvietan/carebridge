@@ -29,9 +29,9 @@
 
 ## Documentation delivered
 
-- [ ] `docs/DEPLOYMENT.md` — production runbook with actual refs/URLs filled in
-- [ ] `docs/USER_GUIDE.md` — role walkthroughs
-- [ ] Restore drill completed and logged in `docs/DEPLOYMENT.md`
+- [x] `docs/DEPLOYMENT.md` — runbook with hosted dev refs filled in; prod pending free-tier unblock
+- [x] `docs/USER_GUIDE.md` — role walkthroughs
+- [ ] Restore drill completed on **production** (partial verification on hosted dev 2026-06-16 — see DEPLOYMENT.md)
 
 ## Source code handover
 

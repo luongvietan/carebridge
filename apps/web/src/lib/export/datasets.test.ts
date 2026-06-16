@@ -22,6 +22,7 @@ describe("DATASETS", () => {
     for (const name of Object.keys(DATASETS) as DatasetName[]) {
       expect(DATASETS[name].view).toMatch(/^v_export_/);
       expect(DATASETS[name].columns.length).toBeGreaterThan(0);
+      expect(DATASETS[name].orderBy.column.length).toBeGreaterThan(0);
     }
   });
 });
