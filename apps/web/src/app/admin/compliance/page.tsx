@@ -50,21 +50,20 @@ export default async function AdminCompliancePage() {
     <main className="mx-auto max-w-4xl px-4 py-10">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm tracking-wide text-[#525252] uppercase">Admin</p>
-          <h1 className="mt-1 text-3xl font-light">Compliance</h1>
+          <h1 className="mt-1 text-3xl font-bold">Compliance</h1>
         </div>
         <RunSweepButton />
       </div>
 
       <section className="mt-10">
-        <h2 className="text-xl font-light">Documents awaiting review</h2>
+        <h2 className="text-xl font-bold">Documents awaiting review</h2>
         <ReviewQueue items={items} />
       </section>
 
       <section className="mt-12">
-        <h2 className="text-xl font-light">Compliance alerts</h2>
+        <h2 className="text-xl font-bold">Compliance alerts</h2>
         {alerts && alerts.length > 0 ? (
-          <ul className="mt-4 divide-y divide-[#e0e0e0] border border-[#e0e0e0] text-sm">
+          <ul className="mt-4 divide-y divide-[#dbe7e0] border border-[#dbe7e0] text-sm">
             {alerts.map((a) => (
               <li key={a.id} className="flex justify-between p-3">
                 <span>
@@ -73,30 +72,30 @@ export default async function AdminCompliancePage() {
                     {a.alert_type}
                   </span>
                 </span>
-                {a.due_date && <span className="text-[#8c8c8c]">due {a.due_date}</span>}
+                {a.due_date && <span className="text-[#7a8a81]">due {a.due_date}</span>}
               </li>
             ))}
           </ul>
         ) : (
-          <p className="mt-3 text-sm text-[#525252]">No active alerts.</p>
+          <p className="mt-3 text-sm text-[#5b6a62]">No active alerts.</p>
         )}
       </section>
 
       <section className="mt-12">
-        <h2 className="text-xl font-light">Non-compliant professionals</h2>
+        <h2 className="text-xl font-bold">Non-compliant professionals</h2>
         {nonCompliant && nonCompliant.length > 0 ? (
-          <ul className="mt-4 divide-y divide-[#e0e0e0] border border-[#e0e0e0] text-sm">
+          <ul className="mt-4 divide-y divide-[#dbe7e0] border border-[#dbe7e0] text-sm">
             {nonCompliant.map((p) => (
               <li key={p.id} className="flex justify-between p-3">
                 <span>{p.full_name}</span>
-                <span className="text-[#8c8c8c]">
+                <span className="text-[#7a8a81]">
                   {p.professional_status.replace(/_/g, " ")} · {p.compliance_status.replace(/_/g, " ")}
                 </span>
               </li>
             ))}
           </ul>
         ) : (
-          <p className="mt-3 text-sm text-[#525252]">All professionals are compliant.</p>
+          <p className="mt-3 text-sm text-[#5b6a62]">All professionals are compliant.</p>
         )}
       </section>
     </main>

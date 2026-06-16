@@ -9,9 +9,8 @@ export default async function OrganisationHome() {
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-10">
-      <p className="text-sm tracking-wide text-[#525252] uppercase">Organisation</p>
-      <h1 className="mt-1 text-3xl font-light">Dashboard</h1>
-      {user?.email && <p className="mt-2 text-sm text-[#525252]">Signed in as {user.email}</p>}
+      <h1 className="mt-1 text-3xl font-bold">Dashboard</h1>
+      {user?.email && <p className="mt-2 text-sm text-[#5b6a62]">Signed in as {user.email}</p>}
 
       <DashboardGrid
         cards={[

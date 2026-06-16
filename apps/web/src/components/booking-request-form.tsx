@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { createBooking } from "@/lib/bookings/actions";
 
 const field =
-  "mt-1 w-full rounded-none border-b border-[#8c8c8c] bg-[#f4f4f4] px-3 py-2 text-sm focus:border-[#198038] focus:outline-none";
+  "mt-1 w-full rounded-none border-b border-[#7a8a81] bg-[#f5f7f6] px-3 py-2 text-sm focus:border-[#198038] focus:outline-none";
 
 type Role = { id: string; name: string };
 

@@ -58,8 +58,7 @@ export default async function ClientBookingsPage() {
     <main className="mx-auto max-w-4xl px-4 py-10">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm tracking-wide text-[#525252] uppercase">Client</p>
-          <h1 className="mt-1 text-3xl font-light">Bookings</h1>
+          <h1 className="mt-1 text-3xl font-bold">Bookings</h1>
         </div>
         <Link
           href="/client/bookings/new"
@@ -70,9 +69,9 @@ export default async function ClientBookingsPage() {
       </div>
 
       {bookings && bookings.length > 0 ? (
-        <div className="mt-8 overflow-x-auto border border-[#e0e0e0]">
+        <div className="mt-8 overflow-x-auto border border-[#dbe7e0]">
           <table className="w-full text-sm">
-            <thead className="border-b border-[#e0e0e0] bg-[#f4f4f4] text-left">
+            <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left">
               <tr>
                 <th className="p-3 font-medium">Date</th>
                 <th className="p-3 font-medium">Role</th>
@@ -82,7 +81,7 @@ export default async function ClientBookingsPage() {
                 <th className="p-3 font-medium" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#e0e0e0]">
+            <tbody className="divide-y divide-[#dbe7e0]">
               {bookings.map((b) => {
                 const payStatus = paymentStatusByBooking.get(b.id) ?? null;
                 const needsPay = PAYABLE.has(b.status) && payStatus !== "succeeded";
@@ -91,18 +90,18 @@ export default async function ClientBookingsPage() {
                     <td className="p-3">{formatDate(b.scheduled_start)}</td>
                     <td className="p-3">{roleNames.get(b.professional_role_id) ?? b.professional_role_id}</td>
                     <td className="p-3">
-                      <span className="bg-[#f4f4f4] px-2 py-0.5 text-xs text-[#525252]">
+                      <span className="bg-[#f5f7f6] px-2 py-0.5 text-xs text-[#5b6a62]">
                         {b.status.replace(/_/g, " ")}
                       </span>
                     </td>
                     <td className="p-3">{formatMoney(b.total_client_charge)}</td>
                     <td className="p-3">
                       {payStatus ? (
-                        <span className="bg-[#f4f4f4] px-2 py-0.5 text-xs text-[#525252]">
+                        <span className="bg-[#f5f7f6] px-2 py-0.5 text-xs text-[#5b6a62]">
                           {payStatus.replace(/_/g, " ")}
                         </span>
                       ) : (
-                        <span className="text-[#525252]">—</span>
+                        <span className="text-[#5b6a62]">—</span>
                       )}
                     </td>
                     <td className="p-3 text-right">
@@ -118,7 +117,7 @@ export default async function ClientBookingsPage() {
           </table>
         </div>
       ) : (
-        <p className="mt-8 text-sm text-[#525252]">No bookings yet.</p>
+        <p className="mt-8 text-sm text-[#5b6a62]">No bookings yet.</p>
       )}
     </main>
   );

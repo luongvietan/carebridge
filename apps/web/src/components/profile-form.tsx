@@ -4,7 +4,7 @@ import Link from "next/link";
 import { saveProfile, type ProfileResult } from "@/lib/onboarding/actions";
 import { OnboardingSteps } from "@/components/onboarding-steps";
 
-const field = "mt-1 w-full rounded-none border-b border-[#8c8c8c] bg-[#f4f4f4] px-3 py-2 text-sm focus:border-[#198038] focus:outline-none";
+const field = "mt-1 w-full rounded-none border-b border-[#7a8a81] bg-[#f5f7f6] px-3 py-2 text-sm focus:border-[#198038] focus:outline-none";
 
 type Role = { id: string; name: string };
 type Current = {
@@ -28,8 +28,8 @@ export function ProfileForm({ roles, current }: { roles: Role[]; current: Curren
     return (
       <div>
         <OnboardingSteps current={3} />
-        <div className="mt-8 border border-[#e0e0e0] p-6">
-          <h2 className="text-xl font-light">Profile saved</h2>
+        <div className="mt-8 rounded-2xl border border-[#dbe7e0] bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
+          <h2 className="text-xl font-bold">Profile saved</h2>
           <Link
             href="/professional/onboarding/documents"
             className="mt-6 inline-block bg-[#198038] px-4 py-3 text-sm text-white hover:bg-[#0e6027]"

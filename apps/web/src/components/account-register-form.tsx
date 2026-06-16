@@ -8,7 +8,7 @@ import {
 } from "@/lib/accounts/actions";
 
 const field =
-  "mt-1 w-full rounded-none border-b border-[#8c8c8c] bg-[#f4f4f4] px-3 py-2 text-sm focus:border-[#198038] focus:outline-none";
+  "mt-1 w-full rounded-none border-b border-[#7a8a81] bg-[#f5f7f6] px-3 py-2 text-sm focus:border-[#198038] focus:outline-none";
 
 type Variant = "client" | "organisation";
 
@@ -19,8 +19,8 @@ export function AccountRegisterForm({ variant }: { variant: Variant }) {
 
   if (state && "ok" in state) {
     return (
-      <div className="border border-[#e0e0e0] p-6">
-        <h2 className="text-xl font-light">Profile saved — you can now create bookings</h2>
+      <div className="rounded-2xl border border-[#dbe7e0] bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
+        <h2 className="text-xl font-bold">Profile saved — you can now create bookings</h2>
         <Link
           href={bookingsHref}
           className="mt-6 inline-block bg-[#198038] px-4 py-3 text-sm text-white hover:bg-[#0e6027]"

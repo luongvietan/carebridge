@@ -61,7 +61,7 @@ function AssignControl({
   }
 
   if (eligible.length === 0) {
-    return <span className="text-xs text-[#525252]">No eligible professionals</span>;
+    return <span className="text-xs text-[#5b6a62]">No eligible professionals</span>;
   }
 
   return (
@@ -71,7 +71,7 @@ function AssignControl({
         <select
           value={selected}
           onChange={(e) => setSelected(e.target.value)}
-          className="border-b border-[#8c8c8c] bg-[#f4f4f4] px-2 py-1 text-sm focus:border-[#198038] focus:outline-none"
+          className="border-b border-[#7a8a81] bg-[#f5f7f6] px-2 py-1 text-sm focus:border-[#198038] focus:outline-none"
         >
           {eligible.map((p) => (
             <option key={p.id} value={p.id}>
@@ -171,7 +171,7 @@ function NoShowControl({ bookingId, onDone }: { bookingId: string; onDone: () =>
         type="button"
         onClick={handleNoShow}
         disabled={busy}
-        className="border border-[#8c8c8c] px-3 py-1.5 text-sm hover:bg-[#f4f4f4] disabled:opacity-50"
+        className="border border-[#7a8a81] px-3 py-1.5 text-sm hover:bg-[#f5f7f6] disabled:opacity-50"
       >
         {busy ? "Saving…" : "No-show"}
       </button>
@@ -189,9 +189,9 @@ export function AdminBookings({
   const router = useRouter();
 
   return (
-    <div className="mt-8 overflow-x-auto border border-[#e0e0e0]">
+    <div className="mt-8 overflow-x-auto border border-[#dbe7e0]">
       <table className="w-full text-sm">
-        <thead className="border-b border-[#e0e0e0] bg-[#f4f4f4] text-left">
+        <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left">
           <tr>
             <th className="p-3 font-medium">Date</th>
             <th className="p-3 font-medium">Role</th>
@@ -201,14 +201,14 @@ export function AdminBookings({
             <th className="p-3 font-medium">Actions</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-[#e0e0e0]">
+        <tbody className="divide-y divide-[#dbe7e0]">
           {bookings.map((b) => (
             <tr key={b.id}>
               <td className="p-3">{formatDate(b.scheduled_start)}</td>
               <td className="p-3">{b.professional_roles?.name ?? b.professional_role_id}</td>
               <td className="p-3">{b.booking_type.replace(/_/g, " ")}</td>
               <td className="p-3">
-                <span className="bg-[#f4f4f4] px-2 py-0.5 text-xs text-[#525252]">
+                <span className="bg-[#f5f7f6] px-2 py-0.5 text-xs text-[#5b6a62]">
                   {b.status.replace(/_/g, " ")}
                 </span>
               </td>
@@ -237,7 +237,7 @@ export function AdminBookings({
         </tbody>
       </table>
       {bookings.length === 0 && (
-        <p className="p-6 text-sm text-[#525252]">No bookings yet.</p>
+        <p className="p-6 text-sm text-[#5b6a62]">No bookings yet.</p>
       )}
     </div>
   );

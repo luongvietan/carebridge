@@ -6,9 +6,9 @@ import { amendRateCard } from "@/lib/admin/rate-actions";
 import type { PlatformFeeType } from "@/lib/admin/rates";
 
 const INPUT_CLASS =
-  "border-b border-[#8c8c8c] bg-[#f4f4f4] px-2 py-1 text-sm focus:border-[#198038] focus:outline-none w-full";
+  "border-b border-[#7a8a81] bg-[#f5f7f6] px-2 py-1 text-sm focus:border-[#198038] focus:outline-none w-full";
 const SELECT_CLASS =
-  "border-b border-[#8c8c8c] bg-[#f4f4f4] px-2 py-1 text-sm focus:border-[#198038] focus:outline-none w-full";
+  "border-b border-[#7a8a81] bg-[#f5f7f6] px-2 py-1 text-sm focus:border-[#198038] focus:outline-none w-full";
 
 type Props = {
   roleId: string;
@@ -58,12 +58,12 @@ export function AmendRateForm({ roleId, roleName }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 text-sm">
-      <p className="text-[#525252]">
-        Amend rates for <span className="font-medium text-[#161616]">{roleName}</span>
+      <p className="text-[#5b6a62]">
+        Amend rates for <span className="font-medium text-[#0f261c]">{roleName}</span>
       </p>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <label className="flex flex-col gap-1 text-[#525252]">
+        <label className="flex flex-col gap-1 text-[#5b6a62]">
           Client charge rate (£/hr)
           <input
             type="number"
@@ -76,7 +76,7 @@ export function AmendRateForm({ roleId, roleName }: Props) {
           />
         </label>
 
-        <label className="flex flex-col gap-1 text-[#525252]">
+        <label className="flex flex-col gap-1 text-[#5b6a62]">
           Professional payout rate (£/hr)
           <input
             type="number"
@@ -89,7 +89,7 @@ export function AmendRateForm({ roleId, roleName }: Props) {
           />
         </label>
 
-        <label className="flex flex-col gap-1 text-[#525252]">
+        <label className="flex flex-col gap-1 text-[#5b6a62]">
           Platform fee type
           <select
             value={platformFeeType}
@@ -103,7 +103,7 @@ export function AmendRateForm({ roleId, roleName }: Props) {
         </label>
 
         {showFeeValue && (
-          <label className="flex flex-col gap-1 text-[#525252]">
+          <label className="flex flex-col gap-1 text-[#5b6a62]">
             Platform fee value
             <input
               type="number"
@@ -117,7 +117,7 @@ export function AmendRateForm({ roleId, roleName }: Props) {
           </label>
         )}
 
-        <label className="flex flex-col gap-1 text-[#525252]">
+        <label className="flex flex-col gap-1 text-[#5b6a62]">
           Currency
           <input
             type="text"

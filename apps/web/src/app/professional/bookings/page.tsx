@@ -34,8 +34,7 @@ export default async function ProfessionalBookingsPage() {
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-10">
-      <p className="text-sm tracking-wide text-[#525252] uppercase">Professional</p>
-      <h1 className="mt-1 text-3xl font-light">Bookings</h1>
+      <h1 className="mt-1 text-3xl font-bold">Bookings</h1>
       <div className="mt-10">
         <ProfessionalBookings open={open} mine={mine} eligible={!!prof?.can_accept_bookings} />
       </div>

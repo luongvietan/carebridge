@@ -3,7 +3,7 @@ const STEPS = ["Eligibility", "Assessment", "Profile", "Documents"];
 
 export function OnboardingSteps({ current }: { current: number }) {
   return (
-    <ol className="flex flex-wrap gap-px border border-[#e0e0e0] bg-[#e0e0e0] text-sm">
+    <ol className="flex flex-wrap gap-px border border-[#dbe7e0] bg-[#dbe7e0] text-sm">
       {STEPS.map((label, i) => {
         const step = i + 1;
         const active = step === current;
@@ -12,7 +12,7 @@ export function OnboardingSteps({ current }: { current: number }) {
           <li
             key={label}
             className={`flex-1 px-4 py-3 ${
-              active ? "bg-white font-semibold text-[#198038]" : done ? "bg-white text-[#161616]" : "bg-[#f4f4f4] text-[#8c8c8c]"
+              active ? "bg-white font-semibold text-[#198038]" : done ? "bg-white text-[#0f261c]" : "bg-[#f5f7f6] text-[#7a8a81]"
             }`}
           >
             <span className="tabular-nums">{done ? "✓" : step}.</span> {label}

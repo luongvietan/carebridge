@@ -3,7 +3,7 @@ import { useActionState } from "react";
 import { savePayoutDetails, type PayoutResult } from "@/lib/payouts/actions";
 
 const field =
-  "mt-1 w-full rounded-none border-b border-[#8c8c8c] bg-[#f4f4f4] px-3 py-2 text-sm focus:border-[#198038] focus:outline-none";
+  "mt-1 w-full rounded-none border-b border-[#7a8a81] bg-[#f5f7f6] px-3 py-2 text-sm focus:border-[#198038] focus:outline-none";
 
 export function PayoutDetailsForm({ last4 }: { last4: string | null }) {
   const [state, action, pending] = useActionState<PayoutResult, FormData>(
@@ -28,7 +28,7 @@ export function PayoutDetailsForm({ last4 }: { last4: string | null }) {
   return (
     <form action={action} className="mt-8 space-y-4">
       {last4 !== null && (
-        <p className="text-sm text-[#525252]">
+        <p className="text-sm text-[#5b6a62]">
           Current account ending ••••{last4}
         </p>
       )}

@@ -33,21 +33,21 @@ export function ReviewQueue({ items }: { items: ReviewItem[] }) {
   }
 
   if (items.length === 0) {
-    return <p className="mt-6 text-sm text-[#525252]">No documents are awaiting review.</p>;
+    return <p className="mt-6 text-sm text-[#5b6a62]">No documents are awaiting review.</p>;
   }
 
   return (
     <div className="mt-6">
       {error && <p className="mb-3 text-sm text-[#da1e28]">{error}</p>}
-      <div className="divide-y divide-[#e0e0e0] border border-[#e0e0e0]">
+      <div className="divide-y divide-[#dbe7e0] border border-[#dbe7e0]">
         {items.map((it) => (
           <div key={it.documentId} className="flex flex-wrap items-center justify-between gap-3 p-4">
             <div className="text-sm">
               <span className="font-semibold">{it.professionalName}</span>
-              <span className="text-[#525252]"> — {it.docTypeName}</span>
-              {it.referenceNumber && <span className="text-[#8c8c8c]"> · ref {it.referenceNumber}</span>}
-              {it.expiryDate && <span className="text-[#8c8c8c]"> · expires {it.expiryDate}</span>}
-              <span className="ml-2 bg-[#f4f4f4] px-2 py-0.5 text-xs text-[#525252]">
+              <span className="text-[#5b6a62]"> — {it.docTypeName}</span>
+              {it.referenceNumber && <span className="text-[#7a8a81]"> · ref {it.referenceNumber}</span>}
+              {it.expiryDate && <span className="text-[#7a8a81]"> · expires {it.expiryDate}</span>}
+              <span className="ml-2 bg-[#f5f7f6] px-2 py-0.5 text-xs text-[#5b6a62]">
                 {it.status.replace(/_/g, " ")}
               </span>
             </div>
@@ -67,7 +67,7 @@ export function ReviewQueue({ items }: { items: ReviewItem[] }) {
               <button
                 onClick={() => decide(it.documentId, "further_info_required")}
                 disabled={busy === it.documentId}
-                className="border border-[#8c8c8c] px-3 py-1.5 hover:bg-[#f4f4f4] disabled:opacity-50"
+                className="border border-[#7a8a81] px-3 py-1.5 hover:bg-[#f5f7f6] disabled:opacity-50"
               >
                 Request info
               </button>

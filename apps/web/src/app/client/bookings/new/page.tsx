@@ -14,9 +14,8 @@ export default async function ClientNewBookingPage() {
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-10">
-      <p className="text-sm tracking-wide text-[#525252] uppercase">Client</p>
-      <h1 className="mt-1 text-3xl font-light">New booking</h1>
-      <p className="mt-2 text-sm text-[#525252]">
+      <h1 className="mt-1 text-3xl font-bold">New booking</h1>
+      <p className="mt-2 text-sm text-[#5b6a62]">
         <Link href="/client/bookings" className="text-[#198038] underline">
           ← Back to bookings
         </Link>

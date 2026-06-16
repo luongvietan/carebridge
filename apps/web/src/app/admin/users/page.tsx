@@ -176,17 +176,16 @@ export default async function AdminUsersPage({
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-10">
-      <p className="text-sm tracking-wide text-[#525252] uppercase">Admin</p>
-      <h1 className="mt-1 text-3xl font-light">Professionals</h1>
-      <p className="mt-2 text-sm text-[#525252]">
+      <h1 className="mt-1 text-3xl font-bold">Professionals</h1>
+      <p className="mt-2 text-sm text-[#5b6a62]">
         Search and filter professionals by status, location and compliance.
       </p>
 
       <UserFilters roles={roles ?? []} />
 
-      <div className="mt-8 overflow-x-auto border border-[#e0e0e0]">
+      <div className="mt-8 overflow-x-auto border border-[#dbe7e0]">
         <table className="w-full text-sm">
-          <thead className="border-b border-[#e0e0e0] bg-[#f4f4f4] text-left">
+          <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left">
             <tr>
               <th className="p-3 font-medium">Name</th>
               <th className="p-3 font-medium">Email</th>
@@ -196,7 +195,7 @@ export default async function AdminUsersPage({
               <th className="p-3 font-medium">Account</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#e0e0e0]">
+          <tbody className="divide-y divide-[#dbe7e0]">
             {professionals.map((prof) => (
               <tr key={prof.id}>
                 <td className="p-3">
@@ -210,17 +209,17 @@ export default async function AdminUsersPage({
                 <td className="p-3">{prof.users?.email ?? "—"}</td>
                 <td className="p-3">{prof.professional_roles?.name ?? "—"}</td>
                 <td className="p-3">
-                  <span className="bg-[#f4f4f4] px-2 py-0.5 text-xs text-[#525252]">
+                  <span className="bg-[#f5f7f6] px-2 py-0.5 text-xs text-[#5b6a62]">
                     {formatLabel(prof.professional_status)}
                   </span>
                 </td>
                 <td className="p-3">
-                  <span className="bg-[#f4f4f4] px-2 py-0.5 text-xs text-[#525252]">
+                  <span className="bg-[#f5f7f6] px-2 py-0.5 text-xs text-[#5b6a62]">
                     {formatLabel(prof.compliance_status)}
                   </span>
                 </td>
                 <td className="p-3">
-                  <span className="bg-[#f4f4f4] px-2 py-0.5 text-xs text-[#525252]">
+                  <span className="bg-[#f5f7f6] px-2 py-0.5 text-xs text-[#5b6a62]">
                     {prof.users?.account_status ? formatLabel(prof.users.account_status) : "—"}
                   </span>
                 </td>
@@ -229,7 +228,7 @@ export default async function AdminUsersPage({
           </tbody>
         </table>
         {professionals.length === 0 && (
-          <p className="p-6 text-sm text-[#525252]">No professionals match these filters.</p>
+          <p className="p-6 text-sm text-[#5b6a62]">No professionals match these filters.</p>
         )}
       </div>
     </main>

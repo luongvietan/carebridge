@@ -21,9 +21,9 @@ export default async function DocumentsPage() {
     return (
       <div>
         <OnboardingSteps current={4} />
-        <div className="mt-8 border border-[#e0e0e0] p-6">
-          <h2 className="text-xl font-light">Complete your profile first</h2>
-          <p className="mt-2 text-sm text-[#525252]">
+        <div className="mt-8 rounded-2xl border border-[#dbe7e0] bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
+          <h2 className="text-xl font-bold">Complete your profile first</h2>
+          <p className="mt-2 text-sm text-[#5b6a62]">
             We need your professional role to know which documents are required.
           </p>
           <Link

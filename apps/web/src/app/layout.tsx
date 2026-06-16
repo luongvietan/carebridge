@@ -5,7 +5,7 @@ import "./globals.css";
 
 const plex = IBM_Plex_Sans({
   subsets: ["latin"],
-  weight: ["300", "400", "600"],
+  weight: ["400", "500", "600", "700"],
   variable: "--font-plex",
 });
 
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={`${plex.className} min-h-screen bg-white text-[#161616] antialiased`}>
+      <body className={`${plex.className} min-h-screen bg-white text-[#0f261c] antialiased`}>
         {children}
       </body>
     </html>

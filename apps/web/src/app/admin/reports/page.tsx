@@ -39,22 +39,21 @@ export default async function AdminReportsPage({
   return (
     <main className="mx-auto max-w-4xl px-4 py-10">
       <div>
-        <p className="text-sm tracking-wide text-[#525252] uppercase">Admin</p>
-        <h1 className="mt-1 text-3xl font-light">Reports &amp; exports</h1>
+        <h1 className="mt-1 text-3xl font-bold">Reports &amp; exports</h1>
       </div>
 
       <section className="mt-8">
-        <h2 className="text-xl font-light">Data exports</h2>
-        <p className="mt-1 text-sm text-[#525252]">Download any dataset as CSV or Excel.</p>
-        <div className="mt-4 overflow-x-auto border border-[#e0e0e0]">
+        <h2 className="text-xl font-bold">Data exports</h2>
+        <p className="mt-1 text-sm text-[#5b6a62]">Download any dataset as CSV or Excel.</p>
+        <div className="mt-4 overflow-x-auto border border-[#dbe7e0]">
           <table className="w-full text-sm">
-            <thead className="border-b border-[#e0e0e0] bg-[#f4f4f4] text-left">
+            <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left">
               <tr>
                 <th className="p-3 font-medium">Dataset</th>
                 <th className="p-3 font-medium">Download</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#e0e0e0]">
+            <tbody className="divide-y divide-[#dbe7e0]">
               {(Object.keys(DATASETS) as DatasetName[]).map((name) => {
                 const label = DATASETS[name].label;
                 return (
@@ -68,7 +67,7 @@ export default async function AdminReportsPage({
                       >
                         CSV
                       </a>
-                      <span className="px-2 text-[#8c8c8c]">·</span>
+                      <span className="px-2 text-[#7a8a81]">·</span>
                       <a
                         className="text-[#198038] underline"
                         href={`/api/export/${name}?format=xlsx`}
@@ -86,20 +85,20 @@ export default async function AdminReportsPage({
       </section>
 
       <section className="mt-12">
-        <h2 className="text-xl font-light">Audit report</h2>
+        <h2 className="text-xl font-bold">Audit report</h2>
         <form method="GET" className="mt-4 flex flex-wrap items-center gap-3 text-sm">
-          <label className="flex items-center gap-1 text-[#525252]">
+          <label className="flex items-center gap-1 text-[#5b6a62]">
             From<input type="date" name="from" defaultValue={from ?? ""}
-              className="ml-1 border-b border-[#8c8c8c] bg-transparent px-1 py-0.5 focus:border-[#198038] focus:outline-none" />
+              className="ml-1 border-b border-[#7a8a81] bg-transparent px-1 py-0.5 focus:border-[#198038] focus:outline-none" />
           </label>
-          <label className="flex items-center gap-1 text-[#525252]">
+          <label className="flex items-center gap-1 text-[#5b6a62]">
             To<input type="date" name="to" defaultValue={to ?? ""}
-              className="ml-1 border-b border-[#8c8c8c] bg-transparent px-1 py-0.5 focus:border-[#198038] focus:outline-none" />
+              className="ml-1 border-b border-[#7a8a81] bg-transparent px-1 py-0.5 focus:border-[#198038] focus:outline-none" />
           </label>
           <input type="text" name="entity_type" placeholder="Entity type" defaultValue={entity_type ?? ""}
-            className="border-b border-[#8c8c8c] bg-transparent px-1 py-0.5 focus:border-[#198038] focus:outline-none" />
+            className="border-b border-[#7a8a81] bg-transparent px-1 py-0.5 focus:border-[#198038] focus:outline-none" />
           <input type="text" name="actor_type" placeholder="Actor type" defaultValue={actor_type ?? ""}
-            className="border-b border-[#8c8c8c] bg-transparent px-1 py-0.5 focus:border-[#198038] focus:outline-none" />
+            className="border-b border-[#7a8a81] bg-transparent px-1 py-0.5 focus:border-[#198038] focus:outline-none" />
           <button type="submit" className="bg-[#198038] px-3 py-1.5 text-white hover:bg-[#0e6027]">Filter</button>
         </form>
 
@@ -109,9 +108,9 @@ export default async function AdminReportsPage({
         </div>
 
         {auditRows && auditRows.length > 0 ? (
-          <div className="mt-4 overflow-x-auto border border-[#e0e0e0]">
+          <div className="mt-4 overflow-x-auto border border-[#dbe7e0]">
             <table className="w-full text-sm">
-              <thead className="border-b border-[#e0e0e0] bg-[#f4f4f4] text-left">
+              <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left">
                 <tr>
                   <th className="p-3 font-medium">When</th>
                   <th className="p-3 font-medium">Actor</th>
@@ -120,21 +119,21 @@ export default async function AdminReportsPage({
                   <th className="p-3 font-medium">Summary</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#e0e0e0]">
+              <tbody className="divide-y divide-[#dbe7e0]">
                 {auditRows.map((a) => (
                   <tr key={String(a.id)}>
                     <td className="p-3">{formatDate(a.occurred_at as string)}</td>
                     <td className="p-3">{a.actor_type as string}</td>
                     <td className="p-3">{a.action as string}</td>
-                    <td className="p-3 text-[#525252]">{a.entity_type as string}</td>
-                    <td className="p-3 text-[#525252]">{(a.summary as string) ?? "—"}</td>
+                    <td className="p-3 text-[#5b6a62]">{a.entity_type as string}</td>
+                    <td className="p-3 text-[#5b6a62]">{(a.summary as string) ?? "—"}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         ) : (
-          <p className="mt-3 text-sm text-[#525252]">No audit entries match.</p>
+          <p className="mt-3 text-sm text-[#5b6a62]">No audit entries match.</p>
         )}
       </section>
     </main>

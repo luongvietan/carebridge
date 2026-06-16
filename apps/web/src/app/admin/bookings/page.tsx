@@ -19,8 +19,7 @@ export default async function AdminBookingsPage() {
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-10">
-      <p className="text-sm tracking-wide text-[#525252] uppercase">Admin</p>
-      <h1 className="mt-1 text-3xl font-light">Bookings</h1>
+      <h1 className="mt-1 text-3xl font-bold">Bookings</h1>
       <AdminBookings bookings={bookings ?? []} professionals={pros ?? []} />
     </main>
   );

@@ -13,22 +13,22 @@ export type DocItem = {
 
 const STATUS_STYLE: Record<string, string> = {
   approved: "bg-[#defbe6] text-[#0e6027]",
-  pending_review: "bg-[#f4f4f4] text-[#525252]",
+  pending_review: "bg-[#f5f7f6] text-[#5b6a62]",
   further_info_required: "bg-[#fcf4d6] text-[#684e1b]",
   rejected: "bg-[#fff1f1] text-[#a2191f]",
   expired: "bg-[#fff1f1] text-[#a2191f]",
 };
 
 function Badge({ status }: { status: string | null }) {
-  if (!status) return <span className="bg-[#f4f4f4] px-2 py-1 text-xs text-[#8c8c8c]">Not uploaded</span>;
+  if (!status) return <span className="bg-[#f5f7f6] px-2 py-1 text-xs text-[#7a8a81]">Not uploaded</span>;
   return (
-    <span className={`px-2 py-1 text-xs ${STATUS_STYLE[status] ?? "bg-[#f4f4f4] text-[#525252]"}`}>
+    <span className={`px-2 py-1 text-xs ${STATUS_STYLE[status] ?? "bg-[#f5f7f6] text-[#5b6a62]"}`}>
       {status.replace(/_/g, " ")}
     </span>
   );
 }
 
-const field = "rounded-none border-b border-[#8c8c8c] bg-[#f4f4f4] px-2 py-1.5 text-sm focus:border-[#198038] focus:outline-none";
+const field = "rounded-none border-b border-[#7a8a81] bg-[#f5f7f6] px-2 py-1.5 text-sm focus:border-[#198038] focus:outline-none";
 
 export function DocumentUploader({ items }: { items: DocItem[] }) {
   const router = useRouter();
@@ -52,13 +52,13 @@ export function DocumentUploader({ items }: { items: DocItem[] }) {
   return (
     <div>
       <OnboardingSteps current={4} />
-      <p className="mt-8 text-sm text-[#525252]">
+      <p className="mt-8 text-sm text-[#5b6a62]">
         Upload each required document. Critical documents are checked by an administrator before
         you can accept bookings.
       </p>
       {error && <p className="mt-3 text-sm text-[#da1e28]">{error}</p>}
 
-      <div className="mt-6 divide-y divide-[#e0e0e0] border border-[#e0e0e0]">
+      <div className="mt-6 divide-y divide-[#dbe7e0] border border-[#dbe7e0]">
         {items.map((item) => (
           <div key={item.typeId} className="p-4">
             <div className="flex items-center justify-between">
@@ -71,14 +71,14 @@ export function DocumentUploader({ items }: { items: DocItem[] }) {
             <form onSubmit={(e) => onUpload(e, item.typeId)} className="mt-3 flex flex-wrap items-end gap-3">
               <input type="file" name="file" required className="text-sm" />
               <input name="referenceNumber" placeholder="Reference no. (optional)" className={field} />
-              <label className="text-xs text-[#525252]">
+              <label className="text-xs text-[#5b6a62]">
                 Expiry
                 <input type="date" name="expiryDate" className={`${field} ml-2`} />
               </label>
               <button
                 type="submit"
                 disabled={busy === item.typeId}
-                className="bg-[#161616] px-3 py-2 text-sm text-white hover:bg-[#393939] disabled:opacity-50"
+                className="bg-[#0f261c] px-3 py-2 text-sm text-white hover:bg-[#33433a] disabled:opacity-50"
               >
                 {busy === item.typeId ? "Uploading…" : item.status ? "Replace" : "Upload"}
               </button>

@@ -72,7 +72,7 @@ function BookingActions({
           type="button"
           onClick={handleDecline}
           disabled={busy !== null}
-          className="border border-[#8c8c8c] px-3 py-1.5 text-sm hover:bg-[#f4f4f4] disabled:opacity-50"
+          className="border border-[#7a8a81] px-3 py-1.5 text-sm hover:bg-[#f5f7f6] disabled:opacity-50"
         >
           {busy === "decline" ? "Declining…" : "Decline"}
         </button>
@@ -118,15 +118,15 @@ function BookingTable({ rows, showActions, showComplete, eligible, onRefresh }: 
   onRefresh: () => void;
 }) {
   if (rows.length === 0) {
-    return <p className="mt-3 text-sm text-[#525252]">None.</p>;
+    return <p className="mt-3 text-sm text-[#5b6a62]">None.</p>;
   }
 
   const hasActionsCol = showActions || showComplete;
 
   return (
-    <div className="mt-4 overflow-x-auto border border-[#e0e0e0]">
+    <div className="mt-4 overflow-x-auto border border-[#dbe7e0]">
       <table className="w-full text-sm">
-        <thead className="border-b border-[#e0e0e0] bg-[#f4f4f4] text-left">
+        <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left">
           <tr>
             <th className="p-3 font-medium">Start</th>
             <th className="p-3 font-medium">Location</th>
@@ -135,13 +135,13 @@ function BookingTable({ rows, showActions, showComplete, eligible, onRefresh }: 
             {hasActionsCol && <th className="p-3 font-medium" />}
           </tr>
         </thead>
-        <tbody className="divide-y divide-[#e0e0e0]">
+        <tbody className="divide-y divide-[#dbe7e0]">
           {rows.map((b) => (
             <tr key={b.id}>
               <td className="p-3">{formatDate(b.scheduled_start)}</td>
               <td className="p-3">{b.location_address}</td>
               <td className="p-3">
-                <span className="bg-[#f4f4f4] px-2 py-0.5 text-xs text-[#525252]">
+                <span className="bg-[#f5f7f6] px-2 py-0.5 text-xs text-[#5b6a62]">
                   {b.status.replace(/_/g, " ")}
                 </span>
               </td>
@@ -180,17 +180,17 @@ export function ProfessionalBookings({
   return (
     <div>
       <section>
-        <h2 className="text-xl font-light">Open bookings</h2>
+        <h2 className="text-xl font-bold">Open bookings</h2>
         <BookingTable rows={open} showActions eligible={eligible} onRefresh={() => router.refresh()} />
       </section>
 
       <section className="mt-12">
-        <h2 className="text-xl font-light">My bookings</h2>
+        <h2 className="text-xl font-bold">My bookings</h2>
         <BookingTable rows={active} showComplete onRefresh={() => router.refresh()} />
       </section>
 
       <section className="mt-12">
-        <h2 className="text-xl font-light">History</h2>
+        <h2 className="text-xl font-bold">History</h2>
         <BookingTable rows={history} onRefresh={() => router.refresh()} />
       </section>
     </div>

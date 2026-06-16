@@ -10,9 +10,9 @@ import {
 } from "@/lib/admin/status-machine";
 
 const INPUT_CLASS =
-  "border-b border-[#8c8c8c] bg-[#f4f4f4] px-2 py-1 text-sm focus:border-[#198038] focus:outline-none w-full";
+  "border-b border-[#7a8a81] bg-[#f5f7f6] px-2 py-1 text-sm focus:border-[#198038] focus:outline-none w-full";
 const SELECT_CLASS =
-  "border-b border-[#8c8c8c] bg-[#f4f4f4] px-2 py-1 text-sm focus:border-[#198038] focus:outline-none w-full";
+  "border-b border-[#7a8a81] bg-[#f5f7f6] px-2 py-1 text-sm focus:border-[#198038] focus:outline-none w-full";
 
 const REASON_CODES = [
   "last_minute_cancellation",
@@ -65,7 +65,7 @@ export function StatusActionForm({ professionalId, currentStatus }: Props) {
 
   if (actions.length === 0) {
     return (
-      <p className="text-sm text-[#525252]">
+      <p className="text-sm text-[#5b6a62]">
         No status actions are available for this professional.
       </p>
     );
@@ -110,7 +110,7 @@ export function StatusActionForm({ professionalId, currentStatus }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 text-sm">
-      <label className="flex flex-col gap-1 text-[#525252]">
+      <label className="flex flex-col gap-1 text-[#5b6a62]">
         Action
         <select
           value={action}
@@ -126,7 +126,7 @@ export function StatusActionForm({ professionalId, currentStatus }: Props) {
         </select>
       </label>
 
-      <label className="flex flex-col gap-1 text-[#525252]">
+      <label className="flex flex-col gap-1 text-[#5b6a62]">
         Reason code{isPunitive ? " (required)" : ""}
         <select
           value={reasonCode}
@@ -143,7 +143,7 @@ export function StatusActionForm({ professionalId, currentStatus }: Props) {
         </select>
       </label>
 
-      <label className="flex flex-col gap-1 text-[#525252]">
+      <label className="flex flex-col gap-1 text-[#5b6a62]">
         Reason text
         <textarea
           value={reasonText}
@@ -154,7 +154,7 @@ export function StatusActionForm({ professionalId, currentStatus }: Props) {
         />
       </label>
 
-      <label className="flex flex-col gap-1 text-[#525252]">
+      <label className="flex flex-col gap-1 text-[#5b6a62]">
         Internal notes
         <textarea
           value={internalNotes}
@@ -164,7 +164,7 @@ export function StatusActionForm({ professionalId, currentStatus }: Props) {
         />
       </label>
 
-      <label className="flex flex-col gap-1 text-[#525252]">
+      <label className="flex flex-col gap-1 text-[#5b6a62]">
         Review date
         <input
           type="date"

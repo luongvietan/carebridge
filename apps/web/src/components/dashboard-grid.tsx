@@ -9,16 +9,21 @@ export type DashboardCard = {
 
 export function DashboardGrid({ cards }: { cards: DashboardCard[] }) {
   return (
-    <div className="mt-8 grid gap-4 sm:grid-cols-2">
+    <div className="mt-8 grid gap-5 sm:grid-cols-2">
       {cards.map((card) => (
         <Link
           key={card.href}
           href={card.href}
-          className="group border border-[#e0e0e0] p-5 transition-colors hover:border-[#198038] hover:bg-[#f4f4f4]"
+          className="group flex flex-col rounded-[28px] border border-[#dbe7e0] bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.12)] transition hover:-translate-y-0.5 hover:border-[#bcd8c7] hover:shadow-[0_12px_36px_-12px_rgba(15,38,28,0.18)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#198038]/30"
         >
-          <h2 className="text-lg font-light text-[#161616] group-hover:text-[#198038]">{card.title}</h2>
-          <p className="mt-2 text-sm leading-relaxed text-[#525252]">{card.description}</p>
-          <span className="mt-4 inline-block text-sm font-medium text-[#198038]">{card.cta} →</span>
+          <h2 className="text-lg font-bold tracking-tight text-[#0c4a35] sm:text-xl">{card.title}</h2>
+          <p className="mt-2 flex-1 text-sm leading-relaxed text-[#5b6a62]">{card.description}</p>
+          <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-[#0c6e4f] transition-colors group-hover:text-[#0a5c42]">
+            {card.cta}
+            <span aria-hidden className="transition-transform group-hover:translate-x-0.5">
+              &rarr;
+            </span>
+          </span>
         </Link>
       ))}
     </div>

@@ -25,15 +25,15 @@ export default function EligibilityPage() {
     return (
       <div>
         <OnboardingSteps current={1} />
-        <div className="mt-8 border border-[#e0e0e0] p-6">
-          <h2 className="text-xl font-light">Eligibility recorded</h2>
+        <div className="mt-8 rounded-2xl border border-[#dbe7e0] bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
+          <h2 className="text-xl font-bold">Eligibility recorded</h2>
           {state.outcome === "pending" ? (
-            <p className="mt-2 text-sm text-[#525252]">
+            <p className="mt-2 text-sm text-[#5b6a62]">
               Your application can proceed, but it will stay <strong>pending</strong> until you
               provide up-to-date mandatory training certificates.
             </p>
           ) : (
-            <p className="mt-2 text-sm text-[#525252]">You can continue to the assessment.</p>
+            <p className="mt-2 text-sm text-[#5b6a62]">You can continue to the assessment.</p>
           )}
           <Link
             href="/professional/onboarding/assessment"
@@ -64,10 +64,10 @@ export default function EligibilityPage() {
 
         <fieldset>
           <legend className="text-base font-semibold">Mandatory training</legend>
-          <p className="mt-2 text-sm text-[#525252]">
+          <p className="mt-2 text-sm text-[#5b6a62]">
             Confirm that all of the following were completed within the previous 12 months:
           </p>
-          <ul className="mt-2 list-disc pl-5 text-sm text-[#525252]">
+          <ul className="mt-2 list-disc pl-5 text-sm text-[#5b6a62]">
             {MANDATORY_TRAINING.map((t) => (
               <li key={t}>{t}</li>
             ))}

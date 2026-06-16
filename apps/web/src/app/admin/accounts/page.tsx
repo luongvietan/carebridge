@@ -25,7 +25,7 @@ const ACCOUNT_TYPES: AccountType[] = [
 ];
 
 const INPUT_CLASS =
-  "border-b border-[#8c8c8c] bg-[#f4f4f4] px-2 py-1 text-sm focus:border-[#198038] focus:outline-none";
+  "border-b border-[#7a8a81] bg-[#f5f7f6] px-2 py-1 text-sm focus:border-[#198038] focus:outline-none";
 
 function formatLabel(value: string) {
   return value.replace(/_/g, " ");
@@ -69,14 +69,13 @@ export default async function AdminAccountsPage({
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-10">
-      <p className="text-sm tracking-wide text-[#525252] uppercase">Admin</p>
-      <h1 className="mt-1 text-3xl font-light">All accounts</h1>
-      <p className="mt-2 text-sm text-[#525252]">
+      <h1 className="mt-1 text-3xl font-bold">All accounts</h1>
+      <p className="mt-2 text-sm text-[#5b6a62]">
         View and manage account status across professionals, clients and organisations.
       </p>
 
       <form method="GET" className="mt-6 flex flex-wrap items-end gap-4">
-        <label className="flex flex-col gap-1 text-sm text-[#525252]">
+        <label className="flex flex-col gap-1 text-sm text-[#5b6a62]">
           Account type
           <select
             name="account_type"
@@ -104,9 +103,9 @@ export default async function AdminAccountsPage({
         )}
       </form>
 
-      <div className="mt-8 overflow-x-auto border border-[#e0e0e0]">
+      <div className="mt-8 overflow-x-auto border border-[#dbe7e0]">
         <table className="w-full text-sm">
-          <thead className="border-b border-[#e0e0e0] bg-[#f4f4f4] text-left">
+          <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left">
             <tr>
               <th className="p-3 font-medium">Email</th>
               <th className="p-3 font-medium">Account type</th>
@@ -114,24 +113,24 @@ export default async function AdminAccountsPage({
               <th className="p-3 font-medium">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#e0e0e0]">
+          <tbody className="divide-y divide-[#dbe7e0]">
             {users.map((user) => (
               <tr key={user.id}>
                 <td className="p-3">{user.email}</td>
                 <td className="p-3">
-                  <span className="bg-[#f4f4f4] px-2 py-0.5 text-xs text-[#525252]">
+                  <span className="bg-[#f5f7f6] px-2 py-0.5 text-xs text-[#5b6a62]">
                     {formatLabel(user.account_type)}
                     {user.is_founder ? " (founder)" : ""}
                   </span>
                 </td>
                 <td className="p-3">
-                  <span className="bg-[#f4f4f4] px-2 py-0.5 text-xs text-[#525252]">
+                  <span className="bg-[#f5f7f6] px-2 py-0.5 text-xs text-[#5b6a62]">
                     {formatLabel(user.account_status)}
                   </span>
                 </td>
                 <td className="p-3">
                   {isProtectedAccount(user) ? (
-                    <span className="text-[#525252]">—</span>
+                    <span className="text-[#5b6a62]">—</span>
                   ) : (
                     <AccountStatusControl userId={user.id} current={user.account_status} />
                   )}
@@ -141,7 +140,7 @@ export default async function AdminAccountsPage({
           </tbody>
         </table>
         {users.length === 0 && (
-          <p className="p-6 text-sm text-[#525252]">No accounts match this filter.</p>
+          <p className="p-6 text-sm text-[#5b6a62]">No accounts match this filter.</p>
         )}
       </div>
     </main>

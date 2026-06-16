@@ -32,84 +32,102 @@ export function RoleNav({ areaLabel, items, email }: RoleNavProps) {
     });
   }
 
-  const linkClass = (href: string, mobile: boolean) => {
+  const desktopLink = (href: string, label: string) => {
     const active = isActive(pathname, href);
-    if (mobile) {
-      return active
-        ? "block rounded-md bg-[#198038] px-3 py-2 text-sm text-white"
-        : "block rounded-md px-3 py-2 text-sm text-[#525252] hover:bg-[#f4f4f4] hover:text-[#161616]";
-    }
-    return active
-      ? "rounded-md bg-white px-3 py-1.5 text-sm font-medium text-[#198038] shadow-sm"
-      : "rounded-md px-3 py-1.5 text-sm text-[#525252] hover:text-[#161616]";
+    return (
+      <Link
+        key={href}
+        href={href}
+        aria-current={active ? "page" : undefined}
+        className={`flex items-center gap-2 whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+          active ? "bg-white text-[#0c4a35] shadow-sm" : "text-[#4a6358] hover:text-[#198038]"
+        }`}
+      >
+        {active && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#198038]" aria-hidden />}
+        {label}
+      </Link>
+    );
+  };
+
+  const mobileLink = (href: string, label: string) => {
+    const active = isActive(pathname, href);
+    return (
+      <Link
+        key={href}
+        href={href}
+        onClick={() => setMenuOpen(false)}
+        aria-current={active ? "page" : undefined}
+        className={`block rounded-xl px-3 py-2 text-sm transition-colors ${
+          active
+            ? "bg-[#198038] font-medium text-white"
+            : "text-[#445049] hover:bg-[#eef5f0] hover:text-[#198038]"
+        }`}
+      >
+        {label}
+      </Link>
+    );
   };
 
   return (
-    <>
-      <header className="border-b border-[#e0e0e0] bg-white">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 lg:px-6">
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#e0e0e0] text-[#525252] lg:hidden"
-              aria-expanded={menuOpen}
-              aria-label={menuOpen ? "Close menu" : "Open menu"}
-              onClick={() => setMenuOpen((open) => !open)}
-            >
-              <Icon icon={menuOpen ? Cancel01Icon : Menu01Icon} size={18} strokeWidth={2} />
-            </button>
-            <Link href="/" className="flex items-center gap-2">
-              <BrandMark size={32} />
-              <span className="hidden text-sm font-semibold text-[#198038] sm:block">CareBridge Connect</span>
-            </Link>
-          </div>
-
-          <p className="text-xs tracking-wide text-[#525252] uppercase sm:text-sm">{areaLabel}</p>
-
-          <div className="flex items-center gap-3">
-            {email && (
-              <span className="hidden max-w-[12rem] truncate text-sm text-[#525252] sm:block" title={email}>
-                {email}
-              </span>
-            )}
-            <button
-              type="button"
-              onClick={handleSignOut}
-              disabled={pending}
-              className="text-sm text-[#525252] underline-offset-2 hover:text-[#161616] hover:underline disabled:opacity-50"
-            >
-              {pending ? "Signing out…" : "Sign out"}
-            </button>
-          </div>
+    <header className="sticky top-0 z-50 border-b border-[#e7efe9] bg-white/90 backdrop-blur-md">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-3.5 lg:px-8">
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#e3ece6] text-[#445049] lg:hidden"
+            aria-expanded={menuOpen}
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            onClick={() => setMenuOpen((open) => !open)}
+          >
+            <Icon icon={menuOpen ? Cancel01Icon : Menu01Icon} size={20} strokeWidth={2} />
+          </button>
+          <Link href="/" className="flex items-center gap-3">
+            <BrandMark size={36} />
+            <span className="hidden leading-tight sm:block">
+              <span className="block text-[16px] font-bold tracking-tight text-[#0c6e4f]">CareBridge</span>
+              <span className="block text-[14px] font-semibold tracking-tight text-[#198038]">Connect</span>
+            </span>
+          </Link>
+          <span className="ml-1 hidden rounded-full bg-[#eef5f0] px-3 py-1 text-xs font-semibold text-[#0c6e4f] sm:inline-block">
+            {areaLabel}
+          </span>
         </div>
 
-        {menuOpen && (
-          <nav className="border-t border-[#e0e0e0] px-4 py-3 lg:hidden">
-            <div className="flex flex-col gap-1">
-              {items.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setMenuOpen(false)}
-                  className={linkClass(item.href, true)}
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </div>
-          </nav>
-        )}
-      </header>
+        <div className="flex items-center gap-3">
+          {email && (
+            <span className="hidden max-w-[12rem] truncate text-sm text-[#5b6a62] md:block" title={email}>
+              {email}
+            </span>
+          )}
+          <button
+            type="button"
+            onClick={handleSignOut}
+            disabled={pending}
+            className="rounded-full px-4 py-2 text-sm font-medium text-[#445049] transition-colors hover:text-[#198038] disabled:opacity-50"
+          >
+            {pending ? "Signing out…" : "Sign out"}
+          </button>
+        </div>
+      </div>
 
-      <nav className="hidden border-b border-[#e0e0e0] bg-[#f4f4f4] lg:block">
-        <div className="mx-auto flex max-w-6xl gap-1 px-6 py-2">
-          {items.map((item) => (
-            <Link key={item.href} href={item.href} className={linkClass(item.href, false)}>
-              {item.label}
-            </Link>
-          ))}
+      <nav className="hidden border-t border-[#e7efe9] lg:block">
+        <div className="mx-auto max-w-7xl px-5 py-2.5 lg:px-8">
+          <div className="inline-flex items-center gap-1 rounded-full border border-[#e3ece6] bg-[#f7faf8] px-1.5 py-1">
+            {items.map((item) => desktopLink(item.href, item.label))}
+          </div>
         </div>
       </nav>
-    </>
+
+      {menuOpen && (
+        <nav className="border-t border-[#e7efe9] bg-white px-5 py-4 lg:hidden">
+          <span className="mb-2 inline-block rounded-full bg-[#eef5f0] px-3 py-1 text-xs font-semibold text-[#0c6e4f]">
+            {areaLabel}
+          </span>
+          <div className="flex flex-col gap-1 rounded-2xl border border-[#e3ece6] bg-[#f7faf8] p-2">
+            {items.map((item) => mobileLink(item.href, item.label))}
+          </div>
+        </nav>
+      )}
+    </header>
   );
 }

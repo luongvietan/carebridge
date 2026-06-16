@@ -5,9 +5,9 @@ import { useState } from "react";
 import type { ProfessionalFilterCriteria } from "@/lib/admin/search";
 
 const INPUT_CLASS =
-  "border-b border-[#8c8c8c] bg-[#f4f4f4] px-2 py-1 text-sm focus:border-[#198038] focus:outline-none";
+  "border-b border-[#7a8a81] bg-[#f5f7f6] px-2 py-1 text-sm focus:border-[#198038] focus:outline-none";
 const SELECT_CLASS =
-  "border-b border-[#8c8c8c] bg-[#f4f4f4] px-2 py-1 text-sm focus:border-[#198038] focus:outline-none";
+  "border-b border-[#7a8a81] bg-[#f5f7f6] px-2 py-1 text-sm focus:border-[#198038] focus:outline-none";
 
 const PROFESSIONAL_STATUSES = [
   "pending_verification",
@@ -82,7 +82,7 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
   return (
     <form onSubmit={handleSubmit} className="mt-6 space-y-4 text-sm">
       <div className="flex flex-wrap items-end gap-3">
-        <label className="flex flex-col gap-1 text-[#525252]">
+        <label className="flex flex-col gap-1 text-[#5b6a62]">
           Name or email
           <input
             type="search"
@@ -92,7 +92,7 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
             className={INPUT_CLASS}
           />
         </label>
-        <label className="flex flex-col gap-1 text-[#525252]">
+        <label className="flex flex-col gap-1 text-[#5b6a62]">
           Professional status
           <select
             value={professionalStatus}
@@ -107,7 +107,7 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
             ))}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-[#525252]">
+        <label className="flex flex-col gap-1 text-[#5b6a62]">
           Compliance status
           <select
             value={complianceStatus}
@@ -122,7 +122,7 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
             ))}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-[#525252]">
+        <label className="flex flex-col gap-1 text-[#5b6a62]">
           Role
           <select
             value={roleId}
@@ -139,7 +139,7 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
         </label>
       </div>
       <div className="flex flex-wrap items-end gap-3">
-        <label className="flex flex-col gap-1 text-[#525252]">
+        <label className="flex flex-col gap-1 text-[#5b6a62]">
           Postcode
           <input
             type="text"
@@ -149,7 +149,7 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
             className={INPUT_CLASS}
           />
         </label>
-        <label className="flex flex-col gap-1 text-[#525252]">
+        <label className="flex flex-col gap-1 text-[#5b6a62]">
           Min travel (km)
           <input
             type="number"
@@ -160,7 +160,7 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
             className={`${INPUT_CLASS} w-24`}
           />
         </label>
-        <label className="flex items-center gap-2 self-end pb-1 text-[#525252]">
+        <label className="flex items-center gap-2 self-end pb-1 text-[#5b6a62]">
           <input
             type="checkbox"
             checked={requireValidDocs}
@@ -179,7 +179,7 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
           <button
             type="button"
             onClick={() => router.push("/admin/users")}
-            className="text-[#525252] underline hover:text-[#161616]"
+            className="text-[#5b6a62] underline hover:text-[#0f261c]"
           >
             Clear
           </button>

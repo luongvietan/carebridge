@@ -6,7 +6,7 @@ import { setAccountStatus } from "@/lib/admin/account-actions";
 import { canSetAccountStatus, type AccountStatus } from "@/lib/admin/account-status";
 
 const INPUT_CLASS =
-  "border-b border-[#8c8c8c] bg-[#f4f4f4] px-2 py-1 text-sm focus:border-[#198038] focus:outline-none w-full";
+  "border-b border-[#7a8a81] bg-[#f5f7f6] px-2 py-1 text-sm focus:border-[#198038] focus:outline-none w-full";
 
 const ALL_STATUSES: AccountStatus[] = ["active", "suspended", "deactivated"];
 
@@ -30,7 +30,7 @@ export function AccountStatusControl({ userId, current }: Props) {
 
   if (legalNext.length === 0) {
     return (
-      <p className="text-sm text-[#525252]">
+      <p className="text-sm text-[#5b6a62]">
         Current account status: <span className="font-medium">{formatLabel(current)}</span>. No
         changes available.
       </p>
@@ -59,11 +59,11 @@ export function AccountStatusControl({ userId, current }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 text-sm">
-      <p className="text-[#525252]">
+      <p className="text-[#5b6a62]">
         Current: <span className="font-medium">{formatLabel(current)}</span>
       </p>
 
-      <label className="flex flex-col gap-1 text-[#525252]">
+      <label className="flex flex-col gap-1 text-[#5b6a62]">
         Set account status to
         <select
           value={next}
@@ -79,7 +79,7 @@ export function AccountStatusControl({ userId, current }: Props) {
         </select>
       </label>
 
-      <label className="flex flex-col gap-1 text-[#525252]">
+      <label className="flex flex-col gap-1 text-[#5b6a62]">
         Reason (optional)
         <textarea
           value={reason}

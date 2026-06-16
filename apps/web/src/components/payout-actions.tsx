@@ -60,7 +60,7 @@ export function MarkPayoutPaidForm({ payoutId }: { payoutId: string }) {
         <select
           value={method}
           onChange={(e) => setMethod(e.target.value)}
-          className="border-b border-[#8c8c8c] bg-[#f4f4f4] px-2 py-1 text-sm focus:border-[#198038] focus:outline-none"
+          className="border-b border-[#7a8a81] bg-[#f5f7f6] px-2 py-1 text-sm focus:border-[#198038] focus:outline-none"
         >
           <option value="bank_transfer">Bank transfer</option>
           <option value="bacs">BACS</option>
@@ -72,7 +72,7 @@ export function MarkPayoutPaidForm({ payoutId }: { payoutId: string }) {
           placeholder="Reference"
           value={reference}
           onChange={(e) => setReference(e.target.value)}
-          className="border-b border-[#8c8c8c] bg-transparent px-2 py-1 text-sm focus:border-[#198038] focus:outline-none"
+          className="border-b border-[#7a8a81] bg-transparent px-2 py-1 text-sm focus:border-[#198038] focus:outline-none"
         />
         <button
           type="submit"

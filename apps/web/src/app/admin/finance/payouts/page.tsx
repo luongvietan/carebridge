@@ -91,12 +91,11 @@ export default async function AdminPayoutsPage() {
     <main className="mx-auto max-w-4xl px-4 py-10">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm tracking-wide text-[#525252] uppercase">Admin · Finance</p>
-          <h1 className="mt-1 text-3xl font-light">Payouts</h1>
+          <h1 className="mt-1 text-3xl font-bold">Payouts</h1>
         </div>
         <a
           href="/admin/finance"
-          className="border border-[#8c8c8c] px-3 py-1.5 text-sm hover:bg-[#f4f4f4]"
+          className="border border-[#7a8a81] px-3 py-1.5 text-sm hover:bg-[#f5f7f6]"
         >
           ← Finance overview
         </a>
@@ -104,11 +103,11 @@ export default async function AdminPayoutsPage() {
 
       {/* Bookings awaiting payout */}
       <section className="mt-10">
-        <h2 className="text-xl font-light">Awaiting payout</h2>
+        <h2 className="text-xl font-bold">Awaiting payout</h2>
         {pendingPayout.length > 0 ? (
-          <div className="mt-4 overflow-x-auto border border-[#e0e0e0]">
+          <div className="mt-4 overflow-x-auto border border-[#dbe7e0]">
             <table className="w-full text-sm">
-              <thead className="border-b border-[#e0e0e0] bg-[#f4f4f4] text-left">
+              <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left">
                 <tr>
                   <th className="p-3 font-medium">Professional</th>
                   <th className="p-3 font-medium">Account last 4</th>
@@ -116,7 +115,7 @@ export default async function AdminPayoutsPage() {
                   <th className="p-3 font-medium" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#e0e0e0]">
+              <tbody className="divide-y divide-[#dbe7e0]">
                 {pendingPayout.map((b) => {
                   const prof = b.professionals as { id: string; full_name: string } | null;
                   const last4 = b.assigned_professional_id
@@ -137,17 +136,17 @@ export default async function AdminPayoutsPage() {
             </table>
           </div>
         ) : (
-          <p className="mt-3 text-sm text-[#525252]">No bookings awaiting payout.</p>
+          <p className="mt-3 text-sm text-[#5b6a62]">No bookings awaiting payout.</p>
         )}
       </section>
 
       {/* Recorded payouts → Mark paid */}
       <section className="mt-12">
-        <h2 className="text-xl font-light">Recorded — awaiting bank transfer</h2>
+        <h2 className="text-xl font-bold">Recorded — awaiting bank transfer</h2>
         {recordedPayouts && recordedPayouts.length > 0 ? (
-          <div className="mt-4 overflow-x-auto border border-[#e0e0e0]">
+          <div className="mt-4 overflow-x-auto border border-[#dbe7e0]">
             <table className="w-full text-sm">
-              <thead className="border-b border-[#e0e0e0] bg-[#f4f4f4] text-left">
+              <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left">
                 <tr>
                   <th className="p-3 font-medium">Professional</th>
                   <th className="p-3 font-medium">Account last 4</th>
@@ -155,7 +154,7 @@ export default async function AdminPayoutsPage() {
                   <th className="p-3 font-medium">Mark paid</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#e0e0e0]">
+              <tbody className="divide-y divide-[#dbe7e0]">
                 {recordedPayouts.map((p) => {
                   const prof = p.professionals as { id: string; full_name: string } | null;
                   const last4 = prof ? (last4Map.get(prof.id) ?? null) : null;
@@ -174,7 +173,7 @@ export default async function AdminPayoutsPage() {
             </table>
           </div>
         ) : (
-          <p className="mt-3 text-sm text-[#525252]">No recorded payouts awaiting payment.</p>
+          <p className="mt-3 text-sm text-[#5b6a62]">No recorded payouts awaiting payment.</p>
         )}
       </section>
     </main>

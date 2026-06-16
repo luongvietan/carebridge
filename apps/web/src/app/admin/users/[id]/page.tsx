@@ -55,35 +55,34 @@ export default async function AdminUserDetailPage({
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-10">
-      <p className="text-sm tracking-wide text-[#525252] uppercase">Admin</p>
       <div className="mt-1 flex flex-wrap items-baseline gap-x-4 gap-y-1">
-        <h1 className="text-3xl font-light">{professional.full_name}</h1>
+        <h1 className="text-3xl font-bold">{professional.full_name}</h1>
         <Link href="/admin/users" className="text-sm text-[#198038] hover:underline">
           ← Back to list
         </Link>
       </div>
 
-      <section className="mt-8 border border-[#e0e0e0] p-4 text-sm">
-        <h2 className="text-lg font-light">Profile</h2>
+      <section className="mt-8 rounded-2xl border border-[#dbe7e0] bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)] text-sm">
+        <h2 className="text-lg font-bold">Profile</h2>
         <dl className="mt-4 grid gap-3 sm:grid-cols-2">
           <div>
-            <dt className="text-[#8c8c8c]">Email</dt>
+            <dt className="text-[#7a8a81]">Email</dt>
             <dd>{user?.email ?? "—"}</dd>
           </div>
           <div>
-            <dt className="text-[#8c8c8c]">Role</dt>
+            <dt className="text-[#7a8a81]">Role</dt>
             <dd>{(professional.professional_roles as { name: string } | null)?.name ?? "—"}</dd>
           </div>
           <div>
-            <dt className="text-[#8c8c8c]">Professional status</dt>
+            <dt className="text-[#7a8a81]">Professional status</dt>
             <dd>{formatLabel(professional.professional_status)}</dd>
           </div>
           <div>
-            <dt className="text-[#8c8c8c]">Compliance status</dt>
+            <dt className="text-[#7a8a81]">Compliance status</dt>
             <dd>{formatLabel(professional.compliance_status)}</dd>
           </div>
           <div>
-            <dt className="text-[#8c8c8c]">Account status</dt>
+            <dt className="text-[#7a8a81]">Account status</dt>
             <dd>{user?.account_status ? formatLabel(user.account_status) : "—"}</dd>
           </div>
         </dl>
@@ -94,8 +93,8 @@ export default async function AdminUserDetailPage({
         </p>
       </section>
 
-      <section className="mt-10 border border-[#e0e0e0] p-4">
-        <h2 className="text-lg font-light">Professional status action</h2>
+      <section className="mt-10 rounded-2xl border border-[#dbe7e0] bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
+        <h2 className="text-lg font-bold">Professional status action</h2>
         <div className="mt-4">
           <StatusActionForm
             professionalId={professional.id}
@@ -105,8 +104,8 @@ export default async function AdminUserDetailPage({
       </section>
 
       {user?.account_status && (
-        <section className="mt-10 border border-[#e0e0e0] p-4">
-          <h2 className="text-lg font-light">Account access</h2>
+        <section className="mt-10 rounded-2xl border border-[#dbe7e0] bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
+          <h2 className="text-lg font-bold">Account access</h2>
           <div className="mt-4">
             <AccountStatusControl
               userId={professional.user_id}
@@ -117,10 +116,10 @@ export default async function AdminUserDetailPage({
       )}
 
       <section className="mt-10">
-        <h2 className="text-lg font-light">Status action history</h2>
-        <div className="mt-4 overflow-x-auto border border-[#e0e0e0]">
+        <h2 className="text-lg font-bold">Status action history</h2>
+        <div className="mt-4 overflow-x-auto border border-[#dbe7e0]">
           <table className="w-full text-sm">
-            <thead className="border-b border-[#e0e0e0] bg-[#f4f4f4] text-left">
+            <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left">
               <tr>
                 <th className="p-3 font-medium">Applied</th>
                 <th className="p-3 font-medium">Action</th>
@@ -128,7 +127,7 @@ export default async function AdminUserDetailPage({
                 <th className="p-3 font-medium">Resulting status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#e0e0e0]">
+            <tbody className="divide-y divide-[#dbe7e0]">
               {(history ?? []).map((row, index) => (
                 <tr key={`${row.applied_at}-${index}`}>
                   <td className="p-3 whitespace-nowrap">{formatDateTime(row.applied_at)}</td>
@@ -144,7 +143,7 @@ export default async function AdminUserDetailPage({
             </tbody>
           </table>
           {(history ?? []).length === 0 && (
-            <p className="p-6 text-sm text-[#525252]">No status actions recorded yet.</p>
+            <p className="p-6 text-sm text-[#5b6a62]">No status actions recorded yet.</p>
           )}
         </div>
       </section>

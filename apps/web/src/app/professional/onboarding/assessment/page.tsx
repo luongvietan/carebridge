@@ -51,9 +51,9 @@ export default function AssessmentPage() {
         {error && <p className="mb-4 text-sm text-[#da1e28]">{error}</p>}
 
         {phase === "intro" && (
-          <div className="border border-[#e0e0e0] p-6">
-            <h2 className="text-xl font-light">Competency assessment</h2>
-            <p className="mt-2 text-sm text-[#525252]">
+          <div className="rounded-2xl border border-[#dbe7e0] bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
+            <h2 className="text-xl font-bold">Competency assessment</h2>
+            <p className="mt-2 text-sm text-[#5b6a62]">
               {QUESTIONS_NOTE}
             </p>
             <button
@@ -69,8 +69,8 @@ export default function AssessmentPage() {
         {phase === "questions" && (
           <div className="space-y-6">
             {questions.map((q, i) => (
-              <fieldset key={q.id} className="border border-[#e0e0e0] p-5">
-                <legend className="px-1 text-xs tracking-wide text-[#525252] uppercase">
+              <fieldset key={q.id} className="rounded-2xl border border-[#dbe7e0] bg-white p-5 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
+                <legend className="px-1 text-xs tracking-wide text-[#5b6a62] uppercase">
                   {q.topic.replace(/_/g, " ")}
                 </legend>
                 <p className="font-semibold">
@@ -99,13 +99,13 @@ export default function AssessmentPage() {
             >
               {busy ? "Submitting…" : "Submit answers"}
             </button>
-            {!allAnswered && <p className="text-sm text-[#8c8c8c]">Answer every question to submit.</p>}
+            {!allAnswered && <p className="text-sm text-[#7a8a81]">Answer every question to submit.</p>}
           </div>
         )}
 
         {phase === "result" && result && (
-          <div className="border border-[#e0e0e0] p-6">
-            <h2 className="text-xl font-light">
+          <div className="rounded-2xl border border-[#dbe7e0] bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
+            <h2 className="text-xl font-bold">
               Score: <span className="tabular-nums">{result.score}%</span>
             </h2>
             {result.passed ? (
@@ -137,9 +137,9 @@ export default function AssessmentPage() {
         )}
 
         {phase === "locked" && (
-          <div className="border border-[#e0e0e0] p-6">
-            <h2 className="text-xl font-light">Assessment locked</h2>
-            <p className="mt-2 text-sm text-[#525252]">
+          <div className="rounded-2xl border border-[#dbe7e0] bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
+            <h2 className="text-xl font-bold">Assessment locked</h2>
+            <p className="mt-2 text-sm text-[#5b6a62]">
               You have used all attempts for now. Please reapply after the lock period has passed.
             </p>
           </div>

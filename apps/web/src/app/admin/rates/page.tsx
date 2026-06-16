@@ -78,9 +78,8 @@ export default async function AdminRatesPage() {
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-10">
-      <p className="text-sm tracking-wide text-[#525252] uppercase">Admin</p>
-      <h1 className="mt-1 text-3xl font-light">Rate cards</h1>
-      <p className="mt-2 text-sm text-[#525252]">
+      <h1 className="mt-1 text-3xl font-bold">Rate cards</h1>
+      <p className="mt-2 text-sm text-[#5b6a62]">
         View effective-dated rates per role and amend the active card. Existing bookings keep their
         snapshotted rates.
       </p>
@@ -91,26 +90,26 @@ export default async function AdminRatesPage() {
           const active = history.find((card) => card.effective_to === null) ?? null;
 
           return (
-            <section key={role.id} className="border border-[#e0e0e0] p-6">
-              <h2 className="text-xl font-light">{role.name}</h2>
+            <section key={role.id} className="rounded-2xl border border-[#dbe7e0] bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
+              <h2 className="text-xl font-bold">{role.name}</h2>
 
               {active ? (
                 <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                   <div>
-                    <p className="text-xs tracking-wide text-[#525252] uppercase">Client charge</p>
-                    <p className="mt-1 text-lg font-light">
+                    <p className="text-xs tracking-wide text-[#5b6a62] uppercase">Client charge</p>
+                    <p className="mt-1 text-lg font-bold">
                       {formatRate(active.client_charge_rate, active.currency)}/hr
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs tracking-wide text-[#525252] uppercase">Payout</p>
-                    <p className="mt-1 text-lg font-light">
+                    <p className="text-xs tracking-wide text-[#5b6a62] uppercase">Payout</p>
+                    <p className="mt-1 text-lg font-bold">
                       {formatRate(active.professional_payout_rate, active.currency)}/hr
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs tracking-wide text-[#525252] uppercase">Platform fee</p>
-                    <p className="mt-1 text-lg font-light">
+                    <p className="text-xs tracking-wide text-[#5b6a62] uppercase">Platform fee</p>
+                    <p className="mt-1 text-lg font-bold">
                       {formatFeeType(
                         active.platform_fee_type,
                         active.platform_fee_value,
@@ -120,18 +119,18 @@ export default async function AdminRatesPage() {
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs tracking-wide text-[#525252] uppercase">Effective from</p>
-                    <p className="mt-1 text-sm text-[#525252]">{formatDate(active.effective_from)}</p>
+                    <p className="text-xs tracking-wide text-[#5b6a62] uppercase">Effective from</p>
+                    <p className="mt-1 text-sm text-[#5b6a62]">{formatDate(active.effective_from)}</p>
                   </div>
                 </div>
               ) : (
-                <p className="mt-4 text-sm text-[#525252]">No active rate card for this role.</p>
+                <p className="mt-4 text-sm text-[#5b6a62]">No active rate card for this role.</p>
               )}
 
               {history.length > 0 && (
-                <div className="mt-6 overflow-x-auto border border-[#e0e0e0]">
+                <div className="mt-6 overflow-x-auto border border-[#dbe7e0]">
                   <table className="w-full text-sm">
-                    <thead className="border-b border-[#e0e0e0] bg-[#f4f4f4] text-left">
+                    <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left">
                       <tr>
                         <th className="p-3 font-medium">Effective from</th>
                         <th className="p-3 font-medium">Effective to</th>
@@ -141,7 +140,7 @@ export default async function AdminRatesPage() {
                         <th className="p-3 font-medium">Status</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#e0e0e0]">
+                    <tbody className="divide-y divide-[#dbe7e0]">
                       {history.map((card) => (
                         <tr key={card.id}>
                           <td className="p-3">{formatDate(card.effective_from)}</td>
@@ -163,7 +162,7 @@ export default async function AdminRatesPage() {
                             )}
                           </td>
                           <td className="p-3">
-                            <span className="bg-[#f4f4f4] px-2 py-0.5 text-xs text-[#525252]">
+                            <span className="bg-[#f5f7f6] px-2 py-0.5 text-xs text-[#5b6a62]">
                               {card.effective_to === null ? "Active" : "Closed"}
                             </span>
                           </td>
@@ -174,7 +173,7 @@ export default async function AdminRatesPage() {
                 </div>
               )}
 
-              <div className="mt-6 border-t border-[#e0e0e0] pt-6">
+              <div className="mt-6 border-t border-[#dbe7e0] pt-6">
                 <AmendRateForm roleId={role.id} roleName={role.name} />
               </div>
             </section>
@@ -182,7 +181,7 @@ export default async function AdminRatesPage() {
         })}
 
         {(roles ?? []).length === 0 && (
-          <p className="text-sm text-[#525252]">No active professional roles found.</p>
+          <p className="text-sm text-[#5b6a62]">No active professional roles found.</p>
         )}
       </div>
     </main>
