@@ -73,3 +73,72 @@ where not exists (
 update notification_templates
    set body = 'Your booking request ({{booking_id}}) has been submitted.'
  where type = 'booking_request';
+
+-- ============================================================================
+-- TEST USERS FOR USER FLOW SCREENSHOTS
+-- ============================================================================
+
+-- Insert test users into public.users table directly
+-- (In local Supabase, we bypass auth.users for demo purposes)
+
+INSERT INTO users (id, email, account_type, is_founder, is_active, created_at, updated_at) VALUES
+  ('00000000-0000-0000-0000-000000000001', 'prof@example.com', 'professional', false, true, now(), now()),
+  ('00000000-0000-0000-0000-000000000002', 'client@example.com', 'private_client', false, true, now(), now()),
+  ('00000000-0000-0000-0000-000000000003', 'org@example.com', 'organisation', false, true, now(), now()),
+  ('00000000-0000-0000-0000-000000000004', 'admin@example.com', 'admin', true, true, now(), now())
+ON CONFLICT (id) DO NOTHING;
+
+-- Insert professional profile for Professional user
+INSERT INTO professionals (user_id, display_name, professional_role_id, years_of_experience, employment_status, professional_status, created_at, updated_at) VALUES
+  ('00000000-0000-0000-0000-000000000001', 'Jane Smith',
+   (SELECT id FROM professional_roles WHERE code = 'registered_nurse' LIMIT 1),
+   15, 'nhs_employed', 'active', now(), now())
+ON CONFLICT (user_id) DO NOTHING;
+
+-- Insert professional rate card
+INSERT INTO professional_rate_cards (professional_id, effective_from, base_rate_hourly, currency, is_active, created_at, updated_at) VALUES
+  ((SELECT id FROM professionals WHERE user_id = '00000000-0000-0000-0000-000000000001' LIMIT 1),
+   CURRENT_DATE, 22.50, 'GBP', true, now(), now())
+ON CONFLICT DO NOTHING;
+
+-- Insert compliance documents for Professional (sample: DBS verified, NMC verified, training pending)
+INSERT INTO professional_documents (professional_id, document_type_id, document_status, file_reference, verified_at, created_at, updated_at) VALUES
+  ((SELECT id FROM professionals WHERE user_id = '00000000-0000-0000-0000-000000000001' LIMIT 1),
+   (SELECT id FROM document_types WHERE code = 'enhanced_dbs' LIMIT 1),
+   'approved', 'dbs_jane_smith_001.pdf', now() - INTERVAL '30 days', now(), now()),
+  ((SELECT id FROM professionals WHERE user_id = '00000000-0000-0000-0000-000000000001' LIMIT 1),
+   (SELECT id FROM document_types WHERE code = 'professional_registration' LIMIT 1),
+   'approved', 'nmc_jane_smith_001.pdf', now() - INTERVAL '60 days', now(), now()),
+  ((SELECT id FROM professionals WHERE user_id = '00000000-0000-0000-0000-000000000001' LIMIT 1),
+   (SELECT id FROM document_types WHERE code = 'mandatory_training_certificate' LIMIT 1),
+   'pending_review', 'training_jane_smith_001.pdf', NULL, now(), now())
+ON CONFLICT DO NOTHING;
+
+-- Insert private client profile
+INSERT INTO private_clients (user_id, display_name, address_line_1, city, postcode, care_needs_description, created_at, updated_at) VALUES
+  ('00000000-0000-0000-0000-000000000002', 'John Brown',
+   '42 Oak Street', 'London', 'SW1A 1AA',
+   'Post-operative care, wound dressing, morning/evening assistance',
+   now(), now())
+ON CONFLICT (user_id) DO NOTHING;
+
+-- Insert organisation profile
+INSERT INTO organisations (user_id, organisation_name, address_line_1, city, postcode, organisation_type, total_bed_capacity, created_at, updated_at) VALUES
+  ('00000000-0000-0000-0000-000000000003', 'Sunnyhill Care Ltd',
+   '100 High Street', 'London', 'E1 6AA',
+   'care_home', 50, now(), now())
+ON CONFLICT (user_id) DO NOTHING;
+
+-- Insert sample bookings for demo (Professional accepts one, Private Client has pending one, Org has managed one)
+INSERT INTO bookings (professional_id, client_id, organisation_id, booking_status, start_time, duration_hours, created_at, updated_at) VALUES
+  ((SELECT id FROM professionals WHERE user_id = '00000000-0000-0000-0000-000000000001' LIMIT 1),
+   (SELECT id FROM private_clients WHERE user_id = '00000000-0000-0000-0000-000000000002' LIMIT 1),
+   NULL,
+   'accepted',
+   now() + INTERVAL '2 days', 8, now(), now()),
+  (NULL,
+   (SELECT id FROM private_clients WHERE user_id = '00000000-0000-0000-0000-000000000002' LIMIT 1),
+   NULL,
+   'open',
+   now() + INTERVAL '5 days', 6, now(), now())
+ON CONFLICT DO NOTHING;
