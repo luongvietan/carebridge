@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createServiceClient } from "@/lib/supabase/service";
 import { requireAdmin } from "@/lib/auth/admin";
+import { DatePicker } from "@/components/ui/date-picker";
 
 export const dynamic = "force-dynamic";
 
@@ -70,27 +71,17 @@ export default async function AdminFinancePage({
 
       {/* Date filter */}
       <form method="GET" className="mt-6 flex items-center gap-3 text-sm">
-        <label className="flex items-center gap-1 text-[#5b6a62]">
+        <div className="flex items-center gap-2 text-[#5b6a62]">
           From
-          <input
-            type="date"
-            name="from"
-            defaultValue={from ?? ""}
-            className="ml-1 border-b border-[#7a8a81] bg-transparent px-1 py-0.5 focus:border-[#198038] focus:outline-none"
-          />
-        </label>
-        <label className="flex items-center gap-1 text-[#5b6a62]">
+          <DatePicker name="from" aria-label="From date" defaultValue={from ?? ""} className="w-40" />
+        </div>
+        <div className="flex items-center gap-2 text-[#5b6a62]">
           To
-          <input
-            type="date"
-            name="to"
-            defaultValue={to ?? ""}
-            className="ml-1 border-b border-[#7a8a81] bg-transparent px-1 py-0.5 focus:border-[#198038] focus:outline-none"
-          />
-        </label>
+          <DatePicker name="to" aria-label="To date" defaultValue={to ?? ""} className="w-40" />
+        </div>
         <button
           type="submit"
-          className="bg-[#198038] px-3 py-1.5 text-white hover:bg-[#0e6027]"
+          className="rounded-full bg-[#0c6e4f] px-3 py-1.5 text-white hover:bg-[#0a5c42]"
         >
           Filter
         </button>
@@ -163,7 +154,7 @@ export default async function AdminFinancePage({
           <h2 className="text-xl font-bold">Payouts</h2>
           <a
             href="/admin/finance/payouts"
-            className="bg-[#198038] px-3 py-1.5 text-sm text-white hover:bg-[#0e6027]"
+            className="rounded-full bg-[#0c6e4f] px-3 py-1.5 text-sm text-white hover:bg-[#0a5c42]"
           >
             Manage payouts
           </a>

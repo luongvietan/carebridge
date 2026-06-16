@@ -4,11 +4,10 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { amendRateCard } from "@/lib/admin/rate-actions";
 import type { PlatformFeeType } from "@/lib/admin/rates";
+import { Select } from "@/components/ui/select";
 
 const INPUT_CLASS =
-  "border-b border-[#7a8a81] bg-[#f5f7f6] px-2 py-1 text-sm focus:border-[#198038] focus:outline-none w-full";
-const SELECT_CLASS =
-  "border-b border-[#7a8a81] bg-[#f5f7f6] px-2 py-1 text-sm focus:border-[#198038] focus:outline-none w-full";
+  "w-full rounded-xl border border-[#dbe7e0] bg-white px-3.5 py-2.5 text-sm text-[#0c4a35] placeholder:text-[#9aa8a0] focus:border-[#198038] focus:outline-none focus:ring-2 focus:ring-[#198038]/15";
 
 type Props = {
   roleId: string;
@@ -89,18 +88,19 @@ export function AmendRateForm({ roleId, roleName }: Props) {
           />
         </label>
 
-        <label className="flex flex-col gap-1 text-[#5b6a62]">
+        <div className="flex flex-col gap-1 text-[#5b6a62]">
           Platform fee type
-          <select
+          <Select
+            aria-label="Platform fee type"
             value={platformFeeType}
-            onChange={(e) => setPlatformFeeType(e.target.value as PlatformFeeType)}
-            className={SELECT_CLASS}
-          >
-            <option value="derived">Derived (charge − payout)</option>
-            <option value="percentage">Percentage</option>
-            <option value="fixed">Fixed</option>
-          </select>
-        </label>
+            onValueChange={(v) => setPlatformFeeType(v as PlatformFeeType)}
+            options={[
+              { value: "derived", label: "Derived (charge − payout)" },
+              { value: "percentage", label: "Percentage" },
+              { value: "fixed", label: "Fixed" },
+            ]}
+          />
+        </div>
 
         {showFeeValue && (
           <label className="flex flex-col gap-1 text-[#5b6a62]">
@@ -135,7 +135,7 @@ export function AmendRateForm({ roleId, roleName }: Props) {
       <button
         type="submit"
         disabled={pending}
-        className="bg-[#198038] px-4 py-1.5 text-white hover:bg-[#0e6027] disabled:opacity-50"
+        className="rounded-full bg-[#0c6e4f] px-4 py-1.5 text-white hover:bg-[#0a5c42] disabled:opacity-50"
       >
         {pending ? "Saving…" : "Amend rate card"}
       </button>

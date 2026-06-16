@@ -26,3 +26,59 @@ html.lenis body {
     scroll-behavior: auto;
   }
 }
+
+/* Brand dropdown chevron — replace the native arrow on every select with the
+   Home-style chevron so dropdowns match the marketing inputs. */
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235b6a62' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.85rem center;
+  background-size: 1rem;
+  padding-right: 2.5rem;
+}
+
+select::-ms-expand {
+  display: none;
+}
+
+/* Brand calendar/time picker — tint the native indicator green and make it
+   clearly clickable to match the brand. */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator,
+input[type="month"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.7;
+  filter: invert(40%) sepia(57%) saturate(548%) hue-rotate(96deg) brightness(95%)
+    contrast(91%);
+  transition: opacity 0.15s ease;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover,
+input[type="time"]::-webkit-calendar-picker-indicator:hover,
+input[type="month"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+/* Force the light theme for native controls so the calendar/time popup renders
+   light (not the OS dark theme) and matches the brand surface. */
+:root {
+  color-scheme: light;
+}
+
+/* Native dropdown option list — best-effort brand colours. The browser draws
+   the open list itself, so only colours apply (padding/hover bar are OS-owned). */
+select option {
+  background-color: #ffffff;
+  color: #0c4a35;
+}
+
+select option:checked,
+select option:hover {
+  background-color: #eef5f0;
+  color: #0c4a35;
+}

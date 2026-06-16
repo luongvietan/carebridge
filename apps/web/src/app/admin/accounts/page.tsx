@@ -4,6 +4,7 @@ import { requireAdmin } from "@/lib/auth/admin";
 import type { AccountStatus } from "@/lib/admin/account-status";
 import { createServiceClient } from "@/lib/supabase/service";
 import type { Database } from "@/lib/supabase/types";
+import { Select } from "@/components/ui/select";
 
 export const dynamic = "force-dynamic";
 
@@ -23,9 +24,6 @@ const ACCOUNT_TYPES: AccountType[] = [
   "organisation",
   "admin",
 ];
-
-const INPUT_CLASS =
-  "border-b border-[#7a8a81] bg-[#f5f7f6] px-2 py-1 text-sm focus:border-[#198038] focus:outline-none";
 
 function formatLabel(value: string) {
   return value.replace(/_/g, " ");
@@ -75,24 +73,22 @@ export default async function AdminAccountsPage({
       </p>
 
       <form method="GET" className="mt-6 flex flex-wrap items-end gap-4">
-        <label className="flex flex-col gap-1 text-sm text-[#5b6a62]">
+        <div className="flex flex-col gap-1 text-sm text-[#5b6a62]">
           Account type
-          <select
+          <Select
             name="account_type"
+            aria-label="Account type"
             defaultValue={accountTypeFilter ?? ""}
-            className={INPUT_CLASS}
-          >
-            <option value="">All types</option>
-            {ACCOUNT_TYPES.map((type) => (
-              <option key={type} value={type}>
-                {formatLabel(type)}
-              </option>
-            ))}
-          </select>
-        </label>
+            className="w-56"
+            options={[
+              { value: "", label: "All types" },
+              ...ACCOUNT_TYPES.map((type) => ({ value: type, label: formatLabel(type) })),
+            ]}
+          />
+        </div>
         <button
           type="submit"
-          className="bg-[#198038] px-4 py-1.5 text-sm text-white hover:bg-[#0e6027]"
+          className="rounded-full bg-[#0c6e4f] px-4 py-1.5 text-sm text-white hover:bg-[#0a5c42]"
         >
           Apply filter
         </button>

@@ -3,11 +3,10 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import type { ProfessionalFilterCriteria } from "@/lib/admin/search";
+import { Select } from "@/components/ui/select";
 
 const INPUT_CLASS =
-  "border-b border-[#7a8a81] bg-[#f5f7f6] px-2 py-1 text-sm focus:border-[#198038] focus:outline-none";
-const SELECT_CLASS =
-  "border-b border-[#7a8a81] bg-[#f5f7f6] px-2 py-1 text-sm focus:border-[#198038] focus:outline-none";
+  "rounded-xl border border-[#dbe7e0] bg-white px-3 py-1.5 text-sm text-[#0c4a35] placeholder:text-[#9aa8a0] focus:border-[#198038] focus:outline-none focus:ring-2 focus:ring-[#198038]/15";
 
 const PROFESSIONAL_STATUSES = [
   "pending_verification",
@@ -30,6 +29,10 @@ const COMPLIANCE_STATUSES = [
 
 function formatLabel(value: string) {
   return value.replace(/_/g, " ");
+}
+
+function withAny(values: readonly string[]) {
+  return [{ value: "", label: "Any" }, ...values.map((v) => ({ value: v, label: formatLabel(v) }))];
 }
 
 type RoleOption = { id: string; name: string };
@@ -92,51 +95,36 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
             className={INPUT_CLASS}
           />
         </label>
-        <label className="flex flex-col gap-1 text-[#5b6a62]">
+        <div className="flex flex-col gap-1 text-[#5b6a62]">
           Professional status
-          <select
+          <Select
+            className="w-52"
+            aria-label="Professional status"
             value={professionalStatus}
-            onChange={(e) => setProfessionalStatus(e.target.value)}
-            className={SELECT_CLASS}
-          >
-            <option value="">Any</option>
-            {PROFESSIONAL_STATUSES.map((s) => (
-              <option key={s} value={s}>
-                {formatLabel(s)}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex flex-col gap-1 text-[#5b6a62]">
+            onValueChange={setProfessionalStatus}
+            options={withAny(PROFESSIONAL_STATUSES)}
+          />
+        </div>
+        <div className="flex flex-col gap-1 text-[#5b6a62]">
           Compliance status
-          <select
+          <Select
+            className="w-52"
+            aria-label="Compliance status"
             value={complianceStatus}
-            onChange={(e) => setComplianceStatus(e.target.value)}
-            className={SELECT_CLASS}
-          >
-            <option value="">Any</option>
-            {COMPLIANCE_STATUSES.map((s) => (
-              <option key={s} value={s}>
-                {formatLabel(s)}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex flex-col gap-1 text-[#5b6a62]">
+            onValueChange={setComplianceStatus}
+            options={withAny(COMPLIANCE_STATUSES)}
+          />
+        </div>
+        <div className="flex flex-col gap-1 text-[#5b6a62]">
           Role
-          <select
+          <Select
+            className="w-48"
+            aria-label="Role"
             value={roleId}
-            onChange={(e) => setRoleId(e.target.value)}
-            className={SELECT_CLASS}
-          >
-            <option value="">Any</option>
-            {roles.map((r) => (
-              <option key={r.id} value={r.id}>
-                {r.name}
-              </option>
-            ))}
-          </select>
-        </label>
+            onValueChange={setRoleId}
+            options={[{ value: "", label: "Any" }, ...roles.map((r) => ({ value: r.id, label: r.name }))]}
+          />
+        </div>
       </div>
       <div className="flex flex-wrap items-end gap-3">
         <label className="flex flex-col gap-1 text-[#5b6a62]">
@@ -171,7 +159,7 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
         </label>
         <button
           type="submit"
-          className="bg-[#198038] px-3 py-1.5 text-white hover:bg-[#0e6027]"
+          className="rounded-full bg-[#0c6e4f] px-4 py-1.5 text-white hover:bg-[#0a5c42]"
         >
           Search
         </button>

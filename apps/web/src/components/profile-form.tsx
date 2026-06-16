@@ -1,10 +1,13 @@
 "use client";
 import { useActionState } from "react";
-import Link from "next/link";
+import { ForwardLink } from "@/components/forward-link";
 import { saveProfile, type ProfileResult } from "@/lib/onboarding/actions";
 import { OnboardingSteps } from "@/components/onboarding-steps";
+import { Select } from "@/components/ui/select";
+import { DatePicker } from "@/components/ui/date-picker";
 
-const field = "mt-1 w-full rounded-none border-b border-[#7a8a81] bg-[#f5f7f6] px-3 py-2 text-sm focus:border-[#198038] focus:outline-none";
+const field =
+  "mt-1 w-full rounded-xl border border-[#dbe7e0] bg-white px-3.5 py-2.5 text-sm text-[#0c4a35] placeholder:text-[#9aa8a0] focus:border-[#198038] focus:outline-none focus:ring-2 focus:ring-[#198038]/15";
 
 type Role = { id: string; name: string };
 type Current = {
@@ -30,12 +33,12 @@ export function ProfileForm({ roles, current }: { roles: Role[]; current: Curren
         <OnboardingSteps current={3} />
         <div className="mt-8 rounded-2xl border border-[#dbe7e0] bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
           <h2 className="text-xl font-bold">Profile saved</h2>
-          <Link
+          <ForwardLink
             href="/professional/onboarding/documents"
-            className="mt-6 inline-block bg-[#198038] px-4 py-3 text-sm text-white hover:bg-[#0e6027]"
+            className="mt-6 rounded-full bg-[#0c6e4f] px-4 py-3 text-sm text-white hover:bg-[#0a5c42]"
           >
-            Continue to documents →
-          </Link>
+            Continue to documents
+          </ForwardLink>
         </div>
       </div>
     );
@@ -45,23 +48,27 @@ export function ProfileForm({ roles, current }: { roles: Role[]; current: Curren
     <div>
       <OnboardingSteps current={3} />
       <form action={action} className="mt-8 space-y-4">
-        <label className="block text-sm font-medium">
+        <div className="block text-sm font-medium">
           Professional role
-          <select name="professionalRoleId" required defaultValue={current?.professional_role_id ?? ""} className={field}>
-            <option value="" disabled>
-              Select a role…
-            </option>
-            {roles.map((r) => (
-              <option key={r.id} value={r.id}>
-                {r.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="block text-sm font-medium">
+          <Select
+            name="professionalRoleId"
+            aria-label="Professional role"
+            required
+            defaultValue={current?.professional_role_id ?? ""}
+            placeholder="Select a role…"
+            className="mt-1"
+            options={roles.map((r) => ({ value: r.id, label: r.name }))}
+          />
+        </div>
+        <div className="block text-sm font-medium">
           Date of birth
-          <input type="date" name="dateOfBirth" defaultValue={current?.date_of_birth ?? ""} className={field} />
-        </label>
+          <DatePicker
+            name="dateOfBirth"
+            aria-label="Date of birth"
+            defaultValue={current?.date_of_birth ?? ""}
+            className="mt-1"
+          />
+        </div>
         <label className="block text-sm font-medium">
           Address line 1
           <input name="addressLine1" required defaultValue={current?.address_line1 ?? ""} className={field} />
@@ -109,7 +116,7 @@ export function ProfileForm({ roles, current }: { roles: Role[]; current: Curren
         <button
           type="submit"
           disabled={pending}
-          className="bg-[#198038] px-4 py-3 text-sm text-white hover:bg-[#0e6027] disabled:opacity-50"
+          className="rounded-full bg-[#0c6e4f] px-4 py-3 text-sm text-white hover:bg-[#0a5c42] disabled:opacity-50"
         >
           {pending ? "Saving…" : "Save profile"}
         </button>

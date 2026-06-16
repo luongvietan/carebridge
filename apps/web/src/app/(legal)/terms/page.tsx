@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ArrowRight01Icon, Icon } from "@/components/ui/icon";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteNav } from "@/components/site-nav";
 
@@ -42,8 +43,9 @@ export default function TermsPage() {
             >
               <h2 className="text-lg font-semibold text-[#0c4a35]">{link.title}</h2>
               <p className="mt-2 text-sm leading-relaxed text-[#5b6a62]">{link.description}</p>
-              <span className="mt-4 inline-block text-sm font-semibold text-[#0c6e4f]">
-                Read document →
+              <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-[#0c6e4f]">
+                Read document
+                <Icon icon={ArrowRight01Icon} size={16} strokeWidth={2} aria-hidden />
               </span>
             </Link>
           ))}

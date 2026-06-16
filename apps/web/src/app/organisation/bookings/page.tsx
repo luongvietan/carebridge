@@ -62,7 +62,7 @@ export default async function OrganisationBookingsPage() {
         </div>
         <Link
           href="/organisation/bookings/new"
-          className="bg-[#198038] px-4 py-3 text-sm text-white hover:bg-[#0e6027]"
+          className="rounded-full bg-[#0c6e4f] px-4 py-3 text-sm text-white hover:bg-[#0a5c42]"
         >
           New booking
         </Link>

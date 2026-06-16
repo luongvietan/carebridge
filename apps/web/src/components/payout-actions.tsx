@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { recordPayout, markPayoutPaid } from "@/lib/payouts/actions";
+import { Select } from "@/components/ui/select";
 
 export function RecordPayoutButton({ bookingId }: { bookingId: string }) {
   const router = useRouter();
@@ -24,7 +25,7 @@ export function RecordPayoutButton({ bookingId }: { bookingId: string }) {
         type="button"
         onClick={handleRecord}
         disabled={busy}
-        className="bg-[#198038] px-3 py-1.5 text-sm text-white hover:bg-[#0e6027] disabled:opacity-50"
+        className="rounded-full bg-[#0c6e4f] px-3 py-1.5 text-sm text-white hover:bg-[#0a5c42] disabled:opacity-50"
       >
         {busy ? "Recording…" : "Record payout"}
       </button>
@@ -57,27 +58,29 @@ export function MarkPayoutPaidForm({ payoutId }: { payoutId: string }) {
     <form onSubmit={handleSubmit} className="flex flex-col items-end gap-1">
       {error && <span className="text-xs text-[#da1e28]">{error}</span>}
       <div className="flex items-center gap-2">
-        <select
+        <Select
+          aria-label="Payout method"
+          className="w-44"
           value={method}
-          onChange={(e) => setMethod(e.target.value)}
-          className="border-b border-[#7a8a81] bg-[#f5f7f6] px-2 py-1 text-sm focus:border-[#198038] focus:outline-none"
-        >
-          <option value="bank_transfer">Bank transfer</option>
-          <option value="bacs">BACS</option>
-          <option value="faster_payments">Faster Payments</option>
-          <option value="cheque">Cheque</option>
-        </select>
+          onValueChange={setMethod}
+          options={[
+            { value: "bank_transfer", label: "Bank transfer" },
+            { value: "bacs", label: "BACS" },
+            { value: "faster_payments", label: "Faster Payments" },
+            { value: "cheque", label: "Cheque" },
+          ]}
+        />
         <input
           type="text"
           placeholder="Reference"
           value={reference}
           onChange={(e) => setReference(e.target.value)}
-          className="border-b border-[#7a8a81] bg-transparent px-2 py-1 text-sm focus:border-[#198038] focus:outline-none"
+          className="rounded-lg border border-[#dbe7e0] bg-white px-2 py-1 text-sm focus:border-[#198038] focus:outline-none"
         />
         <button
           type="submit"
           disabled={busy}
-          className="bg-[#198038] px-3 py-1.5 text-sm text-white hover:bg-[#0e6027] disabled:opacity-50"
+          className="rounded-full bg-[#0c6e4f] px-3 py-1.5 text-sm text-white hover:bg-[#0a5c42] disabled:opacity-50"
         >
           {busy ? "Saving…" : "Mark paid"}
         </button>

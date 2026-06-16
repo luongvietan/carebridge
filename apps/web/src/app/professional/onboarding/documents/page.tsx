@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { ForwardLink } from "@/components/forward-link";
 import { createClient } from "@/lib/supabase/server";
 import { DocumentUploader, type DocItem } from "@/components/document-uploader";
 import { OnboardingSteps } from "@/components/onboarding-steps";
@@ -26,12 +26,12 @@ export default async function DocumentsPage() {
           <p className="mt-2 text-sm text-[#5b6a62]">
             We need your professional role to know which documents are required.
           </p>
-          <Link
+          <ForwardLink
             href="/professional/onboarding/profile"
-            className="mt-6 inline-block bg-[#198038] px-4 py-3 text-sm text-white hover:bg-[#0e6027]"
+            className="mt-6 rounded-full bg-[#0c6e4f] px-4 py-3 text-sm text-white hover:bg-[#0a5c42]"
           >
-            Go to profile →
-          </Link>
+            Go to profile
+          </ForwardLink>
         </div>
       </div>
     );

@@ -4,9 +4,10 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { setAccountStatus } from "@/lib/admin/account-actions";
 import { canSetAccountStatus, type AccountStatus } from "@/lib/admin/account-status";
+import { Select } from "@/components/ui/select";
 
 const INPUT_CLASS =
-  "border-b border-[#7a8a81] bg-[#f5f7f6] px-2 py-1 text-sm focus:border-[#198038] focus:outline-none w-full";
+  "w-full rounded-xl border border-[#dbe7e0] bg-white px-3.5 py-2.5 text-sm text-[#0c4a35] placeholder:text-[#9aa8a0] focus:border-[#198038] focus:outline-none focus:ring-2 focus:ring-[#198038]/15";
 
 const ALL_STATUSES: AccountStatus[] = ["active", "suspended", "deactivated"];
 
@@ -63,21 +64,15 @@ export function AccountStatusControl({ userId, current }: Props) {
         Current: <span className="font-medium">{formatLabel(current)}</span>
       </p>
 
-      <label className="flex flex-col gap-1 text-[#5b6a62]">
+      <div className="flex flex-col gap-1 text-[#5b6a62]">
         Set account status to
-        <select
+        <Select
+          aria-label="Set account status to"
           value={next}
-          onChange={(e) => setNext(e.target.value as AccountStatus)}
-          className={INPUT_CLASS}
-          required
-        >
-          {legalNext.map((status) => (
-            <option key={status} value={status}>
-              {formatLabel(status)}
-            </option>
-          ))}
-        </select>
-      </label>
+          onValueChange={(v) => setNext(v as AccountStatus)}
+          options={legalNext.map((status) => ({ value: status, label: formatLabel(status) }))}
+        />
+      </div>
 
       <label className="flex flex-col gap-1 text-[#5b6a62]">
         Reason (optional)
@@ -94,7 +89,7 @@ export function AccountStatusControl({ userId, current }: Props) {
       <button
         type="submit"
         disabled={pending}
-        className="bg-[#198038] px-4 py-1.5 text-white hover:bg-[#0e6027] disabled:opacity-50"
+        className="rounded-full bg-[#0c6e4f] px-4 py-1.5 text-white hover:bg-[#0a5c42] disabled:opacity-50"
       >
         {pending ? "Updating…" : "Update account status"}
       </button>

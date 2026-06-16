@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { uploadDocument } from "@/lib/onboarding/actions";
 import { OnboardingSteps } from "@/components/onboarding-steps";
+import { DatePicker } from "@/components/ui/date-picker";
 
 export type DocItem = {
   typeId: string;
@@ -28,7 +29,7 @@ function Badge({ status }: { status: string | null }) {
   );
 }
 
-const field = "rounded-none border-b border-[#7a8a81] bg-[#f5f7f6] px-2 py-1.5 text-sm focus:border-[#198038] focus:outline-none";
+const field = "rounded-xl border border-[#dbe7e0] bg-white px-2 py-1.5 text-sm focus:border-[#198038] focus:outline-none";
 
 export function DocumentUploader({ items }: { items: DocItem[] }) {
   const router = useRouter();
@@ -71,10 +72,10 @@ export function DocumentUploader({ items }: { items: DocItem[] }) {
             <form onSubmit={(e) => onUpload(e, item.typeId)} className="mt-3 flex flex-wrap items-end gap-3">
               <input type="file" name="file" required className="text-sm" />
               <input name="referenceNumber" placeholder="Reference no. (optional)" className={field} />
-              <label className="text-xs text-[#5b6a62]">
+              <div className="text-xs text-[#5b6a62]">
                 Expiry
-                <input type="date" name="expiryDate" className={`${field} ml-2`} />
-              </label>
+                <DatePicker name="expiryDate" aria-label="Expiry date" className="mt-1 w-40" />
+              </div>
               <button
                 type="submit"
                 disabled={busy === item.typeId}

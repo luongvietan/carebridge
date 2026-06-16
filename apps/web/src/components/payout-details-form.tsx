@@ -3,7 +3,7 @@ import { useActionState } from "react";
 import { savePayoutDetails, type PayoutResult } from "@/lib/payouts/actions";
 
 const field =
-  "mt-1 w-full rounded-none border-b border-[#7a8a81] bg-[#f5f7f6] px-3 py-2 text-sm focus:border-[#198038] focus:outline-none";
+  "mt-1 w-full rounded-xl border border-[#dbe7e0] bg-white px-3 py-2 text-sm focus:border-[#198038] focus:outline-none";
 
 export function PayoutDetailsForm({ last4 }: { last4: string | null }) {
   const [state, action, pending] = useActionState<PayoutResult, FormData>(
@@ -69,7 +69,7 @@ export function PayoutDetailsForm({ last4 }: { last4: string | null }) {
       <button
         type="submit"
         disabled={pending}
-        className="bg-[#198038] px-4 py-3 text-sm text-white hover:bg-[#0e6027] disabled:opacity-50"
+        className="rounded-full bg-[#0c6e4f] px-4 py-3 text-sm text-white hover:bg-[#0a5c42] disabled:opacity-50"
       >
         {pending ? "Saving…" : "Save bank details"}
       </button>

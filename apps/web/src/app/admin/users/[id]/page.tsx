@@ -1,5 +1,6 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { BackLink } from "@/components/back-link";
+import { ForwardLink } from "@/components/forward-link";
 import { AccountStatusControl } from "@/components/account-status-control";
 import { StatusActionForm } from "@/components/status-action-form";
 import { requireAdmin } from "@/lib/auth/admin";
@@ -57,9 +58,9 @@ export default async function AdminUserDetailPage({
     <main className="mx-auto max-w-4xl px-4 py-10">
       <div className="mt-1 flex flex-wrap items-baseline gap-x-4 gap-y-1">
         <h1 className="text-3xl font-bold">{professional.full_name}</h1>
-        <Link href="/admin/users" className="text-sm text-[#198038] hover:underline">
-          ← Back to list
-        </Link>
+        <BackLink href="/admin/users" className="text-sm text-[#198038] hover:underline">
+          Back to list
+        </BackLink>
       </div>
 
       <section className="mt-8 rounded-2xl border border-[#dbe7e0] bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)] text-sm">
@@ -87,9 +88,9 @@ export default async function AdminUserDetailPage({
           </div>
         </dl>
         <p className="mt-4">
-          <Link href="/admin/compliance" className="text-[#198038] hover:underline">
-            View compliance documents →
-          </Link>
+          <ForwardLink href="/admin/compliance" className="text-[#198038] hover:underline">
+            View compliance documents
+          </ForwardLink>
         </p>
       </section>
 

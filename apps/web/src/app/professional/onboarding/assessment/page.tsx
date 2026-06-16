@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import Link from "next/link";
+import { ForwardLink } from "@/components/forward-link";
 import {
   startAttempt,
   submitAttempt,
@@ -59,7 +59,7 @@ export default function AssessmentPage() {
             <button
               onClick={begin}
               disabled={busy}
-              className="mt-6 bg-[#198038] px-4 py-3 text-sm text-white hover:bg-[#0e6027] disabled:opacity-50"
+              className="mt-6 rounded-full bg-[#0c6e4f] px-4 py-3 text-sm text-white hover:bg-[#0a5c42] disabled:opacity-50"
             >
               {busy ? "Loading…" : "Begin assessment"}
             </button>
@@ -95,7 +95,7 @@ export default function AssessmentPage() {
             <button
               onClick={submit}
               disabled={busy || !allAnswered}
-              className="bg-[#198038] px-4 py-3 text-sm text-white hover:bg-[#0e6027] disabled:opacity-50"
+              className="rounded-full bg-[#0c6e4f] px-4 py-3 text-sm text-white hover:bg-[#0a5c42] disabled:opacity-50"
             >
               {busy ? "Submitting…" : "Submit answers"}
             </button>
@@ -111,19 +111,19 @@ export default function AssessmentPage() {
             {result.passed ? (
               <>
                 <p className="mt-2 text-sm text-[#24a148]">Passed — the minimum is 80%.</p>
-                <Link
+                <ForwardLink
                   href="/professional/onboarding/profile"
-                  className="mt-6 inline-block bg-[#198038] px-4 py-3 text-sm text-white hover:bg-[#0e6027]"
+                  className="mt-6 rounded-full bg-[#0c6e4f] px-4 py-3 text-sm text-white hover:bg-[#0a5c42]"
                 >
-                  Continue to profile →
-                </Link>
+                  Continue to profile
+                </ForwardLink>
               </>
             ) : result.canRetry ? (
               <>
                 <p className="mt-2 text-sm text-[#da1e28]">Below the 80% pass mark. You may try again.</p>
                 <button
                   onClick={() => setPhase("intro")}
-                  className="mt-6 bg-[#198038] px-4 py-3 text-sm text-white hover:bg-[#0e6027]"
+                  className="mt-6 rounded-full bg-[#0c6e4f] px-4 py-3 text-sm text-white hover:bg-[#0a5c42]"
                 >
                   Try again
                 </button>

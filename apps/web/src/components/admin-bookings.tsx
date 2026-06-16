@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { assignBooking, cancelBooking, completeBooking, markNoShow } from "@/lib/bookings/actions";
+import { Select } from "@/components/ui/select";
 
 type AdminBooking = {
   id: string;
@@ -68,22 +69,18 @@ function AssignControl({
     <div className="flex flex-col items-end gap-1">
       {error && <span className="text-xs text-[#da1e28]">{error}</span>}
       <div className="flex items-center gap-2">
-        <select
+        <Select
+          aria-label="Assign professional"
+          className="w-48"
           value={selected}
-          onChange={(e) => setSelected(e.target.value)}
-          className="border-b border-[#7a8a81] bg-[#f5f7f6] px-2 py-1 text-sm focus:border-[#198038] focus:outline-none"
-        >
-          {eligible.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.full_name}
-            </option>
-          ))}
-        </select>
+          onValueChange={setSelected}
+          options={eligible.map((p) => ({ value: p.id, label: p.full_name }))}
+        />
         <button
           type="button"
           onClick={handleAssign}
           disabled={busy || !selected}
-          className="bg-[#198038] px-3 py-1.5 text-sm text-white hover:bg-[#0e6027] disabled:opacity-50"
+          className="rounded-full bg-[#0c6e4f] px-3 py-1.5 text-sm text-white hover:bg-[#0a5c42] disabled:opacity-50"
         >
           {busy ? "Assigning…" : "Assign"}
         </button>
@@ -142,7 +139,7 @@ function CompleteControl({ bookingId, onDone }: { bookingId: string; onDone: () 
         type="button"
         onClick={handleComplete}
         disabled={busy}
-        className="bg-[#198038] px-3 py-1.5 text-sm text-white hover:bg-[#0e6027] disabled:opacity-50"
+        className="rounded-full bg-[#0c6e4f] px-3 py-1.5 text-sm text-white hover:bg-[#0a5c42] disabled:opacity-50"
       >
         {busy ? "Saving…" : "Mark completed"}
       </button>

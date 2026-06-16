@@ -8,11 +8,11 @@ import {
   type ProfessionalStatus,
   type StatusActionType,
 } from "@/lib/admin/status-machine";
+import { Select } from "@/components/ui/select";
+import { DatePicker } from "@/components/ui/date-picker";
 
 const INPUT_CLASS =
-  "border-b border-[#7a8a81] bg-[#f5f7f6] px-2 py-1 text-sm focus:border-[#198038] focus:outline-none w-full";
-const SELECT_CLASS =
-  "border-b border-[#7a8a81] bg-[#f5f7f6] px-2 py-1 text-sm focus:border-[#198038] focus:outline-none w-full";
+  "w-full rounded-xl border border-[#dbe7e0] bg-white px-3.5 py-2.5 text-sm text-[#0c4a35] placeholder:text-[#9aa8a0] focus:border-[#198038] focus:outline-none focus:ring-2 focus:ring-[#198038]/15";
 
 const REASON_CODES = [
   "last_minute_cancellation",
@@ -110,38 +110,28 @@ export function StatusActionForm({ professionalId, currentStatus }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 text-sm">
-      <label className="flex flex-col gap-1 text-[#5b6a62]">
+      <div className="flex flex-col gap-1 text-[#5b6a62]">
         Action
-        <select
+        <Select
+          aria-label="Action"
           value={action}
-          onChange={(e) => setAction(e.target.value as StatusActionType)}
-          className={SELECT_CLASS}
-          required
-        >
-          {actions.map((a) => (
-            <option key={a} value={a}>
-              {formatLabel(a)}
-            </option>
-          ))}
-        </select>
-      </label>
+          onValueChange={(v) => setAction(v as StatusActionType)}
+          options={actions.map((a) => ({ value: a, label: formatLabel(a) }))}
+        />
+      </div>
 
-      <label className="flex flex-col gap-1 text-[#5b6a62]">
+      <div className="flex flex-col gap-1 text-[#5b6a62]">
         Reason code{isPunitive ? " (required)" : ""}
-        <select
+        <Select
+          aria-label="Reason code"
           value={reasonCode}
-          onChange={(e) => setReasonCode(e.target.value)}
-          className={SELECT_CLASS}
-          required={isPunitive}
-        >
-          <option value="">{isPunitive ? "Select a reason…" : "None"}</option>
-          {REASON_CODES.map((code) => (
-            <option key={code} value={code}>
-              {formatLabel(code)}
-            </option>
-          ))}
-        </select>
-      </label>
+          onValueChange={setReasonCode}
+          options={[
+            { value: "", label: isPunitive ? "Select a reason…" : "None" },
+            ...REASON_CODES.map((code) => ({ value: code, label: formatLabel(code) })),
+          ]}
+        />
+      </div>
 
       <label className="flex flex-col gap-1 text-[#5b6a62]">
         Reason text
@@ -164,22 +154,17 @@ export function StatusActionForm({ professionalId, currentStatus }: Props) {
         />
       </label>
 
-      <label className="flex flex-col gap-1 text-[#5b6a62]">
+      <div className="flex flex-col gap-1 text-[#5b6a62]">
         Review date
-        <input
-          type="date"
-          value={reviewDate}
-          onChange={(e) => setReviewDate(e.target.value)}
-          className={INPUT_CLASS}
-        />
-      </label>
+        <DatePicker aria-label="Review date" value={reviewDate} onValueChange={setReviewDate} />
+      </div>
 
       {error && <p className="text-sm text-[#da1e28]">{error}</p>}
 
       <button
         type="submit"
         disabled={pending}
-        className="bg-[#198038] px-4 py-1.5 text-white hover:bg-[#0e6027] disabled:opacity-50"
+        className="rounded-full bg-[#0c6e4f] px-4 py-1.5 text-white hover:bg-[#0a5c42] disabled:opacity-50"
       >
         {pending ? "Applying…" : "Apply action"}
       </button>

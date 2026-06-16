@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { ForwardLink } from "@/components/forward-link";
 import { emergencyDisclaimer, importantInformation } from "@/data/marketing-copy";
 import { marketingSection, marketingSurface } from "@/lib/marketing-ui";
 
@@ -19,12 +19,12 @@ export function ImportantInfoCallout() {
         <p className="mt-4 max-w-3xl rounded-xl border border-[#f5c6cb] bg-[#fff5f5] px-4 py-3 text-sm font-medium leading-relaxed text-[#8b2e2e]">
           {emergencyDisclaimer}
         </p>
-        <Link
+        <ForwardLink
           href="/disclaimer"
-          className="mt-4 inline-block text-sm font-semibold text-[#0c6e4f] hover:underline"
+          className="mt-4 text-sm font-semibold text-[#0c6e4f] hover:underline"
         >
-          Read the full important information &amp; disclaimer →
-        </Link>
+          Read the full important information &amp; disclaimer
+        </ForwardLink>
       </div>
     </section>
   );

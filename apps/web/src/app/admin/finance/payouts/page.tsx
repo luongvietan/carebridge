@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { BackLink } from "@/components/back-link";
 import { createServiceClient } from "@/lib/supabase/service";
 import { requireAdmin } from "@/lib/auth/admin";
 import { RecordPayoutButton, MarkPayoutPaidForm } from "@/components/payout-actions";
@@ -93,12 +94,12 @@ export default async function AdminPayoutsPage() {
         <div>
           <h1 className="mt-1 text-3xl font-bold">Payouts</h1>
         </div>
-        <a
+        <BackLink
           href="/admin/finance"
-          className="border border-[#7a8a81] px-3 py-1.5 text-sm hover:bg-[#f5f7f6]"
+          className="rounded-full border border-[#dbe7e0] px-4 py-1.5 text-sm text-[#0c4a35] hover:bg-[#f5f7f6]"
         >
-          ← Finance overview
-        </a>
+          Finance overview
+        </BackLink>
       </div>
 
       {/* Bookings awaiting payout */}

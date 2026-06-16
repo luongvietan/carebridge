@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import Link from "next/link";
+import { ForwardLink } from "@/components/forward-link";
 import { CtaBanner } from "@/components/cta-banner";
 import { CtaPillLink } from "@/components/cta-pill-link";
 import { ImportantInfoCallout } from "@/components/important-info-callout";
@@ -166,12 +166,12 @@ export default function AboutPage() {
                 </p>
               ))}
             </div>
-            <Link
+            <ForwardLink
               href="/disclaimer"
-              className="mt-6 inline-block text-sm font-semibold text-[#0c6e4f] hover:underline"
+              className="mt-6 text-sm font-semibold text-[#0c6e4f] hover:underline"
             >
-              Read the full disclaimer →
-            </Link>
+              Read the full disclaimer
+            </ForwardLink>
           </div>
         </section>
 

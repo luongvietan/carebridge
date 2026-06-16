@@ -60,7 +60,7 @@ export function ReviewQueue({ items }: { items: ReviewItem[] }) {
               <button
                 onClick={() => decide(it.documentId, "approved")}
                 disabled={busy === it.documentId}
-                className="bg-[#198038] px-3 py-1.5 text-white hover:bg-[#0e6027] disabled:opacity-50"
+                className="rounded-full bg-[#0c6e4f] px-3 py-1.5 text-white hover:bg-[#0a5c42] disabled:opacity-50"
               >
                 Approve
               </button>

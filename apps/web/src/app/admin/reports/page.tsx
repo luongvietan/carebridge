@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth/admin";
 import { createServiceClient } from "@/lib/supabase/service";
 import { DATASETS, type DatasetName } from "@/lib/export/datasets";
+import { DatePicker } from "@/components/ui/date-picker";
 
 export const dynamic = "force-dynamic";
 
@@ -87,19 +88,19 @@ export default async function AdminReportsPage({
       <section className="mt-12">
         <h2 className="text-xl font-bold">Audit report</h2>
         <form method="GET" className="mt-4 flex flex-wrap items-center gap-3 text-sm">
-          <label className="flex items-center gap-1 text-[#5b6a62]">
-            From<input type="date" name="from" defaultValue={from ?? ""}
-              className="ml-1 border-b border-[#7a8a81] bg-transparent px-1 py-0.5 focus:border-[#198038] focus:outline-none" />
-          </label>
-          <label className="flex items-center gap-1 text-[#5b6a62]">
-            To<input type="date" name="to" defaultValue={to ?? ""}
-              className="ml-1 border-b border-[#7a8a81] bg-transparent px-1 py-0.5 focus:border-[#198038] focus:outline-none" />
-          </label>
+          <div className="flex items-center gap-2 text-[#5b6a62]">
+            From
+            <DatePicker name="from" aria-label="From date" defaultValue={from ?? ""} className="w-40" />
+          </div>
+          <div className="flex items-center gap-2 text-[#5b6a62]">
+            To
+            <DatePicker name="to" aria-label="To date" defaultValue={to ?? ""} className="w-40" />
+          </div>
           <input type="text" name="entity_type" placeholder="Entity type" defaultValue={entity_type ?? ""}
-            className="border-b border-[#7a8a81] bg-transparent px-1 py-0.5 focus:border-[#198038] focus:outline-none" />
+            className="rounded-lg border border-[#dbe7e0] bg-white px-1 py-0.5 focus:border-[#198038] focus:outline-none" />
           <input type="text" name="actor_type" placeholder="Actor type" defaultValue={actor_type ?? ""}
-            className="border-b border-[#7a8a81] bg-transparent px-1 py-0.5 focus:border-[#198038] focus:outline-none" />
-          <button type="submit" className="bg-[#198038] px-3 py-1.5 text-white hover:bg-[#0e6027]">Filter</button>
+            className="rounded-lg border border-[#dbe7e0] bg-white px-1 py-0.5 focus:border-[#198038] focus:outline-none" />
+          <button type="submit" className="rounded-full bg-[#0c6e4f] px-3 py-1.5 text-white hover:bg-[#0a5c42]">Filter</button>
         </form>
 
         <div className="mt-4 flex gap-4 text-sm">

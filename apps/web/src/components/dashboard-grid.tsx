@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowRight01Icon, Icon } from "@/components/ui/icon";
 
 export type DashboardCard = {
   href: string;
@@ -20,9 +21,13 @@ export function DashboardGrid({ cards }: { cards: DashboardCard[] }) {
           <p className="mt-2 flex-1 text-sm leading-relaxed text-[#5b6a62]">{card.description}</p>
           <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-[#0c6e4f] transition-colors group-hover:text-[#0a5c42]">
             {card.cta}
-            <span aria-hidden className="transition-transform group-hover:translate-x-0.5">
-              &rarr;
-            </span>
+            <Icon
+              icon={ArrowRight01Icon}
+              size={16}
+              strokeWidth={2}
+              aria-hidden
+              className="transition-transform group-hover:translate-x-0.5"
+            />
           </span>
         </Link>
       ))}

@@ -1,6 +1,6 @@
 "use client";
 import { useActionState } from "react";
-import Link from "next/link";
+import { ForwardLink } from "@/components/forward-link";
 import {
   saveClientProfile,
   saveOrganisationProfile,
@@ -8,7 +8,7 @@ import {
 } from "@/lib/accounts/actions";
 
 const field =
-  "mt-1 w-full rounded-none border-b border-[#7a8a81] bg-[#f5f7f6] px-3 py-2 text-sm focus:border-[#198038] focus:outline-none";
+  "mt-1 w-full rounded-xl border border-[#dbe7e0] bg-white px-3 py-2 text-sm focus:border-[#198038] focus:outline-none";
 
 type Variant = "client" | "organisation";
 
@@ -21,12 +21,12 @@ export function AccountRegisterForm({ variant }: { variant: Variant }) {
     return (
       <div className="rounded-2xl border border-[#dbe7e0] bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
         <h2 className="text-xl font-bold">Profile saved — you can now create bookings</h2>
-        <Link
+        <ForwardLink
           href={bookingsHref}
-          className="mt-6 inline-block bg-[#198038] px-4 py-3 text-sm text-white hover:bg-[#0e6027]"
+          className="mt-6 rounded-full bg-[#0c6e4f] px-4 py-3 text-sm text-white hover:bg-[#0a5c42]"
         >
-          Go to bookings →
-        </Link>
+          Go to bookings
+        </ForwardLink>
       </div>
     );
   }
@@ -113,7 +113,7 @@ export function AccountRegisterForm({ variant }: { variant: Variant }) {
       <button
         type="submit"
         disabled={pending}
-        className="bg-[#198038] px-4 py-3 text-sm text-white hover:bg-[#0e6027] disabled:opacity-50"
+        className="rounded-full bg-[#0c6e4f] px-4 py-3 text-sm text-white hover:bg-[#0a5c42] disabled:opacity-50"
       >
         {pending ? "Saving…" : "Save profile"}
       </button>

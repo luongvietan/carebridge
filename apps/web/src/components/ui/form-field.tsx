@@ -7,14 +7,14 @@ import type {
   TextareaHTMLAttributes,
 } from "react";
 
-/** Shared authenticated-area form styles (Carbon-inspired underline fields). */
+/** Shared authenticated-area form styles (match the Home marketing inputs). */
 export const appFieldClass =
-  "mt-1 w-full rounded-none border-b border-[#7a8a81] bg-[#f5f7f6] px-3 py-2 text-sm text-[#0f261c] focus:border-[#198038] focus:outline-none";
+  "mt-1 w-full rounded-xl border border-[#dbe7e0] bg-white px-3.5 py-2.5 text-sm text-[#0c4a35] placeholder:text-[#9aa8a0] focus:border-[#198038] focus:outline-none focus:ring-2 focus:ring-[#198038]/15";
 
 export const appLabelClass = "block text-sm font-medium text-[#0f261c]";
 
 export const appButtonPrimaryClass =
-  "bg-[#198038] px-4 py-3 text-sm text-white hover:bg-[#0e6027] disabled:opacity-50";
+  "rounded-full bg-[#0c6e4f] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#0a5c42] disabled:opacity-50";
 
 type FormFieldProps = {
   label: string;

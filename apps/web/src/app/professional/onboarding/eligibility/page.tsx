@@ -1,6 +1,6 @@
 "use client";
 import { useActionState } from "react";
-import Link from "next/link";
+import { ForwardLink } from "@/components/forward-link";
 import { submitEligibility, type EligibilityResult } from "@/lib/onboarding/actions";
 import { employmentStatuses, employmentStatusLabels } from "@/lib/validation/onboarding";
 import { OnboardingSteps } from "@/components/onboarding-steps";
@@ -35,12 +35,12 @@ export default function EligibilityPage() {
           ) : (
             <p className="mt-2 text-sm text-[#5b6a62]">You can continue to the assessment.</p>
           )}
-          <Link
+          <ForwardLink
             href="/professional/onboarding/assessment"
-            className="mt-6 inline-block bg-[#198038] px-4 py-3 text-sm text-white hover:bg-[#0e6027]"
+            className="mt-6 rounded-full bg-[#0c6e4f] px-4 py-3 text-sm text-white hover:bg-[#0a5c42]"
           >
-            Continue to assessment →
-          </Link>
+            Continue to assessment
+          </ForwardLink>
         </div>
       </div>
     );
@@ -87,7 +87,7 @@ export default function EligibilityPage() {
         <button
           type="submit"
           disabled={pending}
-          className="bg-[#198038] px-4 py-3 text-sm text-white hover:bg-[#0e6027] disabled:opacity-50"
+          className="rounded-full bg-[#0c6e4f] px-4 py-3 text-sm text-white hover:bg-[#0a5c42] disabled:opacity-50"
         >
           {pending ? "Saving…" : "Continue"}
         </button>
