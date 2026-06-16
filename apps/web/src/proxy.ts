@@ -1,12 +1,29 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { isAreaAllowed, roleHome, type AccountType } from "@/lib/auth/rbac";
+import { getGateSecret, hasValidGateCookie, isGateEnabled, isGatePathExempt } from "@/lib/auth/gate";
 
 const GUARDED = ["/professional", "/client", "/organisation", "/admin"];
 
+function gateRedirect(request: NextRequest, path: string): NextResponse {
+  const gateUrl = new URL("/gate", request.url);
+  if (path !== "/") {
+    gateUrl.searchParams.set("next", path);
+  }
+  return NextResponse.redirect(gateUrl);
+}
+
 export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
-  if (!GUARDED.some((a) => path === a || path.startsWith(a + "/"))) {
+
+  if (isGateEnabled() && !isGatePathExempt(path)) {
+    const secret = getGateSecret();
+    if (!secret || !hasValidGateCookie(request, secret)) {
+      return gateRedirect(request, path);
+    }
+  }
+
+  if (!GUARDED.some((area) => path === area || path.startsWith(`${area}/`))) {
     return NextResponse.next();
   }
 
@@ -45,13 +62,6 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/professional",
-    "/professional/:path*",
-    "/client",
-    "/client/:path*",
-    "/organisation",
-    "/organisation/:path*",
-    "/admin",
-    "/admin/:path*",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 };
