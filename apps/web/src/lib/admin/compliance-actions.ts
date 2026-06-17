@@ -2,7 +2,7 @@
 import { createServiceClient } from "@/lib/supabase/service";
 import { requireAdmin } from "@/lib/auth/admin";
 import { requireAuth } from "@/lib/auth/require-auth";
-import { isCompliant, canActivateProfessional } from "@/lib/compliance/requirements";
+import { evaluateActivation } from "@/lib/compliance/activation";
 import { sendNotification } from "@/lib/notifications/send";
 import { sendDueComplianceReminders } from "@/lib/compliance/reminders";
 import type { ProfessionalStatus } from "./status-machine";
@@ -93,60 +93,10 @@ async function recomputeCompliance(
     .single();
   if (!prof?.professional_role_id) return;
 
-  const { data: reqs } = await admin
-    .from("compliance_requirements")
-    .select("document_type_id, document_types(is_compliance_critical)")
-    .eq("professional_role_id", prof.professional_role_id);
-  const requiredCritical: string[] = [];
-  for (const r of reqs ?? []) {
-    if ((r.document_types as { is_compliance_critical: boolean } | null)?.is_compliance_critical) {
-      requiredCritical.push(r.document_type_id);
-    }
-  }
-
-  const { data: approved } = await admin
-    .from("documents")
-    .select("document_type_id")
-    .eq("professional_id", professionalId)
-    .eq("verification_status", "approved");
-  const approvedSet = new Set((approved ?? []).map((d) => d.document_type_id));
-
-  const documentsCompliant = isCompliant(requiredCritical, approvedSet);
-
-  // Spec item 1: an applicant who declared their mandatory training is NOT current
-  // stays pending "until updated training certificates are provided". Read the
-  // latest screening attestation and whether an approved training certificate
-  // exists, then gate activation on both document compliance AND training.
-  const { data: screening } = await admin
-    .from("eligibility_screenings")
-    .select("training_current")
-    .eq("professional_id", professionalId)
-    .order("submitted_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  const trainingAttestedCurrent = screening ? screening.training_current : null;
-
-  const { data: trainingType } = await admin
-    .from("document_types")
-    .select("id")
-    .eq("code", "mandatory_training_certificate")
-    .maybeSingle();
-  const hasApprovedTrainingCertificate = trainingType ? approvedSet.has(trainingType.id) : false;
-
-  // Spec item 2: the competency assessment must be passed before activation.
-  const { count: passedCount } = await admin
-    .from("assessment_attempts")
-    .select("id", { count: "exact", head: true })
-    .eq("professional_id", professionalId)
-    .eq("passed", true);
-  const assessmentPassed = (passedCount ?? 0) > 0;
-
-  const activate = canActivateProfessional({
-    documentsCompliant,
-    assessmentPassed,
-    trainingAttestedCurrent,
-    hasApprovedTrainingCertificate,
-  });
+  // Gate on live documents, the competency assessment (spec item 2), and the
+  // training attestation (spec item 1) — see evaluateActivation. Shared with the
+  // admin reinstate flow so both apply the same activation rules.
+  const { documentsCompliant, activate } = await evaluateActivation(admin, professionalId);
 
   if (activate) {
     const becameActive = COMPLIANCE_BLOCKED.includes(

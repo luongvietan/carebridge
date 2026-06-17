@@ -4,6 +4,8 @@ import { requireAdmin } from "@/lib/auth/admin";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { applyStatusAction, type ProfessionalStatus, type StatusActionType } from "./status-machine";
 import { PUNITIVE, REASON_CODES, type ReasonCode } from "./status-constants";
+import { reinstateOutcome, type ComplianceStatus } from "./reinstate-compliance";
+import { evaluateActivation } from "@/lib/compliance/activation";
 import type { AccountStatus } from "./account-status";
 
 export type StatusActionResult = { ok: true } | { error: string };
@@ -45,7 +47,22 @@ export async function applyProfessionalStatusAction(
   const t = applyStatusAction(prof.professional_status as ProfessionalStatus, action);
   if (!t.ok) return { error: t.error };
 
-  const { error } = await admin.from("professionals").update({ professional_status: t.to }).eq("id", professionalId);
+  // A reinstate lifts the manual hold, but must not blindly restore booking
+  // ability: re-evaluate live compliance so a professional whose documents
+  // lapsed while suspended stays booking-restricted until re-approved.
+  let finalStatus: ProfessionalStatus = t.to;
+  const update: { professional_status: ProfessionalStatus; compliance_status?: ComplianceStatus } = {
+    professional_status: t.to,
+  };
+  if (action === "reinstate") {
+    const { activate, documentsCompliant } = await evaluateActivation(admin, professionalId);
+    const outcome = reinstateOutcome({ activatable: activate, documentsCompliant });
+    finalStatus = outcome.professionalStatus;
+    update.professional_status = outcome.professionalStatus;
+    update.compliance_status = outcome.complianceStatus;
+  }
+
+  const { error } = await admin.from("professionals").update(update).eq("id", professionalId);
   if (error) return { error: error.message };
 
   // Drive platform account access for actions that gate login (full suspension /
@@ -74,7 +91,7 @@ export async function applyProfessionalStatusAction(
     professional_id: professionalId, action_type: action,
     reason_code: (details.reasonCode as ReasonCode) ?? null,
     reason_text: details.reasonText ?? null, internal_notes: details.internalNotes ?? null,
-    review_date: details.reviewDate ?? null, resulting_status: t.to, applied_by: adminId,
+    review_date: details.reviewDate ?? null, resulting_status: finalStatus, applied_by: adminId,
   });
   await admin.from("audit_log").insert({
     actor_user_id: adminId, actor_type: "admin", action: `professional.${action}`,
