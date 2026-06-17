@@ -843,6 +843,7 @@ export type Database = {
           outcome: string
           professional_id: string
           submitted_at: string
+          training_attestations: Json | null
           training_current: boolean
         }
         Insert: {
@@ -851,6 +852,7 @@ export type Database = {
           outcome: string
           professional_id: string
           submitted_at?: string
+          training_attestations?: Json | null
           training_current: boolean
         }
         Update: {
@@ -859,6 +861,7 @@ export type Database = {
           outcome?: string
           professional_id?: string
           submitted_at?: string
+          training_attestations?: Json | null
           training_current?: boolean
         }
         Relationships: [

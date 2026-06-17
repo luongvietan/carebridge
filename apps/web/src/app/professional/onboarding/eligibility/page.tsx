@@ -2,18 +2,12 @@
 import { useActionState } from "react";
 import { ForwardLink } from "@/components/forward-link";
 import { submitEligibility, type EligibilityResult } from "@/lib/onboarding/actions";
-import { employmentStatuses, employmentStatusLabels } from "@/lib/validation/onboarding";
+import {
+  employmentStatuses,
+  employmentStatusLabels,
+  mandatoryTrainingItems,
+} from "@/lib/validation/onboarding";
 import { OnboardingSteps } from "@/components/onboarding-steps";
-
-const MANDATORY_TRAINING = [
-  "Safeguarding Adults",
-  "Safeguarding Children",
-  "Basic Life Support",
-  "Infection Prevention & Control",
-  "Health & Safety",
-  "Moving & Handling",
-  "GDPR & Confidentiality",
-];
 
 export default function EligibilityPage() {
   const [state, action, pending] = useActionState<EligibilityResult, FormData>(
@@ -65,21 +59,17 @@ export default function EligibilityPage() {
         <fieldset>
           <legend className="text-base font-semibold">Mandatory training</legend>
           <p className="mt-2 text-sm text-[#5b6a62]">
-            Confirm that all of the following were completed within the previous 12 months:
+            Tick each training you have completed within the previous 12 months. Any you cannot
+            confirm will keep your application <strong>pending</strong> until updated certificates
+            are provided.
           </p>
-          <ul className="mt-2 list-disc pl-5 text-sm text-[#5b6a62]">
-            {MANDATORY_TRAINING.map((t) => (
-              <li key={t}>{t}</li>
-            ))}
-          </ul>
           <div className="mt-3 space-y-2 text-sm">
-            <label className="flex items-center gap-2">
-              <input type="radio" name="trainingCurrent" value="yes" defaultChecked /> Yes, all
-              current
-            </label>
-            <label className="flex items-center gap-2">
-              <input type="radio" name="trainingCurrent" value="no" /> No, some need updating
-            </label>
+            {mandatoryTrainingItems.map((t) => (
+              <label key={t.key} className="flex items-center gap-2">
+                <input type="checkbox" name={`training_${t.key}`} className="accent-[#2e7d32]" />
+                {t.label}
+              </label>
+            ))}
           </div>
         </fieldset>
 

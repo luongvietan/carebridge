@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { acceptBooking, declineBooking, completeBooking } from "@/lib/bookings/actions";
+import { acceptBooking, declineBooking, completeBooking, undoDecline } from "@/lib/bookings/actions";
 
 import { formatGbpMoney } from "@/lib/format/money";
 
@@ -82,6 +82,34 @@ function BookingActions({
   );
 }
 
+function UndoDeclineControl({ bookingId, onDone }: { bookingId: string; onDone: () => void }) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleUndo() {
+    setBusy(true);
+    setError(null);
+    const result = await undoDecline(bookingId);
+    setBusy(false);
+    if ("error" in result) setError(result.error);
+    else onDone();
+  }
+
+  return (
+    <div className="flex flex-col items-end gap-1">
+      {error && <span className="text-xs text-[#da1e28]">{error}</span>}
+      <button
+        type="button"
+        onClick={handleUndo}
+        disabled={busy}
+        className="rounded-full border border-[#dbe7e0] px-4 py-1.5 text-sm font-medium text-[#1e5a33] transition hover:border-[#bcd8c7] hover:bg-[#f5f7f6] disabled:opacity-50"
+      >
+        {busy ? "Restoring…" : "Undo decline"}
+      </button>
+    </div>
+  );
+}
+
 function CompleteControl({ bookingId, onDone }: { bookingId: string; onDone: () => void }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -111,10 +139,11 @@ function CompleteControl({ bookingId, onDone }: { bookingId: string; onDone: () 
   );
 }
 
-function BookingTable({ rows, showActions, showComplete, eligible, onRefresh }: {
+function BookingTable({ rows, showActions, showComplete, showUndo, eligible, onRefresh }: {
   rows: BookingRow[];
   showActions?: boolean;
   showComplete?: boolean;
+  showUndo?: boolean;
   eligible?: boolean;
   onRefresh: () => void;
 }) {
@@ -122,7 +151,7 @@ function BookingTable({ rows, showActions, showComplete, eligible, onRefresh }: 
     return <p className="mt-3 text-sm text-[#5b6a62]">None.</p>;
   }
 
-  const hasActionsCol = showActions || showComplete;
+  const hasActionsCol = showActions || showComplete || showUndo;
 
   return (
     <div className="mt-4 overflow-x-auto rounded-2xl border border-[#dbe7e0] shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
@@ -157,6 +186,9 @@ function BookingTable({ rows, showActions, showComplete, eligible, onRefresh }: 
                   {showComplete && (
                     <CompleteControl bookingId={b.id} onDone={onRefresh} />
                   )}
+                  {showUndo && (
+                    <UndoDeclineControl bookingId={b.id} onDone={onRefresh} />
+                  )}
                 </td>
               )}
             </tr>
@@ -170,10 +202,12 @@ function BookingTable({ rows, showActions, showComplete, eligible, onRefresh }: 
 export function ProfessionalBookings({
   open,
   mine,
+  declined = [],
   eligible,
 }: {
   open: BookingRow[];
   mine: BookingRow[];
+  declined?: BookingRow[];
   eligible: boolean;
 }) {
   const router = useRouter();
@@ -186,6 +220,16 @@ export function ProfessionalBookings({
         <h2 className="text-xl font-bold">Open bookings</h2>
         <BookingTable rows={open} showActions eligible={eligible} onRefresh={() => router.refresh()} />
       </section>
+
+      {declined.length > 0 && (
+        <section className="mt-12">
+          <h2 className="text-xl font-bold">Declined bookings</h2>
+          <p className="mt-1 text-sm text-[#5b6a62]">
+            Still open for others — undo a decline to offer it to yourself again.
+          </p>
+          <BookingTable rows={declined} showUndo onRefresh={() => router.refresh()} />
+        </section>
+      )}
 
       <section className="mt-12">
         <h2 className="text-xl font-bold">My bookings</h2>

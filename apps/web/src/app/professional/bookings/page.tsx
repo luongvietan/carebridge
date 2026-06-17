@@ -27,16 +27,23 @@ export default async function ProfessionalBookingsPage() {
     .order("scheduled_start", { ascending: true });
 
   const roleId = prof?.professional_role_id ?? null;
-  const open = (rows ?? []).filter(
-    (b) => b.status === "open" && b.professional_role_id === roleId && !declined.has(b.id),
+  const forMyRole = (rows ?? []).filter(
+    (b) => b.status === "open" && b.professional_role_id === roleId,
   );
+  const open = forMyRole.filter((b) => !declined.has(b.id));
+  const declinedOpen = forMyRole.filter((b) => declined.has(b.id));
   const mine = (rows ?? []).filter((b) => b.assigned_professional_id === prof?.id);
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-10">
       <h1 className="mt-1 text-3xl font-bold">Bookings</h1>
       <div className="mt-10">
-        <ProfessionalBookings open={open} mine={mine} eligible={!!prof?.can_accept_bookings} />
+        <ProfessionalBookings
+          open={open}
+          mine={mine}
+          declined={declinedOpen}
+          eligible={!!prof?.can_accept_bookings}
+        />
       </div>
     </main>
   );

@@ -17,6 +17,7 @@ import {
   writeCreateBooking,
   writeDeclineBooking,
   writeMarkNoShow,
+  writeUndoDecline,
 } from "./service-writes";
 
 export type BookingActionResult = { ok: true; id?: string } | { error: string };
@@ -187,6 +188,19 @@ export async function declineBooking(bookingId: string, reason?: string): Promis
   }
 
   return writeDeclineBooking(bookingId, prof.id, reason);
+}
+
+/** Professional reverses an earlier decline so the open booking is offered again. */
+export async function undoDecline(bookingId: string): Promise<BookingActionResult> {
+  const user = await requireAuth();
+  const admin = createServiceClient();
+  const { data: prof } = await admin
+    .from("professionals")
+    .select("id")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (!prof) return { error: "Professional profile not found." };
+  return writeUndoDecline(bookingId, prof.id);
 }
 
 export async function assignBooking(bookingId: string, professionalId: string): Promise<BookingActionResult> {

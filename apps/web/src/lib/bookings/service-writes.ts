@@ -60,6 +60,20 @@ export async function writeDeclineBooking(
   return { ok: true };
 }
 
+export async function writeUndoDecline(
+  bookingId: string,
+  professionalId: string,
+): Promise<WriteResult> {
+  const admin = createServiceClient();
+  const { error } = await admin
+    .from("booking_declines")
+    .delete()
+    .eq("booking_id", bookingId)
+    .eq("professional_id", professionalId);
+  if (error) return { error: error.message };
+  return { ok: true };
+}
+
 export async function writeAssignBooking(
   bookingId: string,
   professionalId: string,

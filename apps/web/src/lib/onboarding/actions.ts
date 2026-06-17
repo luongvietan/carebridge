@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { ensureProfessional } from "@/lib/onboarding/professional-session";
-import { eligibilitySchema, profileSchema } from "@/lib/validation/onboarding";
+import { eligibilitySchema, profileSchema, mandatoryTrainingItems } from "@/lib/validation/onboarding";
 import { eligibilityOutcome, type EligibilityOutcome } from "@/lib/compliance/requirements";
 import { verifyUpload } from "@/lib/onboarding/upload-rules";
 
@@ -14,23 +14,32 @@ export async function submitEligibility(
   formData: FormData,
 ): Promise<EligibilityResult> {
   const user = await requireAuth();
+  // Per-item attestation: an unchecked box means that training is not current.
+  const trainingItems: Record<string, boolean> = {};
+  for (const item of mandatoryTrainingItems) {
+    trainingItems[item.key] = formData.get(`training_${item.key}`) === "on";
+  }
   const parsed = eligibilitySchema.safeParse({
     employmentStatus: formData.get("employmentStatus"),
-    trainingCurrent: formData.get("trainingCurrent") === "yes",
+    trainingItems,
   });
   if (!parsed.success) return { error: "Please complete every field." };
 
   const professionalId = await ensureProfessional(user);
   if (!professionalId) return { error: "You must be signed in." };
 
+  // training_current is true only when every mandatory item is attested current.
+  const allCurrent = mandatoryTrainingItems.every((i) => parsed.data.trainingItems[i.key]);
+
   // Service client: ownership already verified via ensureProfessional (auth.uid's own row).
   // eligibility_screenings has admin-only RLS, so privileged server-side write is required.
   const admin = createServiceClient();
-  const outcome = eligibilityOutcome(parsed.data.trainingCurrent);
+  const outcome = eligibilityOutcome(allCurrent);
   const { error } = await admin.from("eligibility_screenings").insert({
     professional_id: professionalId,
     employment_status: parsed.data.employmentStatus,
-    training_current: parsed.data.trainingCurrent,
+    training_current: allCurrent,
+    training_attestations: parsed.data.trainingItems,
     outcome,
   });
   if (error) return { error: error.message };

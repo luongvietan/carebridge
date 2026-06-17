@@ -16,10 +16,25 @@ export const employmentStatusLabels: Record<(typeof employmentStatuses)[number],
   not_employed_in_healthcare: "Not currently employed within healthcare",
 };
 
+// The 7 mandatory training types the applicant attests to per-item during
+// eligibility screening (stable keys are persisted; labels are display-only).
+export const mandatoryTrainingItems = [
+  { key: "safeguarding_adults", label: "Safeguarding Adults" },
+  { key: "safeguarding_children", label: "Safeguarding Children" },
+  { key: "basic_life_support", label: "Basic Life Support" },
+  { key: "infection_prevention_control", label: "Infection Prevention & Control" },
+  { key: "health_safety", label: "Health & Safety" },
+  { key: "moving_handling", label: "Moving & Handling" },
+  { key: "gdpr_confidentiality", label: "GDPR & Confidentiality" },
+] as const;
+
+export type MandatoryTrainingKey = (typeof mandatoryTrainingItems)[number]["key"];
+
 export const eligibilitySchema = z.object({
   employmentStatus: z.enum(employmentStatuses),
-  // True only if ALL mandatory training was completed within the previous 12 months.
-  trainingCurrent: z.boolean(),
+  // Per-item confirmation that each mandatory training was completed within the
+  // previous 12 months. trainingCurrent is derived as: every item attested.
+  trainingItems: z.record(z.string(), z.boolean()),
 });
 export type EligibilityInput = z.infer<typeof eligibilitySchema>;
 
