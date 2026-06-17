@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ArrowRight01Icon,
   Calendar03Icon,
@@ -83,20 +83,14 @@ function usePopover() {
 const triggerClass =
   "flex w-full items-center justify-between gap-2 rounded-xl border border-[#dbe7e0] bg-white px-3.5 py-2.5 text-left text-sm text-[#1e5a33] transition focus:border-[#2e7d32] focus:outline-none focus:ring-2 focus:ring-[#2e7d32]/15 disabled:cursor-not-allowed disabled:opacity-50";
 
-function subscribeNoop() {
-  return () => {};
-}
-
-function getToday() {
-  return new Date();
-}
-
-function getTodayServerSnapshot() {
-  return null;
-}
-
 function useToday() {
-  return useSyncExternalStore(subscribeNoop, getToday, getTodayServerSnapshot);
+  // `today` only drives the "current day" highlight. Initialise it after mount so
+  // the server and client first render agree, and keep a stable reference for the
+  // component's lifetime — returning a fresh `new Date()` each call (as a
+  // useSyncExternalStore getSnapshot) throws "getSnapshot should be cached".
+  const [today, setToday] = useState<Date | null>(null);
+  useEffect(() => setToday(new Date()), []);
+  return today;
 }
 
 /* ---------- calendar grid ---------- */

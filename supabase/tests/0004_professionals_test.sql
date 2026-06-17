@@ -7,9 +7,9 @@ select has_column('professionals','can_accept_bookings');
 
 -- Behavioural: generated column logic
 insert into auth.users (id, email, raw_user_meta_data)
-  values ('00000000-0000-0000-0000-000000000001','p1@test.dev','{"account_type":"professional"}'::jsonb);
+  values ('00000000-0000-0000-0000-0000000004d4','p1@test.dev','{"account_type":"professional"}'::jsonb);
 insert into professionals (user_id, full_name, professional_status, compliance_status)
-  values ('00000000-0000-0000-0000-000000000001','Test Pro','active','approved')
+  values ('00000000-0000-0000-0000-0000000004d4','Test Pro','active','approved')
   returning id as pid \gset
 select is( (select can_accept_bookings from professionals where id = :'pid'), true,
            'active + approved => can_accept_bookings true');

@@ -1,5 +1,6 @@
 import { test, expect, request, type APIRequestContext, type Page } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
+import { chooseFrom } from "./select-helper";
 
 const MAILPIT = "http://127.0.0.1:54324";
 
@@ -44,7 +45,8 @@ async function registerConfirmLogin(page: Page, api: APIRequestContext, email: s
   await expect(page).toHaveURL(/\/professional/);
 }
 
-// Correct option TEXT for each seeded placeholder question (one appears per question).
+// Correct option TEXT for each seeded placeholder question. The bank has 20
+// common questions and no role-specific ones, so the 15+5 format serves all 20.
 const CORRECT = [
   "Report it to the safeguarding lead promptly",
   "Hand hygiene",
@@ -54,6 +56,18 @@ const CORRECT = [
   "The right patient, drug, dose, route and time",
   "Report and, if safe, mitigate it",
   "Decline and escalate to an appropriate professional",
+  "Everyone working with them",
+  "Before and after every patient contact",
+  "Decline — there is no legitimate care reason",
+  "Politely decline to maintain professional boundaries",
+  "Score it out, initial and date the correction",
+  "Check with a qualified prescriber/pharmacist before administering",
+  "Carry out a risk assessment and use appropriate equipment",
+  "Raise the concern through the appropriate channel",
+  "Explain you may need to share it to keep them or others safe",
+  "A sealed sharps container",
+  "Access the personal data held about them",
+  "Apron/gown",
 ];
 
 test("professional completes the onboarding wizard and writes persist", async ({ page }) => {
@@ -79,28 +93,25 @@ test("professional completes the onboarding wizard and writes persist", async ({
 
   // Profile
   await page.goto("/professional/onboarding/profile");
-  await page.locator('select[name="professionalRoleId"]').selectOption({ label: "Registered Nurse" });
+  await chooseFrom(page, page.getByRole("combobox", { name: "Professional role" }), "Registered Nurse");
   await page.locator('input[name="addressLine1"]').fill("1 Test Street");
   await page.locator('input[name="city"]').fill("London");
   await page.locator('input[name="postcode"]').fill("E1 6AN");
   await page.getByRole("button", { name: /save profile/i }).click();
   await expect(page.getByText(/profile saved/i)).toBeVisible();
 
-  // Documents — upload one required document
+  // Documents — upload one required document. Use Qualification, a non-expiring
+  // type, so no expiry date is required (the expiry field is a custom DatePicker).
   await page.goto("/professional/onboarding/documents");
-  const firstFile = page.locator('input[type="file"]').first();
-  await firstFile.setInputFiles({ name: "dbs.pdf", mimeType: "application/pdf", buffer: Buffer.from("test-doc") });
-  // Expiry is now mandatory for documents that carry one — set a future date on
-  // the first document's (hidden) expiry input before uploading.
-  const futureExpiry = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-  await page.locator('input[name="expiryDate"]').first().evaluate((el, v) => {
-    const input = el as HTMLInputElement;
-    const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value")!.set!;
-    setter.call(input, v);
-    input.dispatchEvent(new Event("input", { bubbles: true }));
-  }, futureExpiry);
-  await page.getByRole("button", { name: /^upload$/i }).first().click();
-  await expect(page.getByText(/pending review/i).first()).toBeVisible();
+  const qualItem = page.locator("div.p-4", { hasText: "Qualification" });
+  await qualItem.locator('input[type="file"]').setInputFiles({
+    name: "cert.pdf",
+    mimeType: "application/pdf",
+    // Must start with the %PDF magic bytes — uploads are content-sniffed.
+    buffer: Buffer.from("%PDF-1.4\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF"),
+  });
+  await qualItem.getByRole("button", { name: /^upload$/i }).click();
+  await expect(qualItem.getByText(/pending review/i)).toBeVisible();
 
   // Assert the write paths persisted
   const { data: prof } = await sb
@@ -148,6 +159,8 @@ test("admin approving the final critical document activates the professional", a
     user_metadata: { account_type: "admin", full_name: "E2E Admin" },
   });
   expect(adminUser.user).toBeTruthy();
+  // Signup metadata can't grant admin (0031 hardening); promote the test admin.
+  await sb.from("users").update({ account_type: "admin" }).eq("id", adminUser.user!.id);
 
   // Professional fixture: pending_verification, role with critical requirements,
   // all required critical docs already approved EXCEPT one pending.

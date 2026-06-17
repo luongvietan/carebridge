@@ -2,6 +2,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { buildBookingInsert } from "../src/lib/bookings/create";
 import type { RateCard } from "../src/lib/rates/snapshot";
+import { chooseFrom } from "./select-helper";
 
 const PASSWORD = "password123";
 
@@ -13,10 +14,6 @@ function service(): SupabaseClient {
   );
 }
 
-function toDatetimeLocal(d: Date): string {
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" });
@@ -24,6 +21,9 @@ function formatDate(iso: string) {
 
 function slot(hoursFromNow: number, durationHours: number) {
   const start = new Date(Date.now() + hoursFromNow * 3_600_000);
+  // Keep the minute component so concurrently-seeded bookings get distinct times
+  // (the admin list is filtered by displayed start time). The UI-driven happy
+  // path computes its own whole-hour times separately.
   start.setSeconds(0, 0);
   const end = new Date(start.getTime() + durationHours * 3_600_000);
   return { start, end, startIso: start.toISOString(), endIso: end.toISOString() };
@@ -52,6 +52,9 @@ async function seedAdmin(sb: SupabaseClient, stamp: number) {
     user_metadata: { account_type: "admin", full_name: "E2E Admin" },
   });
   if (error || !data.user) throw error ?? new Error("admin user");
+  // Signup metadata can't grant admin (0031 hardening downgrades it to
+  // private_client); promote the trusted service-role-created test admin.
+  await sb.from("users").update({ account_type: "admin" }).eq("id", data.user.id);
   return { email, userId: data.user.id };
 }
 
@@ -146,12 +149,31 @@ async function seedOpenBooking(
   return booking;
 }
 
+// The role/date fields are custom Select / DateTimePicker components, so drive
+// their actual UI (popover + day buttons keyed by data-ymd + Hour Select).
+function pad2(n: number) {
+  return String(n).padStart(2, "0");
+}
+function ymd(d: Date) {
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+}
+
+// Pick a day only; the DateTimePicker commits the clicked day at its default
+// 09:00, which avoids the fragile nested Hour/Minute Selects. Callers therefore
+// use 09:00 times on distinct days.
+async function pickDate(page: Page, triggerName: string, d: Date) {
+  await page.getByRole("button", { name: triggerName, exact: true }).click();
+  await page.locator(`[data-ymd="${ymd(d)}"]`).click();
+  await page.keyboard.press("Escape"); // close the popover before the next field
+}
+
 async function fillBookingForm(page: Page, location: string, start: Date, end: Date) {
-  await page.locator('select[name="professionalRoleId"]').selectOption({ label: "Registered Nurse" });
-  await page.locator('input[name="scheduledStart"]').fill(toDatetimeLocal(start));
-  await page.locator('input[name="scheduledEnd"]').fill(toDatetimeLocal(end));
+  await chooseFrom(page, page.getByRole("combobox", { name: "Professional role" }), "Registered Nurse");
+  await pickDate(page, "Start", start);
+  await pickDate(page, "End", end);
   await page.locator('input[name="locationAddress"]').fill(location);
   await page.locator('input[name="locationPostcode"]').fill("E1 6AN");
+  await page.getByRole("button", { name: /create booking/i }).click();
 }
 
 test("open-market happy path: client creates booking, professional accepts", async ({ page, browser }) => {
@@ -161,14 +183,17 @@ test("open-market happy path: client creates booking, professional accepts", asy
   const client = await seedClient(sb, stamp);
   const pro = await seedEligiblePro(sb, stamp + 1, roleId);
   const location = `OpenMarket ${stamp}`;
-  const durationHours = 4;
 
   await login(page, client.email, /\/client/);
   await page.goto("/client/bookings/new");
-  const { start, end, startIso: happyStartIso } = slot(48, durationHours);
-  await fillBookingForm(page, location, start, end);
-  await page.getByRole("button", { name: /create booking/i }).click();
-  await expect(page).toHaveURL(/\/client\/bookings/);
+  // 09:00 on two different days, so the date picker only needs day clicks
+  // (its committed default time is 09:00) — no fragile hour/minute selection.
+  const start = new Date(Date.now() + 48 * 3_600_000);
+  start.setHours(9, 0, 0, 0);
+  const end = new Date(start.getTime() + 24 * 3_600_000);
+  const happyStartIso = start.toISOString();
+  await fillBookingForm(page, location, start, end); // submits the form
+  await expect(page).toHaveURL(/\/client\/bookings\/?$/);
   await expect(page.locator("tr", { hasText: formatDate(happyStartIso) })).toBeVisible();
 
   const { data: created } = await sb
@@ -177,8 +202,18 @@ test("open-market happy path: client creates booking, professional accepts", asy
     .eq("location_address", location)
     .single();
   expect(created?.status).toBe("open");
-  const expectedCharge = Math.round(Number(created!.duration_hours) * 40 * 100) / 100;
-  const expectedPayout = Math.round(Number(created!.duration_hours) * 28 * 100) / 100;
+  // Derive the expected totals from the active rate card rather than hardcoding
+  // 40/28 — another test may have amended the shared rate card.
+  const { data: activeRate } = await sb
+    .from("rate_cards")
+    .select("client_charge_rate, professional_payout_rate")
+    .eq("professional_role_id", roleId)
+    .is("effective_to", null)
+    .single();
+  const expectedCharge =
+    Math.round(Number(created!.duration_hours) * Number(activeRate!.client_charge_rate) * 100) / 100;
+  const expectedPayout =
+    Math.round(Number(created!.duration_hours) * Number(activeRate!.professional_payout_rate) * 100) / 100;
   expect(Number(created!.total_client_charge)).toBe(expectedCharge);
   expect(Number(created!.total_payout)).toBe(expectedPayout);
 
@@ -225,7 +260,7 @@ test("admin assigns an eligible professional to an open booking", async ({ page 
   await page.goto("/admin/bookings");
   const row = page.locator("tr", { hasText: formatDate(startIso) });
   await expect(row).toBeVisible();
-  await row.locator("select").selectOption({ label: pro.name });
+  await chooseFrom(page, row.getByRole("combobox"), pro.name);
   await row.getByRole("button", { name: /^assign$/i }).click();
   await expect(row.locator("span", { hasText: /^assigned$/ })).toBeVisible({ timeout: 15_000 });
 
@@ -260,7 +295,7 @@ test("admin assign blocked when professional becomes ineligible", async ({ page 
   await login(page, admin.email, /\/admin/);
   await page.goto("/admin/bookings");
   const row = page.locator("tr", { hasText: formatDate(startIso) });
-  await row.locator("select").selectOption({ label: pro.name });
+  await chooseFrom(page, row.getByRole("combobox"), pro.name);
 
   await sb.from("professionals").update({ professional_status: "pending_verification" }).eq("id", pro.proId);
   await row.getByRole("button", { name: /^assign$/i }).click();
@@ -326,7 +361,8 @@ test("professional declines an open booking", async ({ browser }) => {
   await proPage.goto("/professional/bookings");
   const row = proPage.locator("tr", { hasText: location });
   await row.getByRole("button", { name: /^decline$/i }).click();
-  await expect(row).toBeHidden({ timeout: 15_000 });
+  // Undo-decline feature: the row is not removed — it now offers "Undo decline".
+  await expect(row.getByRole("button", { name: /undo decline/i })).toBeVisible({ timeout: 15_000 });
 
   const { count } = await sb
     .from("booking_declines")
@@ -335,8 +371,11 @@ test("professional declines an open booking", async ({ browser }) => {
     .eq("professional_id", pro.proId);
   expect(count).toBe(1);
 
+  // The decline persists across a reload (still shown with an Undo option).
   await proPage.reload();
-  await expect(proPage.locator("tr", { hasText: location })).toHaveCount(0);
+  await expect(
+    proPage.locator("tr", { hasText: location }).getByRole("button", { name: /undo decline/i }),
+  ).toBeVisible();
   await proCtx.close();
 });
 

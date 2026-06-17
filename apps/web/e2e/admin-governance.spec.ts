@@ -2,6 +2,7 @@ import { test, expect, type Page } from "@playwright/test";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { buildBookingInsert } from "../src/lib/bookings/create";
 import type { RateCard } from "../src/lib/rates/snapshot";
+import { chooseFrom } from "./select-helper";
 
 const PASSWORD = "password123";
 
@@ -59,6 +60,9 @@ async function seedAdmin(sb: SupabaseClient, stamp: number) {
     user_metadata: { account_type: "admin", full_name: "Gov E2E Admin" },
   });
   if (error || !data.user) throw error ?? new Error("admin user");
+  // Signup metadata can't grant admin (0031 hardening downgrades it to
+  // private_client); promote the trusted service-role-created test admin.
+  await sb.from("users").update({ account_type: "admin" }).eq("id", data.user.id);
   return { email, userId: data.user.id };
 }
 
@@ -185,7 +189,7 @@ async function suspendClientViaAccounts(page: Page, clientEmail: string) {
   await page.goto("/admin/accounts");
   const row = page.locator("tr", { hasText: clientEmail });
   await expect(row).toBeVisible({ timeout: 15_000 });
-  await row.locator("select").selectOption("suspended");
+  await chooseFrom(page, row.getByRole("combobox"), "suspended");
   await row.getByRole("button", { name: /update account status/i }).click();
   await expect(row.locator("td").nth(2)).toContainText("suspended", { timeout: 15_000 });
 }
@@ -227,8 +231,8 @@ test("admin suspends and reinstates a professional via UI", async ({ page }) => 
   await page.goto(`/admin/users/${pro.proId}`);
 
   const statusSection = page.locator("section", { hasText: "Professional status action" });
-  await statusSection.locator("select").first().selectOption("suspend");
-  await statusSection.locator("select").nth(1).selectOption("conduct_concern");
+  await chooseFrom(page, statusSection.getByRole("combobox", { name: "Action" }), "suspend");
+  await chooseFrom(page, statusSection.getByRole("combobox", { name: "Reason code" }), "conduct concern");
   await statusSection.getByRole("button", { name: /apply action/i }).click();
 
   await expect(async () => {
@@ -248,7 +252,7 @@ test("admin suspends and reinstates a professional via UI", async ({ page }) => 
     .eq("action_type", "suspend");
   expect(actionCount).toBe(1);
 
-  await statusSection.locator("select").first().selectOption("reinstate");
+  await chooseFrom(page, statusSection.getByRole("combobox", { name: "Action" }), "reinstate");
   await statusSection.getByRole("button", { name: /apply action/i }).click();
 
   await expect(async () => {
@@ -372,6 +376,18 @@ test("admin amends rate card without changing existing booking snapshots", async
   expect(Number(unchanged!.snap_payout_rate)).toBe(frozen.snap_payout_rate);
   expect(Number(unchanged!.snap_platform_fee)).toBe(frozen.snap_platform_fee);
   expect(unchanged!.snap_currency).toBe(frozen.snap_currency);
+
+  // Restore the shared RN rate card to the seeded 40/28 so other tests are not
+  // affected by this amendment.
+  await sb.rpc("amend_rate_card", {
+    p_role_id: roleId,
+    p_charge: 40,
+    p_payout: 28,
+    p_fee_type: "derived",
+    p_fee_value: 0,
+    p_currency: "GBP",
+    p_admin_id: admin.userId,
+  });
 
   await cleanupGovernanceTest(sb, {
     bookingIds: [booking.id],

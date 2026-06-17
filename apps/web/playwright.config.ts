@@ -22,6 +22,9 @@ const e2eEnv = {
     process.env.STRIPE_WEBHOOK_SECRET ?? LOCAL.STRIPE_WEBHOOK_SECRET,
   STRIPE_SECRET_KEY:
     process.env.STRIPE_SECRET_KEY ?? LOCAL.STRIPE_SECRET_KEY,
+  // Force the private-preview gate OFF for e2e, overriding any value the dev
+  // server would otherwise inherit from a hosted `.env.local`.
+  PRODUCTION_GATE_ENABLED: "false",
 };
 
 // Ensure test helpers (service client) use the same project as the dev server.
@@ -33,6 +36,9 @@ export default defineConfig({
   testDir: "./e2e",
   timeout: 90_000,
   fullyParallel: false,
+  // Tests share one local database, so run them serially to avoid cross-file
+  // races on shared rows (rate cards, bookings, …).
+  workers: 1,
   retries: 0,
   reporter: [["list"], ["html", { open: "never" }]],
   use: { baseURL: "http://127.0.0.1:3000" },

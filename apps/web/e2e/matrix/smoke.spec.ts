@@ -20,6 +20,9 @@ async function seedAdmin(sb: SupabaseClient, stamp: number) {
     user_metadata: { account_type: "admin", full_name: "Matrix E2E Admin" },
   });
   if (error || !data.user) throw error ?? new Error("admin user");
+  // Signup metadata can't grant admin (0031 hardening downgrades it to
+  // private_client); promote the trusted service-role-created test admin.
+  await sb.from("users").update({ account_type: "admin" }).eq("id", data.user.id);
   return { email, userId: data.user.id };
 }
 

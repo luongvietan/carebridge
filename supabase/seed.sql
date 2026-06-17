@@ -160,17 +160,18 @@ INSERT INTO professionals (user_id, full_name, professional_role_id, employment_
 ON CONFLICT (user_id) DO NOTHING;
 
 
--- Insert compliance documents for Professional (sample: DBS verified, NMC verified, training pending)
-INSERT INTO documents (professional_id, document_type_id, storage_path, original_filename, verification_status, verified_at, created_at, updated_at) VALUES
+-- Insert compliance documents for Professional (sample: DBS verified, NMC verified, training pending).
+-- These document types carry an expiry, so an in-date expiry_date is required (migration 0041).
+INSERT INTO documents (professional_id, document_type_id, storage_path, original_filename, verification_status, verified_at, expiry_date, created_at, updated_at) VALUES
   ((SELECT id FROM professionals WHERE user_id = '00000000-0000-0000-0000-000000000001' LIMIT 1),
    (SELECT id FROM document_types WHERE code = 'enhanced_dbs' LIMIT 1),
-   'professional_documents/dbs_jane_smith_001.pdf', 'dbs_jane_smith_001.pdf', 'approved', now() - INTERVAL '30 days', now(), now()),
+   'professional_documents/dbs_jane_smith_001.pdf', 'dbs_jane_smith_001.pdf', 'approved', now() - INTERVAL '30 days', current_date + 330, now(), now()),
   ((SELECT id FROM professionals WHERE user_id = '00000000-0000-0000-0000-000000000001' LIMIT 1),
    (SELECT id FROM document_types WHERE code = 'professional_registration' LIMIT 1),
-   'professional_documents/nmc_jane_smith_001.pdf', 'nmc_jane_smith_001.pdf', 'approved', now() - INTERVAL '60 days', now(), now()),
+   'professional_documents/nmc_jane_smith_001.pdf', 'nmc_jane_smith_001.pdf', 'approved', now() - INTERVAL '60 days', current_date + 300, now(), now()),
   ((SELECT id FROM professionals WHERE user_id = '00000000-0000-0000-0000-000000000001' LIMIT 1),
    (SELECT id FROM document_types WHERE code = 'mandatory_training_certificate' LIMIT 1),
-   'professional_documents/training_jane_smith_001.pdf', 'training_jane_smith_001.pdf', 'pending_review', NULL, now(), now())
+   'professional_documents/training_jane_smith_001.pdf', 'training_jane_smith_001.pdf', 'pending_review', NULL, current_date + 365, now(), now())
 ON CONFLICT DO NOTHING;
 
 -- Insert private client profile
