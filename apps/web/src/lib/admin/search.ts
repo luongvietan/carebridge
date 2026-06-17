@@ -14,6 +14,7 @@ export type ProfessionalFilterCriteria = {
   dbsStatus?: string;
   registrationStatus?: string;
   assessmentStatus?: string;
+  availabilityDay?: string | number;
 };
 
 export type ProfessionalFilters = {
@@ -27,6 +28,7 @@ export type ProfessionalFilters = {
   dbsStatus?: DocStatusFilter;
   registrationStatus?: DocStatusFilter;
   assessmentStatus?: AssessmentStatusFilter;
+  availabilityDay?: number;
 };
 
 const DOC_STATUSES: DocStatusFilter[] = ["valid", "invalid"];
@@ -52,5 +54,8 @@ export function buildProfessionalFilters(c: ProfessionalFilterCriteria): Profess
   if (ASSESSMENT_STATUSES.includes(c.assessmentStatus as AssessmentStatusFilter)) {
     f.assessmentStatus = c.assessmentStatus as AssessmentStatusFilter;
   }
+  const dayRaw = c.availabilityDay;
+  const day = dayRaw === undefined || dayRaw === "" ? NaN : Number(dayRaw);
+  if (Number.isInteger(day) && day >= 0 && day <= 6) f.availabilityDay = day;
   return f;
 }

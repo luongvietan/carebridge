@@ -11,6 +11,7 @@ import {
   employmentStatusLabels,
   mandatoryTrainingItems,
 } from "@/lib/validation/onboarding";
+import { DAYS_OF_WEEK } from "@/lib/onboarding/profile-children";
 
 export const dynamic = "force-dynamic";
 
@@ -45,33 +46,47 @@ export default async function AdminUserDetailPage({
 
   if (!professional) notFound();
 
-  const [{ data: user }, { data: history }, { data: attempts }, { data: screening }] =
-    await Promise.all([
-      admin
-        .from("users")
-        .select("email, account_status")
-        .eq("id", professional.user_id)
-        .maybeSingle(),
-      admin
-        .from("professional_status_actions")
-        .select("action_type, reason_code, resulting_status, applied_at")
-        .eq("professional_id", id)
-        .order("applied_at", { ascending: false }),
-      admin
-        .from("assessment_attempts")
-        .select("attempt_number, score, passed, completed_at")
-        .eq("professional_id", id)
-        .order("attempt_number", { ascending: true }),
-      admin
-        .from("eligibility_screenings")
-        .select("employment_status, training_current, outcome, training_attestations, submitted_at")
-        .eq("professional_id", id)
-        .order("submitted_at", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
-    ]);
+  const [
+    { data: user },
+    { data: history },
+    { data: attempts },
+    { data: screening },
+    { data: skillRows },
+    { data: availabilityRows },
+  ] = await Promise.all([
+    admin
+      .from("users")
+      .select("email, account_status")
+      .eq("id", professional.user_id)
+      .maybeSingle(),
+    admin
+      .from("professional_status_actions")
+      .select("action_type, reason_code, resulting_status, applied_at")
+      .eq("professional_id", id)
+      .order("applied_at", { ascending: false }),
+    admin
+      .from("assessment_attempts")
+      .select("attempt_number, score, passed, completed_at")
+      .eq("professional_id", id)
+      .order("attempt_number", { ascending: true }),
+    admin
+      .from("eligibility_screenings")
+      .select("employment_status, training_current, outcome, training_attestations, submitted_at")
+      .eq("professional_id", id)
+      .order("submitted_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    admin.from("professional_skills").select("skills(name)").eq("professional_id", id),
+    admin.from("professional_availability").select("day_of_week").eq("professional_id", id),
+  ]);
 
   const attestations = (screening?.training_attestations ?? {}) as Record<string, boolean>;
+  const skillNames = (skillRows ?? [])
+    .map((r) => (r.skills as { name: string } | null)?.name)
+    .filter((n): n is string => Boolean(n));
+  const availabilityDays = new Set(
+    (availabilityRows ?? []).map((r) => r.day_of_week).filter((d): d is number => d != null),
+  );
 
   const completedAttempts = (attempts ?? []).filter((a) => a.completed_at);
   const bestScore = completedAttempts.reduce<number | null>(
@@ -111,6 +126,20 @@ export default async function AdminUserDetailPage({
           <div>
             <dt className="text-[#7a8a81]">Account status</dt>
             <dd>{user?.account_status ? formatLabel(user.account_status) : "—"}</dd>
+          </div>
+          <div>
+            <dt className="text-[#7a8a81]">Skills &amp; specialities</dt>
+            <dd>{skillNames.length > 0 ? skillNames.join(", ") : "—"}</dd>
+          </div>
+          <div>
+            <dt className="text-[#7a8a81]">Availability</dt>
+            <dd>
+              {availabilityDays.size > 0
+                ? DAYS_OF_WEEK.filter((d) => availabilityDays.has(d.value))
+                    .map((d) => d.label)
+                    .join(", ")
+                : "—"}
+            </dd>
           </div>
         </dl>
         <p className="mt-4">

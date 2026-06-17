@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useReducer } from "react";
 import type { ProfessionalFilterCriteria } from "@/lib/admin/search";
 import { Select } from "@/components/ui/select";
+import { DAYS_OF_WEEK } from "@/lib/onboarding/profile-children";
 
 const INPUT_CLASS =
   "rounded-xl border border-[#dbe7e0] bg-white px-3 py-1.5 text-sm text-[#1e5a33] placeholder:text-[#9aa8a0] focus:border-[#2e7d32] focus:outline-none focus:ring-2 focus:ring-[#2e7d32]/15";
@@ -39,6 +40,11 @@ const ASSESSMENT_STATUS_OPTIONS = [
   { value: "not_passed", label: "Not passed" },
 ];
 
+const AVAILABILITY_OPTIONS = [
+  { value: "", label: "Any" },
+  ...DAYS_OF_WEEK.map((d) => ({ value: String(d.value), label: d.label })),
+];
+
 function formatLabel(value: string) {
   return value.replace(/_/g, " ");
 }
@@ -60,6 +66,7 @@ type FilterState = {
   dbsStatus: string;
   registrationStatus: string;
   assessmentStatus: string;
+  availabilityDay: string;
 };
 
 type FilterAction = {
@@ -87,6 +94,7 @@ function initialFilters(searchParams: URLSearchParams): FilterState {
     dbsStatus: searchParams.get("dbsStatus") ?? "",
     registrationStatus: searchParams.get("registrationStatus") ?? "",
     assessmentStatus: searchParams.get("assessmentStatus") ?? "",
+    availabilityDay: searchParams.get("availabilityDay") ?? "",
   };
 }
 
@@ -111,6 +119,7 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
     if (filters.dbsStatus) params.set("dbsStatus", filters.dbsStatus);
     if (filters.registrationStatus) params.set("registrationStatus", filters.registrationStatus);
     if (filters.assessmentStatus) params.set("assessmentStatus", filters.assessmentStatus);
+    if (filters.availabilityDay) params.set("availabilityDay", filters.availabilityDay);
     const qs = params.toString();
     router.push(qs ? `/admin/users?${qs}` : "/admin/users");
   }
@@ -188,6 +197,16 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
             value={filters.assessmentStatus}
             onValueChange={(v) => dispatch({ type: "set", field: "assessmentStatus", value: v })}
             options={ASSESSMENT_STATUS_OPTIONS}
+          />
+        </div>
+        <div className="flex flex-col gap-1 text-[#5b6a62]">
+          Available on
+          <Select
+            className="w-44"
+            aria-label="Available on"
+            value={filters.availabilityDay}
+            onValueChange={(v) => dispatch({ type: "set", field: "availabilityDay", value: v })}
+            options={AVAILABILITY_OPTIONS}
           />
         </div>
       </div>

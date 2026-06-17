@@ -23,4 +23,11 @@ describe("buildProfessionalFilters", () => {
     expect(buildProfessionalFilters({ maxTravelKm: "0" })).toEqual({});
     expect(buildProfessionalFilters({ maxTravelKm: "abc" })).toEqual({});
   });
+  it("accepts a valid availability day and ignores invalid ones", () => {
+    expect(buildProfessionalFilters({ availabilityDay: "3" })).toEqual({ availabilityDay: 3 });
+    expect(buildProfessionalFilters({ availabilityDay: "0" })).toEqual({ availabilityDay: 0 });
+    expect(buildProfessionalFilters({ availabilityDay: "" })).toEqual({});
+    expect(buildProfessionalFilters({ availabilityDay: "9" })).toEqual({});
+    expect(buildProfessionalFilters({ availabilityDay: "abc" })).toEqual({});
+  });
 });

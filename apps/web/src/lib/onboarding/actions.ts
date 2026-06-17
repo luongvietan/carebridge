@@ -7,6 +7,7 @@ import { eligibilitySchema, profileSchema, mandatoryTrainingItems } from "@/lib/
 import { eligibilityOutcome, type EligibilityOutcome } from "@/lib/compliance/requirements";
 import { verifyUpload } from "@/lib/onboarding/upload-rules";
 import { validateDocumentExpiry } from "@/lib/onboarding/document-expiry";
+import { parseSkillIds, parseAvailabilityDays } from "@/lib/onboarding/profile-children";
 
 export type EligibilityResult = { ok: true; outcome: EligibilityOutcome } | { error: string } | null;
 
@@ -138,6 +139,27 @@ export async function saveProfile(_prev: ProfileResult, formData: FormData): Pro
     })
     .eq("id", professionalId);
   if (error) return { error: error.message };
+
+  // Persist skills/specialities and weekly availability as a replace-set. Owner
+  // self-RLS (0042) authorises these writes for the professional's own rows.
+  const skillIds = parseSkillIds(formData.getAll("skillIds").map(String));
+  await supabase.from("professional_skills").delete().eq("professional_id", professionalId);
+  if (skillIds.length > 0) {
+    await supabase
+      .from("professional_skills")
+      .insert(skillIds.map((skill_id) => ({ professional_id: professionalId, skill_id })));
+  }
+
+  const availabilityDays = parseAvailabilityDays(formData.getAll("availabilityDays").map(String));
+  await supabase.from("professional_availability").delete().eq("professional_id", professionalId);
+  if (availabilityDays.length > 0) {
+    await supabase
+      .from("professional_availability")
+      .insert(
+        availabilityDays.map((day_of_week) => ({ professional_id: professionalId, day_of_week })),
+      );
+  }
+
   return { ok: true };
 }
 

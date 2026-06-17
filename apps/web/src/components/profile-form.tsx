@@ -5,11 +5,13 @@ import { saveProfile, type ProfileResult } from "@/lib/onboarding/actions";
 import { OnboardingSteps } from "@/components/onboarding-steps";
 import { Select } from "@/components/ui/select";
 import { DatePicker } from "@/components/ui/date-picker";
+import { DAYS_OF_WEEK } from "@/lib/onboarding/profile-children";
 
 const field =
   "mt-1 w-full rounded-xl border border-[#dbe7e0] bg-white px-3.5 py-2.5 text-sm text-[#1e5a33] placeholder:text-[#9aa8a0] focus:border-[#2e7d32] focus:outline-none focus:ring-2 focus:ring-[#2e7d32]/15";
 
 type Role = { id: string; name: string };
+type Skill = { id: string; name: string };
 type Current = {
   professional_role_id: string | null;
   date_of_birth: string | null;
@@ -24,8 +26,22 @@ type Current = {
   has_vehicle: boolean | null;
 };
 
-export function ProfileForm({ roles, current }: { roles: Role[]; current: Current | null }) {
+export function ProfileForm({
+  roles,
+  skills,
+  current,
+  currentSkillIds = [],
+  currentAvailabilityDays = [],
+}: {
+  roles: Role[];
+  skills: Skill[];
+  current: Current | null;
+  currentSkillIds?: string[];
+  currentAvailabilityDays?: number[];
+}) {
   const [state, action, pending] = useActionState<ProfileResult, FormData>(saveProfile, null);
+  const skillSet = new Set(currentSkillIds);
+  const daySet = new Set(currentAvailabilityDays);
 
   if (state && "ok" in state) {
     return (
@@ -95,6 +111,46 @@ export function ProfileForm({ roles, current }: { roles: Role[]; current: Curren
           Professional summary
           <textarea name="professionalSummary" rows={3} defaultValue={current?.professional_summary ?? ""} className={field} />
         </label>
+
+        <fieldset className="block text-sm font-medium">
+          <legend>Skills &amp; specialities</legend>
+          <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
+            {skills.map((s) => (
+              <label key={s.id} className="flex items-center gap-2 font-normal">
+                <input
+                  type="checkbox"
+                  name="skillIds"
+                  value={s.id}
+                  defaultChecked={skillSet.has(s.id)}
+                  className="accent-[#2e7d32]"
+                />
+                {s.name}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        <fieldset className="block text-sm font-medium">
+          <legend>Availability preferences</legend>
+          <p className="mt-1 text-xs font-normal text-[#7a8a81]">
+            Select the days you are generally available for bookings.
+          </p>
+          <div className="mt-2 flex flex-wrap gap-3">
+            {DAYS_OF_WEEK.map((d) => (
+              <label key={d.value} className="flex items-center gap-2 font-normal">
+                <input
+                  type="checkbox"
+                  name="availabilityDays"
+                  value={d.value}
+                  defaultChecked={daySet.has(d.value)}
+                  className="accent-[#2e7d32]"
+                />
+                {d.label}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
         <label className="block text-sm font-medium">
           Willing to travel (km)
           <input type="number" name="travelDistanceKm" min={0} defaultValue={current?.travel_distance_km ?? ""} className={field} />

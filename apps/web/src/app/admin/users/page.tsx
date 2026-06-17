@@ -107,6 +107,15 @@ async function professionalsWhoPassedAssessment(admin: ServiceClient): Promise<S
   return new Set((data ?? []).map((a) => a.professional_id));
 }
 
+/** Professionals who stated availability on the given weekday (0 = Monday … 6 = Sunday). */
+async function professionalsAvailableOnDay(admin: ServiceClient, day: number): Promise<Set<string>> {
+  const { data } = await admin
+    .from("professional_availability")
+    .select("professional_id")
+    .eq("day_of_week", day);
+  return new Set((data ?? []).map((r) => r.professional_id));
+}
+
 /** PostgREST reserved characters that would break an `.or()` filter string. */
 function sanitiseOrValue(text: string): string {
   return text.replace(/[,()*\\]/g, " ");
@@ -145,6 +154,9 @@ async function fetchProfessionals(
     constraints.push(
       filters.assessmentStatus === "passed" ? passed : new Set(allIds.filter((id) => !passed.has(id))),
     );
+  }
+  if (filters.availabilityDay !== undefined) {
+    constraints.push(await professionalsAvailableOnDay(admin, filters.availabilityDay));
   }
 
   let idFilter: string[] | null = null;
@@ -226,6 +238,7 @@ function criteriaFromSearchParams(
     dbsStatus: pick("dbsStatus"),
     registrationStatus: pick("registrationStatus"),
     assessmentStatus: pick("assessmentStatus"),
+    availabilityDay: pick("availabilityDay"),
   };
 }
 
