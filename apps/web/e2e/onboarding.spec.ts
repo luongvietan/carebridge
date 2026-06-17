@@ -90,6 +90,15 @@ test("professional completes the onboarding wizard and writes persist", async ({
   await page.goto("/professional/onboarding/documents");
   const firstFile = page.locator('input[type="file"]').first();
   await firstFile.setInputFiles({ name: "dbs.pdf", mimeType: "application/pdf", buffer: Buffer.from("test-doc") });
+  // Expiry is now mandatory for documents that carry one — set a future date on
+  // the first document's (hidden) expiry input before uploading.
+  const futureExpiry = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  await page.locator('input[name="expiryDate"]').first().evaluate((el, v) => {
+    const input = el as HTMLInputElement;
+    const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value")!.set!;
+    setter.call(input, v);
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+  }, futureExpiry);
   await page.getByRole("button", { name: /^upload$/i }).first().click();
   await expect(page.getByText(/pending review/i).first()).toBeVisible();
 
@@ -170,12 +179,14 @@ test("admin approving the final critical document activates the professional", a
     })
     .map((r) => r.document_type_id);
 
+  // All critical document types carry an expiry, which is now required.
+  const fixtureExpiry = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
   let pendingDocId = "";
   for (let i = 0; i < critical.length; i++) {
     const status = i === 0 ? "pending_review" : "approved";
     const { data: doc } = await sb
       .from("documents")
-      .insert({ professional_id: pro!.id, document_type_id: critical[i], storage_path: `x/${critical[i]}.pdf`, verification_status: status })
+      .insert({ professional_id: pro!.id, document_type_id: critical[i], storage_path: `x/${critical[i]}.pdf`, verification_status: status, expiry_date: fixtureExpiry })
       .select("id")
       .single();
     if (i === 0) pendingDocId = doc!.id;
@@ -256,6 +267,8 @@ test("professional cannot download another professional's document from storage"
     document_type_id: docType!.id,
     storage_path: storagePath,
     verification_status: "pending_review",
+    // Set an expiry unconditionally — harmless for non-expiring types, required for expiring ones.
+    expiry_date: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
   });
 
   const anonClient = createClient(

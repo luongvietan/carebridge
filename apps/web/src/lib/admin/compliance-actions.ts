@@ -2,7 +2,7 @@
 import { createServiceClient } from "@/lib/supabase/service";
 import { requireAdmin } from "@/lib/auth/admin";
 import { requireAuth } from "@/lib/auth/require-auth";
-import { isCompliant } from "@/lib/compliance/requirements";
+import { isCompliant, canActivateProfessional } from "@/lib/compliance/requirements";
 import { sendNotification } from "@/lib/notifications/send";
 import { sendDueComplianceReminders } from "@/lib/compliance/reminders";
 import type { ProfessionalStatus } from "./status-machine";
@@ -111,7 +111,35 @@ async function recomputeCompliance(
     .eq("verification_status", "approved");
   const approvedSet = new Set((approved ?? []).map((d) => d.document_type_id));
 
-  if (isCompliant(requiredCritical, approvedSet)) {
+  const documentsCompliant = isCompliant(requiredCritical, approvedSet);
+
+  // Spec item 1: an applicant who declared their mandatory training is NOT current
+  // stays pending "until updated training certificates are provided". Read the
+  // latest screening attestation and whether an approved training certificate
+  // exists, then gate activation on both document compliance AND training.
+  const { data: screening } = await admin
+    .from("eligibility_screenings")
+    .select("training_current")
+    .eq("professional_id", professionalId)
+    .order("submitted_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const trainingAttestedCurrent = screening ? screening.training_current : null;
+
+  const { data: trainingType } = await admin
+    .from("document_types")
+    .select("id")
+    .eq("code", "mandatory_training_certificate")
+    .maybeSingle();
+  const hasApprovedTrainingCertificate = trainingType ? approvedSet.has(trainingType.id) : false;
+
+  const activate = canActivateProfessional({
+    documentsCompliant,
+    trainingAttestedCurrent,
+    hasApprovedTrainingCertificate,
+  });
+
+  if (activate) {
     const becameActive = COMPLIANCE_BLOCKED.includes(
       prof.professional_status as ProfessionalStatus,
     );
@@ -149,6 +177,14 @@ async function recomputeCompliance(
           : []),
       ]);
     }
+  } else if (documentsCompliant) {
+    // Documents are all approved, but the applicant declared their mandatory
+    // training is not current and no updated training certificate has been
+    // approved yet. Hold them and surface the outstanding item to the admin.
+    await admin
+      .from("professionals")
+      .update({ compliance_status: "further_info_required" })
+      .eq("id", professionalId);
   } else {
     // Not (yet) fully compliant. Preserve the explicit review outcome so the
     // 'Rejected' and 'Further Information Required' states the spec requires are

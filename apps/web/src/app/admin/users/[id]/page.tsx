@@ -7,6 +7,10 @@ import { requireAdmin } from "@/lib/auth/admin";
 import type { AccountStatus } from "@/lib/admin/account-status";
 import type { ProfessionalStatus } from "@/lib/admin/status-machine";
 import { createServiceClient } from "@/lib/supabase/service";
+import {
+  employmentStatusLabels,
+  mandatoryTrainingItems,
+} from "@/lib/validation/onboarding";
 
 export const dynamic = "force-dynamic";
 
@@ -41,23 +45,33 @@ export default async function AdminUserDetailPage({
 
   if (!professional) notFound();
 
-  const [{ data: user }, { data: history }, { data: attempts }] = await Promise.all([
-    admin
-      .from("users")
-      .select("email, account_status")
-      .eq("id", professional.user_id)
-      .maybeSingle(),
-    admin
-      .from("professional_status_actions")
-      .select("action_type, reason_code, resulting_status, applied_at")
-      .eq("professional_id", id)
-      .order("applied_at", { ascending: false }),
-    admin
-      .from("assessment_attempts")
-      .select("attempt_number, score, passed, completed_at")
-      .eq("professional_id", id)
-      .order("attempt_number", { ascending: true }),
-  ]);
+  const [{ data: user }, { data: history }, { data: attempts }, { data: screening }] =
+    await Promise.all([
+      admin
+        .from("users")
+        .select("email, account_status")
+        .eq("id", professional.user_id)
+        .maybeSingle(),
+      admin
+        .from("professional_status_actions")
+        .select("action_type, reason_code, resulting_status, applied_at")
+        .eq("professional_id", id)
+        .order("applied_at", { ascending: false }),
+      admin
+        .from("assessment_attempts")
+        .select("attempt_number, score, passed, completed_at")
+        .eq("professional_id", id)
+        .order("attempt_number", { ascending: true }),
+      admin
+        .from("eligibility_screenings")
+        .select("employment_status, training_current, outcome, training_attestations, submitted_at")
+        .eq("professional_id", id)
+        .order("submitted_at", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+    ]);
+
+  const attestations = (screening?.training_attestations ?? {}) as Record<string, boolean>;
 
   const completedAttempts = (attempts ?? []).filter((a) => a.completed_at);
   const bestScore = completedAttempts.reduce<number | null>(
@@ -104,6 +118,54 @@ export default async function AdminUserDetailPage({
             View compliance documents
           </ForwardLink>
         </p>
+      </section>
+
+      <section className="mt-10 rounded-2xl border border-[#dbe7e0] bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)] text-sm">
+        <h2 className="text-lg font-bold">Eligibility screening</h2>
+        {!screening ? (
+          <p className="mt-4 text-[#5b6a62]">No eligibility screening on record.</p>
+        ) : (
+          <>
+            <dl className="mt-4 grid gap-3 sm:grid-cols-3">
+              <div>
+                <dt className="text-[#7a8a81]">Employment status</dt>
+                <dd>
+                  {screening.employment_status
+                    ? (employmentStatusLabels[
+                        screening.employment_status as keyof typeof employmentStatusLabels
+                      ] ?? formatLabel(screening.employment_status))
+                    : "—"}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-[#7a8a81]">Mandatory training</dt>
+                <dd>
+                  {screening.training_current ? (
+                    <span className="text-[#0e6027]">All attested current</span>
+                  ) : (
+                    <span className="text-[#a2191f]">
+                      Not current — updated certificate required before approval
+                    </span>
+                  )}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-[#7a8a81]">Outcome</dt>
+                <dd>{formatLabel(screening.outcome)}</dd>
+              </div>
+            </dl>
+            <ul className="mt-4 grid gap-1 sm:grid-cols-2">
+              {mandatoryTrainingItems.map((t) => (
+                <li key={t.key} className="flex items-center gap-2">
+                  <span aria-hidden className={attestations[t.key] ? "text-[#0e6027]" : "text-[#a2191f]"}>
+                    {attestations[t.key] ? "✓" : "✗"}
+                  </span>
+                  <span>{t.label}</span>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
       </section>
 
       <section className="mt-10 rounded-2xl border border-[#dbe7e0] bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)] text-sm">

@@ -9,6 +9,7 @@ export type DocItem = {
   typeId: string;
   name: string;
   critical: boolean;
+  hasExpiry: boolean; // type carries an expiry → an expiry date is required on upload
   status: string | null; // verification_status, or null if not uploaded
 };
 
@@ -36,12 +37,16 @@ export function DocumentUploader({ items }: { items: DocItem[] }) {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  async function onUpload(e: React.FormEvent<HTMLFormElement>, typeId: string) {
+  async function onUpload(e: React.FormEvent<HTMLFormElement>, item: DocItem) {
     e.preventDefault();
-    setBusy(typeId);
-    setError(null);
     const fd = new FormData(e.currentTarget);
-    fd.set("documentTypeId", typeId);
+    fd.set("documentTypeId", item.typeId);
+    if (item.hasExpiry && !String(fd.get("expiryDate") ?? "").trim()) {
+      setError(`${item.name}: an expiry date is required for this document.`);
+      return;
+    }
+    setBusy(item.typeId);
+    setError(null);
     const r = await uploadDocument(fd);
     setBusy(null);
     if ("error" in r) setError(r.error);
@@ -69,12 +74,17 @@ export function DocumentUploader({ items }: { items: DocItem[] }) {
               </div>
               <Badge status={item.status} />
             </div>
-            <form onSubmit={(e) => onUpload(e, item.typeId)} className="mt-3 flex flex-wrap items-end gap-3">
+            <form onSubmit={(e) => onUpload(e, item)} className="mt-3 flex flex-wrap items-end gap-3">
               <input type="file" name="file" required aria-label={`Upload ${item.name}`} className="text-sm" />
               <input name="referenceNumber" placeholder="Reference no. (optional)" aria-label="Reference number" className={field} />
               <div className="text-xs text-[#5b6a62]">
-                Expiry
-                <DatePicker name="expiryDate" aria-label="Expiry date" className="mt-1 w-40" />
+                Expiry{item.hasExpiry && <span className="text-[#da1e28]"> *</span>}
+                <DatePicker
+                  name="expiryDate"
+                  required={item.hasExpiry}
+                  aria-label={item.hasExpiry ? "Expiry date (required)" : "Expiry date"}
+                  className="mt-1 w-40"
+                />
               </div>
               <button
                 type="submit"

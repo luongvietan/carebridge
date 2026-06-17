@@ -6,6 +6,7 @@ import { ensureProfessional } from "@/lib/onboarding/professional-session";
 import { eligibilitySchema, profileSchema, mandatoryTrainingItems } from "@/lib/validation/onboarding";
 import { eligibilityOutcome, type EligibilityOutcome } from "@/lib/compliance/requirements";
 import { verifyUpload } from "@/lib/onboarding/upload-rules";
+import { validateDocumentExpiry } from "@/lib/onboarding/document-expiry";
 
 export type EligibilityResult = { ok: true; outcome: EligibilityOutcome } | { error: string } | null;
 
@@ -43,6 +44,15 @@ export async function submitEligibility(
     outcome,
   });
   if (error) return { error: error.message };
+
+  // Mirror the employment status onto the professional row so it is queryable,
+  // exportable and visible in the admin dashboard (eligibility_screenings is
+  // admin-RLS only). Best-effort: the screening row above is the source of truth.
+  await admin
+    .from("professionals")
+    .update({ employment_status: parsed.data.employmentStatus })
+    .eq("id", professionalId);
+
   return { ok: true, outcome };
 }
 
@@ -148,6 +158,23 @@ export async function uploadDocument(
   if (!documentTypeId) return { error: "Missing document type." };
   if (!(file instanceof File)) return { error: "Choose a file to upload." };
 
+  // Documents whose type carries an expiry (DBS, registration, insurance,
+  // training certificates …) must be uploaded with a valid, in-date expiry —
+  // otherwise the daily compliance sweep (which only acts on rows with a
+  // non-null expiry_date) can never expire or alert on a lapsed certificate.
+  const { data: docType } = await admin0
+    .from("document_types")
+    .select("has_expiry")
+    .eq("id", documentTypeId)
+    .maybeSingle();
+  if (!docType) return { error: "Unknown document type." };
+  const expiryRaw = (formData.get("expiryDate") as string) || "";
+  const expiryCheck = validateDocumentExpiry({
+    hasExpiry: docType.has_expiry,
+    expiryDate: expiryRaw,
+  });
+  if (!expiryCheck.ok) return { error: expiryCheck.error };
+
   const verified = await verifyUpload(file);
   if (!verified.ok) return { error: verified.error };
 
@@ -165,7 +192,7 @@ export async function uploadDocument(
     original_filename: verified.safeName,
     reference_number: (formData.get("referenceNumber") as string) || null,
     issuing_body: (formData.get("issuingBody") as string) || null,
-    expiry_date: (formData.get("expiryDate") as string) || null,
+    expiry_date: expiryRaw || null,
     uploaded_by: user.id,
   });
   if (error) return { error: error.message };

@@ -52,7 +52,9 @@ export async function verifyUpload(file: File): Promise<
   }
 
   // Strip any directory separators / control characters from the original
-  // filename before it ever participates in the storage path.
+  // filename before it ever participates in the storage path. Control-char
+  // range is intentional here — that is exactly what we are sanitising out.
+  // eslint-disable-next-line no-control-regex
   const safeName = file.name.replace(/[\\/\x00-\x1f]/g, "_").slice(0, 200);
 
   return { ok: true, safeMime: SNIFF_TO_MIME[sniffed], safeName };

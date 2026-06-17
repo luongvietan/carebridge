@@ -40,7 +40,7 @@ export default async function DocumentsPage() {
   const [{ data: required }, { data: existing }] = await Promise.all([
     supabase
       .from("compliance_requirements")
-      .select("document_type_id, document_types(id, name, is_compliance_critical)")
+      .select("document_type_id, document_types(id, name, is_compliance_critical, has_expiry)")
       .eq("professional_role_id", prof.professional_role_id),
     supabase
       .from("documents")
@@ -51,11 +51,17 @@ export default async function DocumentsPage() {
   const statusByType = new Map((existing ?? []).map((d) => [d.document_type_id, d.verification_status]));
 
   const items: DocItem[] = (required ?? []).map((r) => {
-    const dt = r.document_types as { id: string; name: string; is_compliance_critical: boolean } | null;
+    const dt = r.document_types as {
+      id: string;
+      name: string;
+      is_compliance_critical: boolean;
+      has_expiry: boolean;
+    } | null;
     return {
       typeId: r.document_type_id,
       name: dt?.name ?? "Document",
       critical: dt?.is_compliance_critical ?? false,
+      hasExpiry: dt?.has_expiry ?? false,
       status: statusByType.get(r.document_type_id) ?? null,
     };
   });
