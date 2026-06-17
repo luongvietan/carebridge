@@ -167,10 +167,10 @@ async function pickDate(page: Page, triggerName: string, d: Date) {
   await page.keyboard.press("Escape"); // close the popover before the next field
 }
 
-async function fillBookingForm(page: Page, location: string, start: Date, end: Date) {
+async function fillBookingForm(page: Page, location: string, start: Date, durationLabel: string) {
   await chooseFrom(page, page.getByRole("combobox", { name: "Professional role" }), "Registered Nurse");
   await pickDate(page, "Start", start);
-  await pickDate(page, "End", end);
+  await chooseFrom(page, page.getByRole("combobox", { name: "Shift duration" }), durationLabel);
   await page.locator('input[name="locationAddress"]').fill(location);
   await page.locator('input[name="locationPostcode"]').fill("E1 6AN");
   await page.getByRole("button", { name: /create booking/i }).click();
@@ -186,13 +186,13 @@ test("open-market happy path: client creates booking, professional accepts", asy
 
   await login(page, client.email, /\/client/);
   await page.goto("/client/bookings/new");
-  // 09:00 on two different days, so the date picker only needs day clicks
-  // (its committed default time is 09:00) — no fragile hour/minute selection.
+  // 09:00 two days out, so the date picker only needs a day click (its committed
+  // default time is 09:00) — no fragile hour/minute selection. Shift duration is
+  // now a Select; pick a whole-hour preset and let the form compute the end.
   const start = new Date(Date.now() + 48 * 3_600_000);
   start.setHours(9, 0, 0, 0);
-  const end = new Date(start.getTime() + 24 * 3_600_000);
   const happyStartIso = start.toISOString();
-  await fillBookingForm(page, location, start, end); // submits the form
+  await fillBookingForm(page, location, start, "8 hours"); // submits the form
   await expect(page).toHaveURL(/\/client\/bookings\/?$/);
   await expect(page.locator("tr", { hasText: formatDate(happyStartIso) })).toBeVisible();
 

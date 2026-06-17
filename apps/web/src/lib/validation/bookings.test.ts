@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { createBookingSchema } from "./bookings";
+import { createBookingSchema, MAX_SHIFT_HOURS } from "./bookings";
 
 describe("createBookingSchema", () => {
   const valid = {
@@ -28,6 +28,36 @@ describe("createBookingSchema", () => {
 
   it("requires a non-empty location address", () => {
     expect(createBookingSchema.safeParse({ ...valid, locationAddress: "" }).success).toBe(false);
+  });
+
+  it("rejects an end time before the start time", () => {
+    expect(
+      createBookingSchema.safeParse({
+        ...valid,
+        scheduledStart: "2026-07-01T11:00:00.000Z",
+        scheduledEnd: "2026-07-01T09:00:00.000Z",
+      }).success,
+    ).toBe(false);
+  });
+
+  it(`accepts a shift up to the ${MAX_SHIFT_HOURS}-hour maximum`, () => {
+    expect(
+      createBookingSchema.safeParse({
+        ...valid,
+        scheduledStart: "2026-07-01T09:00:00.000Z",
+        scheduledEnd: "2026-07-02T09:00:00.000Z", // exactly 24h
+      }).success,
+    ).toBe(true);
+  });
+
+  it(`rejects a shift longer than ${MAX_SHIFT_HOURS} hours`, () => {
+    expect(
+      createBookingSchema.safeParse({
+        ...valid,
+        scheduledStart: "2026-07-01T09:00:00.000Z",
+        scheduledEnd: "2026-07-02T10:00:00.000Z", // 25h
+      }).success,
+    ).toBe(false);
   });
 
   it("accepts optional postcode and notes", () => {

@@ -98,14 +98,21 @@ function useToday() {
 function Calendar({
   selected,
   onSelect,
+  minDate,
 }: {
   selected: Date | null;
   onSelect: (d: Date) => void;
+  minDate?: Date;
 }) {
   const today = useToday();
   const [view, setView] = useState(() => selected ?? new Date());
   const [focused, setFocused] = useState(() => selected ?? new Date());
   const gridRef = useRef<HTMLDivElement>(null);
+
+  const minDay = minDate
+    ? new Date(minDate.getFullYear(), minDate.getMonth(), minDate.getDate())
+    : null;
+  const isDisabled = (d: Date) => (minDay ? d.getTime() < minDay.getTime() : false);
 
   // Keep keyboard focus on the active day button.
   useEffect(() => {
@@ -129,7 +136,7 @@ function Calendar({
       case "ArrowUp": e.preventDefault(); move(-7); break;
       case "ArrowDown": e.preventDefault(); move(7); break;
       case "Enter":
-      case " ": e.preventDefault(); onSelect(focused); break;
+      case " ": e.preventDefault(); if (!isDisabled(focused)) onSelect(focused); break;
     }
   }
 
@@ -175,6 +182,7 @@ function Calendar({
           const isSelected = selected ? sameDay(d, selected) : false;
           const isToday = today ? sameDay(d, today) : false;
           const isFocusable = sameDay(d, focused);
+          const disabled = isDisabled(d);
           return (
             <button
               key={toYMD(d)}
@@ -182,17 +190,21 @@ function Calendar({
               data-ymd={toYMD(d)}
               role="gridcell"
               aria-selected={isSelected}
+              aria-disabled={disabled}
+              disabled={disabled}
               aria-label={formatLong(d)}
               tabIndex={isFocusable ? 0 : -1}
-              onClick={() => onSelect(d)}
+              onClick={() => !disabled && onSelect(d)}
               className={`grid h-9 w-9 place-items-center rounded-full text-sm transition ${
-                isSelected
-                  ? "bg-[#2e7d32] font-semibold text-white"
-                  : isToday
-                    ? "font-semibold text-[#2e7d32] ring-1 ring-inset ring-[#bcd8c7] hover:bg-[#eef5f0]"
-                    : inMonth
-                      ? "text-[#1e5a33] hover:bg-[#eef5f0]"
-                      : "text-[#9aa8a0] hover:bg-[#f5f7f6]"
+                disabled
+                  ? "cursor-not-allowed text-[#c5cec8]"
+                  : isSelected
+                    ? "bg-[#2e7d32] font-semibold text-white"
+                    : isToday
+                      ? "font-semibold text-[#2e7d32] ring-1 ring-inset ring-[#bcd8c7] hover:bg-[#eef5f0]"
+                      : inMonth
+                        ? "text-[#1e5a33] hover:bg-[#eef5f0]"
+                        : "text-[#9aa8a0] hover:bg-[#f5f7f6]"
               } focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2e7d32]/40`}
             >
               {d.getDate()}
@@ -220,6 +232,8 @@ type BaseProps = {
   className?: string;
   placeholder?: string;
   "aria-label"?: string;
+  /** Earliest selectable day; earlier days are disabled (e.g. disallow past dates). */
+  minDate?: Date;
 };
 
 export function DatePicker({
@@ -233,6 +247,7 @@ export function DatePicker({
   className = "",
   placeholder = "Select date",
   "aria-label": ariaLabel,
+  minDate,
 }: BaseProps) {
   const isControlled = value !== undefined;
   const [internal, setInternal] = useState(defaultValue ?? "");
@@ -276,7 +291,7 @@ export function DatePicker({
 
       {open && (
         <dialog open aria-label={ariaLabel ?? "Choose date"} className={popoverClass}>
-          <Calendar selected={selected} onSelect={pick} />
+          <Calendar selected={selected} onSelect={pick} minDate={minDate} />
           <div className="mt-2 flex items-center justify-between border-t border-[#eef5f0] px-1 pt-2 text-sm">
             <button type="button" onClick={pickToday} className="font-medium text-[#2e7d32] hover:underline">
               Today
@@ -320,6 +335,7 @@ export function DateTimePicker({
   className = "",
   placeholder = "Select date & time",
   "aria-label": ariaLabel,
+  minDate,
 }: BaseProps) {
   const isControlled = value !== undefined;
   const [internal, setInternal] = useState(defaultValue ?? "");
@@ -357,7 +373,7 @@ export function DateTimePicker({
 
       {open && (
         <dialog open aria-label={ariaLabel ?? "Choose date and time"} className={popoverClass}>
-          <Calendar selected={selected} onSelect={(d) => commit(toYMD(d), hour || "09", minute || "00")} />
+          <Calendar selected={selected} minDate={minDate} onSelect={(d) => commit(toYMD(d), hour || "09", minute || "00")} />
           <div className="mt-2 flex items-center gap-2 border-t border-[#eef5f0] px-1 pt-3">
             <Icon icon={Clock01Icon} size={16} strokeWidth={2} aria-hidden className="text-[#5b6a62]" />
             <Select
