@@ -149,6 +149,7 @@ export function Select({
 
   function openMenu() {
     if (disabled) return;
+    const currentIdx = options.findIndex((o) => o.value === current);
     dispatch({
       type: "openMenu",
       activeIndex: currentIdx >= 0 ? currentIdx : (selectableIndexes[0] ?? -1),
@@ -176,7 +177,7 @@ export function Select({
     if (!opt || opt.disabled) return;
     if (!isControlled) dispatch({ type: "setInternal", value: opt.value });
     onValueChange?.(opt.value);
-    setOpen(false);
+    dispatch({ type: "setOpen", open: false });
     buttonRef.current?.focus();
   }
 
@@ -206,8 +207,8 @@ export function Select({
       case "End": e.preventDefault(); dispatch({ type: "setActiveIndex", index: selectableIndexes[selectableIndexes.length - 1] ?? -1 }); break;
       case "Enter":
       case " ": e.preventDefault(); if (activeIndex >= 0) commit(activeIndex); break;
-      case "Escape": e.preventDefault(); setOpen(false); buttonRef.current?.focus(); break;
-      case "Tab": setOpen(false); break;
+      case "Escape": e.preventDefault(); dispatch({ type: "setOpen", open: false }); buttonRef.current?.focus(); break;
+      case "Tab": dispatch({ type: "setOpen", open: false }); break;
     }
   }
 
