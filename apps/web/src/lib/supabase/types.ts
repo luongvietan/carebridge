@@ -7,30 +7,10 @@ export type Json =
   | Json[]
 
 export type Database = {
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
@@ -1082,6 +1062,7 @@ export type Database = {
           id: string
           paid_at: string | null
           payer_user_id: string | null
+          refunded_at: string | null
           status: Database["public"]["Enums"]["payment_status"]
           stripe_payment_intent_id: string | null
           updated_at: string
@@ -1094,6 +1075,7 @@ export type Database = {
           id?: string
           paid_at?: string | null
           payer_user_id?: string | null
+          refunded_at?: string | null
           status?: Database["public"]["Enums"]["payment_status"]
           stripe_payment_intent_id?: string | null
           updated_at?: string
@@ -1106,6 +1088,7 @@ export type Database = {
           id?: string
           paid_at?: string | null
           payer_user_id?: string | null
+          refunded_at?: string | null
           status?: Database["public"]["Enums"]["payment_status"]
           stripe_payment_intent_id?: string | null
           updated_at?: string
@@ -1746,6 +1729,42 @@ export type Database = {
         }
         Relationships: []
       }
+      stripe_webhook_events: {
+        Row: {
+          event_id: string
+          event_type: string
+          payment_id: string | null
+          received_at: string
+        }
+        Insert: {
+          event_id: string
+          event_type: string
+          payment_id?: string | null
+          received_at?: string
+        }
+        Update: {
+          event_id?: string
+          event_type?: string
+          payment_id?: string | null
+          received_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stripe_webhook_events_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stripe_webhook_events_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "v_export_payments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       users: {
         Row: {
           account_status: Database["public"]["Enums"]["account_status"]
@@ -2277,12 +2296,7 @@ export type CompositeTypes<
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
 
-// Generated Supabase types — Constants kept for schema parity but unused at runtime.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
+export const Constants = {
   public: {
     Enums: {
       account_status: ["active", "suspended", "deactivated"],
@@ -2348,4 +2362,3 @@ const Constants = {
     },
   },
 } as const
-

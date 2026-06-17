@@ -5,6 +5,7 @@ import { requireAuth } from "@/lib/auth/require-auth";
 import { ensureProfessional } from "@/lib/onboarding/professional-session";
 import { eligibilitySchema, profileSchema } from "@/lib/validation/onboarding";
 import { eligibilityOutcome, type EligibilityOutcome } from "@/lib/compliance/requirements";
+import { verifyUpload } from "@/lib/onboarding/upload-rules";
 
 export type EligibilityResult = { ok: true; outcome: EligibilityOutcome } | { error: string } | null;
 
@@ -62,10 +63,12 @@ export async function saveProfile(_prev: ProfileResult, formData: FormData): Pro
   let photoPath: string | undefined;
   const photo = formData.get("photo");
   if (photo instanceof File && photo.size > 0) {
+    const verified = await verifyUpload(photo);
+    if (!verified.ok) return { error: verified.error };
     const admin = createServiceClient();
-    photoPath = `${professionalId}/profile/${crypto.randomUUID()}-${photo.name}`;
+    photoPath = `${professionalId}/profile/${crypto.randomUUID()}-${verified.safeName}`;
     const { error: upErr } = await admin.storage.from("documents").upload(photoPath, photo, {
-      contentType: photo.type,
+      contentType: verified.safeMime,
       upsert: true,
     });
     if (upErr) return { error: `Photo upload failed: ${upErr.message}` };
@@ -103,20 +106,23 @@ export async function uploadDocument(
   const documentTypeId = String(formData.get("documentTypeId") ?? "");
   const file = formData.get("file");
   if (!documentTypeId) return { error: "Missing document type." };
-  if (!(file instanceof File) || file.size === 0) return { error: "Choose a file to upload." };
+  if (!(file instanceof File)) return { error: "Choose a file to upload." };
+
+  const verified = await verifyUpload(file);
+  if (!verified.ok) return { error: verified.error };
 
   const admin = createServiceClient();
-  const path = `${professionalId}/${documentTypeId}/${crypto.randomUUID()}-${file.name}`;
+  const path = `${professionalId}/${documentTypeId}/${crypto.randomUUID()}-${verified.safeName}`;
   const { error: upErr } = await admin.storage
     .from("documents")
-    .upload(path, file, { contentType: file.type, upsert: true });
+    .upload(path, file, { contentType: verified.safeMime, upsert: true });
   if (upErr) return { error: `Upload failed: ${upErr.message}` };
 
   const { error } = await admin.from("documents").insert({
     professional_id: professionalId,
     document_type_id: documentTypeId,
     storage_path: path,
-    original_filename: file.name,
+    original_filename: verified.safeName,
     reference_number: (formData.get("referenceNumber") as string) || null,
     issuing_body: (formData.get("issuingBody") as string) || null,
     expiry_date: (formData.get("expiryDate") as string) || null,

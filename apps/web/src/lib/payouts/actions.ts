@@ -40,6 +40,12 @@ export async function recordPayout(bookingId: string): Promise<PayoutResult> {
   if (booking.status !== "completed") return { error: "Booking is not completed." };
   if (!booking.assigned_professional_id) return { error: "Booking has no assigned professional." };
 
+  // Reject if any payment row for this booking has ever been refunded — even
+  // if its current status is `succeeded`, a refund history must block payout.
+  const { count: refundedEver } = await admin.from("payments")
+    .select("id", { count: "exact", head: true }).eq("booking_id", bookingId).not("refunded_at", "is", null);
+  if ((refundedEver ?? 0) > 0) return { error: "Payment for this booking has been refunded; no payout will be made." };
+
   const { count: paid } = await admin.from("payments")
     .select("id", { count: "exact", head: true }).eq("booking_id", bookingId).eq("status", "succeeded");
   if ((paid ?? 0) === 0) return { error: "The client payment has not succeeded yet." };

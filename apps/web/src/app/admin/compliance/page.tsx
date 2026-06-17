@@ -31,9 +31,11 @@ export default async function AdminCompliancePage() {
 
   const itemsPromise = Promise.all(
     (pending ?? []).map(async (d) => {
+      // Force Content-Disposition: attachment so user-supplied content cannot
+      // execute in the admin's browser context on the supabase.co storage origin.
       const { data: signed } = await admin.storage
         .from("documents")
-        .createSignedUrl(d.storage_path, 600);
+        .createSignedUrl(d.storage_path, 600, { download: true });
       return {
         documentId: d.id,
         professionalName: (d.professionals as { full_name: string } | null)?.full_name ?? "Professional",

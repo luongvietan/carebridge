@@ -1,3 +1,12 @@
+/**
+ * Neutralise spreadsheet formula prefixes so attacker-controlled cell values
+ * cannot execute when an admin opens the export in Excel / LibreOffice / Sheets.
+ * Cells starting with `=`, `+`, `-`, `@`, TAB or CR get a single-quote prefix.
+ */
+function defuseFormula(s: string): string {
+  return /^[=+\-@\t\r]/.test(s) ? `'${s}` : s;
+}
+
 /** Serialise rows to an RFC-4180 CSV string (CRLF). Always emits a header row. */
 export function toCsv(
   rows: Record<string, unknown>[],
@@ -5,7 +14,8 @@ export function toCsv(
 ): string {
   const cols = headers ?? (rows[0] ? Object.keys(rows[0]) : []);
   const esc = (v: unknown): string => {
-    const s = v == null ? "" : String(v);
+    const raw = v == null ? "" : String(v);
+    const s = defuseFormula(raw);
     return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
   };
   let out = cols.map(esc).join(",") + "\r\n";

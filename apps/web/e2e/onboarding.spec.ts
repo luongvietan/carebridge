@@ -163,7 +163,11 @@ test("admin approving the final critical document activates the professional", a
     .select("document_type_id, document_types(is_compliance_critical)")
     .eq("professional_role_id", role!.id);
   const critical = (reqs ?? [])
-    .filter((r) => (r.document_types as { is_compliance_critical: boolean }).is_compliance_critical)
+    .filter((r) => {
+      const dt = r.document_types as unknown as { is_compliance_critical: boolean } | { is_compliance_critical: boolean }[] | null;
+      const row = Array.isArray(dt) ? dt[0] : dt;
+      return row?.is_compliance_critical;
+    })
     .map((r) => r.document_type_id);
 
   let pendingDocId = "";

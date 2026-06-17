@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import type Stripe from "stripe";
 import { stripe } from "@/lib/stripe/client";
-import { paymentStatusForEvent } from "@/lib/stripe/events";
+import { isAllowedTransition, paymentStatusForEvent } from "@/lib/stripe/events";
 import { createServiceClient } from "@/lib/supabase/service";
 import { sendNotification } from "@/lib/notifications/send";
 
@@ -24,6 +24,20 @@ export async function POST(req: NextRequest) {
   const status = paymentStatusForEvent(event.type);
   if (!status) return new Response("ignored", { status: 200 });
 
+  const admin = createServiceClient();
+
+  // Idempotency: insert event.id and treat unique-violation as already handled.
+  // 23505 = unique_violation.
+  const { error: dedupErr } = await admin
+    .from("stripe_webhook_events")
+    .insert({ event_id: event.id, event_type: event.type });
+  if (dedupErr) {
+    if ((dedupErr as { code?: string }).code === "23505") {
+      return new Response("already processed", { status: 200 });
+    }
+    return new Response("db error", { status: 500 });
+  }
+
   const obj = event.data.object as unknown as Record<string, unknown>;
   const metadata = obj.metadata as Record<string, string> | undefined;
   const paymentIdMeta = metadata?.payment_id;
@@ -31,25 +45,50 @@ export async function POST(req: NextRequest) {
     (typeof obj.payment_intent === "string" ? obj.payment_intent : undefined) ??
     (event.type.startsWith("payment_intent.") ? (obj.id as string) : undefined);
 
-  const admin = createServiceClient();
-  const sel = "id, status, payer_user_id, booking_id, stripe_payment_intent_id";
-  let payment: { id: string; status: string; payer_user_id: string | null; booking_id: string | null; stripe_payment_intent_id: string | null } | null = null;
+  const sel = "id, status, payer_user_id, booking_id, stripe_payment_intent_id, refunded_at";
+  let payment:
+    | { id: string; status: string; payer_user_id: string | null; booking_id: string | null; stripe_payment_intent_id: string | null; refunded_at: string | null }
+    | null = null;
   if (paymentIdMeta) {
     ({ data: payment } = await admin.from("payments").select(sel).eq("id", paymentIdMeta).maybeSingle());
   } else if (intentId) {
     ({ data: payment } = await admin.from("payments").select(sel).eq("stripe_payment_intent_id", intentId).maybeSingle());
   }
   if (!payment) return new Response("no payment row", { status: 200 });
-  if (payment.status === status) return new Response("already reconciled", { status: 200 });
 
-  const patch: { status: typeof status; paid_at?: string; stripe_payment_intent_id?: string } = { status };
+  // Enforce monotonic state machine. A late `payment_intent.succeeded` arriving
+  // after a `charge.refunded` must NOT revert status to succeeded; a stale
+  // `payment_intent.payment_failed` must NOT overwrite a real `succeeded`.
+  // Update payments.stripe_webhook_events so we can link the event to the row
+  // even when we choose not to mutate state.
+  await admin
+    .from("stripe_webhook_events")
+    .update({ payment_id: payment.id })
+    .eq("event_id", event.id);
+
+  if (!isAllowedTransition(payment.status, status)) {
+    return new Response("transition rejected", { status: 200 });
+  }
+
+  const patch: {
+    status: typeof status;
+    paid_at?: string;
+    refunded_at?: string;
+    stripe_payment_intent_id?: string;
+  } = { status };
   if (status === "succeeded") patch.paid_at = new Date().toISOString();
+  if (status === "refunded" && !payment.refunded_at) patch.refunded_at = new Date().toISOString();
   if (intentId && !payment.stripe_payment_intent_id) patch.stripe_payment_intent_id = intentId;
+
   const { error: updateErr } = await admin.from("payments").update(patch).eq("id", payment.id);
   if (updateErr) return new Response("db error", { status: 500 });
 
   await admin.from("audit_log").insert({
-    actor_type: "system", action: `payment.${status}`, entity_type: "payment", entity_id: payment.id, summary: event.type,
+    actor_type: "system",
+    action: `payment.${status}`,
+    entity_type: "payment",
+    entity_id: payment.id,
+    summary: event.type,
   });
   if (status === "succeeded" && payment.payer_user_id) {
     await sendNotification("payment_receipt", payment.payer_user_id, { booking_id: payment.booking_id ?? "" });

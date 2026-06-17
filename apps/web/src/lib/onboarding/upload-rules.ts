@@ -1,0 +1,59 @@
+export const ALLOWED_UPLOAD_MIME = [
+  "application/pdf",
+  "image/jpeg",
+  "image/png",
+] as const;
+
+export const ALLOWED_UPLOAD_EXT = [".pdf", ".jpg", ".jpeg", ".png"] as const;
+
+export const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
+
+const MAGIC = {
+  pdf: [0x25, 0x50, 0x44, 0x46],
+  jpeg: [0xff, 0xd8, 0xff],
+  png: [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a],
+} as const;
+
+function startsWith(buf: Uint8Array, sig: readonly number[]): boolean {
+  if (buf.length < sig.length) return false;
+  for (let i = 0; i < sig.length; i++) if (buf[i] !== sig[i]) return false;
+  return true;
+}
+
+/** Determine the real type by magic bytes; returns null if unrecognised. */
+export function sniffUploadType(head: Uint8Array): "pdf" | "jpeg" | "png" | null {
+  if (startsWith(head, MAGIC.pdf)) return "pdf";
+  if (startsWith(head, MAGIC.jpeg)) return "jpeg";
+  if (startsWith(head, MAGIC.png)) return "png";
+  return null;
+}
+
+const SNIFF_TO_MIME = { pdf: "application/pdf", jpeg: "image/jpeg", png: "image/png" } as const;
+
+/** Build a safe (sniffed) MIME type and storage filename. Rejects unsafe inputs. */
+export async function verifyUpload(file: File): Promise<
+  | { ok: true; safeMime: string; safeName: string }
+  | { ok: false; error: string }
+> {
+  if (file.size === 0) return { ok: false, error: "Choose a file to upload." };
+  if (file.size > MAX_UPLOAD_BYTES) {
+    return { ok: false, error: `File exceeds the ${MAX_UPLOAD_BYTES / (1024 * 1024)}MB limit.` };
+  }
+
+  const lower = file.name.toLowerCase();
+  if (!ALLOWED_UPLOAD_EXT.some((ext) => lower.endsWith(ext))) {
+    return { ok: false, error: "Only PDF, JPEG and PNG files are accepted." };
+  }
+
+  const head = new Uint8Array(await file.slice(0, 16).arrayBuffer());
+  const sniffed = sniffUploadType(head);
+  if (!sniffed) {
+    return { ok: false, error: "File content does not match an allowed PDF/JPEG/PNG document." };
+  }
+
+  // Strip any directory separators / control characters from the original
+  // filename before it ever participates in the storage path.
+  const safeName = file.name.replace(/[\\/\x00-\x1f]/g, "_").slice(0, 200);
+
+  return { ok: true, safeMime: SNIFF_TO_MIME[sniffed], safeName };
+}
