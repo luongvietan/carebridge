@@ -8,9 +8,9 @@ export function ImportantInfoCallout() {
     <section className={`${marketingSection} pt-0`}>
       <div
         data-reveal
-        className={`rounded-[28px] border-2 border-[#0c6e4f]/25 ${marketingSurface} p-6 sm:rounded-[32px] sm:p-8`}
+        className={`rounded-[28px] border-2 border-[#2e7d32]/25 ${marketingSurface} p-6 sm:rounded-[32px] sm:p-8`}
       >
-        <h2 className="text-lg font-bold text-[#0c4a35] sm:text-xl">
+        <h2 className="text-lg font-bold text-[#1e5a33] sm:text-xl">
           {importantInformation.heading}
         </h2>
         <p className="mt-3 max-w-3xl text-sm leading-relaxed text-[#5b6a62]">
@@ -21,7 +21,7 @@ export function ImportantInfoCallout() {
         </p>
         <ForwardLink
           href="/disclaimer"
-          className="mt-4 text-sm font-semibold text-[#0c6e4f] hover:underline"
+          className="mt-4 text-sm font-semibold text-[#2e7d32] hover:underline"
         >
           Read the full important information &amp; disclaimer
         </ForwardLink>

@@ -22,7 +22,7 @@ export function AboutIntroSection() {
         <div className="flex shrink-0 items-center gap-4">
           <div className="flex items-center gap-2">
             <Icon icon={StarIcon} size={20} color="#f5a623" strokeWidth={1.75} />
-            <span className="text-lg font-bold text-[#0c4a35]">Compliance-first</span>
+            <span className="text-lg font-bold text-[#1e5a33]">Compliance-first</span>
           </div>
           <div className="flex -space-x-2.5">
             {aboutAvatars.map((src) => (
@@ -86,11 +86,11 @@ export function AboutIntroSection() {
                 <Icon
                   icon={CheckmarkCircle01Icon}
                   size={22}
-                  color="#0c6e4f"
+                  color="#2e7d32"
                   strokeWidth={1.75}
                   className="mt-0.5 shrink-0"
                 />
-                <span className="text-sm font-medium leading-snug text-[#0c4a35] sm:text-[15px]">
+                <span className="text-sm font-medium leading-snug text-[#1e5a33] sm:text-[15px]">
                   {feature}
                 </span>
               </li>

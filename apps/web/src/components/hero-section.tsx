@@ -126,7 +126,7 @@ export function HeroSection() {
             data-hero-float
             className="absolute bottom-6 right-6 hidden rounded-2xl bg-white px-5 py-4 shadow-xl sm:block lg:bottom-10 lg:right-10"
           >
-            <p className="text-[15px] font-bold text-[#0c4a35]">Compliance built in</p>
+            <p className="text-[15px] font-bold text-[#1e5a33]">Compliance built in</p>
             <div className="mt-3 flex items-center gap-3">
               <div className="flex -space-x-2.5">
                 {heroAvatars.map((src, i) => (

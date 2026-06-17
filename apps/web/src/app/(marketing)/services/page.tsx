@@ -72,7 +72,7 @@ export default function ServicesPage() {
               <div
                 key={service}
                 data-reveal-child
-                className={`rounded-2xl bg-white p-5 text-sm font-medium text-[#0c4a35] ${marketingCardShadow}`}
+                className={`rounded-2xl bg-white p-5 text-sm font-medium text-[#1e5a33] ${marketingCardShadow}`}
               >
                 {service}
               </div>
@@ -102,7 +102,7 @@ export default function ServicesPage() {
                 <span className={`text-5xl font-bold ${marketingDecorativeNumber}`}>
                   {String(i + 1).padStart(2, "0")}
                 </span>
-                <h3 className="mt-3 text-lg font-bold text-[#0c4a35] sm:text-xl">{step.title}</h3>
+                <h3 className="mt-3 text-lg font-bold text-[#1e5a33] sm:text-xl">{step.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-[#5b6a62]">{step.description}</p>
               </div>
             ))}
@@ -114,7 +114,7 @@ export default function ServicesPage() {
             data-reveal
             className={`rounded-[28px] ${marketingSurface} p-8 text-center sm:rounded-[32px] sm:p-12`}
           >
-            <h2 className="text-2xl font-bold tracking-tight text-[#0c4a35] sm:text-3xl">
+            <h2 className="text-2xl font-bold tracking-tight text-[#1e5a33] sm:text-3xl">
               Ready to create a booking request?
             </h2>
             <p className="mx-auto mt-3 max-w-lg text-sm leading-relaxed text-[#5b6a62] sm:text-base">

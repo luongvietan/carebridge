@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { pickQuestions } from "./selection";
+import { pickQuestions, pickStratified } from "./selection";
 
 const pool = ["q1", "q2", "q3", "q4", "q5"];
 
@@ -16,5 +16,35 @@ describe("pickQuestions", () => {
   });
   it("draws only from the pool", () => {
     expect(pickQuestions(pool, 4).every((q) => pool.includes(q))).toBe(true);
+  });
+});
+
+describe("pickStratified", () => {
+  const common = Array.from({ length: 50 }, (_, i) => `c${i}`);
+  const role = Array.from({ length: 6 }, (_, i) => `r${i}`);
+
+  it("draws commonN from common and roleN from role-specific", () => {
+    const got = pickStratified(common, role, 15, 5);
+    expect(got).toHaveLength(20);
+    expect(got.filter((q) => q.startsWith("c"))).toHaveLength(15);
+    expect(got.filter((q) => q.startsWith("r"))).toHaveLength(5);
+  });
+
+  it("returns unique items only", () => {
+    const got = pickStratified(common, role, 15, 5);
+    expect(new Set(got).size).toBe(got.length);
+  });
+
+  it("degrades gracefully when a pool is smaller than requested", () => {
+    const got = pickStratified(["c0", "c1"], ["r0"], 15, 5);
+    expect(got).toHaveLength(3);
+    expect(got.filter((q) => q.startsWith("c"))).toHaveLength(2);
+    expect(got.filter((q) => q.startsWith("r"))).toHaveLength(1);
+  });
+
+  it("works with no role-specific questions (e.g. role not yet seeded)", () => {
+    const got = pickStratified(common, [], 15, 5);
+    expect(got).toHaveLength(15);
+    expect(got.every((q) => q.startsWith("c"))).toBe(true);
   });
 });

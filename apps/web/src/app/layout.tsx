@@ -28,7 +28,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={`${plex.className} min-h-screen bg-white text-[#0f261c] antialiased`}>
+      <body className={`${plex.className} min-h-screen bg-white text-[#14301e] antialiased`}>
         {children}
       </body>
     </html>

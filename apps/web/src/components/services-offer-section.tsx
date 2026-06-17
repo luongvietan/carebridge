@@ -37,7 +37,7 @@ function ServiceCard({
           <Icon icon={ArrowUpRight01Icon} size={18} strokeWidth={2} />
         </span>
       </div>
-      <h3 className="mt-5 text-xl font-bold text-[#0c4a35]">{title}</h3>
+      <h3 className="mt-5 text-xl font-bold text-[#1e5a33]">{title}</h3>
       <p className="mt-2 text-sm leading-relaxed text-[#5b6a62]">{description}</p>
     </Link>
   );
@@ -72,7 +72,7 @@ export function ServicesOfferSection() {
       <p className="mx-auto mt-8 max-w-2xl text-center text-sm text-[#5b6a62]">
         Physiotherapists (HCPC-registered) are also available for rehabilitation and mobility
         programmes.{" "}
-        <ForwardLink href="/services" className="text-sm text-[#0c6e4f] hover:underline">
+        <ForwardLink href="/services" className="text-sm text-[#2e7d32] hover:underline">
           View all four roles
         </ForwardLink>
       </p>

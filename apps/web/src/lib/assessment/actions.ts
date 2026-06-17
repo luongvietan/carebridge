@@ -2,11 +2,13 @@
 import { createServiceClient } from "@/lib/supabase/service";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { ensureProfessional } from "@/lib/onboarding/professional-session";
-import { pickQuestions } from "./selection";
+import { pickStratified } from "./selection";
 import { scorePercent, isPass, nextAttemptState, MAX_ATTEMPTS } from "./scoring";
 import { sendNotification } from "@/lib/notifications/send";
 
-const QUESTIONS_PER_ATTEMPT = 8;
+// CareBridge MVP assessment format: 15 common + 5 role-specific = 20 questions.
+const COMMON_PER_ATTEMPT = 15;
+const ROLE_SPECIFIC_PER_ATTEMPT = 5;
 
 export type AssessmentOption = { key: string; text: string };
 export type AssessmentQuestion = {
@@ -53,19 +55,31 @@ export async function startAttempt(): Promise<StartResult> {
     return { locked: true, lockUntil: prof?.assessment_locked_until ?? null };
   }
 
-  let query = admin
-    .from("assessment_question_bank")
-    .select("id, topic, question_text, options")
-    .eq("is_active", true);
+  const cols = "id, topic, question_text, options";
   const roleId = prof?.professional_role_id ?? null;
-  query = roleId
-    ? query.or(`professional_role_id.is.null,professional_role_id.eq.${roleId}`)
-    : query.is("professional_role_id", null);
 
-  const { data: pool } = await query;
-  if (!pool || pool.length === 0) return { error: "No assessment questions are available yet." };
+  // Two pools: common questions (no role) and role-specific questions. The MVP
+  // format draws 15 from common + 5 from role-specific, each shuffled separately.
+  const { data: commonPool } = await admin
+    .from("assessment_question_bank")
+    .select(cols)
+    .eq("is_active", true)
+    .is("professional_role_id", null);
+  const { data: rolePool } = roleId
+    ? await admin
+        .from("assessment_question_bank")
+        .select(cols)
+        .eq("is_active", true)
+        .eq("professional_role_id", roleId)
+    : { data: [] };
 
-  const picked = pickQuestions(pool, QUESTIONS_PER_ATTEMPT);
+  const picked = pickStratified(
+    commonPool ?? [],
+    rolePool ?? [],
+    COMMON_PER_ATTEMPT,
+    ROLE_SPECIFIC_PER_ATTEMPT,
+  );
+  if (picked.length === 0) return { error: "No assessment questions are available yet." };
   const servedIds = picked.map((p) => p.id);
 
   const { data: attempt, error } = await admin

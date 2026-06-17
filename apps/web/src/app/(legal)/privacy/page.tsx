@@ -9,7 +9,7 @@ export default function PrivacyPage() {
     <>
       <SiteNav />
       <main className="mx-auto max-w-3xl px-5 py-16">
-        <h1 className="text-3xl font-semibold tracking-tight text-[#0f261c]">Privacy Policy</h1>
+        <h1 className="text-3xl font-semibold tracking-tight text-[#14301e]">Privacy Policy</h1>
         <p className="mt-5 leading-relaxed text-[#5b6a62]">
           CareBridge Connect Ltd handles personal data in line with UK GDPR. We collect only the
           information needed to verify professionals, manage bookings and process payments, store it

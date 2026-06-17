@@ -16,7 +16,7 @@ export default async function ClientNewBookingPage() {
     <main className="mx-auto max-w-2xl px-4 py-10">
       <h1 className="mt-1 text-3xl font-bold">New booking</h1>
       <p className="mt-2 text-sm text-[#5b6a62]">
-        <BackLink href="/client/bookings" className="text-[#198038] hover:underline">
+        <BackLink href="/client/bookings" className="text-[#2e7d32] hover:underline">
           Back to bookings
         </BackLink>
       </p>

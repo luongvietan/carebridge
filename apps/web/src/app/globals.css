@@ -68,17 +68,27 @@ input[type="month"]::-webkit-calendar-picker-indicator:hover {
    light (not the OS dark theme) and matches the brand surface. */
 :root {
   color-scheme: light;
+
+  /* CareBridge Connect brand palette (Ana's spec, green-led).
+     --brand-green is the signature brand fill/accent; it fails WCAG as text or
+     a white-text button background, so use --brand-green-strong for those. */
+  --brand-green: #6cc24a;          /* Primary brand green — accents, highlights, brand fills */
+  --brand-green-strong: #2e7d32;   /* AA-safe green for buttons/links/strong text */
+  --brand-green-strong-hover: #246627;
+  --brand-teal: #00a99d;           /* Secondary — accents */
+  --brand-teal-dark: #007a73;      /* Accent — AA-safe on white for text/buttons */
+  --brand-text: #4a4a4a;           /* Body text (Ana's dark grey) */
 }
 
 /* Native dropdown option list — best-effort brand colours. The browser draws
    the open list itself, so only colours apply (padding/hover bar are OS-owned). */
 select option {
   background-color: #ffffff;
-  color: #0c4a35;
+  color: #1e5a33;
 }
 
 select option:checked,
 select option:hover {
   background-color: #eef5f0;
-  color: #0c4a35;
+  color: #1e5a33;
 }

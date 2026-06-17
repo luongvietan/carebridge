@@ -41,14 +41,14 @@ export default function HomePage() {
             {onboardingSteps.map((step, i) => (
               <div key={step.title} data-reveal-child className="relative">
                 <div className="flex items-center gap-4">
-                  <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-[#0c6e4f] text-base font-bold text-white">
+                  <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-[#2e7d32] text-base font-bold text-white">
                     {String(i + 1).padStart(2, "0")}
                   </span>
                   {i < onboardingSteps.length - 1 && (
                     <span className="hidden h-px flex-1 bg-[#cfe3d6] md:block" aria-hidden />
                   )}
                 </div>
-                <h3 className="mt-5 text-lg font-bold text-[#0c4a35] sm:text-xl">{step.title}</h3>
+                <h3 className="mt-5 text-lg font-bold text-[#1e5a33] sm:text-xl">{step.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-[#5b6a62]">{step.description}</p>
               </div>
             ))}

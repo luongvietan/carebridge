@@ -8,7 +8,7 @@ import {
 } from "@/lib/accounts/actions";
 
 const field =
-  "mt-1 w-full rounded-xl border border-[#dbe7e0] bg-white px-3 py-2 text-sm focus:border-[#198038] focus:outline-none";
+  "mt-1 w-full rounded-xl border border-[#dbe7e0] bg-white px-3 py-2 text-sm focus:border-[#2e7d32] focus:outline-none";
 
 type Variant = "client" | "organisation";
 
@@ -23,7 +23,7 @@ export function AccountRegisterForm({ variant }: { variant: Variant }) {
         <h2 className="text-xl font-bold">Profile saved — you can now create bookings</h2>
         <ForwardLink
           href={bookingsHref}
-          className="mt-6 rounded-full bg-[#0c6e4f] px-4 py-3 text-sm text-white hover:bg-[#0a5c42]"
+          className="mt-6 rounded-full bg-[#2e7d32] px-4 py-3 text-sm text-white hover:bg-[#246627]"
         >
           Go to bookings
         </ForwardLink>
@@ -113,7 +113,7 @@ export function AccountRegisterForm({ variant }: { variant: Variant }) {
       <button
         type="submit"
         disabled={pending}
-        className="rounded-full bg-[#0c6e4f] px-4 py-3 text-sm text-white hover:bg-[#0a5c42] disabled:opacity-50"
+        className="rounded-full bg-[#2e7d32] px-4 py-3 text-sm text-white hover:bg-[#246627] disabled:opacity-50"
       >
         {pending ? "Saving…" : "Save profile"}
       </button>

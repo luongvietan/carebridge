@@ -7,7 +7,7 @@ import { Select } from "@/components/ui/select";
 import { DatePicker } from "@/components/ui/date-picker";
 
 const field =
-  "mt-1 w-full rounded-xl border border-[#dbe7e0] bg-white px-3.5 py-2.5 text-sm text-[#0c4a35] placeholder:text-[#9aa8a0] focus:border-[#198038] focus:outline-none focus:ring-2 focus:ring-[#198038]/15";
+  "mt-1 w-full rounded-xl border border-[#dbe7e0] bg-white px-3.5 py-2.5 text-sm text-[#1e5a33] placeholder:text-[#9aa8a0] focus:border-[#2e7d32] focus:outline-none focus:ring-2 focus:ring-[#2e7d32]/15";
 
 type Role = { id: string; name: string };
 type Current = {
@@ -35,7 +35,7 @@ export function ProfileForm({ roles, current }: { roles: Role[]; current: Curren
           <h2 className="text-xl font-bold">Profile saved</h2>
           <ForwardLink
             href="/professional/onboarding/documents"
-            className="mt-6 rounded-full bg-[#0c6e4f] px-4 py-3 text-sm text-white hover:bg-[#0a5c42]"
+            className="mt-6 rounded-full bg-[#2e7d32] px-4 py-3 text-sm text-white hover:bg-[#246627]"
           >
             Continue to documents
           </ForwardLink>
@@ -116,7 +116,7 @@ export function ProfileForm({ roles, current }: { roles: Role[]; current: Curren
         <button
           type="submit"
           disabled={pending}
-          className="rounded-full bg-[#0c6e4f] px-4 py-3 text-sm text-white hover:bg-[#0a5c42] disabled:opacity-50"
+          className="rounded-full bg-[#2e7d32] px-4 py-3 text-sm text-white hover:bg-[#246627] disabled:opacity-50"
         >
           {pending ? "Saving…" : "Save profile"}
         </button>

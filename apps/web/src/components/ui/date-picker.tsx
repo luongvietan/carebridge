@@ -81,7 +81,7 @@ function usePopover() {
 }
 
 const triggerClass =
-  "flex w-full items-center justify-between gap-2 rounded-xl border border-[#dbe7e0] bg-white px-3.5 py-2.5 text-left text-sm text-[#0c4a35] transition focus:border-[#198038] focus:outline-none focus:ring-2 focus:ring-[#198038]/15 disabled:cursor-not-allowed disabled:opacity-50";
+  "flex w-full items-center justify-between gap-2 rounded-xl border border-[#dbe7e0] bg-white px-3.5 py-2.5 text-left text-sm text-[#1e5a33] transition focus:border-[#2e7d32] focus:outline-none focus:ring-2 focus:ring-[#2e7d32]/15 disabled:cursor-not-allowed disabled:opacity-50";
 
 function subscribeNoop() {
   return () => {};
@@ -152,18 +152,18 @@ function Calendar({
           type="button"
           aria-label="Previous month"
           onClick={() => shiftMonth(-1)}
-          className="grid h-8 w-8 place-items-center rounded-full text-[#445049] transition hover:bg-[#eef5f0] hover:text-[#198038]"
+          className="grid h-8 w-8 place-items-center rounded-full text-[#445049] transition hover:bg-[#eef5f0] hover:text-[#2e7d32]"
         >
           <Icon icon={ArrowRight01Icon} size={16} strokeWidth={2} className="rotate-180" aria-hidden />
         </button>
-        <span className="text-sm font-semibold text-[#0c4a35]">
+        <span className="text-sm font-semibold text-[#1e5a33]">
           {MONTHS[view.getMonth()]} {view.getFullYear()}
         </span>
         <button
           type="button"
           aria-label="Next month"
           onClick={() => shiftMonth(1)}
-          className="grid h-8 w-8 place-items-center rounded-full text-[#445049] transition hover:bg-[#eef5f0] hover:text-[#198038]"
+          className="grid h-8 w-8 place-items-center rounded-full text-[#445049] transition hover:bg-[#eef5f0] hover:text-[#2e7d32]"
         >
           <Icon icon={ArrowRight01Icon} size={16} strokeWidth={2} aria-hidden />
         </button>
@@ -193,13 +193,13 @@ function Calendar({
               onClick={() => onSelect(d)}
               className={`grid h-9 w-9 place-items-center rounded-full text-sm transition ${
                 isSelected
-                  ? "bg-[#0c6e4f] font-semibold text-white"
+                  ? "bg-[#2e7d32] font-semibold text-white"
                   : isToday
-                    ? "font-semibold text-[#0c6e4f] ring-1 ring-inset ring-[#bcd8c7] hover:bg-[#eef5f0]"
+                    ? "font-semibold text-[#2e7d32] ring-1 ring-inset ring-[#bcd8c7] hover:bg-[#eef5f0]"
                     : inMonth
-                      ? "text-[#0c4a35] hover:bg-[#eef5f0]"
+                      ? "text-[#1e5a33] hover:bg-[#eef5f0]"
                       : "text-[#9aa8a0] hover:bg-[#f5f7f6]"
-              } focus:outline-none focus-visible:ring-2 focus-visible:ring-[#198038]/40`}
+              } focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2e7d32]/40`}
             >
               {d.getDate()}
             </button>
@@ -284,7 +284,7 @@ export function DatePicker({
         <dialog open aria-label={ariaLabel ?? "Choose date"} className={popoverClass}>
           <Calendar selected={selected} onSelect={pick} />
           <div className="mt-2 flex items-center justify-between border-t border-[#eef5f0] px-1 pt-2 text-sm">
-            <button type="button" onClick={pickToday} className="font-medium text-[#0c6e4f] hover:underline">
+            <button type="button" onClick={pickToday} className="font-medium text-[#2e7d32] hover:underline">
               Today
             </button>
             <button
@@ -293,7 +293,7 @@ export function DatePicker({
                 setValue("");
                 setOpen(false);
               }}
-              className="font-medium text-[#5b6a62] hover:text-[#0f261c] hover:underline"
+              className="font-medium text-[#5b6a62] hover:text-[#14301e] hover:underline"
             >
               Clear
             </button>

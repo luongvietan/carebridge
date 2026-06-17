@@ -31,7 +31,7 @@ export function RoleCard({ title, description, image, alt, href }: RoleCardProps
           </span>
         ) : null}
       </div>
-      <h3 className="mt-5 text-xl font-bold text-[#0c4a35]">{title}</h3>
+      <h3 className="mt-5 text-xl font-bold text-[#1e5a33]">{title}</h3>
       <p className="mt-2 text-sm leading-relaxed text-[#5b6a62]">{description}</p>
     </>
   );

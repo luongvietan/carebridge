@@ -205,7 +205,7 @@ export default async function AdminUsersPage({
                 <td className="p-3">
                   <Link
                     href={`/admin/users/${prof.id}`}
-                    className="text-[#198038] hover:underline"
+                    className="text-[#2e7d32] hover:underline"
                   >
                     {prof.full_name}
                   </Link>

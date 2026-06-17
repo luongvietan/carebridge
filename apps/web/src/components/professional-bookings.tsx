@@ -65,7 +65,7 @@ function BookingActions({
           type="button"
           onClick={handleAccept}
           disabled={!eligible || busy !== null}
-          className="rounded-full bg-[#0c6e4f] px-3 py-1.5 text-sm text-white hover:bg-[#0a5c42] disabled:opacity-50"
+          className="rounded-full bg-[#2e7d32] px-3 py-1.5 text-sm text-white hover:bg-[#246627] disabled:opacity-50"
         >
           {busy === "accept" ? "Accepting…" : "Accept"}
         </button>
@@ -73,7 +73,7 @@ function BookingActions({
           type="button"
           onClick={handleDecline}
           disabled={busy !== null}
-          className="rounded-full border border-[#dbe7e0] px-4 py-1.5 text-sm font-medium text-[#0c4a35] transition hover:border-[#bcd8c7] hover:bg-[#f5f7f6] disabled:opacity-50"
+          className="rounded-full border border-[#dbe7e0] px-4 py-1.5 text-sm font-medium text-[#1e5a33] transition hover:border-[#bcd8c7] hover:bg-[#f5f7f6] disabled:opacity-50"
         >
           {busy === "decline" ? "Declining…" : "Decline"}
         </button>
@@ -103,7 +103,7 @@ function CompleteControl({ bookingId, onDone }: { bookingId: string; onDone: () 
         type="button"
         onClick={handleComplete}
         disabled={busy}
-        className="rounded-full bg-[#0c6e4f] px-3 py-1.5 text-sm text-white hover:bg-[#0a5c42] disabled:opacity-50"
+        className="rounded-full bg-[#2e7d32] px-3 py-1.5 text-sm text-white hover:bg-[#246627] disabled:opacity-50"
       >
         {busy ? "Saving…" : "Mark completed"}
       </button>

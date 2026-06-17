@@ -6,7 +6,7 @@ import type { ProfessionalFilterCriteria } from "@/lib/admin/search";
 import { Select } from "@/components/ui/select";
 
 const INPUT_CLASS =
-  "rounded-xl border border-[#dbe7e0] bg-white px-3 py-1.5 text-sm text-[#0c4a35] placeholder:text-[#9aa8a0] focus:border-[#198038] focus:outline-none focus:ring-2 focus:ring-[#198038]/15";
+  "rounded-xl border border-[#dbe7e0] bg-white px-3 py-1.5 text-sm text-[#1e5a33] placeholder:text-[#9aa8a0] focus:border-[#2e7d32] focus:outline-none focus:ring-2 focus:ring-[#2e7d32]/15";
 
 const PROFESSIONAL_STATUSES = [
   "pending_verification",
@@ -167,13 +167,13 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
             type="checkbox"
             checked={filters.requireValidDocs}
             onChange={(e) => dispatch({ type: "set", field: "requireValidDocs", value: e.target.checked })}
-            className="accent-[#198038]"
+            className="accent-[#2e7d32]"
           />
           Valid critical docs only
         </label>
         <button
           type="submit"
-          className="rounded-full bg-[#0c6e4f] px-4 py-1.5 text-white hover:bg-[#0a5c42]"
+          className="rounded-full bg-[#2e7d32] px-4 py-1.5 text-white hover:bg-[#246627]"
         >
           Search
         </button>
@@ -181,7 +181,7 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
           <button
             type="button"
             onClick={() => router.push("/admin/users")}
-            className="text-[#5b6a62] underline hover:text-[#0f261c]"
+            className="text-[#5b6a62] underline hover:text-[#14301e]"
           >
             Clear
           </button>

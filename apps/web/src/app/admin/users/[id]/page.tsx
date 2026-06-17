@@ -58,7 +58,7 @@ export default async function AdminUserDetailPage({
     <main className="mx-auto max-w-4xl px-4 py-10">
       <div className="mt-1 flex flex-wrap items-baseline gap-x-4 gap-y-1">
         <h1 className="text-3xl font-bold">{professional.full_name}</h1>
-        <BackLink href="/admin/users" className="text-sm text-[#198038] hover:underline">
+        <BackLink href="/admin/users" className="text-sm text-[#2e7d32] hover:underline">
           Back to list
         </BackLink>
       </div>
@@ -88,7 +88,7 @@ export default async function AdminUserDetailPage({
           </div>
         </dl>
         <p className="mt-4">
-          <ForwardLink href="/admin/compliance" className="text-[#198038] hover:underline">
+          <ForwardLink href="/admin/compliance" className="text-[#2e7d32] hover:underline">
             View compliance documents
           </ForwardLink>
         </p>

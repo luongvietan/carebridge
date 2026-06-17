@@ -36,7 +36,7 @@ export function FaqList({ faqs, showSidebar = true, defaultOpenIndex = 0 }: FaqL
               className="flex w-full items-center justify-between gap-4 px-5 py-5 text-left sm:px-6"
               aria-expanded={isOpen}
             >
-              <span className="font-semibold text-[#0c4a35] sm:text-[17px]">{faq.question}</span>
+              <span className="font-semibold text-[#1e5a33] sm:text-[17px]">{faq.question}</span>
               <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white shadow-sm">
                 <Icon
                   icon={isOpen ? MinusSignIcon : Add01Icon}
@@ -63,7 +63,7 @@ export function FaqList({ faqs, showSidebar = true, defaultOpenIndex = 0 }: FaqL
     <div className="grid gap-8 lg:grid-cols-[minmax(280px,340px)_1fr] lg:items-start">
       <div
         data-reveal-child
-        className="flex flex-col rounded-[28px] bg-[#0c6e4f] px-8 py-10 text-white sm:rounded-[32px] sm:px-10 sm:py-12"
+        className="flex flex-col rounded-[28px] bg-[#2e7d32] px-8 py-10 text-white sm:rounded-[32px] sm:px-10 sm:py-12"
       >
         <Icon icon={MessageQuestionIcon} size={48} color="#ffffff" strokeWidth={1.75} />
         <h3 className="mt-6 text-2xl font-bold leading-tight sm:text-[1.75rem]">
@@ -75,7 +75,7 @@ export function FaqList({ faqs, showSidebar = true, defaultOpenIndex = 0 }: FaqL
         </p>
         <Link
           href="/contact"
-          className="mt-8 inline-flex w-fit rounded-full bg-white px-8 py-3.5 text-sm font-semibold text-[#0c4a35] transition hover:bg-[#f5f7f6]"
+          className="mt-8 inline-flex w-fit rounded-full bg-white px-8 py-3.5 text-sm font-semibold text-[#1e5a33] transition hover:bg-[#f5f7f6]"
         >
           Contact us
         </Link>

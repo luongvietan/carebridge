@@ -28,7 +28,7 @@ export function PayNowButton({ bookingId }: { bookingId: string }) {
         type="button"
         onClick={handlePay}
         disabled={busy}
-        className="rounded-full bg-[#0c6e4f] px-3 py-1.5 text-sm text-white hover:bg-[#0a5c42] disabled:opacity-50"
+        className="rounded-full bg-[#2e7d32] px-3 py-1.5 text-sm text-white hover:bg-[#246627] disabled:opacity-50"
       >
         {busy ? "Redirecting…" : "Pay now"}
       </button>

@@ -81,12 +81,12 @@ export default async function AdminFinancePage({
         </div>
         <button
           type="submit"
-          className="rounded-full bg-[#0c6e4f] px-3 py-1.5 text-white hover:bg-[#0a5c42]"
+          className="rounded-full bg-[#2e7d32] px-3 py-1.5 text-white hover:bg-[#246627]"
         >
           Filter
         </button>
         {(from || to) && (
-          <Link href="/admin/finance" className="text-[#5b6a62] underline hover:text-[#0f261c]">
+          <Link href="/admin/finance" className="text-[#5b6a62] underline hover:text-[#14301e]">
             Clear
           </Link>
         )}
@@ -154,7 +154,7 @@ export default async function AdminFinancePage({
           <h2 className="text-xl font-bold">Payouts</h2>
           <Link
             href="/admin/finance/payouts"
-            className="rounded-full bg-[#0c6e4f] px-3 py-1.5 text-sm text-white hover:bg-[#0a5c42]"
+            className="rounded-full bg-[#2e7d32] px-3 py-1.5 text-sm text-white hover:bg-[#246627]"
           >
             Manage payouts
           </Link>

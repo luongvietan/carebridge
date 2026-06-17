@@ -26,13 +26,13 @@ function RegisterChoice() {
   return (
     <AuthShell wide>
       <div className="lg:hidden">
-        <BackLink href="/" className="text-[#5b6a62] hover:text-[#198038]">
+        <BackLink href="/" className="text-[#5b6a62] hover:text-[#2e7d32]">
           Back to home
         </BackLink>
       </div>
 
       <div className="mt-4 text-center lg:mt-0">
-        <h1 className="text-2xl font-bold tracking-tight text-[#0c4a35] sm:text-3xl">
+        <h1 className="text-2xl font-bold tracking-tight text-[#1e5a33] sm:text-3xl">
           Get started with CareBridge Connect
         </h1>
         <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-[#5b6a62] sm:text-base">
@@ -45,14 +45,14 @@ function RegisterChoice() {
           <Link
             key={path.id}
             href={path.href}
-            className={`group flex flex-col rounded-[28px] border border-[#e7efe9] bg-white p-7 ${marketingCardShadow} transition hover:border-[#198038] hover:shadow-[0_16px_40px_-12px_rgba(25,128,56,0.2)] sm:p-8`}
+            className={`group flex flex-col rounded-[28px] border border-[#e7efe9] bg-white p-7 ${marketingCardShadow} transition hover:border-[#2e7d32] hover:shadow-[0_16px_40px_-12px_rgba(25,128,56,0.2)] sm:p-8`}
           >
-            <span className="inline-flex w-fit rounded-full bg-[#e6f4ea] px-3 py-1 text-xs font-semibold uppercase tracking-wide text-[#198038]">
+            <span className="inline-flex w-fit rounded-full bg-[#e6f4ea] px-3 py-1 text-xs font-semibold uppercase tracking-wide text-[#2e7d32]">
               {path.id === "professional" ? "For professionals" : "For clients"}
             </span>
-            <h2 className="mt-4 text-xl font-bold text-[#0c4a35]">{path.title}</h2>
+            <h2 className="mt-4 text-xl font-bold text-[#1e5a33]">{path.title}</h2>
             <p className="mt-3 flex-1 text-sm leading-relaxed text-[#5b6a62]">{path.description}</p>
-            <span className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[#0c6e4f] group-hover:underline">
+            <span className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[#2e7d32] group-hover:underline">
               Continue
               <Icon icon={ArrowRight01Icon} size={16} strokeWidth={2} aria-hidden />
             </span>
@@ -62,7 +62,7 @@ function RegisterChoice() {
 
       <p className="mt-8 text-center text-sm text-[#5b6a62]">
         Already registered?{" "}
-        <Link href="/login" className="font-semibold text-[#0c6e4f] hover:underline">
+        <Link href="/login" className="font-semibold text-[#2e7d32] hover:underline">
           Sign in
         </Link>
       </p>
@@ -78,15 +78,15 @@ function RegisterForm({ mode }: { mode: RegisterMode }) {
     return (
       <AuthShell>
         <div className="lg:hidden">
-          <BackLink href="/" className="text-[#5b6a62] hover:text-[#198038]">
+          <BackLink href="/" className="text-[#5b6a62] hover:text-[#2e7d32]">
             Back to home
           </BackLink>
         </div>
 
-        <h1 className="mt-4 text-2xl font-bold text-[#0c4a35] lg:mt-0">Check your email</h1>
+        <h1 className="mt-4 text-2xl font-bold text-[#1e5a33] lg:mt-0">Check your email</h1>
         <p className="mt-3 text-sm leading-relaxed text-[#5b6a62]">
           We&apos;ve sent a confirmation link. Confirm your email, then{" "}
-          <Link href="/login" className="font-semibold text-[#0c6e4f] hover:underline">
+          <Link href="/login" className="font-semibold text-[#2e7d32] hover:underline">
             sign in
           </Link>
           .
@@ -98,19 +98,19 @@ function RegisterForm({ mode }: { mode: RegisterMode }) {
   return (
     <AuthShell>
       <div className="lg:hidden">
-        <BackLink href="/" className="text-[#5b6a62] hover:text-[#198038]">
+        <BackLink href="/" className="text-[#5b6a62] hover:text-[#2e7d32]">
           Back to home
         </BackLink>
       </div>
 
       <BackLink
         href="/register"
-        className="mt-4 text-[#5b6a62] hover:text-[#198038] lg:mt-0"
+        className="mt-4 text-[#5b6a62] hover:text-[#2e7d32] lg:mt-0"
       >
         All registration options
       </BackLink>
 
-      <h1 className="mt-6 text-2xl font-bold text-[#0c4a35] sm:text-3xl">
+      <h1 className="mt-6 text-2xl font-bold text-[#1e5a33] sm:text-3xl">
         {isProfessional ? ctaLabels.joinProfessional : ctaLabels.createBookingRequest}
       </h1>
       <p className="mt-2 text-sm leading-relaxed text-[#5b6a62]">
@@ -124,30 +124,30 @@ function RegisterForm({ mode }: { mode: RegisterMode }) {
           <input type="hidden" name="accountType" value="professional" />
         ) : (
           <fieldset>
-            <legend className="text-sm font-medium text-[#0c4a35]">I am registering as…</legend>
+            <legend className="text-sm font-medium text-[#1e5a33]">I am registering as…</legend>
             <div className="mt-3 space-y-2 text-sm">
-              <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-[#e7efe9] bg-white px-4 py-3 has-[:checked]:border-[#198038] has-[:checked]:bg-[#f3f9f5]">
+              <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-[#e7efe9] bg-white px-4 py-3 has-[:checked]:border-[#2e7d32] has-[:checked]:bg-[#f3f9f5]">
                 <input
                   type="radio"
                   name="accountType"
                   value="private_client"
                   defaultChecked
-                  className="accent-[#198038]"
+                  className="accent-[#2e7d32]"
                 />
                 <span>
-                  <span className="block font-medium text-[#0c4a35]">Private client</span>
+                  <span className="block font-medium text-[#1e5a33]">Private client</span>
                   <span className="text-[#5b6a62]">Individual or family arranging care</span>
                 </span>
               </label>
-              <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-[#e7efe9] bg-white px-4 py-3 has-[:checked]:border-[#198038] has-[:checked]:bg-[#f3f9f5]">
+              <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-[#e7efe9] bg-white px-4 py-3 has-[:checked]:border-[#2e7d32] has-[:checked]:bg-[#f3f9f5]">
                 <input
                   type="radio"
                   name="accountType"
                   value="organisation"
-                  className="accent-[#198038]"
+                  className="accent-[#2e7d32]"
                 />
                 <span>
-                  <span className="block font-medium text-[#0c4a35]">Organisation</span>
+                  <span className="block font-medium text-[#1e5a33]">Organisation</span>
                   <span className="text-[#5b6a62]">Care home, provider or healthcare organisation</span>
                 </span>
               </label>
@@ -168,17 +168,17 @@ function RegisterForm({ mode }: { mode: RegisterMode }) {
           <input type="password" name="password" required minLength={8} className={marketingInput} />
         </label>
         <label className="flex items-start gap-2.5 text-sm text-[#445049]">
-          <input type="checkbox" name="acceptedTerms" required className="mt-1 accent-[#198038]" />{" "}
+          <input type="checkbox" name="acceptedTerms" required className="mt-1 accent-[#2e7d32]" />{" "}
           <span>
             I accept the{" "}
             <Link
               href={isProfessional ? "/terms/professionals" : "/terms/clients"}
-              className="font-medium text-[#0c6e4f] hover:underline"
+              className="font-medium text-[#2e7d32] hover:underline"
             >
               Terms
             </Link>{" "}
             and{" "}
-            <Link href="/privacy" className="font-medium text-[#0c6e4f] hover:underline">
+            <Link href="/privacy" className="font-medium text-[#2e7d32] hover:underline">
               Privacy Policy
             </Link>
           </span>
@@ -193,7 +193,7 @@ function RegisterForm({ mode }: { mode: RegisterMode }) {
         {isProfessional ? (
           <>
             Need to request care instead?{" "}
-            <Link href={registerLinks.client} className="font-semibold text-[#0c6e4f] hover:underline">
+            <Link href={registerLinks.client} className="font-semibold text-[#2e7d32] hover:underline">
               {ctaLabels.createBookingRequest}
             </Link>
           </>
@@ -202,7 +202,7 @@ function RegisterForm({ mode }: { mode: RegisterMode }) {
             Are you a healthcare professional?{" "}
             <Link
               href={registerLinks.professional}
-              className="font-semibold text-[#0c6e4f] hover:underline"
+              className="font-semibold text-[#2e7d32] hover:underline"
             >
               {ctaLabels.joinProfessional}
             </Link>
@@ -212,7 +212,7 @@ function RegisterForm({ mode }: { mode: RegisterMode }) {
 
       <p className="mt-3 text-sm text-[#5b6a62]">
         Already registered?{" "}
-        <Link href="/login" className="font-semibold text-[#0c6e4f] hover:underline">
+        <Link href="/login" className="font-semibold text-[#2e7d32] hover:underline">
           Sign in
         </Link>
       </p>

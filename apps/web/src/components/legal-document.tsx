@@ -8,11 +8,11 @@ type LegalDocumentProps = {
 export function LegalDocument({ title, sections }: LegalDocumentProps) {
   return (
     <>
-      <h1 className="text-3xl font-semibold tracking-tight text-[#0f261c]">{title}</h1>
+      <h1 className="text-3xl font-semibold tracking-tight text-[#14301e]">{title}</h1>
       <div className="mt-8 space-y-10">
         {sections.map((section) => (
           <section key={section.title}>
-            <h2 className="text-xl font-semibold text-[#0f261c]">{section.title}</h2>
+            <h2 className="text-xl font-semibold text-[#14301e]">{section.title}</h2>
             {section.intro && (
               <p className="mt-3 leading-relaxed text-[#5b6a62]">{section.intro}</p>
             )}
@@ -25,7 +25,7 @@ export function LegalDocument({ title, sections }: LegalDocumentProps) {
               <ul className="mt-3 space-y-2">
                 {section.bullets.map((bullet) => (
                   <li key={bullet} className="flex items-start gap-2 text-[#5b6a62]">
-                    <span aria-hidden className="mt-1 text-[#0c6e4f]">
+                    <span aria-hidden className="mt-1 text-[#2e7d32]">
                       •
                     </span>
                     <span className="leading-relaxed">{bullet}</span>

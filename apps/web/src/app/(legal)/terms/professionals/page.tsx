@@ -16,7 +16,7 @@ export default function ProfessionalTermsPage() {
       <main className="mx-auto max-w-3xl px-5 py-16">
         <BackLink
           href="/terms"
-          className="text-sm font-semibold text-[#0c6e4f] hover:underline"
+          className="text-sm font-semibold text-[#2e7d32] hover:underline"
         >
           All terms &amp; conditions
         </BackLink>

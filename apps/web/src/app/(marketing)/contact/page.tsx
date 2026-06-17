@@ -6,7 +6,7 @@ import { SiteFooter } from "@/components/site-footer";
 export const metadata: Metadata = { title: "Contact — CareBridge Connect" };
 
 const field =
-  "mt-1.5 w-full rounded-xl border border-[#dbe7e0] bg-white px-4 py-2.5 text-sm text-[#0f261c] placeholder:text-[#9aa8a0] focus:border-[#198038] focus:outline-none focus:ring-2 focus:ring-[#198038]/15";
+  "mt-1.5 w-full rounded-xl border border-[#dbe7e0] bg-white px-4 py-2.5 text-sm text-[#14301e] placeholder:text-[#9aa8a0] focus:border-[#2e7d32] focus:outline-none focus:ring-2 focus:ring-[#2e7d32]/15";
 
 const details = [
   ["Email", "info@carebridgeconnect.co.uk", "M4 6h16v12H4zM4 7l8 6 8-6"],
@@ -51,7 +51,7 @@ export default function ContactPage() {
             </label>
             <button
               type="submit"
-              className="mt-6 rounded-full bg-[#0c6e4f] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#0a5c42]"
+              className="mt-6 rounded-full bg-[#2e7d32] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#246627]"
             >
               Send message
             </button>
@@ -60,16 +60,16 @@ export default function ContactPage() {
           <div className="space-y-4">
             {details.map(([label, value, icon]) => (
               <div key={label} className="flex items-start gap-4 rounded-2xl border border-[#e7efe9] bg-white p-5">
-                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#e6f4ea] text-[#198038]">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#e6f4ea] text-[#2e7d32]">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d={icon} /></svg>
                 </span>
                 <div>
                   <p className="text-xs font-medium uppercase tracking-wide text-[#7a8a81]">{label}</p>
-                  <p className="mt-1 text-sm font-medium text-[#0f261c]">{value}</p>
+                  <p className="mt-1 text-sm font-medium text-[#14301e]">{value}</p>
                 </div>
               </div>
             ))}
-            <div className="rounded-2xl bg-gradient-to-br from-[#11512f] to-[#0c3a25] p-6 text-white">
+            <div className="rounded-2xl bg-gradient-to-br from-[#11512f] to-[#17492c] p-6 text-white">
               <p className="font-semibold">Looking to join?</p>
               <p className="mt-1.5 text-sm text-[#bcd8c7]">
                 Professionals complete onboarding online. Clients and organisations can register

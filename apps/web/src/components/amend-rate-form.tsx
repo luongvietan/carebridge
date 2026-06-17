@@ -7,7 +7,7 @@ import type { PlatformFeeType } from "@/lib/admin/rates";
 import { Select } from "@/components/ui/select";
 
 const INPUT_CLASS =
-  "w-full rounded-xl border border-[#dbe7e0] bg-white px-3.5 py-2.5 text-sm text-[#0c4a35] placeholder:text-[#9aa8a0] focus:border-[#198038] focus:outline-none focus:ring-2 focus:ring-[#198038]/15";
+  "w-full rounded-xl border border-[#dbe7e0] bg-white px-3.5 py-2.5 text-sm text-[#1e5a33] placeholder:text-[#9aa8a0] focus:border-[#2e7d32] focus:outline-none focus:ring-2 focus:ring-[#2e7d32]/15";
 
 type Props = {
   roleId: string;
@@ -85,7 +85,7 @@ export function AmendRateForm({ roleId, roleName }: Props) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4 text-sm">
       <p className="text-[#5b6a62]">
-        Amend rates for <span className="font-medium text-[#0f261c]">{roleName}</span>
+        Amend rates for <span className="font-medium text-[#14301e]">{roleName}</span>
       </p>
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -162,7 +162,7 @@ export function AmendRateForm({ roleId, roleName }: Props) {
       <button
         type="submit"
         disabled={state.pending}
-        className="rounded-full bg-[#0c6e4f] px-4 py-1.5 text-white hover:bg-[#0a5c42] disabled:opacity-50"
+        className="rounded-full bg-[#2e7d32] px-4 py-1.5 text-white hover:bg-[#246627] disabled:opacity-50"
       >
         {state.pending ? "Saving…" : "Amend rate card"}
       </button>

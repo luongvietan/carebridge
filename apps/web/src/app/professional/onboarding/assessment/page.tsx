@@ -110,7 +110,7 @@ export default function AssessmentPage() {
               type="button"
               onClick={begin}
               disabled={state.busy}
-              className="mt-6 rounded-full bg-[#0c6e4f] px-4 py-3 text-sm text-white hover:bg-[#0a5c42] disabled:opacity-50"
+              className="mt-6 rounded-full bg-[#2e7d32] px-4 py-3 text-sm text-white hover:bg-[#246627] disabled:opacity-50"
             >
               {state.busy ? "Loading…" : "Begin assessment"}
             </button>
@@ -147,7 +147,7 @@ export default function AssessmentPage() {
               type="button"
               onClick={submit}
               disabled={state.busy || !allAnswered}
-              className="rounded-full bg-[#0c6e4f] px-4 py-3 text-sm text-white hover:bg-[#0a5c42] disabled:opacity-50"
+              className="rounded-full bg-[#2e7d32] px-4 py-3 text-sm text-white hover:bg-[#246627] disabled:opacity-50"
             >
               {state.busy ? "Submitting…" : "Submit answers"}
             </button>
@@ -162,13 +162,21 @@ export default function AssessmentPage() {
             </h2>
             {state.result.passed ? (
               <>
-                <p className="mt-2 text-sm text-[#24a148]">Passed — the minimum is 80%.</p>
-                <ForwardLink
-                  href="/professional/onboarding/profile"
-                  className="mt-6 rounded-full bg-[#0c6e4f] px-4 py-3 text-sm text-white hover:bg-[#0a5c42]"
-                >
-                  Continue to profile
-                </ForwardLink>
+                <p className="mt-2 text-sm text-[#2e7d32]">Passed — the minimum is 80%.</p>
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <ForwardLink
+                    href="/professional/onboarding/profile"
+                    className="rounded-full bg-[#2e7d32] px-4 py-3 text-sm text-white hover:bg-[#246627]"
+                  >
+                    Continue to profile
+                  </ForwardLink>
+                  <ForwardLink
+                    href="/professional/onboarding/assessment/certificate"
+                    className="rounded-full border border-[#2e7d32] px-4 py-3 text-sm text-[#2e7d32] hover:bg-[#eef5f0]"
+                  >
+                    View your certificate
+                  </ForwardLink>
+                </div>
               </>
             ) : state.result.canRetry ? (
               <>
@@ -176,7 +184,7 @@ export default function AssessmentPage() {
                 <button
                   type="button"
                   onClick={() => dispatch({ type: "reset-intro" })}
-                  className="mt-6 rounded-full bg-[#0c6e4f] px-4 py-3 text-sm text-white hover:bg-[#0a5c42]"
+                  className="mt-6 rounded-full bg-[#2e7d32] px-4 py-3 text-sm text-white hover:bg-[#246627]"
                 >
                   Try again
                 </button>
@@ -203,4 +211,4 @@ export default function AssessmentPage() {
 }
 
 const QUESTIONS_NOTE =
-  "Questions are drawn at random and auto-scored. You need 80% to pass and have up to three attempts. Topics include safeguarding, infection control, GDPR, professional boundaries, documentation, medication awareness and health & safety.";
+  "You will be asked 20 questions — 15 covering core healthcare topics and 5 specific to your professional role — drawn at random and auto-scored. You need 80% to pass and have up to three attempts. Topics include safeguarding, infection prevention & control, GDPR, professional boundaries, documentation, medication awareness and health & safety.";

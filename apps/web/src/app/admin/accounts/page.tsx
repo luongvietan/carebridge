@@ -89,12 +89,12 @@ export default async function AdminAccountsPage({
         </div>
         <button
           type="submit"
-          className="rounded-full bg-[#0c6e4f] px-4 py-1.5 text-sm text-white hover:bg-[#0a5c42]"
+          className="rounded-full bg-[#2e7d32] px-4 py-1.5 text-sm text-white hover:bg-[#246627]"
         >
           Apply filter
         </button>
         {accountTypeFilter && (
-          <Link href="/admin/accounts" className="text-sm text-[#198038] hover:underline">
+          <Link href="/admin/accounts" className="text-sm text-[#2e7d32] hover:underline">
             Clear filter
           </Link>
         )}

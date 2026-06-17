@@ -24,7 +24,7 @@ type SelectProps = {
 };
 
 const controlClass =
-  "flex w-full items-center justify-between gap-2 rounded-xl border border-[#dbe7e0] bg-white px-3.5 py-2.5 text-left text-sm text-[#0c4a35] transition focus:border-[#198038] focus:outline-none focus:ring-2 focus:ring-[#198038]/15 disabled:cursor-not-allowed disabled:opacity-50";
+  "flex w-full items-center justify-between gap-2 rounded-xl border border-[#dbe7e0] bg-white px-3.5 py-2.5 text-left text-sm text-[#1e5a33] transition focus:border-[#2e7d32] focus:outline-none focus:ring-2 focus:ring-[#2e7d32]/15 disabled:cursor-not-allowed disabled:opacity-50";
 
 type MenuRect = { top: number; left: number; width: number; placement: "below" | "above"; maxHeight: number };
 
@@ -276,15 +276,15 @@ export function Select({
                     opt.disabled
                       ? "cursor-not-allowed text-[#9aa8a0]"
                       : isActive
-                        ? "bg-[#eef5f0] text-[#0c4a35]"
+                        ? "bg-[#eef5f0] text-[#1e5a33]"
                         : isSelected
-                          ? "text-[#0c4a35]"
+                          ? "text-[#1e5a33]"
                           : "text-[#445049]"
                   } ${isSelected ? "font-medium" : ""}`}
                 >
                   <span className="truncate">{opt.label}</span>
                   {isSelected && (
-                    <Icon icon={Tick01Icon} size={16} strokeWidth={2} aria-hidden className="shrink-0 text-[#198038]" />
+                    <Icon icon={Tick01Icon} size={16} strokeWidth={2} aria-hidden className="shrink-0 text-[#2e7d32]" />
                   )}
                 </button>
               );

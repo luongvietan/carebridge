@@ -29,7 +29,7 @@ export default function NotFound() {
             404
           </p>
 
-          <h1 className="mt-2 text-2xl font-bold tracking-tight text-[#0c4a35] sm:text-3xl">
+          <h1 className="mt-2 text-2xl font-bold tracking-tight text-[#1e5a33] sm:text-3xl">
             Page not found
           </h1>
 
@@ -53,7 +53,7 @@ export default function NotFound() {
                 <li key={href}>
                   <Link
                     href={href}
-                    className="text-sm font-medium text-[#0c6e4f] transition hover:text-[#0a5c42] hover:underline"
+                    className="text-sm font-medium text-[#2e7d32] transition hover:text-[#246627] hover:underline"
                   >
                     {label}
                   </Link>

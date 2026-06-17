@@ -53,7 +53,7 @@ export function ReviewQueue({ items }: { items: ReviewItem[] }) {
             </div>
             <div className="flex items-center gap-2 text-sm">
               {it.viewUrl && (
-                <a href={it.viewUrl} target="_blank" rel="noreferrer" className="text-[#198038] underline">
+                <a href={it.viewUrl} target="_blank" rel="noreferrer" className="text-[#2e7d32] underline">
                   View
                 </a>
               )}
@@ -61,7 +61,7 @@ export function ReviewQueue({ items }: { items: ReviewItem[] }) {
                 type="button"
                 onClick={() => decide(it.documentId, "approved")}
                 disabled={busy === it.documentId}
-                className="rounded-full bg-[#0c6e4f] px-3 py-1.5 text-white hover:bg-[#0a5c42] disabled:opacity-50"
+                className="rounded-full bg-[#2e7d32] px-3 py-1.5 text-white hover:bg-[#246627] disabled:opacity-50"
               >
                 Approve
               </button>
@@ -69,7 +69,7 @@ export function ReviewQueue({ items }: { items: ReviewItem[] }) {
                 type="button"
                 onClick={() => decide(it.documentId, "further_info_required")}
                 disabled={busy === it.documentId}
-                className="rounded-full border border-[#dbe7e0] px-4 py-1.5 text-sm font-medium text-[#0c4a35] transition hover:border-[#bcd8c7] hover:bg-[#f5f7f6] disabled:opacity-50"
+                className="rounded-full border border-[#dbe7e0] px-4 py-1.5 text-sm font-medium text-[#1e5a33] transition hover:border-[#bcd8c7] hover:bg-[#f5f7f6] disabled:opacity-50"
               >
                 Request info
               </button>

@@ -3,7 +3,7 @@ import { useActionState } from "react";
 import { savePayoutDetails, type PayoutResult } from "@/lib/payouts/actions";
 
 const field =
-  "mt-1 w-full rounded-xl border border-[#dbe7e0] bg-white px-3 py-2 text-sm focus:border-[#198038] focus:outline-none";
+  "mt-1 w-full rounded-xl border border-[#dbe7e0] bg-white px-3 py-2 text-sm focus:border-[#2e7d32] focus:outline-none";
 
 export function PayoutDetailsForm({ last4 }: { last4: string | null }) {
   const [state, action, pending] = useActionState<PayoutResult, FormData>(
@@ -19,7 +19,7 @@ export function PayoutDetailsForm({ last4 }: { last4: string | null }) {
 
   if (state && "ok" in state) {
     return (
-      <p className="mt-4 text-sm text-[#198038]">
+      <p className="mt-4 text-sm text-[#2e7d32]">
         Bank details saved — we store only the last 4 digits.
       </p>
     );
@@ -69,7 +69,7 @@ export function PayoutDetailsForm({ last4 }: { last4: string | null }) {
       <button
         type="submit"
         disabled={pending}
-        className="rounded-full bg-[#0c6e4f] px-4 py-3 text-sm text-white hover:bg-[#0a5c42] disabled:opacity-50"
+        className="rounded-full bg-[#2e7d32] px-4 py-3 text-sm text-white hover:bg-[#246627] disabled:opacity-50"
       >
         {pending ? "Saving…" : "Save bank details"}
       </button>

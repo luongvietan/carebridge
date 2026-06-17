@@ -62,7 +62,7 @@ export default async function AdminReportsPage({
                     <td className="p-3">{label}</td>
                     <td className="p-3">
                       <a
-                        className="text-[#198038] underline"
+                        className="text-[#2e7d32] underline"
                         href={`/api/export/${name}?format=csv`}
                         aria-label={`Download ${label} as CSV`}
                       >
@@ -70,7 +70,7 @@ export default async function AdminReportsPage({
                       </a>
                       <span className="px-2 text-[#7a8a81]">·</span>
                       <a
-                        className="text-[#198038] underline"
+                        className="text-[#2e7d32] underline"
                         href={`/api/export/${name}?format=xlsx`}
                         aria-label={`Download ${label} as Excel`}
                       >
@@ -97,15 +97,15 @@ export default async function AdminReportsPage({
             <DatePicker name="to" aria-label="To date" defaultValue={to ?? ""} className="w-40" />
           </div>
           <input type="text" name="entity_type" placeholder="Entity type" aria-label="Entity type" defaultValue={entity_type ?? ""}
-            className="rounded-lg border border-[#dbe7e0] bg-white px-1 py-0.5 focus:border-[#198038] focus:outline-none" />
+            className="rounded-lg border border-[#dbe7e0] bg-white px-1 py-0.5 focus:border-[#2e7d32] focus:outline-none" />
           <input type="text" name="actor_type" placeholder="Actor type" aria-label="Actor type" defaultValue={actor_type ?? ""}
-            className="rounded-lg border border-[#dbe7e0] bg-white px-1 py-0.5 focus:border-[#198038] focus:outline-none" />
-          <button type="submit" className="rounded-full bg-[#0c6e4f] px-3 py-1.5 text-white hover:bg-[#0a5c42]">Filter</button>
+            className="rounded-lg border border-[#dbe7e0] bg-white px-1 py-0.5 focus:border-[#2e7d32] focus:outline-none" />
+          <button type="submit" className="rounded-full bg-[#2e7d32] px-3 py-1.5 text-white hover:bg-[#246627]">Filter</button>
         </form>
 
         <div className="mt-4 flex gap-4 text-sm">
-          <a className="text-[#198038] underline" href={`/api/export/audit?format=csv${auditQsString}`}>Download filtered audit (CSV)</a>
-          <a className="text-[#198038] underline" href={`/api/export/audit?format=xlsx${auditQsString}`}>Download filtered audit (Excel)</a>
+          <a className="text-[#2e7d32] underline" href={`/api/export/audit?format=csv${auditQsString}`}>Download filtered audit (CSV)</a>
+          <a className="text-[#2e7d32] underline" href={`/api/export/audit?format=xlsx${auditQsString}`}>Download filtered audit (Excel)</a>
         </div>
 
         {auditRows && auditRows.length > 0 ? (

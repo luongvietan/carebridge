@@ -37,7 +37,7 @@ export default function EligibilityPage() {
           )}
           <ForwardLink
             href="/professional/onboarding/assessment"
-            className="mt-6 rounded-full bg-[#0c6e4f] px-4 py-3 text-sm text-white hover:bg-[#0a5c42]"
+            className="mt-6 rounded-full bg-[#2e7d32] px-4 py-3 text-sm text-white hover:bg-[#246627]"
           >
             Continue to assessment
           </ForwardLink>
@@ -87,7 +87,7 @@ export default function EligibilityPage() {
         <button
           type="submit"
           disabled={pending}
-          className="rounded-full bg-[#0c6e4f] px-4 py-3 text-sm text-white hover:bg-[#0a5c42] disabled:opacity-50"
+          className="rounded-full bg-[#2e7d32] px-4 py-3 text-sm text-white hover:bg-[#246627] disabled:opacity-50"
         >
           {pending ? "Saving…" : "Continue"}
         </button>

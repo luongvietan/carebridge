@@ -6,7 +6,7 @@ export function StatsBand() {
     <section className={marketingSectionShell}>
       <div className={`relative mx-auto max-w-7xl overflow-hidden ${marketingCard}`}>
         <div className="absolute inset-0 bg-[#1a5c3a]" />
-        <div className="absolute inset-0 bg-gradient-to-br from-[#2a7048]/80 via-[#1a5c3a] to-[#0c3a25]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#2a7048]/80 via-[#1a5c3a] to-[#17492c]" />
         <div className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full bg-[#7ed7a0]/10 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-24 -left-12 h-72 w-72 rounded-full bg-black/20 blur-3xl" />
         <div

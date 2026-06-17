@@ -25,7 +25,7 @@ function ComplianceStatusCard({
         </div>
 
         <div className="flex min-w-[168px] flex-col justify-center px-3 py-2 sm:min-w-[200px] sm:px-4 sm:py-2.5">
-          <p className="text-[13px] font-bold leading-none tracking-tight text-[#0c4a35] sm:text-sm">
+          <p className="text-[13px] font-bold leading-none tracking-tight text-[#1e5a33] sm:text-sm">
             Compliance status
           </p>
           <div
@@ -35,7 +35,7 @@ function ComplianceStatusCard({
             {chartBars.map((height, i) => (
               <span
                 key={i}
-                className="w-[7px] flex-1 rounded-full bg-gradient-to-t from-[#0a5c42] via-[#198038] to-[#9ee7b8] sm:w-2"
+                className="w-[7px] flex-1 rounded-full bg-gradient-to-t from-[#246627] via-[#2e7d32] to-[#9ee7b8] sm:w-2"
                 style={{ height: `${height}%`, minHeight: "4px" }}
               />
             ))}
@@ -74,8 +74,8 @@ export function ComplianceShowcase() {
                   key={item.title}
                   className={`overflow-hidden rounded-2xl transition ${
                     isOpen
-                      ? "bg-[#0c6e4f] text-white"
-                      : "bg-white text-[#0c4a35]"
+                      ? "bg-[#2e7d32] text-white"
+                      : "bg-white text-[#1e5a33]"
                   }`}
                 >
                   <button

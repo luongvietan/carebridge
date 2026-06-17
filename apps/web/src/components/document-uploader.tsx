@@ -29,7 +29,7 @@ function Badge({ status }: { status: string | null }) {
   );
 }
 
-const field = "rounded-xl border border-[#dbe7e0] bg-white px-2 py-1.5 text-sm focus:border-[#198038] focus:outline-none";
+const field = "rounded-xl border border-[#dbe7e0] bg-white px-2 py-1.5 text-sm focus:border-[#2e7d32] focus:outline-none";
 
 export function DocumentUploader({ items }: { items: DocItem[] }) {
   const router = useRouter();
@@ -65,7 +65,7 @@ export function DocumentUploader({ items }: { items: DocItem[] }) {
             <div className="flex items-center justify-between">
               <div>
                 <span className="font-semibold">{item.name}</span>
-                {item.critical && <span className="ml-2 text-xs text-[#198038]">critical</span>}
+                {item.critical && <span className="ml-2 text-xs text-[#2e7d32]">critical</span>}
               </div>
               <Badge status={item.status} />
             </div>
@@ -79,7 +79,7 @@ export function DocumentUploader({ items }: { items: DocItem[] }) {
               <button
                 type="submit"
                 disabled={busy === item.typeId}
-                className="bg-[#0f261c] px-3 py-2 text-sm text-white hover:bg-[#33433a] disabled:opacity-50"
+                className="bg-[#14301e] px-3 py-2 text-sm text-white hover:bg-[#33433a] disabled:opacity-50"
               >
                 {busy === item.typeId ? "Uploading…" : item.status ? "Replace" : "Upload"}
               </button>
@@ -89,7 +89,7 @@ export function DocumentUploader({ items }: { items: DocItem[] }) {
       </div>
 
       {allUploaded && (
-        <div className="mt-6 border border-[#24a148] bg-[#defbe6] p-4 text-sm text-[#0e6027]">
+        <div className="mt-6 border border-[#2e7d32] bg-[#defbe6] p-4 text-sm text-[#0e6027]">
           All documents uploaded. Your application is now with our administrators for verification.
         </div>
       )}

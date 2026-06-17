@@ -79,7 +79,7 @@ export function SiteFooter() {
                   aria-label={social.label}
                   className="grid h-11 w-11 place-items-center rounded-xl bg-white transition hover:scale-105 hover:bg-[#f5f7f6]"
                 >
-                  <Icon icon={social.icon} size={20} color="#0c6e4f" strokeWidth={1.75} />
+                  <Icon icon={social.icon} size={20} color="#2e7d32" strokeWidth={1.75} />
                 </a>
               ))}
             </div>
@@ -115,9 +115,9 @@ export function SiteFooter() {
               type="button"
               onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
               aria-label="Back to top"
-              className="grid h-11 w-11 place-items-center rounded-full bg-[#7ed7a0] text-[#0c3a25] transition hover:scale-105 hover:bg-[#9ee7b8]"
+              className="grid h-11 w-11 place-items-center rounded-full bg-[#7ed7a0] text-[#17492c] transition hover:scale-105 hover:bg-[#9ee7b8]"
             >
-              <Icon icon={ArrowUp01Icon} size={20} color="#0c3a25" strokeWidth={2} />
+              <Icon icon={ArrowUp01Icon} size={20} color="#17492c" strokeWidth={2} />
             </button>
           </div>
         </div>

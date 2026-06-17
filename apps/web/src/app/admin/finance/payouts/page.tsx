@@ -100,7 +100,7 @@ export default async function AdminPayoutsPage() {
         </div>
         <BackLink
           href="/admin/finance"
-          className="rounded-full border border-[#dbe7e0] px-4 py-1.5 text-sm text-[#0c4a35] hover:bg-[#f5f7f6]"
+          className="rounded-full border border-[#dbe7e0] px-4 py-1.5 text-sm text-[#1e5a33] hover:bg-[#f5f7f6]"
         >
           Finance overview
         </BackLink>

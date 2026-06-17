@@ -25,7 +25,7 @@ export function RecordPayoutButton({ bookingId }: { bookingId: string }) {
         type="button"
         onClick={handleRecord}
         disabled={busy}
-        className="rounded-full bg-[#0c6e4f] px-3 py-1.5 text-sm text-white hover:bg-[#0a5c42] disabled:opacity-50"
+        className="rounded-full bg-[#2e7d32] px-3 py-1.5 text-sm text-white hover:bg-[#246627] disabled:opacity-50"
       >
         {busy ? "Recording…" : "Record payout"}
       </button>
@@ -76,12 +76,12 @@ export function MarkPayoutPaidForm({ payoutId }: { payoutId: string }) {
           aria-label="Payout reference"
           value={reference}
           onChange={(e) => setReference(e.target.value)}
-          className="rounded-lg border border-[#dbe7e0] bg-white px-2 py-1 text-sm focus:border-[#198038] focus:outline-none"
+          className="rounded-lg border border-[#dbe7e0] bg-white px-2 py-1 text-sm focus:border-[#2e7d32] focus:outline-none"
         />
         <button
           type="submit"
           disabled={busy}
-          className="rounded-full bg-[#0c6e4f] px-3 py-1.5 text-sm text-white hover:bg-[#0a5c42] disabled:opacity-50"
+          className="rounded-full bg-[#2e7d32] px-3 py-1.5 text-sm text-white hover:bg-[#246627] disabled:opacity-50"
         >
           {busy ? "Saving…" : "Mark paid"}
         </button>

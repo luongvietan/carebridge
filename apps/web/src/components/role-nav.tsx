@@ -40,10 +40,10 @@ export function RoleNav({ areaLabel, items, email }: RoleNavProps) {
         href={href}
         aria-current={active ? "page" : undefined}
         className={`flex items-center gap-2 whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-          active ? "bg-white text-[#0c4a35] shadow-sm" : "text-[#4a6358] hover:text-[#198038]"
+          active ? "bg-white text-[#1e5a33] shadow-sm" : "text-[#4a6358] hover:text-[#2e7d32]"
         }`}
       >
-        {active && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#198038]" aria-hidden />}
+        {active && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#2e7d32]" aria-hidden />}
         {label}
       </Link>
     );
@@ -59,8 +59,8 @@ export function RoleNav({ areaLabel, items, email }: RoleNavProps) {
         aria-current={active ? "page" : undefined}
         className={`block rounded-xl px-3 py-2 text-sm transition-colors ${
           active
-            ? "bg-[#198038] font-medium text-white"
-            : "text-[#445049] hover:bg-[#eef5f0] hover:text-[#198038]"
+            ? "bg-[#2e7d32] font-medium text-white"
+            : "text-[#445049] hover:bg-[#eef5f0] hover:text-[#2e7d32]"
         }`}
       >
         {label}
@@ -84,7 +84,7 @@ export function RoleNav({ areaLabel, items, email }: RoleNavProps) {
           <Link href="/" className="flex items-center">
             <BrandMark height={36} />
           </Link>
-          <span className="ml-1 hidden rounded-full bg-[#eef5f0] px-3 py-1 text-xs font-semibold text-[#0c6e4f] sm:inline-block">
+          <span className="ml-1 hidden rounded-full bg-[#eef5f0] px-3 py-1 text-xs font-semibold text-[#2e7d32] sm:inline-block">
             {areaLabel}
           </span>
         </div>
@@ -99,7 +99,7 @@ export function RoleNav({ areaLabel, items, email }: RoleNavProps) {
             type="button"
             onClick={handleSignOut}
             disabled={pending}
-            className="rounded-full px-4 py-2 text-sm font-medium text-[#445049] transition-colors hover:text-[#198038] disabled:opacity-50"
+            className="rounded-full px-4 py-2 text-sm font-medium text-[#445049] transition-colors hover:text-[#2e7d32] disabled:opacity-50"
           >
             {pending ? "Signing out…" : "Sign out"}
           </button>
@@ -116,7 +116,7 @@ export function RoleNav({ areaLabel, items, email }: RoleNavProps) {
 
       {menuOpen && (
         <nav className="border-t border-[#e7efe9] bg-white px-5 py-4 lg:hidden">
-          <span className="mb-2 inline-block rounded-full bg-[#eef5f0] px-3 py-1 text-xs font-semibold text-[#0c6e4f]">
+          <span className="mb-2 inline-block rounded-full bg-[#eef5f0] px-3 py-1 text-xs font-semibold text-[#2e7d32]">
             {areaLabel}
           </span>
           <div className="flex flex-col gap-1 rounded-2xl border border-[#e3ece6] bg-[#f7faf8] p-2">

@@ -21,7 +21,7 @@ export function HomeFaqSection() {
       </div>
 
       <p data-reveal className="mt-8 text-center text-sm text-[#5b6a62]">
-        <ForwardLink href="/faq" className="text-sm text-[#0c6e4f] hover:underline">
+        <ForwardLink href="/faq" className="text-sm text-[#2e7d32] hover:underline">
           View all questions
         </ForwardLink>
       </p>

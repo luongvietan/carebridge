@@ -10,13 +10,13 @@ gsap.registerPlugin(useGSAP);
 
 const variantStyles = {
   primary:
-    "bg-gradient-to-r from-[#0c6e4f] to-[#7ed7a0] text-white hover:from-[#0a5c42] hover:to-[#6bc98f]",
-  secondary: "bg-white text-[#0f261c] hover:bg-[#f5f7f6]",
+    "bg-gradient-to-r from-[#2e7d32] to-[#7ed7a0] text-white hover:from-[#246627] hover:to-[#6bc98f]",
+  secondary: "bg-white text-[#14301e] hover:bg-[#f5f7f6]",
 } as const;
 
 const iconStyles = {
-  primary: "bg-white text-[#0c3a25]",
-  secondary: "bg-gradient-to-r from-[#0c6e4f] to-[#7ed7a0] text-white",
+  primary: "bg-white text-[#17492c]",
+  secondary: "bg-gradient-to-r from-[#2e7d32] to-[#7ed7a0] text-white",
 } as const;
 
 const shadowStyles = {

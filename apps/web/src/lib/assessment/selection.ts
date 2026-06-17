@@ -10,3 +10,19 @@ export function pickQuestions<T>(pool: readonly T[], n: number, rng: () => numbe
   }
   return arr.slice(0, Math.max(0, Math.min(n, arr.length)));
 }
+
+/**
+ * Pick `commonN` questions from the common pool plus `roleN` from the
+ * role-specific pool (CareBridge MVP format: 15 common + 5 role-specific).
+ * Each pool is shuffled independently; degrades gracefully when a pool holds
+ * fewer questions than requested.
+ */
+export function pickStratified<T>(
+  common: readonly T[],
+  roleSpecific: readonly T[],
+  commonN: number,
+  roleN: number,
+  rng: () => number = Math.random,
+): T[] {
+  return [...pickQuestions(common, commonN, rng), ...pickQuestions(roleSpecific, roleN, rng)];
+}

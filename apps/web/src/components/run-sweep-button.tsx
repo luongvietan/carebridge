@@ -16,7 +16,7 @@ export function RunSweepButton() {
         router.refresh();
       }}
       disabled={busy}
-      className="rounded-full border border-[#dbe7e0] px-4 py-1.5 text-sm font-medium text-[#0c4a35] transition hover:border-[#bcd8c7] hover:bg-[#f5f7f6] disabled:opacity-50"
+      className="rounded-full border border-[#dbe7e0] px-4 py-1.5 text-sm font-medium text-[#1e5a33] transition hover:border-[#bcd8c7] hover:bg-[#f5f7f6] disabled:opacity-50"
     >
       {busy ? "Running…" : "Run compliance sweep"}
     </button>
