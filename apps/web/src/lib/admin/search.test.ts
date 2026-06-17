@@ -3,10 +3,10 @@ import { buildProfessionalFilters } from "./search";
 
 describe("buildProfessionalFilters", () => {
   it("drops empty/blank criteria", () => {
-    expect(buildProfessionalFilters({ text: "  ", professionalStatus: "", maxTravelKm: "" })).toEqual({});
+    expect(buildProfessionalFilters({ text: "  ", professionalStatus: "", minTravelKm: "" })).toEqual({});
   });
-  it("trims text and coerces maxTravelKm", () => {
-    expect(buildProfessionalFilters({ text: " jane ", maxTravelKm: "25" })).toEqual({ text: "jane", maxTravelKm: 25 });
+  it("trims text and coerces minTravelKm", () => {
+    expect(buildProfessionalFilters({ text: " jane ", minTravelKm: "25" })).toEqual({ text: "jane", minTravelKm: 25 });
   });
   it("passes through enums, role, postcode, docs", () => {
     expect(
@@ -20,8 +20,8 @@ describe("buildProfessionalFilters", () => {
     });
   });
   it("ignores non-positive or NaN travel distance", () => {
-    expect(buildProfessionalFilters({ maxTravelKm: "0" })).toEqual({});
-    expect(buildProfessionalFilters({ maxTravelKm: "abc" })).toEqual({});
+    expect(buildProfessionalFilters({ minTravelKm: "0" })).toEqual({});
+    expect(buildProfessionalFilters({ minTravelKm: "abc" })).toEqual({});
   });
   it("accepts a valid availability day and ignores invalid ones", () => {
     expect(buildProfessionalFilters({ availabilityDay: "3" })).toEqual({ availabilityDay: 3 });

@@ -123,7 +123,21 @@ export async function createBooking(form: unknown): Promise<BookingActionResult>
   const result = await writeCreateBooking(insert, user.id);
   if ("error" in result) return result;
 
-  await sendNotification("booking_request", user.id, { booking_id: result.id });
+  // Notify the requester, plus every professional of the matching role who is
+  // currently eligible to accept — spec item 7: professionals receive booking
+  // notifications when matching work becomes available.
+  const { data: matches } = await admin
+    .from("professionals")
+    .select("user_id")
+    .eq("professional_role_id", formData.professionalRoleId)
+    .eq("can_accept_bookings", true);
+  await Promise.all([
+    sendNotification("booking_request", user.id, { booking_id: result.id }),
+    ...(matches ?? [])
+      .map((m) => m.user_id)
+      .filter((id): id is string => Boolean(id))
+      .map((id) => sendNotification("booking_available", id, { booking_id: result.id })),
+  ]);
   return { ok: true, id: result.id };
 }
 

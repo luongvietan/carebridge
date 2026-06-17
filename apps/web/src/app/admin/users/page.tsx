@@ -202,8 +202,8 @@ async function fetchProfessionals(
   if (filters.postcode) {
     query = query.ilike("postcode", `${filters.postcode}%`);
   }
-  if (filters.maxTravelKm !== undefined) {
-    query = query.gte("travel_distance_km", filters.maxTravelKm);
+  if (filters.minTravelKm !== undefined) {
+    query = query.gte("travel_distance_km", filters.minTravelKm);
   }
   if (filters.text) {
     // Sanitise before embedding in the PostgREST `.or()` grammar so commas /
@@ -233,7 +233,7 @@ function criteriaFromSearchParams(
     complianceStatus: pick("complianceStatus"),
     roleId: pick("roleId"),
     postcode: pick("postcode"),
-    maxTravelKm: pick("maxTravelKm"),
+    minTravelKm: pick("minTravelKm"),
     requireValidDocs: pick("requireValidDocs") === "true",
     dbsStatus: pick("dbsStatus"),
     registrationStatus: pick("registrationStatus"),

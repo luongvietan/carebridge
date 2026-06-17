@@ -61,7 +61,7 @@ type FilterState = {
   complianceStatus: string;
   roleId: string;
   postcode: string;
-  maxTravelKm: string;
+  minTravelKm: string;
   requireValidDocs: boolean;
   dbsStatus: string;
   registrationStatus: string;
@@ -89,7 +89,7 @@ function initialFilters(searchParams: URLSearchParams): FilterState {
     complianceStatus: searchParams.get("complianceStatus") ?? "",
     roleId: searchParams.get("roleId") ?? "",
     postcode: searchParams.get("postcode") ?? "",
-    maxTravelKm: searchParams.get("maxTravelKm") ?? "",
+    minTravelKm: searchParams.get("minTravelKm") ?? "",
     requireValidDocs: searchParams.get("requireValidDocs") === "true",
     dbsStatus: searchParams.get("dbsStatus") ?? "",
     registrationStatus: searchParams.get("registrationStatus") ?? "",
@@ -112,8 +112,8 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
     if (criteria.complianceStatus) params.set("complianceStatus", criteria.complianceStatus);
     if (criteria.roleId) params.set("roleId", criteria.roleId);
     if (criteria.postcode?.trim()) params.set("postcode", criteria.postcode.trim());
-    if (criteria.maxTravelKm !== "" && criteria.maxTravelKm !== undefined) {
-      params.set("maxTravelKm", String(criteria.maxTravelKm));
+    if (criteria.minTravelKm !== "" && criteria.minTravelKm !== undefined) {
+      params.set("minTravelKm", String(criteria.minTravelKm));
     }
     if (criteria.requireValidDocs) params.set("requireValidDocs", "true");
     if (filters.dbsStatus) params.set("dbsStatus", filters.dbsStatus);
@@ -226,8 +226,8 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
           <input
             type="number"
             min={1}
-            value={filters.maxTravelKm}
-            onChange={(e) => dispatch({ type: "set", field: "maxTravelKm", value: e.target.value })}
+            value={filters.minTravelKm}
+            onChange={(e) => dispatch({ type: "set", field: "minTravelKm", value: e.target.value })}
             placeholder="25"
             className={`${INPUT_CLASS} w-24`}
           />

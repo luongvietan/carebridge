@@ -9,7 +9,7 @@ export type ProfessionalFilterCriteria = {
   complianceStatus?: string;
   roleId?: string;
   postcode?: string;
-  maxTravelKm?: string | number;
+  minTravelKm?: string | number;
   requireValidDocs?: boolean;
   dbsStatus?: string;
   registrationStatus?: string;
@@ -23,7 +23,7 @@ export type ProfessionalFilters = {
   complianceStatus?: string;
   roleId?: string;
   postcode?: string;
-  maxTravelKm?: number;
+  minTravelKm?: number;
   requireValidDocs?: boolean;
   dbsStatus?: DocStatusFilter;
   registrationStatus?: DocStatusFilter;
@@ -43,9 +43,9 @@ export function buildProfessionalFilters(c: ProfessionalFilterCriteria): Profess
   if (c.roleId) f.roleId = c.roleId;
   const pc = c.postcode?.trim();
   if (pc) f.postcode = pc;
-  const kmRaw = c.maxTravelKm;
+  const kmRaw = c.minTravelKm;
   const km = kmRaw === undefined || kmRaw === "" ? NaN : Number(kmRaw);
-  if (!Number.isNaN(km) && km > 0) f.maxTravelKm = km;
+  if (!Number.isNaN(km) && km > 0) f.minTravelKm = km;
   if (c.requireValidDocs) f.requireValidDocs = true;
   if (DOC_STATUSES.includes(c.dbsStatus as DocStatusFilter)) f.dbsStatus = c.dbsStatus as DocStatusFilter;
   if (DOC_STATUSES.includes(c.registrationStatus as DocStatusFilter)) {
