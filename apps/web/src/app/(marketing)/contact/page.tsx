@@ -9,7 +9,7 @@ const field =
   "mt-1.5 w-full rounded-xl border border-[#dbe7e0] bg-white px-4 py-2.5 text-sm text-[#0f261c] placeholder:text-[#9aa8a0] focus:border-[#198038] focus:outline-none focus:ring-2 focus:ring-[#198038]/15";
 
 const details = [
-  ["Email", "hello@carebridgeconnect.example", "M4 6h16v12H4zM4 7l8 6 8-6"],
+  ["Email", "info@carebridgeconnect.example", "M4 6h16v12H4zM4 7l8 6 8-6"],
   ["Phone", "+44 (0)20 0000 0000", "M4 5c0 8 7 15 15 15l2-3-4-2-2 2c-3-1.5-6-4.5-7.5-7.5l2-2-2-4-3 2Z"],
   ["Address", "London, United Kingdom", "M12 22s7-6 7-12a7 7 0 1 0-14 0c0 6 7 12 7 12Zm0-9a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"],
 ];
@@ -26,7 +26,7 @@ export default function ContactPage() {
       <main className="mx-auto max-w-5xl px-5 py-16">
         <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr]">
           <form
-            action="mailto:hello@carebridgeconnect.example"
+            action="mailto:info@carebridgeconnect.example"
             method="post"
             encType="text/plain"
             className="rounded-3xl border border-[#e7efe9] bg-white p-7 sm:p-8"

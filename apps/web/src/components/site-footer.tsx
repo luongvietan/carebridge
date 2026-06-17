@@ -22,7 +22,7 @@ const FOOTER_IMAGE = marketingImages.footer;
 const contactItems = [
   { label: "London, United Kingdom", icon: Location01Icon },
   { label: "+44 (0)20 0000 0000", icon: Call02Icon },
-  { label: "hello@carebridgeconnect.example", icon: Mail01Icon },
+  { label: "info@carebridgeconnect.example", icon: Mail01Icon },
 ];
 
 const navPills = [
