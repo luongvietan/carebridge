@@ -78,6 +78,26 @@ async function assessmentPassed(
 const ASSESSMENT_REQUIRED_ERROR =
   "You must pass the competency assessment before completing your application.";
 
+/**
+ * Eligibility screening is the first mandatory step — spec: "Before accessing the
+ * registration form, all healthcare professionals must complete an eligibility
+ * screening." Enforced server-side so the profile/document steps cannot be
+ * reached by navigating directly to a later wizard page.
+ */
+async function eligibilityCompleted(
+  admin: ReturnType<typeof createServiceClient>,
+  professionalId: string,
+): Promise<boolean> {
+  const { count } = await admin
+    .from("eligibility_screenings")
+    .select("id", { count: "exact", head: true })
+    .eq("professional_id", professionalId);
+  return (count ?? 0) > 0;
+}
+
+const ELIGIBILITY_REQUIRED_ERROR =
+  "Please complete the eligibility screening before continuing your application.";
+
 export type ProfileResult = { ok: true } | { error: string } | null;
 
 export async function saveProfile(_prev: ProfileResult, formData: FormData): Promise<ProfileResult> {
@@ -101,6 +121,9 @@ export async function saveProfile(_prev: ProfileResult, formData: FormData): Pro
   if (!professionalId) return { error: "You must be signed in." };
 
   const gateAdmin = createServiceClient();
+  if (!(await eligibilityCompleted(gateAdmin, professionalId))) {
+    return { error: ELIGIBILITY_REQUIRED_ERROR };
+  }
   if (!(await assessmentPassed(gateAdmin, professionalId))) {
     return { error: ASSESSMENT_REQUIRED_ERROR };
   }
@@ -171,6 +194,9 @@ export async function uploadDocument(
   if (!professionalId) return { error: "You must be signed in." };
 
   const admin0 = createServiceClient();
+  if (!(await eligibilityCompleted(admin0, professionalId))) {
+    return { error: ELIGIBILITY_REQUIRED_ERROR };
+  }
   if (!(await assessmentPassed(admin0, professionalId))) {
     return { error: ASSESSMENT_REQUIRED_ERROR };
   }

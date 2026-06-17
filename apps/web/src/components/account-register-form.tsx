@@ -96,6 +96,10 @@ export function AccountRegisterForm({ variant }: { variant: Variant }) {
             Address line 1
             <input name="addressLine1" className={field} />
           </label>
+          <label className="block text-sm font-medium">
+            Address line 2
+            <input name="addressLine2" className={field} />
+          </label>
           <div className="grid grid-cols-2 gap-4">
             <label className="block text-sm font-medium">
               City

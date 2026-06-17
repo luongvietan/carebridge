@@ -26,6 +26,149 @@ function formatDateTime(iso: string) {
   });
 }
 
+function formatDate(value: string) {
+  return new Date(value).toLocaleDateString("en-GB", { dateStyle: "medium" });
+}
+
+const cardClass =
+  "mt-10 rounded-2xl border border-[#dbe7e0] bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)] text-sm";
+
+type EligibilityScreening = {
+  employment_status: string | null;
+  training_current: boolean;
+  outcome: string;
+} | null;
+
+function EligibilityScreeningCard({
+  screening,
+  attestations,
+}: {
+  screening: EligibilityScreening;
+  attestations: Record<string, boolean>;
+}) {
+  return (
+    <section className={cardClass}>
+      <h2 className="text-lg font-bold">Eligibility screening</h2>
+      {!screening ? (
+        <p className="mt-4 text-[#5b6a62]">No eligibility screening on record.</p>
+      ) : (
+        <>
+          <dl className="mt-4 grid gap-3 sm:grid-cols-3">
+            <div>
+              <dt className="text-[#7a8a81]">Employment status</dt>
+              <dd>
+                {screening.employment_status
+                  ? (employmentStatusLabels[
+                      screening.employment_status as keyof typeof employmentStatusLabels
+                    ] ?? formatLabel(screening.employment_status))
+                  : "—"}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-[#7a8a81]">Mandatory training</dt>
+              <dd>
+                {screening.training_current ? (
+                  <span className="text-[#0e6027]">All attested current</span>
+                ) : (
+                  <span className="text-[#a2191f]">
+                    Not current — updated certificate required before approval
+                  </span>
+                )}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-[#7a8a81]">Outcome</dt>
+              <dd>{formatLabel(screening.outcome)}</dd>
+            </div>
+          </dl>
+          <ul className="mt-4 grid gap-1 sm:grid-cols-2">
+            {mandatoryTrainingItems.map((t) => (
+              <li key={t.key} className="flex items-center gap-2">
+                <span aria-hidden className={attestations[t.key] ? "text-[#0e6027]" : "text-[#a2191f]"}>
+                  {attestations[t.key] ? "✓" : "✗"}
+                </span>
+                <span>{t.label}</span>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+    </section>
+  );
+}
+
+type StatusActionRow = {
+  action_type: string;
+  reason_code: string | null;
+  reason_text: string | null;
+  internal_notes: string | null;
+  review_date: string | null;
+  resulting_status: string | null;
+  applied_at: string;
+  resolved_at: string | null;
+  applied_by: string | null;
+};
+
+function StatusHistoryCard({
+  history,
+  actorEmail,
+}: {
+  history: StatusActionRow[];
+  actorEmail: Map<string, string>;
+}) {
+  return (
+    <section className="mt-10">
+      <h2 className="text-lg font-bold">Status action history</h2>
+      <div className="mt-4 overflow-x-auto rounded-2xl border border-[#dbe7e0] shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
+        <table className="w-full text-sm">
+          <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#5b6a62]">
+            <tr>
+              <th className="p-3 font-medium">Applied</th>
+              <th className="p-3 font-medium">Action</th>
+              <th className="p-3 font-medium">Reason</th>
+              <th className="p-3 font-medium">Internal notes</th>
+              <th className="p-3 font-medium">Review date</th>
+              <th className="p-3 font-medium">Resulting status</th>
+              <th className="p-3 font-medium">Resolved</th>
+              <th className="p-3 font-medium">By</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-[#dbe7e0]">
+            {history.map((row, index) => (
+              <tr key={`${row.applied_at}-${index}`}>
+                <td className="p-3 whitespace-nowrap">{formatDateTime(row.applied_at)}</td>
+                <td className="p-3">{formatLabel(row.action_type)}</td>
+                <td className="p-3">
+                  {row.reason_code ? formatLabel(row.reason_code) : "—"}
+                  {row.reason_text ? (
+                    <div className="text-xs text-[#7a8a81]">{row.reason_text}</div>
+                  ) : null}
+                </td>
+                <td className="p-3">{row.internal_notes ?? "—"}</td>
+                <td className="p-3 whitespace-nowrap">
+                  {row.review_date ? formatDate(row.review_date) : "—"}
+                </td>
+                <td className="p-3">
+                  {row.resulting_status ? formatLabel(row.resulting_status) : "—"}
+                </td>
+                <td className="p-3 whitespace-nowrap">
+                  {row.resolved_at ? formatDateTime(row.resolved_at) : "—"}
+                </td>
+                <td className="p-3 whitespace-nowrap">
+                  {row.applied_by ? (actorEmail.get(row.applied_by) ?? "—") : "—"}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {history.length === 0 && (
+          <p className="p-6 text-sm text-[#5b6a62]">No status actions recorded yet.</p>
+        )}
+      </div>
+    </section>
+  );
+}
+
 export default async function AdminUserDetailPage({
   params,
 }: {
@@ -61,7 +204,9 @@ export default async function AdminUserDetailPage({
       .maybeSingle(),
     admin
       .from("professional_status_actions")
-      .select("action_type, reason_code, resulting_status, applied_at")
+      .select(
+        "action_type, reason_code, reason_text, internal_notes, review_date, resulting_status, applied_at, resolved_at, applied_by",
+      )
       .eq("professional_id", id)
       .order("applied_at", { ascending: false }),
     admin
@@ -79,6 +224,14 @@ export default async function AdminUserDetailPage({
     admin.from("professional_skills").select("skills(name)").eq("professional_id", id),
     admin.from("professional_availability").select("day_of_week").eq("professional_id", id),
   ]);
+
+  const actorIds = [
+    ...new Set((history ?? []).map((h) => h.applied_by).filter((x): x is string => Boolean(x))),
+  ];
+  const { data: actors } = actorIds.length
+    ? await admin.from("users").select("id, email").in("id", actorIds)
+    : { data: [] as { id: string; email: string }[] };
+  const actorEmail = new Map((actors ?? []).map((a) => [a.id, a.email] as const));
 
   const attestations = (screening?.training_attestations ?? {}) as Record<string, boolean>;
   const skillNames = (skillRows ?? []).flatMap((r) => {
@@ -150,53 +303,7 @@ export default async function AdminUserDetailPage({
         </p>
       </section>
 
-      <section className="mt-10 rounded-2xl border border-[#dbe7e0] bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)] text-sm">
-        <h2 className="text-lg font-bold">Eligibility screening</h2>
-        {!screening ? (
-          <p className="mt-4 text-[#5b6a62]">No eligibility screening on record.</p>
-        ) : (
-          <>
-            <dl className="mt-4 grid gap-3 sm:grid-cols-3">
-              <div>
-                <dt className="text-[#7a8a81]">Employment status</dt>
-                <dd>
-                  {screening.employment_status
-                    ? (employmentStatusLabels[
-                        screening.employment_status as keyof typeof employmentStatusLabels
-                      ] ?? formatLabel(screening.employment_status))
-                    : "—"}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-[#7a8a81]">Mandatory training</dt>
-                <dd>
-                  {screening.training_current ? (
-                    <span className="text-[#0e6027]">All attested current</span>
-                  ) : (
-                    <span className="text-[#a2191f]">
-                      Not current — updated certificate required before approval
-                    </span>
-                  )}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-[#7a8a81]">Outcome</dt>
-                <dd>{formatLabel(screening.outcome)}</dd>
-              </div>
-            </dl>
-            <ul className="mt-4 grid gap-1 sm:grid-cols-2">
-              {mandatoryTrainingItems.map((t) => (
-                <li key={t.key} className="flex items-center gap-2">
-                  <span aria-hidden className={attestations[t.key] ? "text-[#0e6027]" : "text-[#a2191f]"}>
-                    {attestations[t.key] ? "✓" : "✗"}
-                  </span>
-                  <span>{t.label}</span>
-                </li>
-              ))}
-            </ul>
-          </>
-        )}
-      </section>
+      <EligibilityScreeningCard screening={screening} attestations={attestations} />
 
       <section className="mt-10 rounded-2xl border border-[#dbe7e0] bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)] text-sm">
         <h2 className="text-lg font-bold">Competency assessment</h2>
@@ -270,38 +377,7 @@ export default async function AdminUserDetailPage({
         </section>
       )}
 
-      <section className="mt-10">
-        <h2 className="text-lg font-bold">Status action history</h2>
-        <div className="mt-4 overflow-x-auto rounded-2xl border border-[#dbe7e0] shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
-          <table className="w-full text-sm">
-            <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#5b6a62]">
-              <tr>
-                <th className="p-3 font-medium">Applied</th>
-                <th className="p-3 font-medium">Action</th>
-                <th className="p-3 font-medium">Reason</th>
-                <th className="p-3 font-medium">Resulting status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#dbe7e0]">
-              {(history ?? []).map((row, index) => (
-                <tr key={`${row.applied_at}-${index}`}>
-                  <td className="p-3 whitespace-nowrap">{formatDateTime(row.applied_at)}</td>
-                  <td className="p-3">{formatLabel(row.action_type)}</td>
-                  <td className="p-3">
-                    {row.reason_code ? formatLabel(row.reason_code) : "—"}
-                  </td>
-                  <td className="p-3">
-                    {row.resulting_status ? formatLabel(row.resulting_status) : "—"}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {(history ?? []).length === 0 && (
-            <p className="p-6 text-sm text-[#5b6a62]">No status actions recorded yet.</p>
-          )}
-        </div>
-      </section>
+      <StatusHistoryCard history={history ?? []} actorEmail={actorEmail} />
     </main>
   );
 }

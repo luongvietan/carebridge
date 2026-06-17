@@ -38,8 +38,38 @@ export const eligibilitySchema = z.object({
 });
 export type EligibilityInput = z.infer<typeof eligibilitySchema>;
 
+function ageYears(dob: string, today: string): number {
+  const [by, bm, bd] = dob.split("-").map(Number);
+  const [ty, tm, td] = today.split("-").map(Number);
+  let age = ty - by;
+  if (tm < bm || (tm === bm && td < bd)) age -= 1;
+  return age;
+}
+
+/**
+ * Date of birth is optional, but when supplied it must be a real past date for a
+ * plausible adult (age 16–100) — a DOB in the future or an implausible age is a
+ * data-entry error. `today` is injectable for deterministic tests; ISO
+ * `YYYY-MM-DD` strings compare chronologically as plain strings.
+ */
+export function isPlausibleDateOfBirth(value: string | null | undefined, today?: string): boolean {
+  const v = (value ?? "").trim();
+  if (!v) return true;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(v) || Number.isNaN(Date.parse(v))) return false;
+  const now = today ?? new Date().toISOString().slice(0, 10);
+  if (v >= now) return false;
+  const age = ageYears(v, now);
+  return age >= 16 && age <= 100;
+}
+
 export const profileSchema = z.object({
-  dateOfBirth: z.string().optional(),
+  dateOfBirth: z
+    .string()
+    .optional()
+    .refine(
+      (v) => isPlausibleDateOfBirth(v),
+      "Enter a valid date of birth (age 16–100, not in the future).",
+    ),
   addressLine1: z.string().min(1),
   addressLine2: z.string().optional(),
   city: z.string().min(1),

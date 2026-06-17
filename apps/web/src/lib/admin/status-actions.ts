@@ -59,6 +59,17 @@ export async function applyProfessionalStatusAction(
     if (accErr) return { error: accErr.message };
   }
 
+  // A reinstatement or removal resolves any still-open restriction on this
+  // professional — stamp resolved_at so the audit trail records the date the
+  // suspension was lifted (spec: "Date professional was reinstated or removed").
+  if (action === "reinstate" || action === "remove") {
+    await admin
+      .from("professional_status_actions")
+      .update({ resolved_at: new Date().toISOString() })
+      .eq("professional_id", professionalId)
+      .is("resolved_at", null);
+  }
+
   await admin.from("professional_status_actions").insert({
     professional_id: professionalId, action_type: action,
     reason_code: (details.reasonCode as ReasonCode) ?? null,

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { profileSchema } from "./onboarding";
+import { profileSchema, isPlausibleDateOfBirth } from "./onboarding";
 
 const base = {
   addressLine1: "1 Test Street",
@@ -23,5 +23,42 @@ describe("profileSchema National Insurance validation", () => {
 
   it("rejects a malformed NI number", () => {
     expect(profileSchema.safeParse({ ...base, nationalInsuranceNo: "12345" }).success).toBe(false);
+  });
+});
+
+describe("isPlausibleDateOfBirth", () => {
+  const today = "2026-06-18";
+
+  it("accepts an empty/undefined value (optional field)", () => {
+    expect(isPlausibleDateOfBirth(undefined, today)).toBe(true);
+    expect(isPlausibleDateOfBirth("", today)).toBe(true);
+  });
+  it("rejects a future date of birth", () => {
+    expect(isPlausibleDateOfBirth("2999-01-01", today)).toBe(false);
+  });
+  it("rejects today (age 0)", () => {
+    expect(isPlausibleDateOfBirth("2026-06-18", today)).toBe(false);
+  });
+  it("rejects an under-16 date of birth", () => {
+    expect(isPlausibleDateOfBirth("2012-06-18", today)).toBe(false);
+  });
+  it("accepts a plausible adult date of birth", () => {
+    expect(isPlausibleDateOfBirth("1990-05-20", today)).toBe(true);
+  });
+  it("rejects an implausibly old date of birth", () => {
+    expect(isPlausibleDateOfBirth("1900-01-01", today)).toBe(false);
+  });
+  it("rejects a malformed date", () => {
+    expect(isPlausibleDateOfBirth("not-a-date", today)).toBe(false);
+    expect(isPlausibleDateOfBirth("2026-13-40", today)).toBe(false);
+  });
+});
+
+describe("profileSchema date of birth validation", () => {
+  it("rejects a future date of birth", () => {
+    expect(profileSchema.safeParse({ ...base, dateOfBirth: "2999-01-01" }).success).toBe(false);
+  });
+  it("accepts a valid adult date of birth", () => {
+    expect(profileSchema.safeParse({ ...base, dateOfBirth: "1990-05-20" }).success).toBe(true);
   });
 });
