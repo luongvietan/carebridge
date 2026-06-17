@@ -64,13 +64,16 @@ insert into assessment_question_bank (id, professional_role_id, topic, question_
   ('00000000-0000-0000-0000-0000000a0020', null, 'health_safety', 'The correct order for putting on PPE generally starts with:', '[{"key":"a","text":"Gloves"},{"key":"b","text":"Apron/gown"},{"key":"c","text":"Eye protection"},{"key":"d","text":"Mask last"}]', 'b')
 on conflict (id) do nothing;
 
--- Required documents per role: every role must provide the key critical documents + photo ID.
+-- Required documents per role: the critical documents + photo ID, plus the
+-- remaining supporting uploads (qualifications, references, DBS update service).
+-- Bank details are collected via the encrypted payout-details form, not here.
 insert into compliance_requirements (professional_role_id, document_type_id)
 select r.id, d.id
 from professional_roles r
 join document_types d on d.code in
   ('photo_id','right_to_work','enhanced_dbs','professional_registration',
-   'mandatory_training_certificate','professional_indemnity_insurance')
+   'mandatory_training_certificate','professional_indemnity_insurance',
+   'qualification','professional_reference','dbs_update_service')
 on conflict (professional_role_id, document_type_id) do nothing;
 
 -- One active, effective-dated rate card per role so booking creation can resolve a snapshot.

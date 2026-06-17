@@ -81,9 +81,10 @@ export default async function AdminUserDetailPage({
   ]);
 
   const attestations = (screening?.training_attestations ?? {}) as Record<string, boolean>;
-  const skillNames = (skillRows ?? [])
-    .map((r) => (r.skills as { name: string } | null)?.name)
-    .filter((n): n is string => Boolean(n));
+  const skillNames = (skillRows ?? []).flatMap((r) => {
+    const name = (r.skills as { name: string } | null)?.name;
+    return name ? [name] : [];
+  });
   const availabilityDays = new Set(
     (availabilityRows ?? []).map((r) => r.day_of_week).filter((d): d is number => d != null),
   );

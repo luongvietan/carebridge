@@ -10,6 +10,10 @@ import { DAYS_OF_WEEK } from "@/lib/onboarding/profile-children";
 const field =
   "mt-1 w-full rounded-xl border border-[#dbe7e0] bg-white px-3.5 py-2.5 text-sm text-[#1e5a33] placeholder:text-[#9aa8a0] focus:border-[#2e7d32] focus:outline-none focus:ring-2 focus:ring-[#2e7d32]/15";
 
+// Stable empty defaults so passing no value doesn't create a new array each render.
+const NO_SKILL_IDS: string[] = [];
+const NO_AVAILABILITY_DAYS: number[] = [];
+
 type Role = { id: string; name: string };
 type Skill = { id: string; name: string };
 type Current = {
@@ -30,8 +34,8 @@ export function ProfileForm({
   roles,
   skills,
   current,
-  currentSkillIds = [],
-  currentAvailabilityDays = [],
+  currentSkillIds = NO_SKILL_IDS,
+  currentAvailabilityDays = NO_AVAILABILITY_DAYS,
 }: {
   roles: Role[];
   skills: Skill[];
