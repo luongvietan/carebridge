@@ -1,7 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { ProfileForm } from "@/components/profile-form";
+import { guardOnboardingStep } from "@/lib/onboarding/guard";
 
 export default async function ProfilePage() {
+  await guardOnboardingStep("profile");
   const supabase = await createClient();
   const [{ data: roles }, { data: skills }, { data: { user } }] = await Promise.all([
     supabase.from("professional_roles").select("id, name").eq("is_active", true).order("name"),

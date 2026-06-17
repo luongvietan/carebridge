@@ -2,8 +2,10 @@ import { ForwardLink } from "@/components/forward-link";
 import { createClient } from "@/lib/supabase/server";
 import { DocumentUploader, type DocItem } from "@/components/document-uploader";
 import { OnboardingSteps } from "@/components/onboarding-steps";
+import { guardOnboardingStep } from "@/lib/onboarding/guard";
 
 export default async function DocumentsPage() {
+  await guardOnboardingStep("documents");
   const supabase = await createClient();
   const {
     data: { user },

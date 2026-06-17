@@ -8,6 +8,7 @@ import { eligibilityOutcome, type EligibilityOutcome } from "@/lib/compliance/re
 import { verifyUpload } from "@/lib/onboarding/upload-rules";
 import { validateDocumentExpiry } from "@/lib/onboarding/document-expiry";
 import { parseSkillIds, parseAvailabilityDays } from "@/lib/onboarding/profile-children";
+import { eligibilityCompleted, assessmentPassed } from "@/lib/onboarding/progress";
 
 export type EligibilityResult = { ok: true; outcome: EligibilityOutcome } | { error: string } | null;
 
@@ -57,43 +58,12 @@ export async function submitEligibility(
   return { ok: true, outcome };
 }
 
-/**
- * The competency assessment must be PASSED before any application data
- * (profile or documents) can be submitted — spec: "Assessment must be passed
- * before application can be submitted/approved." Enforced server-side so the
- * wizard step order cannot be bypassed by navigating directly to a later step.
- */
-async function assessmentPassed(
-  admin: ReturnType<typeof createServiceClient>,
-  professionalId: string,
-): Promise<boolean> {
-  const { count } = await admin
-    .from("assessment_attempts")
-    .select("id", { count: "exact", head: true })
-    .eq("professional_id", professionalId)
-    .eq("passed", true);
-  return (count ?? 0) > 0;
-}
-
+// Server-side ordering guards (spec §1–2): eligibility must be screened and the
+// competency assessment passed before any application data is written. Shared
+// with the page-level guard (onboarding/guard.ts) via onboarding/progress.ts so
+// the wizard order cannot be bypassed by navigating directly to a later step.
 const ASSESSMENT_REQUIRED_ERROR =
   "You must pass the competency assessment before completing your application.";
-
-/**
- * Eligibility screening is the first mandatory step — spec: "Before accessing the
- * registration form, all healthcare professionals must complete an eligibility
- * screening." Enforced server-side so the profile/document steps cannot be
- * reached by navigating directly to a later wizard page.
- */
-async function eligibilityCompleted(
-  admin: ReturnType<typeof createServiceClient>,
-  professionalId: string,
-): Promise<boolean> {
-  const { count } = await admin
-    .from("eligibility_screenings")
-    .select("id", { count: "exact", head: true })
-    .eq("professional_id", professionalId);
-  return (count ?? 0) > 0;
-}
 
 const ELIGIBILITY_REQUIRED_ERROR =
   "Please complete the eligibility screening before continuing your application.";
