@@ -3,6 +3,7 @@ import { createServiceClient } from "@/lib/supabase/service";
 import { requireAdmin } from "@/lib/auth/admin";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { nextPayoutStatus, type PayoutStatus } from "./record";
+import { validateBankDetails } from "./bank";
 import { sendNotification } from "@/lib/notifications/send";
 
 export type PayoutResult = { ok: true } | { error: string };
@@ -15,13 +16,16 @@ export async function savePayoutDetails(form: {
   const key = process.env.PAYOUT_ENC_KEY;
   if (!key) return { error: "Payout encryption is not configured." };
 
+  const valid = validateBankDetails(form);
+  if (!valid.ok) return { error: valid.error };
+
   const admin = createServiceClient();
   const { data: prof } = await admin.from("professionals").select("id").eq("user_id", user.id).maybeSingle();
   if (!prof) return { error: "Professional profile not found." };
 
   const { error } = await admin.rpc("set_payout_details", {
-    p_professional_id: prof.id, p_account_name: form.accountName,
-    p_sort_code: form.sortCode, p_account_number: form.accountNumber, p_key: key,
+    p_professional_id: prof.id, p_account_name: valid.normalised.accountName,
+    p_sort_code: valid.normalised.sortCode, p_account_number: valid.normalised.accountNumber, p_key: key,
   });
   if (error) return { error: error.message };
   return { ok: true };

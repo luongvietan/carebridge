@@ -23,10 +23,24 @@ describe("isCompliant", () => {
 });
 
 describe("canActivateProfessional", () => {
+  const passed = { assessmentPassed: true };
+
   it("does not activate when documents are not compliant", () => {
     expect(
       canActivateProfessional({
+        ...passed,
         documentsCompliant: false,
+        trainingAttestedCurrent: true,
+        hasApprovedTrainingCertificate: true,
+      }),
+    ).toBe(false);
+  });
+
+  it("does not activate when the competency assessment has not been passed", () => {
+    expect(
+      canActivateProfessional({
+        assessmentPassed: false,
+        documentsCompliant: true,
         trainingAttestedCurrent: true,
         hasApprovedTrainingCertificate: true,
       }),
@@ -36,6 +50,7 @@ describe("canActivateProfessional", () => {
   it("activates a compliant professional whose training was attested current", () => {
     expect(
       canActivateProfessional({
+        ...passed,
         documentsCompliant: true,
         trainingAttestedCurrent: true,
         hasApprovedTrainingCertificate: false,
@@ -46,6 +61,7 @@ describe("canActivateProfessional", () => {
   it("activates a compliant professional with no eligibility screening on record", () => {
     expect(
       canActivateProfessional({
+        ...passed,
         documentsCompliant: true,
         trainingAttestedCurrent: null,
         hasApprovedTrainingCertificate: false,
@@ -56,6 +72,7 @@ describe("canActivateProfessional", () => {
   it("holds a training-not-current professional until an updated training certificate is approved", () => {
     expect(
       canActivateProfessional({
+        ...passed,
         documentsCompliant: true,
         trainingAttestedCurrent: false,
         hasApprovedTrainingCertificate: false,
@@ -66,6 +83,7 @@ describe("canActivateProfessional", () => {
   it("activates a training-not-current professional once an approved training certificate is provided", () => {
     expect(
       canActivateProfessional({
+        ...passed,
         documentsCompliant: true,
         trainingAttestedCurrent: false,
         hasApprovedTrainingCertificate: true,

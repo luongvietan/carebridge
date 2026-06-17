@@ -152,7 +152,9 @@ export async function saveProfile(_prev: ProfileResult, formData: FormData): Pro
       address_line2: parsed.data.addressLine2 ?? null,
       city: parsed.data.city,
       postcode: parsed.data.postcode,
-      national_insurance_no: parsed.data.nationalInsuranceNo ?? null,
+      national_insurance_no: parsed.data.nationalInsuranceNo
+        ? parsed.data.nationalInsuranceNo.replace(/\s/g, "").toUpperCase()
+        : null,
       professional_role_id: parsed.data.professionalRoleId,
       professional_summary: parsed.data.professionalSummary ?? null,
       travel_distance_km: parsed.data.travelDistanceKm ?? null,

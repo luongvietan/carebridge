@@ -133,8 +133,17 @@ async function recomputeCompliance(
     .maybeSingle();
   const hasApprovedTrainingCertificate = trainingType ? approvedSet.has(trainingType.id) : false;
 
+  // Spec item 2: the competency assessment must be passed before activation.
+  const { count: passedCount } = await admin
+    .from("assessment_attempts")
+    .select("id", { count: "exact", head: true })
+    .eq("professional_id", professionalId)
+    .eq("passed", true);
+  const assessmentPassed = (passedCount ?? 0) > 0;
+
   const activate = canActivateProfessional({
     documentsCompliant,
+    assessmentPassed,
     trainingAttestedCurrent,
     hasApprovedTrainingCertificate,
   });
@@ -178,9 +187,10 @@ async function recomputeCompliance(
       ]);
     }
   } else if (documentsCompliant) {
-    // Documents are all approved, but the applicant declared their mandatory
-    // training is not current and no updated training certificate has been
-    // approved yet. Hold them and surface the outstanding item to the admin.
+    // Documents are all approved but the professional is not yet activatable —
+    // either the competency assessment has not been passed, or training was
+    // declared not current with no updated certificate approved. Hold them and
+    // surface the outstanding item to the admin.
     await admin
       .from("professionals")
       .update({ compliance_status: "further_info_required" })

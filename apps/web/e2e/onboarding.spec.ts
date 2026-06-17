@@ -167,6 +167,17 @@ test("admin approving the final critical document activates the professional", a
     .select("id")
     .single();
 
+  // Activation now also requires a passed competency assessment (spec item 2),
+  // so seed one for this fixture before approving the final document.
+  await sb.from("assessment_attempts").insert({
+    professional_id: pro!.id,
+    attempt_number: 1,
+    served_question_ids: [],
+    score: 100,
+    passed: true,
+    completed_at: new Date().toISOString(),
+  });
+
   const { data: reqs } = await sb
     .from("compliance_requirements")
     .select("document_type_id, document_types(is_compliance_critical)")

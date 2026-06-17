@@ -47,6 +47,8 @@ export function PayoutDetailsForm({ last4 }: { last4: string | null }) {
           id="sortCode"
           name="sortCode"
           required
+          inputMode="numeric"
+          maxLength={8}
           placeholder="00-00-00"
           className={field}
         />
@@ -57,6 +59,8 @@ export function PayoutDetailsForm({ last4 }: { last4: string | null }) {
           id="accountNumber"
           name="accountNumber"
           required
+          inputMode="numeric"
+          maxLength={8}
           placeholder="00000000"
           className={field}
         />
