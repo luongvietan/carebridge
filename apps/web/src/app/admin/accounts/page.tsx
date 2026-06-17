@@ -99,9 +99,9 @@ export default async function AdminAccountsPage({
         )}
       </form>
 
-      <div className="mt-8 overflow-x-auto border border-[#dbe7e0]">
+      <div className="mt-8 overflow-x-auto rounded-2xl border border-[#dbe7e0] shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
         <table className="w-full text-sm">
-          <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left">
+          <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#5b6a62]">
             <tr>
               <th className="p-3 font-medium">Email</th>
               <th className="p-3 font-medium">Account type</th>
@@ -114,13 +114,13 @@ export default async function AdminAccountsPage({
               <tr key={user.id}>
                 <td className="p-3">{user.email}</td>
                 <td className="p-3">
-                  <span className="bg-[#f5f7f6] px-2 py-0.5 text-xs text-[#5b6a62]">
+                  <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#5b6a62]">
                     {formatLabel(user.account_type)}
                     {user.is_founder ? " (founder)" : ""}
                   </span>
                 </td>
                 <td className="p-3">
-                  <span className="bg-[#f5f7f6] px-2 py-0.5 text-xs text-[#5b6a62]">
+                  <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#5b6a62]">
                     {formatLabel(user.account_status)}
                   </span>
                 </td>

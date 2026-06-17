@@ -47,7 +47,7 @@ export function ReviewQueue({ items }: { items: ReviewItem[] }) {
               <span className="text-[#5b6a62]"> — {it.docTypeName}</span>
               {it.referenceNumber && <span className="text-[#7a8a81]"> · ref {it.referenceNumber}</span>}
               {it.expiryDate && <span className="text-[#7a8a81]"> · expires {it.expiryDate}</span>}
-              <span className="ml-2 bg-[#f5f7f6] px-2 py-0.5 text-xs text-[#5b6a62]">
+              <span className="ml-2 rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#5b6a62]">
                 {it.status.replace(/_/g, " ")}
               </span>
             </div>
@@ -67,7 +67,7 @@ export function ReviewQueue({ items }: { items: ReviewItem[] }) {
               <button
                 onClick={() => decide(it.documentId, "further_info_required")}
                 disabled={busy === it.documentId}
-                className="border border-[#7a8a81] px-3 py-1.5 hover:bg-[#f5f7f6] disabled:opacity-50"
+                className="rounded-full border border-[#dbe7e0] px-4 py-1.5 text-sm font-medium text-[#0c4a35] transition hover:border-[#bcd8c7] hover:bg-[#f5f7f6] disabled:opacity-50"
               >
                 Request info
               </button>

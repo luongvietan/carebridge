@@ -110,7 +110,7 @@ function CancelControl({ bookingId, onDone }: { bookingId: string; onDone: () =>
         type="button"
         onClick={handleCancel}
         disabled={busy}
-        className="border border-[#da1e28] px-3 py-1.5 text-sm text-[#da1e28] hover:bg-[#fff1f1] disabled:opacity-50"
+        className="rounded-full border border-[#da1e28] px-3 py-1.5 text-sm text-[#da1e28] hover:bg-[#fff1f1] disabled:opacity-50"
       >
         {busy ? "Cancelling…" : "Cancel"}
       </button>
@@ -168,7 +168,7 @@ function NoShowControl({ bookingId, onDone }: { bookingId: string; onDone: () =>
         type="button"
         onClick={handleNoShow}
         disabled={busy}
-        className="border border-[#7a8a81] px-3 py-1.5 text-sm hover:bg-[#f5f7f6] disabled:opacity-50"
+        className="rounded-full border border-[#dbe7e0] px-4 py-1.5 text-sm font-medium text-[#0c4a35] transition hover:border-[#bcd8c7] hover:bg-[#f5f7f6] disabled:opacity-50"
       >
         {busy ? "Saving…" : "No-show"}
       </button>
@@ -186,9 +186,9 @@ export function AdminBookings({
   const router = useRouter();
 
   return (
-    <div className="mt-8 overflow-x-auto border border-[#dbe7e0]">
+    <div className="mt-8 overflow-x-auto rounded-2xl border border-[#dbe7e0] shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
       <table className="w-full text-sm">
-        <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left">
+        <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#5b6a62]">
           <tr>
             <th className="p-3 font-medium">Date</th>
             <th className="p-3 font-medium">Role</th>
@@ -205,7 +205,7 @@ export function AdminBookings({
               <td className="p-3">{b.professional_roles?.name ?? b.professional_role_id}</td>
               <td className="p-3">{b.booking_type.replace(/_/g, " ")}</td>
               <td className="p-3">
-                <span className="bg-[#f5f7f6] px-2 py-0.5 text-xs text-[#5b6a62]">
+                <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#5b6a62]">
                   {b.status.replace(/_/g, " ")}
                 </span>
               </td>

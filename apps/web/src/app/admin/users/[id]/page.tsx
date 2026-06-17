@@ -118,9 +118,9 @@ export default async function AdminUserDetailPage({
 
       <section className="mt-10">
         <h2 className="text-lg font-bold">Status action history</h2>
-        <div className="mt-4 overflow-x-auto border border-[#dbe7e0]">
+        <div className="mt-4 overflow-x-auto rounded-2xl border border-[#dbe7e0] shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
           <table className="w-full text-sm">
-            <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left">
+            <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#5b6a62]">
               <tr>
                 <th className="p-3 font-medium">Applied</th>
                 <th className="p-3 font-medium">Action</th>

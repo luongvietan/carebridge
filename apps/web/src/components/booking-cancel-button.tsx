@@ -25,7 +25,7 @@ export function BookingCancelButton({ bookingId }: { bookingId: string }) {
         type="button"
         onClick={handleCancel}
         disabled={busy}
-        className="border border-[#da1e28] px-3 py-1.5 text-sm text-[#da1e28] hover:bg-[#fff1f1] disabled:opacity-50"
+        className="rounded-full border border-[#da1e28] px-3 py-1.5 text-sm text-[#da1e28] hover:bg-[#fff1f1] disabled:opacity-50"
       >
         {busy ? "Cancelling…" : "Cancel"}
       </button>
