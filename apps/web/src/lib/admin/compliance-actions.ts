@@ -4,6 +4,8 @@ import { requireAdmin } from "@/lib/auth/admin";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { isCompliant } from "@/lib/compliance/requirements";
 import { sendNotification } from "@/lib/notifications/send";
+import { sendDueComplianceReminders } from "@/lib/compliance/reminders";
+import type { ProfessionalStatus } from "./status-machine";
 
 export type ReviewDecision = "approved" | "rejected" | "further_info_required";
 
@@ -15,6 +17,15 @@ export async function runComplianceSweep(): Promise<{ ok: true } | { error: stri
   const { error } = await admin.rpc("fn_run_compliance_sweep");
   if (error) return { error: error.message };
   return { ok: true };
+}
+
+/** Admin-triggered send of outstanding compliance expiry reminder emails. */
+export async function runComplianceReminders(): Promise<{ ok: true; sent: number } | { error: string }> {
+  await requireAuth();
+  const adminId = await requireAdmin();
+  if (!adminId) return { error: "Administrator access required." };
+  const { sent } = await sendDueComplianceReminders();
+  return { ok: true, sent };
 }
 
 export async function reviewDocument(
@@ -54,12 +65,26 @@ export async function reviewDocument(
     summary: note ?? null,
   });
 
-  await recomputeCompliance(doc.professional_id, adminId);
+  await recomputeCompliance(doc.professional_id, adminId, decision);
   return { ok: true };
 }
 
+/** Professional statuses that are blocked *because of* compliance and should be
+ * automatically cleared back to active once all required documents are approved.
+ * Punitive/manual statuses (suspended, under investigation, rejected, removed)
+ * are deliberately NOT auto-cleared by a document approval. */
+const COMPLIANCE_BLOCKED: ProfessionalStatus[] = [
+  "pending_verification",
+  "booking_restricted",
+  "compliance_hold",
+];
+
 /** Recompute a professional's compliance/professional status from their approved documents. */
-async function recomputeCompliance(professionalId: string, adminId: string): Promise<void> {
+async function recomputeCompliance(
+  professionalId: string,
+  adminId: string,
+  decision: ReviewDecision,
+): Promise<void> {
   const admin = createServiceClient();
   const { data: prof } = await admin
     .from("professionals")
@@ -87,7 +112,9 @@ async function recomputeCompliance(professionalId: string, adminId: string): Pro
   const approvedSet = new Set((approved ?? []).map((d) => d.document_type_id));
 
   if (isCompliant(requiredCritical, approvedSet)) {
-    const becameActive = prof.professional_status === "pending_verification";
+    const becameActive = COMPLIANCE_BLOCKED.includes(
+      prof.professional_status as ProfessionalStatus,
+    );
     await admin
       .from("professionals")
       .update({
@@ -123,6 +150,18 @@ async function recomputeCompliance(professionalId: string, adminId: string): Pro
       ]);
     }
   } else {
-    await admin.from("professionals").update({ compliance_status: "pending_review" }).eq("id", professionalId);
+    // Not (yet) fully compliant. Preserve the explicit review outcome so the
+    // 'Rejected' and 'Further Information Required' states the spec requires are
+    // actually surfaced, rather than collapsing everything to 'pending_review'.
+    const complianceStatus =
+      decision === "rejected"
+        ? "rejected"
+        : decision === "further_info_required"
+          ? "further_info_required"
+          : "pending_review";
+    await admin
+      .from("professionals")
+      .update({ compliance_status: complianceStatus })
+      .eq("id", professionalId);
   }
 }

@@ -42,9 +42,17 @@ describe("pickStratified", () => {
     expect(got.filter((q) => q.startsWith("r"))).toHaveLength(1);
   });
 
-  it("works with no role-specific questions (e.g. role not yet seeded)", () => {
+  it("tops up to the full total from common when no role-specific questions exist", () => {
     const got = pickStratified(common, [], 15, 5);
-    expect(got).toHaveLength(15);
+    expect(got).toHaveLength(20);
     expect(got.every((q) => q.startsWith("c"))).toBe(true);
+  });
+
+  it("tops up a partial role-specific shortfall from common", () => {
+    // 2 role-specific available, 5 requested -> 3 short, topped up from common.
+    const got = pickStratified(common, ["r0", "r1"], 15, 5);
+    expect(got).toHaveLength(20);
+    expect(got.filter((q) => q.startsWith("r"))).toHaveLength(2);
+    expect(got.filter((q) => q.startsWith("c"))).toHaveLength(18);
   });
 });

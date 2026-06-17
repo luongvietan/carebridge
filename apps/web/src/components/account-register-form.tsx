@@ -106,6 +106,10 @@ export function AccountRegisterForm({ variant }: { variant: Variant }) {
               <input name="postcode" className={field} />
             </label>
           </div>
+          <label className="block text-sm font-medium">
+            Billing address
+            <input name="billingAddress" className={field} />
+          </label>
         </>
       )}
 

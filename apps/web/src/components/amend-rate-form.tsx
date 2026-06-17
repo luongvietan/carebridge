@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useReducer } from "react";
 import { amendRateCard } from "@/lib/admin/rate-actions";
-import type { PlatformFeeType } from "@/lib/admin/rates";
+import { type PlatformFeeType, SUPPORTED_CURRENCIES } from "@/lib/admin/rates";
 import { Select } from "@/components/ui/select";
 
 const INPUT_CLASS =
@@ -144,17 +144,15 @@ export function AmendRateForm({ roleId, roleName }: Props) {
           </label>
         )}
 
-        <label className="flex flex-col gap-1 text-[#5b6a62]">
+        <div className="flex flex-col gap-1 text-[#5b6a62]">
           Currency
-          <input
-            type="text"
+          <Select
+            aria-label="Currency"
             value={state.currency}
-            onChange={(e) => dispatch({ type: "set", field: "currency", value: e.target.value.toUpperCase() })}
-            className={INPUT_CLASS}
-            maxLength={3}
-            required
+            onValueChange={(v) => dispatch({ type: "set", field: "currency", value: v })}
+            options={SUPPORTED_CURRENCIES.map((c) => ({ value: c, label: c }))}
           />
-        </label>
+        </div>
       </div>
 
       {state.error && <p className="text-sm text-[#da1e28]">{state.error}</p>}

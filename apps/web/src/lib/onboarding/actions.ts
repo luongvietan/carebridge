@@ -37,6 +37,27 @@ export async function submitEligibility(
   return { ok: true, outcome };
 }
 
+/**
+ * The competency assessment must be PASSED before any application data
+ * (profile or documents) can be submitted — spec: "Assessment must be passed
+ * before application can be submitted/approved." Enforced server-side so the
+ * wizard step order cannot be bypassed by navigating directly to a later step.
+ */
+async function assessmentPassed(
+  admin: ReturnType<typeof createServiceClient>,
+  professionalId: string,
+): Promise<boolean> {
+  const { count } = await admin
+    .from("assessment_attempts")
+    .select("id", { count: "exact", head: true })
+    .eq("professional_id", professionalId)
+    .eq("passed", true);
+  return (count ?? 0) > 0;
+}
+
+const ASSESSMENT_REQUIRED_ERROR =
+  "You must pass the competency assessment before completing your application.";
+
 export type ProfileResult = { ok: true } | { error: string } | null;
 
 export async function saveProfile(_prev: ProfileResult, formData: FormData): Promise<ProfileResult> {
@@ -58,6 +79,11 @@ export async function saveProfile(_prev: ProfileResult, formData: FormData): Pro
 
   const professionalId = await ensureProfessional(user);
   if (!professionalId) return { error: "You must be signed in." };
+
+  const gateAdmin = createServiceClient();
+  if (!(await assessmentPassed(gateAdmin, professionalId))) {
+    return { error: ASSESSMENT_REQUIRED_ERROR };
+  }
 
   // Optional profile photo → private storage bucket.
   let photoPath: string | undefined;
@@ -102,6 +128,11 @@ export async function uploadDocument(
   const user = await requireAuth();
   const professionalId = await ensureProfessional(user);
   if (!professionalId) return { error: "You must be signed in." };
+
+  const admin0 = createServiceClient();
+  if (!(await assessmentPassed(admin0, professionalId))) {
+    return { error: ASSESSMENT_REQUIRED_ERROR };
+  }
 
   const documentTypeId = String(formData.get("documentTypeId") ?? "");
   const file = formData.get("file");

@@ -4,6 +4,10 @@
  * Cells starting with `=`, `+`, `-`, `@`, TAB or CR get a single-quote prefix.
  */
 function defuseFormula(s: string): string {
+  // Leave plain numeric values (incl. negatives and decimals) untouched so
+  // financial figures like "-50.00" stay numeric in the spreadsheet; only
+  // genuine formula-trigger prefixes on other text are neutralised.
+  if (/^-?\d+(\.\d+)?$/.test(s)) return s;
   return /^[=+\-@\t\r]/.test(s) ? `'${s}` : s;
 }
 

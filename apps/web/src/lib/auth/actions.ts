@@ -1,8 +1,10 @@
 "use server";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { createServiceClient } from "@/lib/supabase/service";
 import { registerSchema } from "@/lib/validation/auth";
+import { sendNotification } from "@/lib/notifications/send";
+
+const CONSENT_VERSION = "v1";
 
 export type SignUpResult = { ok: true } | { error: string } | null;
 
@@ -32,18 +34,26 @@ export async function signUp(_prev: SignUpResult, formData: FormData): Promise<S
     email: parsed.data.email,
     password: parsed.data.password,
     options: {
-      data: { account_type: parsed.data.accountType, full_name: parsed.data.fullName },
+      // Privacy + T&C consent is recorded atomically by the handle_new_user
+      // trigger (see migration 0038) so it can never be silently dropped if a
+      // separate insert fails or the user object isn't returned.
+      data: {
+        account_type: parsed.data.accountType,
+        full_name: parsed.data.fullName,
+        accepted_terms: parsed.data.acceptedTerms ? "true" : "false",
+        consent_version: CONSENT_VERSION,
+      },
     },
   });
   if (error) return { error: error.message };
 
-  // Record privacy + terms consent (server-only service client; user isn't signed in yet).
+  // Registration confirmation email (best-effort; the users row is created by
+  // the on_auth_user_created trigger as part of the signUp above).
   if (data.user) {
-    const admin = createServiceClient();
-    await admin.from("consents").insert([
-      { user_id: data.user.id, consent_type: "terms_conditions", version: "v1" },
-      { user_id: data.user.id, consent_type: "privacy_policy", version: "v1" },
-    ]);
+    await sendNotification("registration_confirmation", data.user.id, {
+      full_name: parsed.data.fullName,
+    });
   }
+
   return { ok: true };
 }

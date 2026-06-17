@@ -4,8 +4,8 @@ import type { NextRequest } from "next/server";
 export const GATE_COOKIE_NAME = "cbc_site_access";
 const GATE_TOKEN_SALT = "cbc-site-access-v1";
 
-/** Paths that must stay reachable without the gate cookie (webhooks, email links). */
-const GATE_EXEMPT = ["/gate", "/api/stripe/webhook", "/auth/confirm"];
+/** Paths that must stay reachable without the gate cookie (webhooks, email links, cron). */
+const GATE_EXEMPT = ["/gate", "/api/stripe/webhook", "/auth/confirm", "/api/cron"];
 
 export function isGateEnabled(): boolean {
   return process.env.PRODUCTION_GATE_ENABLED === "true";

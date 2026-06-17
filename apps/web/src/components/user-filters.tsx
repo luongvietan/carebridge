@@ -27,6 +27,18 @@ const COMPLIANCE_STATUSES = [
   "further_info_required",
 ] as const;
 
+const DOC_STATUS_OPTIONS = [
+  { value: "", label: "Any" },
+  { value: "valid", label: "Valid" },
+  { value: "invalid", label: "Expired / missing" },
+];
+
+const ASSESSMENT_STATUS_OPTIONS = [
+  { value: "", label: "Any" },
+  { value: "passed", label: "Passed" },
+  { value: "not_passed", label: "Not passed" },
+];
+
 function formatLabel(value: string) {
   return value.replace(/_/g, " ");
 }
@@ -45,6 +57,9 @@ type FilterState = {
   postcode: string;
   maxTravelKm: string;
   requireValidDocs: boolean;
+  dbsStatus: string;
+  registrationStatus: string;
+  assessmentStatus: string;
 };
 
 type FilterAction = {
@@ -69,6 +84,9 @@ function initialFilters(searchParams: URLSearchParams): FilterState {
     postcode: searchParams.get("postcode") ?? "",
     maxTravelKm: searchParams.get("maxTravelKm") ?? "",
     requireValidDocs: searchParams.get("requireValidDocs") === "true",
+    dbsStatus: searchParams.get("dbsStatus") ?? "",
+    registrationStatus: searchParams.get("registrationStatus") ?? "",
+    assessmentStatus: searchParams.get("assessmentStatus") ?? "",
   };
 }
 
@@ -90,6 +108,9 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
       params.set("maxTravelKm", String(criteria.maxTravelKm));
     }
     if (criteria.requireValidDocs) params.set("requireValidDocs", "true");
+    if (filters.dbsStatus) params.set("dbsStatus", filters.dbsStatus);
+    if (filters.registrationStatus) params.set("registrationStatus", filters.registrationStatus);
+    if (filters.assessmentStatus) params.set("assessmentStatus", filters.assessmentStatus);
     const qs = params.toString();
     router.push(qs ? `/admin/users?${qs}` : "/admin/users");
   }
@@ -137,6 +158,36 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
             value={filters.roleId}
             onValueChange={(v) => dispatch({ type: "set", field: "roleId", value: v })}
             options={[{ value: "", label: "Any" }, ...roles.map((r) => ({ value: r.id, label: r.name }))]}
+          />
+        </div>
+        <div className="flex flex-col gap-1 text-[#5b6a62]">
+          DBS status
+          <Select
+            className="w-44"
+            aria-label="DBS status"
+            value={filters.dbsStatus}
+            onValueChange={(v) => dispatch({ type: "set", field: "dbsStatus", value: v })}
+            options={DOC_STATUS_OPTIONS}
+          />
+        </div>
+        <div className="flex flex-col gap-1 text-[#5b6a62]">
+          Registration status
+          <Select
+            className="w-44"
+            aria-label="Registration status"
+            value={filters.registrationStatus}
+            onValueChange={(v) => dispatch({ type: "set", field: "registrationStatus", value: v })}
+            options={DOC_STATUS_OPTIONS}
+          />
+        </div>
+        <div className="flex flex-col gap-1 text-[#5b6a62]">
+          Assessment status
+          <Select
+            className="w-44"
+            aria-label="Assessment status"
+            value={filters.assessmentStatus}
+            onValueChange={(v) => dispatch({ type: "set", field: "assessmentStatus", value: v })}
+            options={ASSESSMENT_STATUS_OPTIONS}
           />
         </div>
       </div>

@@ -28,4 +28,11 @@ describe("toCsv", () => {
     // Formula prefix + comma → defused AND quoted per RFC-4180.
     expect(toCsv([{ a: "=HYPERLINK(1,2)" }], ["a"])).toBe('a\r\n"\'=HYPERLINK(1,2)"');
   });
+
+  it("keeps plain negative numbers numeric (no defuse prefix)", () => {
+    expect(toCsv([{ a: -50 }], ["a"])).toBe("a\r\n-50");
+    expect(toCsv([{ a: "-50.00" }], ["a"])).toBe("a\r\n-50.00");
+    // ...but a non-numeric leading-dash string is still defused.
+    expect(toCsv([{ a: "-2-2" }], ["a"])).toBe("a\r\n'-2-2");
+  });
 });

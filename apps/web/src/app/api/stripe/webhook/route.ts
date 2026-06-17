@@ -38,6 +38,13 @@ export async function POST(req: NextRequest) {
     return new Response("db error", { status: 500 });
   }
 
+  // If processing fails after we have claimed the event, release the idempotency
+  // claim so Stripe's retry of the SAME event is reprocessed rather than being
+  // short-circuited as "already processed" (which would strand the payment).
+  const releaseClaim = async () => {
+    await admin.from("stripe_webhook_events").delete().eq("event_id", event.id);
+  };
+
   const obj = event.data.object as unknown as Record<string, unknown>;
   const metadata = obj.metadata as Record<string, string> | undefined;
   const paymentIdMeta = metadata?.payment_id;
@@ -54,7 +61,12 @@ export async function POST(req: NextRequest) {
   } else if (intentId) {
     ({ data: payment } = await admin.from("payments").select(sel).eq("stripe_payment_intent_id", intentId).maybeSingle());
   }
-  if (!payment) return new Response("no payment row", { status: 200 });
+  if (!payment) {
+    // The payment row may not be visible yet (created right before redirect).
+    // Release the claim and 500 so Stripe retries rather than us dropping it.
+    await releaseClaim();
+    return new Response("no payment row", { status: 500 });
+  }
 
   // Enforce monotonic state machine. A late `payment_intent.succeeded` arriving
   // after a `charge.refunded` must NOT revert status to succeeded; a stale
@@ -81,7 +93,10 @@ export async function POST(req: NextRequest) {
   if (intentId && !payment.stripe_payment_intent_id) patch.stripe_payment_intent_id = intentId;
 
   const { error: updateErr } = await admin.from("payments").update(patch).eq("id", payment.id);
-  if (updateErr) return new Response("db error", { status: 500 });
+  if (updateErr) {
+    await releaseClaim();
+    return new Response("db error", { status: 500 });
+  }
 
   await admin.from("audit_log").insert({
     actor_type: "system",

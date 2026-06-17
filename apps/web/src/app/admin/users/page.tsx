@@ -79,18 +79,82 @@ async function lookupUserIdsByEmail(admin: ServiceClient, text: string): Promise
   return (data ?? []).map((user) => user.id);
 }
 
+async function allProfessionalIds(admin: ServiceClient): Promise<string[]> {
+  const { data } = await admin.from("professionals").select("id");
+  return (data ?? []).map((p) => p.id);
+}
+
+/** Professionals holding an approved, unexpired document of the given type code. */
+async function professionalsWithValidDoc(admin: ServiceClient, code: string): Promise<Set<string>> {
+  const today = new Date().toISOString().slice(0, 10);
+  const { data: docType } = await admin.from("document_types").select("id").eq("code", code).maybeSingle();
+  if (!docType) return new Set();
+  const { data: docs } = await admin
+    .from("documents")
+    .select("professional_id, expiry_date")
+    .eq("document_type_id", docType.id)
+    .eq("verification_status", "approved");
+  const set = new Set<string>();
+  for (const d of docs ?? []) {
+    if (d.expiry_date && d.expiry_date < today) continue;
+    set.add(d.professional_id);
+  }
+  return set;
+}
+
+async function professionalsWhoPassedAssessment(admin: ServiceClient): Promise<Set<string>> {
+  const { data } = await admin.from("assessment_attempts").select("professional_id").eq("passed", true);
+  return new Set((data ?? []).map((a) => a.professional_id));
+}
+
+/** PostgREST reserved characters that would break an `.or()` filter string. */
+function sanitiseOrValue(text: string): string {
+  return text.replace(/[,()*\\]/g, " ");
+}
+
 async function fetchProfessionals(
   admin: ServiceClient,
   filters: ReturnType<typeof buildProfessionalFilters>,
 ): Promise<ProfessionalRow[]> {
-  let idFilter: string[] | null = null;
+  // Each id-based filter contributes a set of matching professional ids; the
+  // final id filter is their intersection.
+  const constraints: Set<string>[] = [];
+  const needAllIds =
+    filters.dbsStatus === "invalid" ||
+    filters.registrationStatus === "invalid" ||
+    filters.assessmentStatus === "not_passed";
+  const allIds = needAllIds ? await allProfessionalIds(admin) : [];
 
   if (filters.requireValidDocs) {
-    idFilter = await getProfessionalsWithValidDocs(admin);
+    constraints.push(new Set(await getProfessionalsWithValidDocs(admin)));
+  }
+  if (filters.dbsStatus) {
+    const valid = await professionalsWithValidDoc(admin, "enhanced_dbs");
+    constraints.push(
+      filters.dbsStatus === "valid" ? valid : new Set(allIds.filter((id) => !valid.has(id))),
+    );
+  }
+  if (filters.registrationStatus) {
+    const valid = await professionalsWithValidDoc(admin, "professional_registration");
+    constraints.push(
+      filters.registrationStatus === "valid" ? valid : new Set(allIds.filter((id) => !valid.has(id))),
+    );
+  }
+  if (filters.assessmentStatus) {
+    const passed = await professionalsWhoPassedAssessment(admin);
+    constraints.push(
+      filters.assessmentStatus === "passed" ? passed : new Set(allIds.filter((id) => !passed.has(id))),
+    );
   }
 
-  if (idFilter !== null && idFilter.length === 0) {
-    return [];
+  let idFilter: string[] | null = null;
+  if (constraints.length > 0) {
+    let intersection = constraints[0];
+    for (let i = 1; i < constraints.length; i++) {
+      intersection = new Set([...intersection].filter((id) => constraints[i].has(id)));
+    }
+    idFilter = [...intersection];
+    if (idFilter.length === 0) return [];
   }
 
   let emailUserIds: string[] = [];
@@ -130,7 +194,9 @@ async function fetchProfessionals(
     query = query.gte("travel_distance_km", filters.maxTravelKm);
   }
   if (filters.text) {
-    const pattern = `%${filters.text}%`;
+    // Sanitise before embedding in the PostgREST `.or()` grammar so commas /
+    // parentheses in the search text cannot break or inject filter clauses.
+    const pattern = `%${sanitiseOrValue(filters.text)}%`;
     if (emailUserIds.length > 0) {
       query = query.or(`full_name.ilike.${pattern},user_id.in.(${emailUserIds.join(",")})`);
     } else {
@@ -157,6 +223,9 @@ function criteriaFromSearchParams(
     postcode: pick("postcode"),
     maxTravelKm: pick("maxTravelKm"),
     requireValidDocs: pick("requireValidDocs") === "true",
+    dbsStatus: pick("dbsStatus"),
+    registrationStatus: pick("registrationStatus"),
+    assessmentStatus: pick("assessmentStatus"),
   };
 }
 

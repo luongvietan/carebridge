@@ -41,7 +41,7 @@ export default async function AdminUserDetailPage({
 
   if (!professional) notFound();
 
-  const [{ data: user }, { data: history }] = await Promise.all([
+  const [{ data: user }, { data: history }, { data: attempts }] = await Promise.all([
     admin
       .from("users")
       .select("email, account_status")
@@ -52,7 +52,19 @@ export default async function AdminUserDetailPage({
       .select("action_type, reason_code, resulting_status, applied_at")
       .eq("professional_id", id)
       .order("applied_at", { ascending: false }),
+    admin
+      .from("assessment_attempts")
+      .select("attempt_number, score, passed, completed_at")
+      .eq("professional_id", id)
+      .order("attempt_number", { ascending: true }),
   ]);
+
+  const completedAttempts = (attempts ?? []).filter((a) => a.completed_at);
+  const bestScore = completedAttempts.reduce<number | null>(
+    (best, a) => (a.score != null && (best == null || a.score > best) ? a.score : best),
+    null,
+  );
+  const hasPassed = completedAttempts.some((a) => a.passed);
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-10">
@@ -92,6 +104,56 @@ export default async function AdminUserDetailPage({
             View compliance documents
           </ForwardLink>
         </p>
+      </section>
+
+      <section className="mt-10 rounded-2xl border border-[#dbe7e0] bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)] text-sm">
+        <h2 className="text-lg font-bold">Competency assessment</h2>
+        <dl className="mt-4 grid gap-3 sm:grid-cols-3">
+          <div>
+            <dt className="text-[#7a8a81]">Result</dt>
+            <dd>
+              {completedAttempts.length === 0
+                ? "Not yet attempted"
+                : hasPassed
+                  ? "Passed"
+                  : "Not passed"}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-[#7a8a81]">Best score</dt>
+            <dd>{bestScore != null ? `${bestScore}%` : "—"}</dd>
+          </div>
+          <div>
+            <dt className="text-[#7a8a81]">Attempts used</dt>
+            <dd>{completedAttempts.length} / 3</dd>
+          </div>
+        </dl>
+        {completedAttempts.length > 0 && (
+          <div className="mt-4 overflow-x-auto rounded-xl border border-[#dbe7e0]">
+            <table className="w-full text-sm">
+              <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#5b6a62]">
+                <tr>
+                  <th className="p-3 font-medium">Attempt</th>
+                  <th className="p-3 font-medium">Score</th>
+                  <th className="p-3 font-medium">Result</th>
+                  <th className="p-3 font-medium">Completed</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#dbe7e0]">
+                {completedAttempts.map((a) => (
+                  <tr key={a.attempt_number}>
+                    <td className="p-3">{a.attempt_number}</td>
+                    <td className="p-3">{a.score != null ? `${a.score}%` : "—"}</td>
+                    <td className="p-3">{a.passed ? "Pass" : "Fail"}</td>
+                    <td className="p-3 whitespace-nowrap">
+                      {a.completed_at ? formatDateTime(a.completed_at) : "—"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </section>
 
       <section className="mt-10 rounded-2xl border border-[#dbe7e0] bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">

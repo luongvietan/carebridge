@@ -15,7 +15,7 @@ export default function ResetPage() {
     const form = new FormData(e.currentTarget);
     const supabase = createClient();
     await supabase.auth.resetPasswordForEmail(String(form.get("email")), {
-      redirectTo: `${window.location.origin}/auth/confirm?next=/login`,
+      redirectTo: `${window.location.origin}/auth/confirm?next=/reset/update`,
     });
     setSent(true);
     setPending(false);

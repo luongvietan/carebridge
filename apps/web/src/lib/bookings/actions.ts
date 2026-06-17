@@ -137,8 +137,12 @@ export async function acceptBooking(bookingId: string): Promise<BookingActionRes
     .maybeSingle();
   if (!prof) return { error: "Professional profile not found." };
 
-  const { data: booking } = await admin.from("bookings").select("status, professional_role_id, requester_user_id").eq("id", bookingId).single();
+  const { data: booking } = await admin.from("bookings").select("status, professional_role_id, requester_user_id, scheduled_start").eq("id", bookingId).single();
   if (!booking) return { error: "Booking not found." };
+
+  if (new Date(booking.scheduled_start).getTime() <= Date.now()) {
+    return { error: "This booking can no longer be accepted — its start time has passed." };
+  }
 
   const t = applyTransition(booking.status, "accept", "professional");
   if (!t.ok) return { error: t.error };
@@ -237,13 +241,17 @@ export async function cancelBooking(bookingId: string, reason?: string): Promise
   const result = await writeCancelBooking(bookingId, booking.status, user.id, actor, isLastMinute, reason);
   if ("error" in result) return result;
 
-  let recipient: string | null = null;
-  if (actor === "professional") recipient = booking.requester_user_id;
-  else if (booking.assigned_professional_id) {
+  // Notify both counterparties (requester + assigned professional) except whoever
+  // initiated the cancellation, so e.g. an admin-initiated cancel reaches the client.
+  const recipients = new Set<string>([booking.requester_user_id]);
+  if (booking.assigned_professional_id) {
     const { data: p } = await admin.from("professionals").select("user_id").eq("id", booking.assigned_professional_id).maybeSingle();
-    recipient = p?.user_id ?? null;
+    if (p?.user_id) recipients.add(p.user_id);
   }
-  if (recipient) await sendNotification("booking_cancellation", recipient, { booking_id: bookingId });
+  recipients.delete(user.id);
+  await Promise.all(
+    [...recipients].map((r) => sendNotification("booking_cancellation", r, { booking_id: bookingId })),
+  );
   return { ok: true };
 }
 
@@ -255,10 +263,17 @@ export async function completeBooking(bookingId: string): Promise<BookingActionR
 
   const { data: booking } = await admin
     .from("bookings")
-    .select("status, assigned_professional_id")
+    .select("status, assigned_professional_id, scheduled_end")
     .eq("id", bookingId)
     .single();
   if (!booking) return { error: "Booking not found." };
+
+  // A booking cannot be completed before its shift has actually finished —
+  // otherwise a future booking could be marked done (and paid out) for work
+  // that never happened.
+  if (new Date(booking.scheduled_end).getTime() > Date.now()) {
+    return { error: "This booking cannot be completed until the shift has ended." };
+  }
 
   let actor: Actor = "admin";
   if (!isAdmin) {

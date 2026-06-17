@@ -46,17 +46,48 @@ export async function startAttempt(): Promise<StartResult> {
     return { locked: true, lockUntil: prof.assessment_locked_until };
   }
 
+  const cols = "id, topic, question_text, options";
+  const roleId = prof?.professional_role_id ?? null;
+
+  // Resume an in-progress attempt (started but never submitted) instead of
+  // creating a new row. Otherwise an abandoned attempt would still increment the
+  // attempt count and could lock the applicant out with no reapply date set.
+  const { data: inProgress } = await admin
+    .from("assessment_attempts")
+    .select("id, attempt_number, served_question_ids")
+    .eq("professional_id", professionalId)
+    .is("completed_at", null)
+    .order("attempt_number", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (inProgress) {
+    const servedIds = (inProgress.served_question_ids as string[]) ?? [];
+    const { data: qs } = await admin.from("assessment_question_bank").select(cols).in("id", servedIds);
+    const byId = new Map((qs ?? []).map((q) => [q.id, q]));
+    const resumed = servedIds
+      .map((qid) => byId.get(qid))
+      .filter((q): q is NonNullable<typeof q> => Boolean(q))
+      .map((q) => ({
+        id: q.id,
+        topic: q.topic,
+        question_text: q.question_text,
+        options: q.options as AssessmentOption[],
+      }));
+    if (resumed.length > 0) {
+      return { ok: true, attemptId: inProgress.id, attemptNumber: inProgress.attempt_number, questions: resumed };
+    }
+  }
+
+  // Count only COMPLETED attempts toward the limit.
   const { count } = await admin
     .from("assessment_attempts")
     .select("id", { count: "exact", head: true })
-    .eq("professional_id", professionalId);
+    .eq("professional_id", professionalId)
+    .not("completed_at", "is", null);
   const attemptNumber = (count ?? 0) + 1;
   if (attemptNumber > MAX_ATTEMPTS) {
     return { locked: true, lockUntil: prof?.assessment_locked_until ?? null };
   }
-
-  const cols = "id, topic, question_text, options";
-  const roleId = prof?.professional_role_id ?? null;
 
   // Two pools: common questions (no role) and role-specific questions. The MVP
   // format draws 15 from common + 5 from role-specific, each shuffled separately.

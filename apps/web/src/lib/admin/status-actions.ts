@@ -4,8 +4,21 @@ import { requireAdmin } from "@/lib/auth/admin";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { applyStatusAction, type ProfessionalStatus, type StatusActionType } from "./status-machine";
 import { PUNITIVE, REASON_CODES, type ReasonCode } from "./status-constants";
+import type { AccountStatus } from "./account-status";
 
 export type StatusActionResult = { ok: true } | { error: string };
+
+/**
+ * Actions that also change platform-level account access. This is what makes a
+ * "Full account suspension" different from a (booking-only) temporary suspension:
+ * it flips users.account_status so the proxy blocks login entirely. Actions not
+ * listed here leave account access untouched.
+ */
+const ACCOUNT_STATUS_FOR_ACTION: Partial<Record<StatusActionType, AccountStatus>> = {
+  full_suspension: "suspended",
+  remove: "deactivated",
+  reinstate: "active",
+};
 
 export async function applyProfessionalStatusAction(
   professionalId: string,
@@ -26,7 +39,7 @@ export async function applyProfessionalStatusAction(
   }
   const admin = createServiceClient();
 
-  const { data: prof } = await admin.from("professionals").select("professional_status").eq("id", professionalId).single();
+  const { data: prof } = await admin.from("professionals").select("professional_status, user_id").eq("id", professionalId).single();
   if (!prof) return { error: "Professional not found." };
 
   const t = applyStatusAction(prof.professional_status as ProfessionalStatus, action);
@@ -34,6 +47,17 @@ export async function applyProfessionalStatusAction(
 
   const { error } = await admin.from("professionals").update({ professional_status: t.to }).eq("id", professionalId);
   if (error) return { error: error.message };
+
+  // Drive platform account access for actions that gate login (full suspension /
+  // removal block all access; reinstate restores it).
+  const accountStatus = ACCOUNT_STATUS_FOR_ACTION[action];
+  if (accountStatus && prof.user_id) {
+    const { error: accErr } = await admin
+      .from("users")
+      .update({ account_status: accountStatus })
+      .eq("id", prof.user_id);
+    if (accErr) return { error: accErr.message };
+  }
 
   await admin.from("professional_status_actions").insert({
     professional_id: professionalId, action_type: action,

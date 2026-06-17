@@ -75,8 +75,21 @@ export async function markPayoutPaid(payoutId: string, method: string, reference
   const ALLOWED_METHODS = ["bank_transfer", "bacs", "faster_payments", "cheque"];
   if (!ALLOWED_METHODS.includes(method)) return { error: "Invalid payout method." };
   const admin = createServiceClient();
-  const { data: payout } = await admin.from("payouts").select("id, status").eq("id", payoutId).single();
+  const { data: payout } = await admin.from("payouts").select("id, status, booking_id").eq("id", payoutId).single();
   if (!payout) return { error: "Payout not found." };
+
+  // Re-check refunds at pay-out time: a refund may have arrived AFTER the payout
+  // was recorded, and we must not pay a professional on money returned to the client.
+  if (payout.booking_id) {
+    const { count: refundedEver } = await admin
+      .from("payments")
+      .select("id", { count: "exact", head: true })
+      .eq("booking_id", payout.booking_id)
+      .not("refunded_at", "is", null);
+    if ((refundedEver ?? 0) > 0) {
+      return { error: "Payment for this booking has been refunded; this payout cannot be paid." };
+    }
+  }
 
   let newStatus: PayoutStatus;
   try {

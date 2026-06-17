@@ -1,3 +1,8 @@
+/** Document-backed status filters: a "valid" doc is approved and not expired. */
+export type DocStatusFilter = "valid" | "invalid";
+/** Assessment outcome filter. */
+export type AssessmentStatusFilter = "passed" | "not_passed";
+
 export type ProfessionalFilterCriteria = {
   text?: string;
   professionalStatus?: string;
@@ -6,6 +11,9 @@ export type ProfessionalFilterCriteria = {
   postcode?: string;
   maxTravelKm?: string | number;
   requireValidDocs?: boolean;
+  dbsStatus?: string;
+  registrationStatus?: string;
+  assessmentStatus?: string;
 };
 
 export type ProfessionalFilters = {
@@ -16,7 +24,13 @@ export type ProfessionalFilters = {
   postcode?: string;
   maxTravelKm?: number;
   requireValidDocs?: boolean;
+  dbsStatus?: DocStatusFilter;
+  registrationStatus?: DocStatusFilter;
+  assessmentStatus?: AssessmentStatusFilter;
 };
+
+const DOC_STATUSES: DocStatusFilter[] = ["valid", "invalid"];
+const ASSESSMENT_STATUSES: AssessmentStatusFilter[] = ["passed", "not_passed"];
 
 export function buildProfessionalFilters(c: ProfessionalFilterCriteria): ProfessionalFilters {
   const f: ProfessionalFilters = {};
@@ -31,5 +45,12 @@ export function buildProfessionalFilters(c: ProfessionalFilterCriteria): Profess
   const km = kmRaw === undefined || kmRaw === "" ? NaN : Number(kmRaw);
   if (!Number.isNaN(km) && km > 0) f.maxTravelKm = km;
   if (c.requireValidDocs) f.requireValidDocs = true;
+  if (DOC_STATUSES.includes(c.dbsStatus as DocStatusFilter)) f.dbsStatus = c.dbsStatus as DocStatusFilter;
+  if (DOC_STATUSES.includes(c.registrationStatus as DocStatusFilter)) {
+    f.registrationStatus = c.registrationStatus as DocStatusFilter;
+  }
+  if (ASSESSMENT_STATUSES.includes(c.assessmentStatus as AssessmentStatusFilter)) {
+    f.assessmentStatus = c.assessmentStatus as AssessmentStatusFilter;
+  }
   return f;
 }

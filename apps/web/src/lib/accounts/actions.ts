@@ -69,10 +69,12 @@ export async function saveOrganisationProfile(_prev: AccountResult, formData: Fo
     phone: (formData.get("phone") as string) || undefined,
     emailContact: (formData.get("emailContact") as string) || undefined,
     addressLine1: (formData.get("addressLine1") as string) || undefined,
+    addressLine2: (formData.get("addressLine2") as string) || undefined,
     city: (formData.get("city") as string) || undefined,
     postcode: (formData.get("postcode") as string) || undefined,
     cqcRegistrationNumber: (formData.get("cqcRegistrationNumber") as string) || undefined,
     billingEmail: (formData.get("billingEmail") as string) || undefined,
+    billingAddress: (formData.get("billingAddress") as string) || undefined,
   });
   if (!parsed.success) return { error: "Please complete the required fields." };
   const user = await currentUser();
@@ -102,10 +104,12 @@ export async function saveOrganisationProfile(_prev: AccountResult, formData: Fo
       phone: parsed.data.phone ?? null,
       email_contact: parsed.data.emailContact ?? null,
       address_line1: parsed.data.addressLine1 ?? null,
+      address_line2: parsed.data.addressLine2 ?? null,
       city: parsed.data.city ?? null,
       postcode: parsed.data.postcode ?? null,
       cqc_registration_number: parsed.data.cqcRegistrationNumber ?? null,
       billing_email: parsed.data.billingEmail ?? null,
+      billing_address: parsed.data.billingAddress ?? null,
       stripe_customer_id: stripeCustomerId,
     },
     { onConflict: "user_id" },
