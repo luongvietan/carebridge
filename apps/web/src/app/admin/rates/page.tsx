@@ -34,7 +34,7 @@ function formatFeeType(type: string, value: number | null, charge: number, payou
     return `${value}%`;
   }
   if (type === "fixed" && value != null) {
-    return formatRate(value, "GBP");
+    return `${formatRate(value, "GBP")}/hr`;
   }
   return formatLabel(type);
 }

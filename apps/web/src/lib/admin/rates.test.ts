@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { validateRateAmendment } from "./rates";
+import { validateRateAmendment, resolveRateAmendment } from "./rates";
 
 const base = { clientChargeRate: 40, professionalPayoutRate: 28, platformFeeType: "derived" as const, platformFeeValue: null, currency: "GBP" };
 
@@ -21,5 +21,65 @@ describe("validateRateAmendment", () => {
     expect(validateRateAmendment({ ...base, currency: "EUR" }).ok).toBe(false);
     expect(validateRateAmendment({ ...base, currency: "gbp" }).ok).toBe(false);
     expect(validateRateAmendment({ ...base, currency: "GBP" }).ok).toBe(true);
+  });
+});
+
+describe("resolveRateAmendment", () => {
+  it("derives payout from a percentage fee (charge − charge×fee%)", () => {
+    const r = resolveRateAmendment({
+      clientChargeRate: 40,
+      platformFeeType: "percentage",
+      platformFeeValue: 30,
+      currency: "GBP",
+    });
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.rate.professionalPayoutRate).toBe(28);
+  });
+
+  it("derives payout from a fixed per-hour fee (charge − fee)", () => {
+    const r = resolveRateAmendment({
+      clientChargeRate: 40,
+      platformFeeType: "fixed",
+      platformFeeValue: 5,
+      currency: "GBP",
+    });
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.rate.professionalPayoutRate).toBe(35);
+  });
+
+  it("uses the entered payout for a derived fee", () => {
+    const r = resolveRateAmendment({
+      clientChargeRate: 40,
+      platformFeeType: "derived",
+      professionalPayoutRate: 28,
+      platformFeeValue: null,
+      currency: "GBP",
+    });
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.rate.professionalPayoutRate).toBe(28);
+  });
+
+  it("rejects a percentage outside 0–100", () => {
+    expect(
+      resolveRateAmendment({ clientChargeRate: 40, platformFeeType: "percentage", platformFeeValue: 120, currency: "GBP" }).ok,
+    ).toBe(false);
+  });
+
+  it("rejects a fixed fee that exceeds the client charge", () => {
+    expect(
+      resolveRateAmendment({ clientChargeRate: 40, platformFeeType: "fixed", platformFeeValue: 50, currency: "GBP" }).ok,
+    ).toBe(false);
+  });
+
+  it("rejects a derived payout above the client charge", () => {
+    expect(
+      resolveRateAmendment({ clientChargeRate: 40, platformFeeType: "derived", professionalPayoutRate: 50, platformFeeValue: null, currency: "GBP" }).ok,
+    ).toBe(false);
+  });
+
+  it("rejects an unsupported currency", () => {
+    expect(
+      resolveRateAmendment({ clientChargeRate: 40, platformFeeType: "percentage", platformFeeValue: 10, currency: "USD" }).ok,
+    ).toBe(false);
   });
 });

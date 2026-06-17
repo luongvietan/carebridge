@@ -3,8 +3,9 @@
 import { useRouter } from "next/navigation";
 import { useReducer } from "react";
 import { amendRateCard } from "@/lib/admin/rate-actions";
-import { type PlatformFeeType, SUPPORTED_CURRENCIES } from "@/lib/admin/rates";
+import { type PlatformFeeType, SUPPORTED_CURRENCIES, resolveRateAmendment } from "@/lib/admin/rates";
 import { Select } from "@/components/ui/select";
+import { formatRate } from "@/lib/format/money";
 
 const INPUT_CLASS =
   "w-full rounded-xl border border-[#dbe7e0] bg-white px-3.5 py-2.5 text-sm text-[#1e5a33] placeholder:text-[#9aa8a0] focus:border-[#2e7d32] focus:outline-none focus:ring-2 focus:ring-[#2e7d32]/15";
@@ -60,6 +61,18 @@ export function AmendRateForm({ roleId, roleName }: Props) {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const showFeeValue = state.platformFeeType !== "derived";
+  const showPayoutInput = state.platformFeeType === "derived";
+
+  // Live preview of the payout the platform fee will produce (percentage/fixed).
+  const preview =
+    showFeeValue && state.clientChargeRate !== "" && state.platformFeeValue !== ""
+      ? resolveRateAmendment({
+          clientChargeRate: Number(state.clientChargeRate),
+          platformFeeType: state.platformFeeType,
+          platformFeeValue: Number(state.platformFeeValue),
+          currency: state.currency,
+        })
+      : null;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -67,7 +80,7 @@ export function AmendRateForm({ roleId, roleName }: Props) {
 
     const result = await amendRateCard(roleId, {
       clientChargeRate: Number(state.clientChargeRate),
-      professionalPayoutRate: Number(state.professionalPayoutRate),
+      professionalPayoutRate: showPayoutInput ? Number(state.professionalPayoutRate) : null,
       platformFeeType: state.platformFeeType,
       platformFeeValue: showFeeValue ? Number(state.platformFeeValue) : null,
       currency: state.currency,
@@ -102,18 +115,20 @@ export function AmendRateForm({ roleId, roleName }: Props) {
           />
         </label>
 
-        <label className="flex flex-col gap-1 text-[#5b6a62]">
-          Professional payout rate (£/hr)
-          <input
-            type="number"
-            step="0.01"
-            min="0"
-            value={state.professionalPayoutRate}
-            onChange={(e) => dispatch({ type: "set", field: "professionalPayoutRate", value: e.target.value })}
-            className={INPUT_CLASS}
-            required
-          />
-        </label>
+        {showPayoutInput && (
+          <label className="flex flex-col gap-1 text-[#5b6a62]">
+            Professional payout rate (£/hr)
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              value={state.professionalPayoutRate}
+              onChange={(e) => dispatch({ type: "set", field: "professionalPayoutRate", value: e.target.value })}
+              className={INPUT_CLASS}
+              required
+            />
+          </label>
+        )}
 
         <div className="flex flex-col gap-1 text-[#5b6a62]">
           Platform fee type
@@ -122,16 +137,16 @@ export function AmendRateForm({ roleId, roleName }: Props) {
             value={state.platformFeeType}
             onValueChange={(v) => dispatch({ type: "set", field: "platformFeeType", value: v as PlatformFeeType })}
             options={[
-              { value: "derived", label: "Derived (charge − payout)" },
-              { value: "percentage", label: "Percentage" },
-              { value: "fixed", label: "Fixed" },
+              { value: "derived", label: "Derived (enter payout directly)" },
+              { value: "percentage", label: "Percentage of charge" },
+              { value: "fixed", label: "Fixed (£/hr)" },
             ]}
           />
         </div>
 
         {showFeeValue && (
           <label className="flex flex-col gap-1 text-[#5b6a62]">
-            Platform fee value
+            {state.platformFeeType === "percentage" ? "Platform fee (%)" : "Platform fee (£/hr)"}
             <input
               type="number"
               step="0.01"
@@ -154,6 +169,24 @@ export function AmendRateForm({ roleId, roleName }: Props) {
           />
         </div>
       </div>
+
+      {preview &&
+        (preview.ok ? (
+          <p className="text-sm text-[#5b6a62]">
+            Professional payout will be{" "}
+            <span className="font-semibold text-[#14301e]">
+              {formatRate(preview.rate.professionalPayoutRate, state.currency)}/hr
+            </span>{" "}
+            — the platform keeps{" "}
+            {formatRate(
+              Number(state.clientChargeRate) - preview.rate.professionalPayoutRate,
+              state.currency,
+            )}
+            /hr.
+          </p>
+        ) : (
+          <p className="text-sm text-[#da1e28]">{preview.error}</p>
+        ))}
 
       {state.error && <p className="text-sm text-[#da1e28]">{state.error}</p>}
 

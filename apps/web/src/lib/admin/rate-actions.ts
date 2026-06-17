@@ -2,15 +2,18 @@
 import { createServiceClient } from "@/lib/supabase/service";
 import { requireAdmin } from "@/lib/auth/admin";
 import { requireAuth } from "@/lib/auth/require-auth";
-import { validateRateAmendment, type NewRate } from "./rates";
+import { resolveRateAmendment, type RateAmendmentInput } from "./rates";
 
 export type RateActionResult = { ok: true } | { error: string };
 
-export async function amendRateCard(roleId: string, newRates: NewRate): Promise<RateActionResult> {
+export async function amendRateCard(
+  roleId: string,
+  input: RateAmendmentInput,
+): Promise<RateActionResult> {
   await requireAuth();
   const adminId = await requireAdmin();
   if (!adminId) return { error: "Administrator access required." };
-  const v = validateRateAmendment(newRates);
+  const v = resolveRateAmendment(input);
   if (!v.ok) return { error: v.error };
 
   const admin = createServiceClient();
