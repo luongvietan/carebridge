@@ -14,31 +14,29 @@ const links = [
   { href: "/faq", label: "FAQ" },
 ];
 
-export function BrandMark({ size = 40 }: { size?: number }) {
+const LOGO_WIDTH = 1402;
+const LOGO_HEIGHT = 769;
+
+export function BrandMark({ height = 40 }: { height?: number }) {
+  const width = Math.round((height * LOGO_WIDTH) / LOGO_HEIGHT);
+
   return (
     <Image
-      src="/logo.svg"
+      src="/logo.jpeg"
       alt="CareBridge Connect"
-      width={size}
-      height={size}
+      width={width}
+      height={height}
       priority
-      className="shrink-0"
+      className="h-auto w-auto shrink-0"
+      style={{ height }}
     />
   );
 }
 
 function BrandLogo({ className = "" }: { className?: string }) {
   return (
-    <Link href="/" className={`flex items-center gap-3 ${className}`}>
-      <BrandMark />
-      <span className="leading-tight">
-        <span className="block text-[17px] font-bold tracking-tight text-[#0c6e4f]">
-          CareBridge
-        </span>
-        <span className="block text-[15px] font-semibold tracking-tight text-[#198038]">
-          Connect
-        </span>
-      </span>
+    <Link href="/" className={`flex items-center ${className}`}>
+      <BrandMark height={44} />
     </Link>
   );
 }

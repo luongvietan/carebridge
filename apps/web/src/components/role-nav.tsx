@@ -81,12 +81,8 @@ export function RoleNav({ areaLabel, items, email }: RoleNavProps) {
           >
             <Icon icon={menuOpen ? Cancel01Icon : Menu01Icon} size={20} strokeWidth={2} />
           </button>
-          <Link href="/" className="flex items-center gap-3">
-            <BrandMark size={36} />
-            <span className="hidden leading-tight sm:block">
-              <span className="block text-[16px] font-bold tracking-tight text-[#0c6e4f]">CareBridge</span>
-              <span className="block text-[14px] font-semibold tracking-tight text-[#198038]">Connect</span>
-            </span>
+          <Link href="/" className="flex items-center">
+            <BrandMark height={36} />
           </Link>
           <span className="ml-1 hidden rounded-full bg-[#eef5f0] px-3 py-1 text-xs font-semibold text-[#0c6e4f] sm:inline-block">
             {areaLabel}
