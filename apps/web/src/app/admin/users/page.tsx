@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { UserFilters } from "@/components/user-filters";
 import { requireAdmin } from "@/lib/auth/admin";
@@ -32,11 +33,12 @@ function formatLabel(value: string) {
 async function getProfessionalsWithValidDocs(admin: ServiceClient): Promise<string[]> {
   const today = new Date().toISOString().slice(0, 10);
 
-  const { data: pros } = await admin.from("professionals").select("id, professional_role_id");
-
-  const { data: reqs } = await admin
-    .from("compliance_requirements")
-    .select("professional_role_id, document_type_id, document_types(is_compliance_critical)");
+  const [{ data: pros }, { data: reqs }] = await Promise.all([
+    admin.from("professionals").select("id, professional_role_id"),
+    admin
+      .from("compliance_requirements")
+      .select("professional_role_id, document_type_id, document_types(is_compliance_critical)"),
+  ]);
 
   const criticalReqsByRole = new Map<string, string[]>();
   for (const req of reqs ?? []) {
@@ -62,14 +64,14 @@ async function getProfessionalsWithValidDocs(admin: ServiceClient): Promise<stri
     validDocsByProf.set(doc.professional_id, set);
   }
 
-  return (pros ?? [])
-    .filter((prof) => {
-      if (!prof.professional_role_id) return false;
-      const required = criticalReqsByRole.get(prof.professional_role_id) ?? [];
-      const approved = validDocsByProf.get(prof.id) ?? new Set<string>();
-      return isCompliant(required, approved);
-    })
-    .map((prof) => prof.id);
+  const compliantIds: string[] = [];
+  for (const prof of pros ?? []) {
+    if (!prof.professional_role_id) continue;
+    const required = criticalReqsByRole.get(prof.professional_role_id) ?? [];
+    const approved = validDocsByProf.get(prof.id) ?? new Set<string>();
+    if (isCompliant(required, approved)) compliantIds.push(prof.id);
+  }
+  return compliantIds;
 }
 
 async function lookupUserIdsByEmail(admin: ServiceClient, text: string): Promise<string[]> {
@@ -181,7 +183,9 @@ export default async function AdminUsersPage({
         Search and filter professionals by status, location and compliance.
       </p>
 
-      <UserFilters roles={roles ?? []} />
+      <Suspense fallback={<div className="mt-6 h-32 animate-pulse rounded-2xl bg-[#f5f7f6]" />}>
+        <UserFilters roles={roles ?? []} />
+      </Suspense>
 
       <div className="mt-8 overflow-x-auto rounded-2xl border border-[#dbe7e0] shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
         <table className="w-full text-sm">

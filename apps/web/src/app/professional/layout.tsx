@@ -9,7 +9,7 @@ export default async function ProfessionalLayout({ children }: { children: React
   } = await supabase.auth.getUser();
 
   return (
-    <RoleShell role="professional" email={user?.email ?? null}>
+    <RoleShell accountType="professional" email={user?.email ?? null}>
       {children}
     </RoleShell>
   );

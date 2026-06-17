@@ -1,6 +1,6 @@
-export const PASS_THRESHOLD = 80;
+const PASS_THRESHOLD = 80;
 export const MAX_ATTEMPTS = 3;
-export const REAPPLY_LOCK_MONTHS = 3;
+const REAPPLY_LOCK_MONTHS = 3;
 
 /** Percentage of correct answers, rounded to 2 decimals. Empty input scores 0. */
 export function scorePercent(results: boolean[]): number {

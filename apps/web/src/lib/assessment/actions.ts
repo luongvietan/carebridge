@@ -1,6 +1,7 @@
 "use server";
 import { createServiceClient } from "@/lib/supabase/service";
-import { ensureProfessional } from "@/lib/onboarding/actions";
+import { requireAuth } from "@/lib/auth/require-auth";
+import { ensureProfessional } from "@/lib/onboarding/professional-session";
 import { pickQuestions } from "./selection";
 import { scorePercent, isPass, nextAttemptState, MAX_ATTEMPTS } from "./scoring";
 import { sendNotification } from "@/lib/notifications/send";
@@ -25,7 +26,8 @@ export type SubmitResult =
   | { error: string };
 
 export async function startAttempt(): Promise<StartResult> {
-  const professionalId = await ensureProfessional();
+  const user = await requireAuth();
+  const professionalId = await ensureProfessional(user);
   if (!professionalId) return { error: "You must be signed in." };
 
   // Service client: question bank holds correct answers and is admin-only by RLS,
@@ -86,7 +88,8 @@ export async function submitAttempt(
   attemptId: string,
   answers: Record<string, string>,
 ): Promise<SubmitResult> {
-  const professionalId = await ensureProfessional();
+  const user = await requireAuth();
+  const professionalId = await ensureProfessional(user);
   if (!professionalId) return { error: "You must be signed in." };
 
   const admin = createServiceClient();

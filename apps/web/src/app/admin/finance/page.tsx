@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { createServiceClient } from "@/lib/supabase/service";
 import { requireAdmin } from "@/lib/auth/admin";
 import { DatePicker } from "@/components/ui/date-picker";
+import { formatGbpMoney } from "@/lib/format/money";
 
 export const dynamic = "force-dynamic";
 
@@ -10,8 +12,7 @@ function formatDate(iso: string) {
 }
 
 function formatMoney(amount: number | null | undefined) {
-  if (amount == null) return "—";
-  return new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format(Number(amount));
+  return formatGbpMoney(amount);
 }
 
 export default async function AdminFinancePage({
@@ -30,21 +31,19 @@ export default async function AdminFinancePage({
     .order("created_at", { ascending: false });
   if (from) paymentsQuery = paymentsQuery.gte("created_at", from);
   if (to) paymentsQuery = paymentsQuery.lte("created_at", to + "T23:59:59Z");
-  const { data: payments } = await paymentsQuery;
 
-  // Payouts — join professionals(full_name).
   let payoutsQuery = admin
     .from("payouts")
     .select("id, booking_id, amount, currency, status, created_at, method, reference, professionals(full_name)")
     .order("created_at", { ascending: false });
   if (from) payoutsQuery = payoutsQuery.gte("created_at", from);
   if (to) payoutsQuery = payoutsQuery.lte("created_at", to + "T23:59:59Z");
-  const { data: payouts } = await payoutsQuery;
 
-  // Platform revenue view — for bookings with succeeded payment.
-  const { data: revenueRows } = await admin
-    .from("v_platform_revenue")
-    .select("booking_id, platform_revenue");
+  const [{ data: payments }, { data: payouts }, { data: revenueRows }] = await Promise.all([
+    paymentsQuery,
+    payoutsQuery,
+    admin.from("v_platform_revenue").select("booking_id, platform_revenue"),
+  ]);
 
   // Headline figures.
   const totalCollected = (payments ?? [])
@@ -56,9 +55,10 @@ export default async function AdminFinancePage({
     .reduce((sum, p) => sum + Number(p.amount), 0);
 
   // Platform revenue — sum v_platform_revenue for bookings that have a succeeded payment.
-  const succeededBookingIds = new Set(
-    (payments ?? []).filter((p) => p.status === "succeeded").map((p) => p.booking_id),
-  );
+  const succeededBookingIds = new Set<string>();
+  for (const p of payments ?? []) {
+    if (p.status === "succeeded") succeededBookingIds.add(p.booking_id);
+  }
   const platformRevenue = (revenueRows ?? [])
     .filter((r) => r.booking_id && succeededBookingIds.has(r.booking_id))
     .reduce((sum, r) => sum + Number(r.platform_revenue ?? 0), 0);
@@ -86,9 +86,9 @@ export default async function AdminFinancePage({
           Filter
         </button>
         {(from || to) && (
-          <a href="/admin/finance" className="text-[#5b6a62] underline hover:text-[#0f261c]">
+          <Link href="/admin/finance" className="text-[#5b6a62] underline hover:text-[#0f261c]">
             Clear
-          </a>
+          </Link>
         )}
       </form>
 
@@ -152,12 +152,12 @@ export default async function AdminFinancePage({
       <section className="mt-12">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-bold">Payouts</h2>
-          <a
+          <Link
             href="/admin/finance/payouts"
             className="rounded-full bg-[#0c6e4f] px-3 py-1.5 text-sm text-white hover:bg-[#0a5c42]"
           >
             Manage payouts
-          </a>
+          </Link>
         </div>
         {payouts && payouts.length > 0 ? (
           <div className="mt-4 overflow-x-auto rounded-2xl border border-[#dbe7e0] shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">

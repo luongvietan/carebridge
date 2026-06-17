@@ -9,7 +9,7 @@ export default async function ClientLayout({ children }: { children: ReactNode }
   } = await supabase.auth.getUser();
 
   return (
-    <RoleShell role="private_client" email={user?.email ?? null}>
+    <RoleShell accountType="private_client" email={user?.email ?? null}>
       {children}
     </RoleShell>
   );

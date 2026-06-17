@@ -8,6 +8,7 @@ export function RunSweepButton() {
   const [busy, setBusy] = useState(false);
   return (
     <button
+      type="button"
       onClick={async () => {
         setBusy(true);
         await runComplianceSweep();

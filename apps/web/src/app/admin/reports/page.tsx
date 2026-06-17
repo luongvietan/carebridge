@@ -96,9 +96,9 @@ export default async function AdminReportsPage({
             To
             <DatePicker name="to" aria-label="To date" defaultValue={to ?? ""} className="w-40" />
           </div>
-          <input type="text" name="entity_type" placeholder="Entity type" defaultValue={entity_type ?? ""}
+          <input type="text" name="entity_type" placeholder="Entity type" aria-label="Entity type" defaultValue={entity_type ?? ""}
             className="rounded-lg border border-[#dbe7e0] bg-white px-1 py-0.5 focus:border-[#198038] focus:outline-none" />
-          <input type="text" name="actor_type" placeholder="Actor type" defaultValue={actor_type ?? ""}
+          <input type="text" name="actor_type" placeholder="Actor type" aria-label="Actor type" defaultValue={actor_type ?? ""}
             className="rounded-lg border border-[#dbe7e0] bg-white px-1 py-0.5 focus:border-[#198038] focus:outline-none" />
           <button type="submit" className="rounded-full bg-[#0c6e4f] px-3 py-1.5 text-white hover:bg-[#0a5c42]">Filter</button>
         </form>

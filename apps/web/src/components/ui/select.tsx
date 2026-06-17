@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useReducer, useId, useRef, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { ChevronDownIcon, Icon, Tick01Icon } from "@/components/ui/icon";
 
@@ -28,6 +28,49 @@ const controlClass =
 
 type MenuRect = { top: number; left: number; width: number; placement: "below" | "above"; maxHeight: number };
 
+type SelectUiState = {
+  internal: string;
+  open: boolean;
+  activeIndex: number;
+  rect: MenuRect | null;
+};
+
+type SelectUiAction =
+  | { type: "setInternal"; value: string }
+  | { type: "setOpen"; open: boolean }
+  | { type: "setActiveIndex"; index: number }
+  | { type: "setRect"; rect: MenuRect | null }
+  | { type: "openMenu"; activeIndex: number; rect: MenuRect };
+
+function selectUiReducer(state: SelectUiState, action: SelectUiAction): SelectUiState {
+  switch (action.type) {
+    case "setInternal":
+      return { ...state, internal: action.value };
+    case "setOpen":
+      return { ...state, open: action.open };
+    case "setActiveIndex":
+      return { ...state, activeIndex: action.index };
+    case "setRect":
+      return { ...state, rect: action.rect };
+    case "openMenu":
+      return { ...state, open: true, activeIndex: action.activeIndex, rect: action.rect };
+    default:
+      return state;
+  }
+}
+
+function subscribeNoop() {
+  return () => {};
+}
+
+function getClientSnapshot() {
+  return true;
+}
+
+function getServerSnapshot() {
+  return false;
+}
+
 export function Select({
   options,
   value,
@@ -42,23 +85,26 @@ export function Select({
   "aria-label": ariaLabel,
 }: SelectProps) {
   const isControlled = value !== undefined;
-  const [internal, setInternal] = useState(defaultValue ?? "");
-  const current = isControlled ? value : internal;
-
-  const [open, setOpen] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(-1);
-  const [rect, setRect] = useState<MenuRect | null>(null);
-  const [mounted, setMounted] = useState(false);
+  const [ui, dispatch] = useReducer(selectUiReducer, {
+    internal: defaultValue ?? "",
+    open: false,
+    activeIndex: -1,
+    rect: null,
+  });
+  const current = isControlled ? value : ui.internal;
+  const { open, activeIndex, rect } = ui;
 
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const menuRef = useRef<HTMLUListElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const reactId = useId();
   const listId = `${reactId}-listbox`;
-
-  useEffect(() => setMounted(true), []);
+  const mounted = useSyncExternalStore(subscribeNoop, getClientSnapshot, getServerSnapshot);
 
   const selected = options.find((o) => o.value === current) ?? null;
-  const selectableIndexes = options.map((o, i) => (o.disabled ? -1 : i)).filter((i) => i >= 0);
+  const selectableIndexes: number[] = [];
+  for (let i = 0; i < options.length; i++) {
+    if (!options[i].disabled) selectableIndexes.push(i);
+  }
 
   function reposition() {
     const el = buttonRef.current;
@@ -68,12 +114,15 @@ export function Select({
     const spaceAbove = r.top;
     const placeAbove = spaceBelow < 260 && spaceAbove > spaceBelow;
     const maxHeight = Math.min(256, Math.max(140, (placeAbove ? spaceAbove : spaceBelow) - 16));
-    setRect({
-      top: placeAbove ? r.top - 6 : r.bottom + 6,
-      left: r.left,
-      width: r.width,
-      placement: placeAbove ? "above" : "below",
-      maxHeight,
+    dispatch({
+      type: "setRect",
+      rect: {
+        top: placeAbove ? r.top - 6 : r.bottom + 6,
+        left: r.left,
+        width: r.width,
+        placement: placeAbove ? "above" : "below",
+        maxHeight,
+      },
     });
   }
 
@@ -83,7 +132,7 @@ export function Select({
     function onPointerDown(e: PointerEvent) {
       const t = e.target as Node;
       if (buttonRef.current?.contains(t) || menuRef.current?.contains(t)) return;
-      setOpen(false);
+      dispatch({ type: "setOpen", open: false });
     }
     function onScrollResize() {
       reposition();
@@ -100,16 +149,32 @@ export function Select({
 
   function openMenu() {
     if (disabled) return;
-    const currentIdx = options.findIndex((o) => o.value === current);
-    setActiveIndex(currentIdx >= 0 ? currentIdx : (selectableIndexes[0] ?? -1));
-    reposition();
-    setOpen(true);
+    dispatch({
+      type: "openMenu",
+      activeIndex: currentIdx >= 0 ? currentIdx : (selectableIndexes[0] ?? -1),
+      rect: (() => {
+        const el = buttonRef.current;
+        if (!el) return { top: 0, left: 0, width: 0, placement: "below" as const, maxHeight: 256 };
+        const r = el.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - r.bottom;
+        const spaceAbove = r.top;
+        const placeAbove = spaceBelow < 260 && spaceAbove > spaceBelow;
+        const maxHeight = Math.min(256, Math.max(140, (placeAbove ? spaceAbove : spaceBelow) - 16));
+        return {
+          top: placeAbove ? r.top - 6 : r.bottom + 6,
+          left: r.left,
+          width: r.width,
+          placement: placeAbove ? ("above" as const) : ("below" as const),
+          maxHeight,
+        };
+      })(),
+    });
   }
 
   function commit(idx: number) {
     const opt = options[idx];
     if (!opt || opt.disabled) return;
-    if (!isControlled) setInternal(opt.value);
+    if (!isControlled) dispatch({ type: "setInternal", value: opt.value });
     onValueChange?.(opt.value);
     setOpen(false);
     buttonRef.current?.focus();
@@ -122,7 +187,7 @@ export function Select({
       pos === -1
         ? selectableIndexes[dir === 1 ? 0 : selectableIndexes.length - 1]
         : selectableIndexes[(pos + dir + selectableIndexes.length) % selectableIndexes.length];
-    setActiveIndex(next);
+    dispatch({ type: "setActiveIndex", index: next });
   }
 
   function onKeyDown(e: React.KeyboardEvent) {
@@ -137,8 +202,8 @@ export function Select({
     switch (e.key) {
       case "ArrowDown": e.preventDefault(); moveActive(1); break;
       case "ArrowUp": e.preventDefault(); moveActive(-1); break;
-      case "Home": e.preventDefault(); setActiveIndex(selectableIndexes[0] ?? -1); break;
-      case "End": e.preventDefault(); setActiveIndex(selectableIndexes[selectableIndexes.length - 1] ?? -1); break;
+      case "Home": e.preventDefault(); dispatch({ type: "setActiveIndex", index: selectableIndexes[0] ?? -1 }); break;
+      case "End": e.preventDefault(); dispatch({ type: "setActiveIndex", index: selectableIndexes[selectableIndexes.length - 1] ?? -1 }); break;
       case "Enter":
       case " ": e.preventDefault(); if (activeIndex >= 0) commit(activeIndex); break;
       case "Escape": e.preventDefault(); setOpen(false); buttonRef.current?.focus(); break;
@@ -159,7 +224,7 @@ export function Select({
         aria-controls={open ? listId : undefined}
         aria-label={ariaLabel}
         disabled={disabled}
-        onClick={() => (open ? setOpen(false) : openMenu())}
+        onClick={() => (open ? dispatch({ type: "setOpen", open: false }) : openMenu())}
         onKeyDown={onKeyDown}
         className={controlClass}
       >
@@ -179,10 +244,9 @@ export function Select({
         mounted &&
         rect &&
         createPortal(
-          <ul
+          <div
             ref={menuRef}
             id={listId}
-            role="listbox"
             aria-label={ariaLabel}
             style={{
               position: "fixed",
@@ -199,14 +263,15 @@ export function Select({
               const isSelected = opt.value === current;
               const isActive = i === activeIndex;
               return (
-                <li
+                <button
                   key={opt.value || `opt-${i}`}
+                  type="button"
                   role="option"
                   aria-selected={isSelected}
-                  aria-disabled={opt.disabled || undefined}
-                  onMouseEnter={() => !opt.disabled && setActiveIndex(i)}
+                  disabled={opt.disabled}
+                  onMouseEnter={() => !opt.disabled && dispatch({ type: "setActiveIndex", index: i })}
                   onClick={() => commit(i)}
-                  className={`flex cursor-pointer items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm ${
+                  className={`flex w-full cursor-pointer items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm ${
                     opt.disabled
                       ? "cursor-not-allowed text-[#9aa8a0]"
                       : isActive
@@ -220,10 +285,10 @@ export function Select({
                   {isSelected && (
                     <Icon icon={Tick01Icon} size={16} strokeWidth={2} aria-hidden className="shrink-0 text-[#198038]" />
                   )}
-                </li>
+                </button>
               );
             })}
-          </ul>,
+          </div>,
           document.body,
         )}
     </div>

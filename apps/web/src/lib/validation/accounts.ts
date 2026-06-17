@@ -1,9 +1,11 @@
 import { z } from "zod";
 
+const email = z.email();
+
 export const clientSchema = z.object({
   fullName: z.string().min(1),
   phone: z.string().optional(),
-  emailContact: z.string().email().optional(),
+  emailContact: email.optional(),
   addressLine1: z.string().optional(),
   addressLine2: z.string().optional(),
   city: z.string().optional(),
@@ -15,13 +17,13 @@ export const organisationSchema = z.object({
   organisationName: z.string().min(1),
   contactPerson: z.string().min(1),
   phone: z.string().optional(),
-  emailContact: z.string().email().optional(),
+  emailContact: email.optional(),
   addressLine1: z.string().optional(),
   addressLine2: z.string().optional(),
   city: z.string().optional(),
   postcode: z.string().optional(),
   cqcRegistrationNumber: z.string().optional(),
-  billingEmail: z.string().email().optional(),
+  billingEmail: email.optional(),
   billingAddress: z.string().optional(),
 });
 export type OrganisationInput = z.infer<typeof organisationSchema>;

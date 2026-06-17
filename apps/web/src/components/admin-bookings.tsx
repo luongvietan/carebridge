@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import { assignBooking, cancelBooking, completeBooking, markNoShow } from "@/lib/bookings/actions";
 import { Select } from "@/components/ui/select";
 
+import { formatGbpMoney } from "@/lib/format/money";
+
 type AdminBooking = {
   id: string;
   status: string;
@@ -29,8 +31,7 @@ function formatDate(iso: string) {
 }
 
 function formatMoney(amount: number | null) {
-  if (amount == null) return "—";
-  return new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format(amount);
+  return formatGbpMoney(amount);
 }
 
 function AssignControl({

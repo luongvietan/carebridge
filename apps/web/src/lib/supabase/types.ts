@@ -2277,7 +2277,9 @@ export type CompositeTypes<
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
 
-export const Constants = {
+// Generated Supabase types — Constants kept for schema parity but unused at runtime.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const Constants = {
   graphql_public: {
     Enums: {},
   },

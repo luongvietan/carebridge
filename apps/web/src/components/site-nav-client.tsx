@@ -126,11 +126,24 @@ export function SiteNavClient({ dashboardHref }: SiteNavClientProps) {
         <div className="border-t border-[#e7efe9] bg-white px-5 py-4 lg:hidden">
           <div className="flex flex-col gap-1 rounded-2xl border border-[#e3ece6] bg-[#f7faf8] p-2">
             <NavLinks onNavigate={() => setMenuOpen(false)} />
-            <div
-              className="mt-1 border-t border-[#e3ece6] pt-1 sm:hidden"
-              onClick={() => setMenuOpen(false)}
-            >
-              {accountLink}
+            <div className="mt-1 border-t border-[#e3ece6] pt-1 sm:hidden">
+              {dashboardHref ? (
+                <Link
+                  href={dashboardHref}
+                  onClick={() => setMenuOpen(false)}
+                  className="rounded-full px-4 py-2 text-sm font-medium text-[#445049] transition-colors hover:text-[#198038]"
+                >
+                  Dashboard
+                </Link>
+              ) : (
+                <Link
+                  href="/login"
+                  onClick={() => setMenuOpen(false)}
+                  className="rounded-full px-4 py-2 text-sm font-medium text-[#445049] transition-colors hover:text-[#198038]"
+                >
+                  Sign in
+                </Link>
+              )}
             </div>
           </div>
         </div>

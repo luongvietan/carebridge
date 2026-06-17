@@ -1,37 +1,10 @@
 "use server";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
+import { requireAuth } from "@/lib/auth/require-auth";
+import { ensureProfessional } from "@/lib/onboarding/professional-session";
 import { eligibilitySchema, profileSchema } from "@/lib/validation/onboarding";
 import { eligibilityOutcome, type EligibilityOutcome } from "@/lib/compliance/requirements";
-
-/**
- * Ensure a professionals row exists for the signed-in user and return its id.
- * Onboarding steps (eligibility, assessment, documents) all reference it, so it
- * is created lazily on first onboarding action rather than via the signup trigger
- * (which would collide with existing DB test fixtures).
- */
-export async function ensureProfessional(): Promise<string | null> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
-
-  const { data: existing } = await supabase
-    .from("professionals")
-    .select("id")
-    .eq("user_id", user.id)
-    .maybeSingle();
-  if (existing) return existing.id;
-
-  const fullName = (user.user_metadata?.full_name as string | undefined) ?? user.email ?? "Professional";
-  const { data: created } = await supabase
-    .from("professionals")
-    .insert({ user_id: user.id, full_name: fullName })
-    .select("id")
-    .single();
-  return created?.id ?? null;
-}
 
 export type EligibilityResult = { ok: true; outcome: EligibilityOutcome } | { error: string } | null;
 
@@ -39,13 +12,14 @@ export async function submitEligibility(
   _prev: EligibilityResult,
   formData: FormData,
 ): Promise<EligibilityResult> {
+  const user = await requireAuth();
   const parsed = eligibilitySchema.safeParse({
     employmentStatus: formData.get("employmentStatus"),
     trainingCurrent: formData.get("trainingCurrent") === "yes",
   });
   if (!parsed.success) return { error: "Please complete every field." };
 
-  const professionalId = await ensureProfessional();
+  const professionalId = await ensureProfessional(user);
   if (!professionalId) return { error: "You must be signed in." };
 
   // Service client: ownership already verified via ensureProfessional (auth.uid's own row).
@@ -65,6 +39,7 @@ export async function submitEligibility(
 export type ProfileResult = { ok: true } | { error: string } | null;
 
 export async function saveProfile(_prev: ProfileResult, formData: FormData): Promise<ProfileResult> {
+  const user = await requireAuth();
   const parsed = profileSchema.safeParse({
     dateOfBirth: (formData.get("dateOfBirth") as string) || undefined,
     addressLine1: formData.get("addressLine1"),
@@ -80,7 +55,7 @@ export async function saveProfile(_prev: ProfileResult, formData: FormData): Pro
   });
   if (!parsed.success) return { error: "Please complete the required fields." };
 
-  const professionalId = await ensureProfessional();
+  const professionalId = await ensureProfessional(user);
   if (!professionalId) return { error: "You must be signed in." };
 
   // Optional profile photo → private storage bucket.
@@ -121,7 +96,8 @@ export async function saveProfile(_prev: ProfileResult, formData: FormData): Pro
 export async function uploadDocument(
   formData: FormData,
 ): Promise<{ ok: true } | { error: string }> {
-  const professionalId = await ensureProfessional();
+  const user = await requireAuth();
+  const professionalId = await ensureProfessional(user);
   if (!professionalId) return { error: "You must be signed in." };
 
   const documentTypeId = String(formData.get("documentTypeId") ?? "");
@@ -136,10 +112,6 @@ export async function uploadDocument(
     .upload(path, file, { contentType: file.type, upsert: true });
   if (upErr) return { error: `Upload failed: ${upErr.message}` };
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
   const { error } = await admin.from("documents").insert({
     professional_id: professionalId,
     document_type_id: documentTypeId,
@@ -148,7 +120,7 @@ export async function uploadDocument(
     reference_number: (formData.get("referenceNumber") as string) || null,
     issuing_body: (formData.get("issuingBody") as string) || null,
     expiry_date: (formData.get("expiryDate") as string) || null,
-    uploaded_by: user?.id ?? null,
+    uploaded_by: user.id,
   });
   if (error) return { error: error.message };
   return { ok: true };

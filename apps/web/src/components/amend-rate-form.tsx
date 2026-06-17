@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useReducer } from "react";
 import { amendRateCard } from "@/lib/admin/rate-actions";
 import type { PlatformFeeType } from "@/lib/admin/rates";
 import { Select } from "@/components/ui/select";
@@ -14,44 +14,71 @@ type Props = {
   roleName: string;
 };
 
+type State = {
+  clientChargeRate: string;
+  professionalPayoutRate: string;
+  platformFeeType: PlatformFeeType;
+  platformFeeValue: string;
+  currency: string;
+  error: string | null;
+  pending: boolean;
+};
+
+type Action =
+  | { type: "set"; field: keyof Omit<State, "error" | "pending">; value: string | PlatformFeeType }
+  | { type: "pending" }
+  | { type: "error"; error: string }
+  | { type: "reset" };
+
+const initialState: State = {
+  clientChargeRate: "",
+  professionalPayoutRate: "",
+  platformFeeType: "derived",
+  platformFeeValue: "",
+  currency: "GBP",
+  error: null,
+  pending: false,
+};
+
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case "set":
+      return { ...state, [action.field]: action.value };
+    case "pending":
+      return { ...state, pending: true, error: null };
+    case "error":
+      return { ...state, pending: false, error: action.error };
+    case "reset":
+      return { ...initialState };
+    default:
+      return state;
+  }
+}
+
 export function AmendRateForm({ roleId, roleName }: Props) {
   const router = useRouter();
+  const [state, dispatch] = useReducer(reducer, initialState);
 
-  const [clientChargeRate, setClientChargeRate] = useState("");
-  const [professionalPayoutRate, setProfessionalPayoutRate] = useState("");
-  const [platformFeeType, setPlatformFeeType] = useState<PlatformFeeType>("derived");
-  const [platformFeeValue, setPlatformFeeValue] = useState("");
-  const [currency, setCurrency] = useState("GBP");
-  const [error, setError] = useState<string | null>(null);
-  const [pending, setPending] = useState(false);
-
-  const showFeeValue = platformFeeType !== "derived";
+  const showFeeValue = state.platformFeeType !== "derived";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setPending(true);
-    setError(null);
+    dispatch({ type: "pending" });
 
     const result = await amendRateCard(roleId, {
-      clientChargeRate: Number(clientChargeRate),
-      professionalPayoutRate: Number(professionalPayoutRate),
-      platformFeeType,
-      platformFeeValue: showFeeValue ? Number(platformFeeValue) : null,
-      currency,
+      clientChargeRate: Number(state.clientChargeRate),
+      professionalPayoutRate: Number(state.professionalPayoutRate),
+      platformFeeType: state.platformFeeType,
+      platformFeeValue: showFeeValue ? Number(state.platformFeeValue) : null,
+      currency: state.currency,
     });
 
-    setPending(false);
-
     if ("error" in result) {
-      setError(result.error);
+      dispatch({ type: "error", error: result.error });
       return;
     }
 
-    setClientChargeRate("");
-    setProfessionalPayoutRate("");
-    setPlatformFeeType("derived");
-    setPlatformFeeValue("");
-    setCurrency("GBP");
+    dispatch({ type: "reset" });
     router.refresh();
   }
 
@@ -68,8 +95,8 @@ export function AmendRateForm({ roleId, roleName }: Props) {
             type="number"
             step="0.01"
             min="0"
-            value={clientChargeRate}
-            onChange={(e) => setClientChargeRate(e.target.value)}
+            value={state.clientChargeRate}
+            onChange={(e) => dispatch({ type: "set", field: "clientChargeRate", value: e.target.value })}
             className={INPUT_CLASS}
             required
           />
@@ -81,8 +108,8 @@ export function AmendRateForm({ roleId, roleName }: Props) {
             type="number"
             step="0.01"
             min="0"
-            value={professionalPayoutRate}
-            onChange={(e) => setProfessionalPayoutRate(e.target.value)}
+            value={state.professionalPayoutRate}
+            onChange={(e) => dispatch({ type: "set", field: "professionalPayoutRate", value: e.target.value })}
             className={INPUT_CLASS}
             required
           />
@@ -92,8 +119,8 @@ export function AmendRateForm({ roleId, roleName }: Props) {
           Platform fee type
           <Select
             aria-label="Platform fee type"
-            value={platformFeeType}
-            onValueChange={(v) => setPlatformFeeType(v as PlatformFeeType)}
+            value={state.platformFeeType}
+            onValueChange={(v) => dispatch({ type: "set", field: "platformFeeType", value: v as PlatformFeeType })}
             options={[
               { value: "derived", label: "Derived (charge − payout)" },
               { value: "percentage", label: "Percentage" },
@@ -109,8 +136,8 @@ export function AmendRateForm({ roleId, roleName }: Props) {
               type="number"
               step="0.01"
               min="0"
-              value={platformFeeValue}
-              onChange={(e) => setPlatformFeeValue(e.target.value)}
+              value={state.platformFeeValue}
+              onChange={(e) => dispatch({ type: "set", field: "platformFeeValue", value: e.target.value })}
               className={INPUT_CLASS}
               required
             />
@@ -121,8 +148,8 @@ export function AmendRateForm({ roleId, roleName }: Props) {
           Currency
           <input
             type="text"
-            value={currency}
-            onChange={(e) => setCurrency(e.target.value.toUpperCase())}
+            value={state.currency}
+            onChange={(e) => dispatch({ type: "set", field: "currency", value: e.target.value.toUpperCase() })}
             className={INPUT_CLASS}
             maxLength={3}
             required
@@ -130,14 +157,14 @@ export function AmendRateForm({ roleId, roleName }: Props) {
         </label>
       </div>
 
-      {error && <p className="text-sm text-[#da1e28]">{error}</p>}
+      {state.error && <p className="text-sm text-[#da1e28]">{state.error}</p>}
 
       <button
         type="submit"
-        disabled={pending}
+        disabled={state.pending}
         className="rounded-full bg-[#0c6e4f] px-4 py-1.5 text-white hover:bg-[#0a5c42] disabled:opacity-50"
       >
-        {pending ? "Saving…" : "Amend rate card"}
+        {state.pending ? "Saving…" : "Amend rate card"}
       </button>
     </form>
   );

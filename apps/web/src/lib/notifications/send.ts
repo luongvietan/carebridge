@@ -19,7 +19,7 @@ export function renderTemplate(
 }
 
 /** Prod sender via Resend HTTP API (no SDK dependency). */
-export const resendSender: ChannelSender = async (msg) => {
+const resendSender: ChannelSender = async (msg) => {
   const key = process.env.RESEND_API_KEY!;
   const from = process.env.RESEND_FROM ?? "CareBridge Connect <noreply@carebridge.example>";
   const res = await fetch("https://api.resend.com/emails", {
@@ -31,9 +31,9 @@ export const resendSender: ChannelSender = async (msg) => {
 };
 
 /** Dev/default: the notifications row is the durable record; no external email. */
-export const recordOnlySender: ChannelSender = async () => {};
+const recordOnlySender: ChannelSender = async () => {};
 
-export function defaultSender(): ChannelSender {
+function defaultSender(): ChannelSender {
   return process.env.RESEND_API_KEY ? resendSender : recordOnlySender;
 }
 
@@ -49,11 +49,14 @@ export async function sendNotification(
 ): Promise<void> {
   const admin = createServiceClient();
   try {
-    const { data: tpl } = await admin
-      .from("notification_templates")
-      .select("subject, body")
-      .eq("type", type)
-      .single();
+    const [{ data: tpl }, { data: u }] = await Promise.all([
+      admin
+        .from("notification_templates")
+        .select("subject, body")
+        .eq("type", type)
+        .single(),
+      admin.from("users").select("email").eq("id", recipientUserId).maybeSingle(),
+    ]);
     if (!tpl) return;
 
     const { subject, body } = renderTemplate(tpl, payload);
@@ -63,7 +66,6 @@ export async function sendNotification(
       .select("id")
       .single();
 
-    const { data: u } = await admin.from("users").select("email").eq("id", recipientUserId).maybeSingle();
     try {
       if (u?.email) await sender({ to: u.email, subject, body });
       if (row) await admin.from("notifications").update({ status: "sent", sent_at: new Date().toISOString() }).eq("id", row.id);

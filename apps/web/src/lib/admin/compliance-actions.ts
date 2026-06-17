@@ -1,12 +1,14 @@
 "use server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { requireAdmin } from "@/lib/auth/admin";
+import { requireAuth } from "@/lib/auth/require-auth";
 import { isCompliant } from "@/lib/compliance/requirements";
 import { sendNotification } from "@/lib/notifications/send";
 
 export type ReviewDecision = "approved" | "rejected" | "further_info_required";
 
 export async function runComplianceSweep(): Promise<{ ok: true } | { error: string }> {
+  await requireAuth();
   const adminId = await requireAdmin();
   if (!adminId) return { error: "Administrator access required." };
   const admin = createServiceClient();
@@ -20,6 +22,7 @@ export async function reviewDocument(
   decision: ReviewDecision,
   note?: string,
 ): Promise<{ ok: true } | { error: string }> {
+  await requireAuth();
   const adminId = await requireAdmin();
   if (!adminId) return { error: "Administrator access required." };
 
@@ -69,9 +72,12 @@ async function recomputeCompliance(professionalId: string, adminId: string): Pro
     .from("compliance_requirements")
     .select("document_type_id, document_types(is_compliance_critical)")
     .eq("professional_role_id", prof.professional_role_id);
-  const requiredCritical = (reqs ?? [])
-    .filter((r) => (r.document_types as { is_compliance_critical: boolean } | null)?.is_compliance_critical)
-    .map((r) => r.document_type_id);
+  const requiredCritical: string[] = [];
+  for (const r of reqs ?? []) {
+    if ((r.document_types as { is_compliance_critical: boolean } | null)?.is_compliance_critical) {
+      requiredCritical.push(r.document_type_id);
+    }
+  }
 
   const { data: approved } = await admin
     .from("documents")
@@ -90,29 +96,31 @@ async function recomputeCompliance(professionalId: string, adminId: string): Pro
       })
       .eq("id", professionalId);
     if (becameActive) {
-      await admin.from("professional_status_actions").insert({
-        professional_id: professionalId,
-        action_type: "reinstate",
-        resulting_status: "active",
-        reason_text: "All required compliance documents approved",
-        applied_by: adminId,
-      });
-      await admin.from("audit_log").insert({
-        actor_user_id: adminId,
-        actor_type: "admin",
-        action: "professional.activated",
-        entity_type: "professional",
-        entity_id: professionalId,
-        summary: "Compliance approved — professional activated",
-      });
       const { data: profUser } = await admin
         .from("professionals")
         .select("user_id")
         .eq("id", professionalId)
         .single();
-      if (profUser?.user_id) {
-        await sendNotification("compliance_approval", profUser.user_id, { professional_id: professionalId });
-      }
+      await Promise.all([
+        admin.from("professional_status_actions").insert({
+          professional_id: professionalId,
+          action_type: "reinstate",
+          resulting_status: "active",
+          reason_text: "All required compliance documents approved",
+          applied_by: adminId,
+        }),
+        admin.from("audit_log").insert({
+          actor_user_id: adminId,
+          actor_type: "admin",
+          action: "professional.activated",
+          entity_type: "professional",
+          entity_id: professionalId,
+          summary: "Compliance approved — professional activated",
+        }),
+        ...(profUser?.user_id
+          ? [sendNotification("compliance_approval", profUser.user_id, { professional_id: professionalId })]
+          : []),
+      ]);
     }
   } else {
     await admin.from("professionals").update({ compliance_status: "pending_review" }).eq("id", professionalId);

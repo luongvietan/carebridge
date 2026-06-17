@@ -1,5 +1,5 @@
 import { createServiceClient } from "@/lib/supabase/service";
-import { ReviewQueue, type ReviewItem } from "@/components/review-queue";
+import { ReviewQueue } from "@/components/review-queue";
 import { RunSweepButton } from "@/components/run-sweep-button";
 
 export const dynamic = "force-dynamic";
@@ -7,8 +7,7 @@ export const dynamic = "force-dynamic";
 export default async function AdminCompliancePage() {
   const admin = createServiceClient();
 
-  // Documents awaiting review.
-  const { data: pending } = await admin
+  const pendingQuery = admin
     .from("documents")
     .select(
       "id, storage_path, reference_number, expiry_date, verification_status, professionals(full_name), document_types(name)",
@@ -16,7 +15,21 @@ export default async function AdminCompliancePage() {
     .in("verification_status", ["pending_review", "further_info_required"])
     .order("created_at", { ascending: true });
 
-  const items: ReviewItem[] = await Promise.all(
+  const nonCompliantQuery = admin
+    .from("professionals")
+    .select("id, full_name, professional_status, compliance_status")
+    .neq("compliance_status", "approved")
+    .order("created_at", { ascending: false });
+
+  const alertsQuery = admin
+    .from("compliance_alerts")
+    .select("id, alert_type, due_date, professionals(full_name)")
+    .eq("acknowledged", false)
+    .order("due_date", { ascending: true });
+
+  const { data: pending } = await pendingQuery;
+
+  const itemsPromise = Promise.all(
     (pending ?? []).map(async (d) => {
       const { data: signed } = await admin.storage
         .from("documents")
@@ -33,18 +46,11 @@ export default async function AdminCompliancePage() {
     }),
   );
 
-  // Non-compliant professionals + open compliance alerts.
-  const { data: nonCompliant } = await admin
-    .from("professionals")
-    .select("id, full_name, professional_status, compliance_status")
-    .neq("compliance_status", "approved")
-    .order("created_at", { ascending: false });
-
-  const { data: alerts } = await admin
-    .from("compliance_alerts")
-    .select("id, alert_type, due_date, professionals(full_name)")
-    .eq("acknowledged", false)
-    .order("due_date", { ascending: true });
+  const [items, { data: nonCompliant }, { data: alerts }] = await Promise.all([
+    itemsPromise,
+    nonCompliantQuery,
+    alertsQuery,
+  ]);
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-10">

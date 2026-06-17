@@ -17,9 +17,11 @@
     "db:stop": "supabase stop",
     "db:reset": "supabase db reset",
     "db:test": "supabase test db",
-    "db:push": "supabase db push"
+    "db:push": "supabase db push",
+    "doctor": "npx react-doctor@latest"
   },
   "devDependencies": {
+    "react-doctor": "^0.5.6",
     "supabase": "^2.106.0"
   }
 }

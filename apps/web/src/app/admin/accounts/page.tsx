@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AccountStatusControl } from "@/components/account-status-control";
 import { requireAdmin } from "@/lib/auth/admin";
@@ -93,9 +94,9 @@ export default async function AdminAccountsPage({
           Apply filter
         </button>
         {accountTypeFilter && (
-          <a href="/admin/accounts" className="text-sm text-[#198038] hover:underline">
+          <Link href="/admin/accounts" className="text-sm text-[#198038] hover:underline">
             Clear filter
-          </a>
+          </Link>
         )}
       </form>
 

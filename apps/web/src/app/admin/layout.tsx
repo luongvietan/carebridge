@@ -9,7 +9,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   } = await supabase.auth.getUser();
 
   return (
-    <RoleShell role="admin" email={user?.email ?? null}>
+    <RoleShell accountType="admin" email={user?.email ?? null}>
       {children}
     </RoleShell>
   );

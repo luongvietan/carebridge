@@ -1,20 +1,9 @@
 "use server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { requireAdmin } from "@/lib/auth/admin";
+import { requireAuth } from "@/lib/auth/require-auth";
 import { applyStatusAction, type ProfessionalStatus, type StatusActionType } from "./status-machine";
-
-const REASON_CODES = [
-  "last_minute_cancellation","repeated_cancellations","no_show","expired_dbs","expired_training",
-  "expired_registration","expired_insurance","right_to_work_concern","safeguarding_concern",
-  "client_complaint","conduct_concern","missing_documents","other",
-] as const;
-type ReasonCode = (typeof REASON_CODES)[number];
-
-/** Actions that change status away from active/reinstate — require a reason for audit. */
-const PUNITIVE: StatusActionType[] = [
-  "suspend", "full_suspension", "booking_restriction", "compliance_hold",
-  "under_investigation", "reject", "remove",
-];
+import { PUNITIVE, REASON_CODES, type ReasonCode } from "./status-constants";
 
 export type StatusActionResult = { ok: true } | { error: string };
 
@@ -23,6 +12,7 @@ export async function applyProfessionalStatusAction(
   action: StatusActionType,
   details: { reasonCode?: string; reasonText?: string; internalNotes?: string; reviewDate?: string },
 ): Promise<StatusActionResult> {
+  await requireAuth();
   const adminId = await requireAdmin();
   if (!adminId) return { error: "Administrator access required." };
   if (PUNITIVE.includes(action)) {

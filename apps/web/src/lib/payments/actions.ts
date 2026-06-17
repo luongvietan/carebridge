@@ -1,21 +1,13 @@
 "use server";
-import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
-import { requireAdmin } from "@/lib/auth/admin";
+import { requireAuth } from "@/lib/auth/require-auth";
 import { stripe } from "@/lib/stripe/client";
 import { buildCheckoutLineItems } from "@/lib/stripe/checkout";
 
 export type PaymentActionResult = { ok: true; url?: string } | { error: string };
 
-async function authUser() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  return user;
-}
-
 export async function startCheckout(bookingId: string): Promise<PaymentActionResult> {
-  const user = await authUser();
-  if (!user) return { error: "You must be signed in." };
+  const user = await requireAuth();
   const admin = createServiceClient();
 
   const { data: booking } = await admin
@@ -68,22 +60,4 @@ export async function startCheckout(bookingId: string): Promise<PaymentActionRes
 async function alreadyPaid(admin: ReturnType<typeof createServiceClient>, bookingId: string): Promise<boolean> {
   const { count } = await admin.from("payments").select("id", { count: "exact", head: true }).eq("booking_id", bookingId).eq("status", "succeeded");
   return (count ?? 0) > 0;
-}
-
-export async function refundPayment(paymentId: string): Promise<PaymentActionResult> {
-  const adminId = await requireAdmin();
-  if (!adminId) return { error: "Administrator access required." };
-  const admin = createServiceClient();
-  const { data: payment } = await admin.from("payments").select("id, stripe_payment_intent_id, status").eq("id", paymentId).single();
-  if (!payment) return { error: "Payment not found." };
-  if (payment.status !== "succeeded") return { error: "Only a succeeded payment can be refunded." };
-  if (!payment.stripe_payment_intent_id) return { error: "No Stripe payment intent on this payment." };
-
-  try {
-    await stripe().refunds.create({ payment_intent: payment.stripe_payment_intent_id });
-  } catch (e) {
-    return { error: `Refund failed: ${(e as Error).message}` };
-  }
-  await admin.from("audit_log").insert({ actor_user_id: adminId, actor_type: "admin", action: "payment.refund_requested", entity_type: "payment", entity_id: paymentId });
-  return { ok: true };
 }

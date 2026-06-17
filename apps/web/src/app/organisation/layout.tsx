@@ -9,7 +9,7 @@ export default async function OrganisationLayout({ children }: { children: React
   } = await supabase.auth.getUser();
 
   return (
-    <RoleShell role="organisation" email={user?.email ?? null}>
+    <RoleShell accountType="organisation" email={user?.email ?? null}>
       {children}
     </RoleShell>
   );

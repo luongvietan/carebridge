@@ -1,20 +1,27 @@
+import "server-only";
+// eslint-disable-next-line @typescript-eslint/no-unused-expressions -- Next.js server action boundary
 "use server";
-import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { requireAdmin } from "@/lib/auth/admin";
+import { requireAuth } from "@/lib/auth/require-auth";
 import { buildBookingInsert, isFutureStart, type CreateBookingInput } from "./create";
 import type { RateCard } from "@/lib/rates/snapshot";
 import { applyTransition, type Actor } from "./transitions";
 import { canAccept } from "./eligibility";
 import { sendNotification } from "@/lib/notifications/send";
 import { createBookingSchema } from "@/lib/validation/bookings";
+import { REQUESTER_ACCOUNT } from "./constants";
+import {
+  writeAcceptBooking,
+  writeAssignBooking,
+  writeCancelBooking,
+  writeCompleteBooking,
+  writeCreateBooking,
+  writeDeclineBooking,
+  writeMarkNoShow,
+} from "./service-writes";
 
 export type BookingActionResult = { ok: true; id?: string } | { error: string };
-
-const REQUESTER_ACCOUNT: Record<"client" | "organisation", "private_client" | "organisation"> = {
-  client: "private_client",
-  organisation: "organisation",
-};
 
 function toRateCard(row: {
   id: string;
@@ -32,12 +39,6 @@ function toRateCard(row: {
     platform_fee_value: row.platform_fee_value != null ? Number(row.platform_fee_value) : null,
     currency: row.currency.trim(),
   };
-}
-
-async function authUser() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  return user;
 }
 
 /** Derive cancel actor from the session — never trust a client-supplied role. */
@@ -67,12 +68,11 @@ async function resolveCancelActor(
 }
 
 export async function createBooking(form: unknown): Promise<BookingActionResult> {
+  const user = await requireAuth();
   const parsed = createBookingSchema.safeParse(form);
   if (!parsed.success) return { error: "Please check the booking details." };
   const formData = parsed.data;
 
-  const user = await authUser();
-  if (!user) return { error: "You must be signed in." };
   const admin = createServiceClient();
 
   const { data: account } = await admin
@@ -121,22 +121,15 @@ export async function createBooking(form: unknown): Promise<BookingActionResult>
     return { error: (e as Error).message };
   }
 
-  const { data: booking, error } = await admin
-    .from("bookings")
-    .insert({ ...insert, created_by: user.id })
-    .select("id")
-    .single();
-  if (error || !booking) return { error: error?.message ?? "Could not create booking." };
+  const result = await writeCreateBooking(insert, user.id);
+  if ("error" in result) return result;
 
-  await admin.from("booking_status_history").insert({ booking_id: booking.id, to_status: "open", changed_by: user.id });
-  await admin.from("audit_log").insert({ actor_user_id: user.id, actor_type: "user", action: "booking.created", entity_type: "booking", entity_id: booking.id });
-  await sendNotification("booking_request", user.id, { booking_id: booking.id });
-  return { ok: true, id: booking.id };
+  await sendNotification("booking_request", user.id, { booking_id: result.id });
+  return { ok: true, id: result.id };
 }
 
 export async function acceptBooking(bookingId: string): Promise<BookingActionResult> {
-  const user = await authUser();
-  if (!user) return { error: "You must be signed in." };
+  const user = await requireAuth();
   const admin = createServiceClient();
 
   const { data: prof } = await admin
@@ -158,26 +151,18 @@ export async function acceptBooking(bookingId: string): Promise<BookingActionRes
   );
   if (!eligible.ok) return { error: eligible.reason };
 
-  const { data: updated, error } = await admin
-    .from("bookings")
-    .update({ status: "accepted", assigned_professional_id: prof.id, accepted_at: new Date().toISOString() })
-    .eq("id", bookingId)
-    .eq("status", "open")
-    .is("assigned_professional_id", null)
-    .select("id");
-  if (error) return { error: error.message };
-  if (!updated || updated.length === 0) return { error: "This booking has already been taken." };
+  const result = await writeAcceptBooking(bookingId, prof.id, user.id);
+  if ("error" in result) return result;
 
-  await admin.from("booking_status_history").insert({ booking_id: bookingId, from_status: "open", to_status: "accepted", changed_by: user.id });
-  await admin.from("audit_log").insert({ actor_user_id: user.id, actor_type: "user", action: "booking.accepted", entity_type: "booking", entity_id: bookingId });
-  await sendNotification("booking_confirmation", booking.requester_user_id, { booking_id: bookingId });
-  await sendNotification("booking_confirmation", user.id, { booking_id: bookingId });
+  await Promise.all([
+    sendNotification("booking_confirmation", booking.requester_user_id, { booking_id: bookingId }),
+    sendNotification("booking_confirmation", user.id, { booking_id: bookingId }),
+  ]);
   return { ok: true };
 }
 
 export async function declineBooking(bookingId: string, reason?: string): Promise<BookingActionResult> {
-  const user = await authUser();
-  if (!user) return { error: "You must be signed in." };
+  const user = await requireAuth();
   const admin = createServiceClient();
   const { data: prof } = await admin
     .from("professionals")
@@ -199,14 +184,11 @@ export async function declineBooking(bookingId: string, reason?: string): Promis
     return { error: "This booking is for a different professional role." };
   }
 
-  const { error } = await admin
-    .from("booking_declines")
-    .upsert({ booking_id: bookingId, professional_id: prof.id, reason: reason ?? null }, { onConflict: "booking_id,professional_id" });
-  if (error) return { error: error.message };
-  return { ok: true };
+  return writeDeclineBooking(bookingId, prof.id, reason);
 }
 
 export async function assignBooking(bookingId: string, professionalId: string): Promise<BookingActionResult> {
+  await requireAuth();
   const adminId = await requireAdmin();
   if (!adminId) return { error: "Administrator access required." };
   const admin = createServiceClient();
@@ -227,25 +209,18 @@ export async function assignBooking(bookingId: string, professionalId: string): 
   );
   if (!eligible.ok) return { error: eligible.reason };
 
-  const { data: updated, error } = await admin
-    .from("bookings")
-    .update({ status: "assigned", assigned_professional_id: professionalId, booking_type: "admin_assigned", assigned_by: adminId })
-    .eq("id", bookingId)
-    .eq("status", "open")
-    .select("id");
-  if (error) return { error: error.message };
-  if (!updated || updated.length === 0) return { error: "This booking is no longer open." };
+  const result = await writeAssignBooking(bookingId, professionalId, adminId);
+  if ("error" in result) return result;
 
-  await admin.from("booking_status_history").insert({ booking_id: bookingId, from_status: "open", to_status: "assigned", changed_by: adminId });
-  await admin.from("audit_log").insert({ actor_user_id: adminId, actor_type: "admin", action: "booking.assigned", entity_type: "booking", entity_id: bookingId });
-  await sendNotification("booking_confirmation", booking.requester_user_id, { booking_id: bookingId });
-  if (prof.user_id) await sendNotification("booking_confirmation", prof.user_id, { booking_id: bookingId });
+  await Promise.all([
+    sendNotification("booking_confirmation", booking.requester_user_id, { booking_id: bookingId }),
+    ...(prof.user_id ? [sendNotification("booking_confirmation", prof.user_id, { booking_id: bookingId })] : []),
+  ]);
   return { ok: true };
 }
 
 export async function cancelBooking(bookingId: string, reason?: string): Promise<BookingActionResult> {
-  const user = await authUser();
-  if (!user) return { error: "You must be signed in." };
+  const user = await requireAuth();
   const admin = createServiceClient();
   const { data: booking } = await admin
     .from("bookings")
@@ -261,20 +236,9 @@ export async function cancelBooking(bookingId: string, reason?: string): Promise
   if (!t.ok) return { error: t.error };
 
   const isLastMinute = new Date(booking.scheduled_start).getTime() - Date.now() < 24 * 3_600_000;
-  const fromStatus = booking.status;
-  const { data: updated, error } = await admin
-    .from("bookings")
-    .update({ status: "cancelled" })
-    .eq("id", bookingId)
-    .eq("status", fromStatus)
-    .select("id");
-  if (error) return { error: error.message };
-  if (!updated || updated.length === 0) return { error: "This booking has already been cancelled." };
-  await admin.from("booking_status_history").insert({ booking_id: bookingId, from_status: fromStatus, to_status: "cancelled", changed_by: user.id, reason: reason ?? null });
-  await admin.from("audit_log").insert({ actor_user_id: user.id, actor_type: actor === "admin" ? "admin" : "user", action: "booking.cancelled", entity_type: "booking", entity_id: bookingId, summary: reason ?? null });
-  await admin.from("booking_cancellations").insert({
-    booking_id: bookingId, cancelled_by: user.id, cancelled_role: actor, is_last_minute: isLastMinute, reason: reason ?? null,
-  });
+  const result = await writeCancelBooking(bookingId, booking.status, user.id, actor, isLastMinute, reason);
+  if ("error" in result) return result;
+
   let recipient: string | null = null;
   if (actor === "professional") recipient = booking.requester_user_id;
   else if (booking.assigned_professional_id) {
@@ -287,8 +251,7 @@ export async function cancelBooking(bookingId: string, reason?: string): Promise
 
 /** Professional (own booking) or admin marks a booking completed. */
 export async function completeBooking(bookingId: string): Promise<BookingActionResult> {
-  const user = await authUser();
-  if (!user) return { error: "You must be signed in." };
+  const user = await requireAuth();
   const admin = createServiceClient();
   const isAdmin = !!(await requireAdmin());
 
@@ -309,18 +272,12 @@ export async function completeBooking(bookingId: string): Promise<BookingActionR
   const t = applyTransition(booking.status, "complete", actor);
   if (!t.ok) return { error: t.error };
 
-  const { data: updated, error } = await admin
-    .from("bookings").update({ status: "completed" }).eq("id", bookingId).eq("status", booking.status).select("id");
-  if (error) return { error: error.message };
-  if (!updated || updated.length === 0) return { error: "This booking is no longer in a completable state." };
-
-  await admin.from("booking_status_history").insert({ booking_id: bookingId, from_status: booking.status, to_status: "completed", changed_by: user.id });
-  await admin.from("audit_log").insert({ actor_user_id: user.id, actor_type: isAdmin ? "admin" : "user", action: "booking.completed", entity_type: "booking", entity_id: bookingId });
-  return { ok: true };
+  return writeCompleteBooking(bookingId, booking.status, user.id, isAdmin);
 }
 
 /** Admin marks an accepted/assigned booking as a no-show. */
 export async function markNoShow(bookingId: string): Promise<BookingActionResult> {
+  await requireAuth();
   const adminId = await requireAdmin();
   if (!adminId) return { error: "Administrator access required." };
   const admin = createServiceClient();
@@ -328,11 +285,5 @@ export async function markNoShow(bookingId: string): Promise<BookingActionResult
   if (!booking) return { error: "Booking not found." };
   const t = applyTransition(booking.status, "no_show", "admin");
   if (!t.ok) return { error: t.error };
-  const { data: updated, error } = await admin
-    .from("bookings").update({ status: "no_show" }).eq("id", bookingId).eq("status", booking.status).select("id");
-  if (error) return { error: error.message };
-  if (!updated || updated.length === 0) return { error: "This booking is no longer in a no-show-able state." };
-  await admin.from("booking_status_history").insert({ booking_id: bookingId, from_status: booking.status, to_status: "no_show", changed_by: adminId });
-  await admin.from("audit_log").insert({ actor_user_id: adminId, actor_type: "admin", action: "booking.no_show", entity_type: "booking", entity_id: bookingId });
-  return { ok: true };
+  return writeMarkNoShow(bookingId, booking.status, adminId);
 }

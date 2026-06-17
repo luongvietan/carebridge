@@ -2,6 +2,7 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
 import {
   createGateToken,
   GATE_COOKIE_NAME,
@@ -9,6 +10,7 @@ import {
   isGateEnabled,
   verifyAccessCode,
 } from "@/lib/auth/gate";
+import { safeRedirectPath } from "@/lib/auth/safe-redirect";
 
 export type GateAccessResult = { error: string } | null;
 
@@ -16,6 +18,9 @@ export async function submitGateAccess(
   _prev: GateAccessResult,
   formData: FormData,
 ): Promise<GateAccessResult> {
+  const supabase = await createClient();
+  await supabase.auth.getUser();
+
   if (!isGateEnabled()) {
     redirect("/");
   }
@@ -39,6 +44,5 @@ export async function submitGateAccess(
     path: "/",
   });
 
-  const next = formData.get("next");
-  redirect(typeof next === "string" && next.startsWith("/") && !next.startsWith("//") ? next : "/");
+  redirect(safeRedirectPath(formData.get("next")?.toString()));
 }

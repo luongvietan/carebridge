@@ -8,11 +8,17 @@ export type SignUpResult = { ok: true } | { error: string } | null;
 
 export async function signOut(): Promise<void> {
   const supabase = await createClient();
-  await supabase.auth.signOut();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (user) await supabase.auth.signOut();
   redirect("/login");
 }
 
 export async function signUp(_prev: SignUpResult, formData: FormData): Promise<SignUpResult> {
+  const supabase = await createClient();
+  await supabase.auth.getUser();
+
   const parsed = registerSchema.safeParse({
     email: formData.get("email"),
     password: formData.get("password"),
@@ -22,7 +28,6 @@ export async function signUp(_prev: SignUpResult, formData: FormData): Promise<S
   });
   if (!parsed.success) return { error: "Please check the form and try again." };
 
-  const supabase = await createClient();
   const { data, error } = await supabase.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,

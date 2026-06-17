@@ -1,11 +1,16 @@
+import "server-only";
+// eslint-disable-next-line @typescript-eslint/no-unused-expressions -- Next.js server action boundary
 "use server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { requireAdmin } from "@/lib/auth/admin";
+import { requireAuth } from "@/lib/auth/require-auth";
 import { canSetAccountStatus, type AccountStatus } from "./account-status";
+import { writeSetAccountStatus } from "./account-service";
 
 export type AdminActionResult = { ok: true } | { error: string };
 
 export async function setAccountStatus(userId: string, next: AccountStatus, reason?: string): Promise<AdminActionResult> {
+  await requireAuth();
   const adminId = await requireAdmin();
   if (!adminId) return { error: "Administrator access required." };
   const admin = createServiceClient();
@@ -18,10 +23,5 @@ export async function setAccountStatus(userId: string, next: AccountStatus, reas
   const t = canSetAccountStatus(target.account_status as AccountStatus, next);
   if (!t.ok) return { error: t.error };
 
-  const { error } = await admin.from("users").update({ account_status: next }).eq("id", userId);
-  if (error) return { error: error.message };
-  await admin.from("audit_log").insert({
-    actor_user_id: adminId, actor_type: "admin", action: `account.${next}`, entity_type: "user", entity_id: userId, summary: reason ?? null,
-  });
-  return { ok: true };
+  return writeSetAccountStatus(userId, next, adminId, reason);
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useReducer } from "react";
 import type { ProfessionalFilterCriteria } from "@/lib/admin/search";
 import { Select } from "@/components/ui/select";
 
@@ -37,35 +37,49 @@ function withAny(values: readonly string[]) {
 
 type RoleOption = { id: string; name: string };
 
+type FilterState = {
+  text: string;
+  professionalStatus: string;
+  complianceStatus: string;
+  roleId: string;
+  postcode: string;
+  maxTravelKm: string;
+  requireValidDocs: boolean;
+};
+
+type FilterAction = {
+  type: "set";
+  field: keyof FilterState;
+  value: string | boolean;
+};
+
+function filterReducer(state: FilterState, action: FilterAction): FilterState {
+  if (action.type === "set") {
+    return { ...state, [action.field]: action.value };
+  }
+  return state;
+}
+
+function initialFilters(searchParams: URLSearchParams): FilterState {
+  return {
+    text: searchParams.get("text") ?? "",
+    professionalStatus: searchParams.get("professionalStatus") ?? "",
+    complianceStatus: searchParams.get("complianceStatus") ?? "",
+    roleId: searchParams.get("roleId") ?? "",
+    postcode: searchParams.get("postcode") ?? "",
+    maxTravelKm: searchParams.get("maxTravelKm") ?? "",
+    requireValidDocs: searchParams.get("requireValidDocs") === "true",
+  };
+}
+
 export function UserFilters({ roles }: { roles: RoleOption[] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-
-  const [text, setText] = useState(searchParams.get("text") ?? "");
-  const [professionalStatus, setProfessionalStatus] = useState(
-    searchParams.get("professionalStatus") ?? "",
-  );
-  const [complianceStatus, setComplianceStatus] = useState(
-    searchParams.get("complianceStatus") ?? "",
-  );
-  const [roleId, setRoleId] = useState(searchParams.get("roleId") ?? "");
-  const [postcode, setPostcode] = useState(searchParams.get("postcode") ?? "");
-  const [maxTravelKm, setMaxTravelKm] = useState(searchParams.get("maxTravelKm") ?? "");
-  const [requireValidDocs, setRequireValidDocs] = useState(
-    searchParams.get("requireValidDocs") === "true",
-  );
+  const [filters, dispatch] = useReducer(filterReducer, searchParams, initialFilters);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const criteria: ProfessionalFilterCriteria = {
-      text,
-      professionalStatus,
-      complianceStatus,
-      roleId,
-      postcode,
-      maxTravelKm,
-      requireValidDocs,
-    };
+    const criteria: ProfessionalFilterCriteria = filters;
     const params = new URLSearchParams();
     if (criteria.text?.trim()) params.set("text", criteria.text.trim());
     if (criteria.professionalStatus) params.set("professionalStatus", criteria.professionalStatus);
@@ -89,8 +103,8 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
           Name or email
           <input
             type="search"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
+            value={filters.text}
+            onChange={(e) => dispatch({ type: "set", field: "text", value: e.target.value })}
             placeholder="Search…"
             className={INPUT_CLASS}
           />
@@ -100,8 +114,8 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
           <Select
             className="w-52"
             aria-label="Professional status"
-            value={professionalStatus}
-            onValueChange={setProfessionalStatus}
+            value={filters.professionalStatus}
+            onValueChange={(v) => dispatch({ type: "set", field: "professionalStatus", value: v })}
             options={withAny(PROFESSIONAL_STATUSES)}
           />
         </div>
@@ -110,8 +124,8 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
           <Select
             className="w-52"
             aria-label="Compliance status"
-            value={complianceStatus}
-            onValueChange={setComplianceStatus}
+            value={filters.complianceStatus}
+            onValueChange={(v) => dispatch({ type: "set", field: "complianceStatus", value: v })}
             options={withAny(COMPLIANCE_STATUSES)}
           />
         </div>
@@ -120,8 +134,8 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
           <Select
             className="w-48"
             aria-label="Role"
-            value={roleId}
-            onValueChange={setRoleId}
+            value={filters.roleId}
+            onValueChange={(v) => dispatch({ type: "set", field: "roleId", value: v })}
             options={[{ value: "", label: "Any" }, ...roles.map((r) => ({ value: r.id, label: r.name }))]}
           />
         </div>
@@ -131,8 +145,8 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
           Postcode
           <input
             type="text"
-            value={postcode}
-            onChange={(e) => setPostcode(e.target.value)}
+            value={filters.postcode}
+            onChange={(e) => dispatch({ type: "set", field: "postcode", value: e.target.value })}
             placeholder="e.g. E1"
             className={INPUT_CLASS}
           />
@@ -142,8 +156,8 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
           <input
             type="number"
             min={1}
-            value={maxTravelKm}
-            onChange={(e) => setMaxTravelKm(e.target.value)}
+            value={filters.maxTravelKm}
+            onChange={(e) => dispatch({ type: "set", field: "maxTravelKm", value: e.target.value })}
             placeholder="25"
             className={`${INPUT_CLASS} w-24`}
           />
@@ -151,8 +165,8 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
         <label className="flex items-center gap-2 self-end pb-1 text-[#5b6a62]">
           <input
             type="checkbox"
-            checked={requireValidDocs}
-            onChange={(e) => setRequireValidDocs(e.target.checked)}
+            checked={filters.requireValidDocs}
+            onChange={(e) => dispatch({ type: "set", field: "requireValidDocs", value: e.target.checked })}
             className="accent-[#198038]"
           />
           Valid critical docs only

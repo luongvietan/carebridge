@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { AmendRateForm } from "@/components/amend-rate-form";
 import { requireAdmin } from "@/lib/auth/admin";
 import { createServiceClient } from "@/lib/supabase/service";
+import { formatRate } from "@/lib/format/money";
 
 export const dynamic = "force-dynamic";
 
@@ -19,14 +20,6 @@ type RateCardRow = {
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" });
-}
-
-function formatRate(amount: number, currency: string) {
-  return new Intl.NumberFormat("en-GB", {
-    style: "currency",
-    currency,
-    minimumFractionDigits: 2,
-  }).format(Number(amount));
 }
 
 function formatLabel(value: string) {
@@ -51,26 +44,21 @@ export default async function AdminRatesPage() {
 
   const admin = createServiceClient();
 
-  const { data: roles } = await admin
-    .from("professional_roles")
-    .select("id, name")
-    .eq("is_active", true)
-    .order("name");
+  const [{ data: roles }, { data: allCards }] = await Promise.all([
+    admin.from("professional_roles").select("id, name").eq("is_active", true).order("name"),
+    admin
+      .from("rate_cards")
+      .select(
+        "id, professional_role_id, client_charge_rate, professional_payout_rate, platform_fee_type, platform_fee_value, currency, effective_from, effective_to",
+      )
+      .order("effective_from", { ascending: false }),
+  ]);
 
-  const roleIds = (roles ?? []).map((role) => role.id);
-
-  const { data: allCards } = roleIds.length
-    ? await admin
-        .from("rate_cards")
-        .select(
-          "id, professional_role_id, client_charge_rate, professional_payout_rate, platform_fee_type, platform_fee_value, currency, effective_from, effective_to",
-        )
-        .in("professional_role_id", roleIds)
-        .order("effective_from", { ascending: false })
-    : { data: [] as RateCardRow[] };
+  const roleIds = new Set((roles ?? []).map((role) => role.id));
 
   const cardsByRole = new Map<string, RateCardRow[]>();
-  for (const card of allCards ?? []) {
+  for (const card of (allCards ?? []) as RateCardRow[]) {
+    if (!roleIds.has(card.professional_role_id)) continue;
     const list = cardsByRole.get(card.professional_role_id) ?? [];
     list.push(card);
     cardsByRole.set(card.professional_role_id, list);

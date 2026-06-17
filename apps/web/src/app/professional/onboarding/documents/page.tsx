@@ -37,15 +37,16 @@ export default async function DocumentsPage() {
     );
   }
 
-  const { data: required } = await supabase
-    .from("compliance_requirements")
-    .select("document_type_id, document_types(id, name, is_compliance_critical)")
-    .eq("professional_role_id", prof.professional_role_id);
-
-  const { data: existing } = await supabase
-    .from("documents")
-    .select("document_type_id, verification_status")
-    .eq("professional_id", prof.id);
+  const [{ data: required }, { data: existing }] = await Promise.all([
+    supabase
+      .from("compliance_requirements")
+      .select("document_type_id, document_types(id, name, is_compliance_critical)")
+      .eq("professional_role_id", prof.professional_role_id),
+    supabase
+      .from("documents")
+      .select("document_type_id, verification_status")
+      .eq("professional_id", prof.id),
+  ]);
 
   const statusByType = new Map((existing ?? []).map((d) => [d.document_type_id, d.verification_status]));
 

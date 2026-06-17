@@ -1,7 +1,7 @@
 "use server";
-import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { requireAdmin } from "@/lib/auth/admin";
+import { requireAuth } from "@/lib/auth/require-auth";
 import { nextPayoutStatus, type PayoutStatus } from "./record";
 import { sendNotification } from "@/lib/notifications/send";
 
@@ -11,9 +11,7 @@ export type PayoutResult = { ok: true } | { error: string };
 export async function savePayoutDetails(form: {
   accountName: string; sortCode: string; accountNumber: string;
 }): Promise<PayoutResult> {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: "You must be signed in." };
+  const user = await requireAuth();
   const key = process.env.PAYOUT_ENC_KEY;
   if (!key) return { error: "Payout encryption is not configured." };
 
@@ -31,6 +29,7 @@ export async function savePayoutDetails(form: {
 
 /** Admin records a payout for a completed + paid booking (amount = total_payout). */
 export async function recordPayout(bookingId: string): Promise<PayoutResult> {
+  await requireAuth();
   const adminId = await requireAdmin();
   if (!adminId) return { error: "Administrator access required." };
   const admin = createServiceClient();
@@ -64,6 +63,7 @@ export async function recordPayout(bookingId: string): Promise<PayoutResult> {
 
 /** Admin marks a recorded payout as paid (out-of-band bank transfer). */
 export async function markPayoutPaid(payoutId: string, method: string, reference: string): Promise<PayoutResult> {
+  await requireAuth();
   const adminId = await requireAdmin();
   if (!adminId) return { error: "Administrator access required." };
   const ALLOWED_METHODS = ["bank_transfer", "bacs", "faster_payments", "cheque"];

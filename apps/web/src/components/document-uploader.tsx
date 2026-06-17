@@ -70,8 +70,8 @@ export function DocumentUploader({ items }: { items: DocItem[] }) {
               <Badge status={item.status} />
             </div>
             <form onSubmit={(e) => onUpload(e, item.typeId)} className="mt-3 flex flex-wrap items-end gap-3">
-              <input type="file" name="file" required className="text-sm" />
-              <input name="referenceNumber" placeholder="Reference no. (optional)" className={field} />
+              <input type="file" name="file" required aria-label={`Upload ${item.name}`} className="text-sm" />
+              <input name="referenceNumber" placeholder="Reference no. (optional)" aria-label="Reference number" className={field} />
               <div className="text-xs text-[#5b6a62]">
                 Expiry
                 <DatePicker name="expiryDate" aria-label="Expiry date" className="mt-1 w-40" />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import {
   ArrowRight01Icon,
   Calendar03Icon,
@@ -83,6 +83,22 @@ function usePopover() {
 const triggerClass =
   "flex w-full items-center justify-between gap-2 rounded-xl border border-[#dbe7e0] bg-white px-3.5 py-2.5 text-left text-sm text-[#0c4a35] transition focus:border-[#198038] focus:outline-none focus:ring-2 focus:ring-[#198038]/15 disabled:cursor-not-allowed disabled:opacity-50";
 
+function subscribeNoop() {
+  return () => {};
+}
+
+function getToday() {
+  return new Date();
+}
+
+function getTodayServerSnapshot() {
+  return null;
+}
+
+function useToday() {
+  return useSyncExternalStore(subscribeNoop, getToday, getTodayServerSnapshot);
+}
+
 /* ---------- calendar grid ---------- */
 
 function Calendar({
@@ -92,9 +108,9 @@ function Calendar({
   selected: Date | null;
   onSelect: (d: Date) => void;
 }) {
-  const today = new Date();
-  const [view, setView] = useState(() => selected ?? today);
-  const [focused, setFocused] = useState(() => selected ?? today);
+  const today = useToday();
+  const [view, setView] = useState(() => selected ?? new Date());
+  const [focused, setFocused] = useState(() => selected ?? new Date());
   const gridRef = useRef<HTMLDivElement>(null);
 
   // Keep keyboard focus on the active day button.
@@ -159,11 +175,11 @@ function Calendar({
         ))}
       </div>
 
-      <div ref={gridRef} role="grid" onKeyDown={onKeyDown} className="grid grid-cols-7 gap-0.5 px-1">
+      <div ref={gridRef} role="grid" tabIndex={-1} onKeyDown={onKeyDown} className="grid grid-cols-7 gap-0.5 px-1">
         {days.map((d) => {
           const inMonth = d.getMonth() === view.getMonth();
           const isSelected = selected ? sameDay(d, selected) : false;
-          const isToday = sameDay(d, today);
+          const isToday = today ? sameDay(d, today) : false;
           const isFocusable = sameDay(d, focused);
           return (
             <button
@@ -195,7 +211,7 @@ function Calendar({
 }
 
 const popoverClass =
-  "absolute z-30 mt-1.5 w-[18rem] rounded-2xl border border-[#dbe7e0] bg-white p-3 shadow-[0_12px_36px_-12px_rgba(15,38,28,0.22)]";
+  "absolute z-30 mt-1.5 m-0 w-[18rem] max-w-none rounded-2xl border border-[#dbe7e0] bg-white p-3 shadow-[0_12px_36px_-12px_rgba(15,38,28,0.22)] [&::backdrop]:hidden";
 
 /* ---------- DatePicker (date only) ---------- */
 
@@ -241,6 +257,10 @@ export function DatePicker({
     setOpen(false);
   }
 
+  function pickToday() {
+    pick(new Date());
+  }
+
   return (
     <div ref={rootRef} className={`relative ${className}`}>
       {name && <input type="hidden" name={name} value={current} required={required} />}
@@ -261,10 +281,10 @@ export function DatePicker({
       </button>
 
       {open && (
-        <div className={popoverClass} role="dialog" aria-label={ariaLabel ?? "Choose date"}>
+        <dialog open aria-label={ariaLabel ?? "Choose date"} className={popoverClass}>
           <Calendar selected={selected} onSelect={pick} />
           <div className="mt-2 flex items-center justify-between border-t border-[#eef5f0] px-1 pt-2 text-sm">
-            <button type="button" onClick={() => pick(new Date())} className="font-medium text-[#0c6e4f] hover:underline">
+            <button type="button" onClick={pickToday} className="font-medium text-[#0c6e4f] hover:underline">
               Today
             </button>
             <button
@@ -278,7 +298,7 @@ export function DatePicker({
               Clear
             </button>
           </div>
-        </div>
+        </dialog>
       )}
     </div>
   );
@@ -342,7 +362,7 @@ export function DateTimePicker({
       </button>
 
       {open && (
-        <div className={popoverClass} role="dialog" aria-label={ariaLabel ?? "Choose date and time"}>
+        <dialog open aria-label={ariaLabel ?? "Choose date and time"} className={popoverClass}>
           <Calendar selected={selected} onSelect={(d) => commit(toYMD(d), hour || "09", minute || "00")} />
           <div className="mt-2 flex items-center gap-2 border-t border-[#eef5f0] px-1 pt-3">
             <Icon icon={Clock01Icon} size={16} strokeWidth={2} aria-hidden className="text-[#5b6a62]" />
@@ -364,7 +384,7 @@ export function DateTimePicker({
               options={MINUTES}
             />
           </div>
-        </div>
+        </dialog>
       )}
     </div>
   );

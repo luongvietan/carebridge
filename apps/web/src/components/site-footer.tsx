@@ -126,7 +126,7 @@ export function SiteFooter() {
           <p className="max-w-3xl text-sm leading-relaxed text-white/80">{regulatoryDisclaimer}</p>
           <p className="max-w-3xl text-sm leading-relaxed text-white/70">{emergencyDisclaimer}</p>
         </div>
-        <p className="mt-3 text-xs text-white/40">
+        <p className="mt-3 text-xs text-white/40" suppressHydrationWarning>
           © {new Date().getFullYear()} CareBridge Connect Ltd. All rights reserved.
         </p>
       </div>

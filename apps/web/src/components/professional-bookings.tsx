@@ -3,6 +3,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { acceptBooking, declineBooking, completeBooking } from "@/lib/bookings/actions";
 
+import { formatGbpMoney } from "@/lib/format/money";
+
 type BookingRow = {
   id: string;
   status: string;
@@ -19,8 +21,7 @@ function formatDate(iso: string) {
 }
 
 function formatMoney(amount: number | null) {
-  if (amount == null) return "—";
-  return new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format(amount);
+  return formatGbpMoney(amount);
 }
 
 function BookingActions({
@@ -132,7 +133,9 @@ function BookingTable({ rows, showActions, showComplete, eligible, onRefresh }: 
             <th className="p-3 font-medium">Location</th>
             <th className="p-3 font-medium">Status</th>
             <th className="p-3 font-medium">Payout</th>
-            {hasActionsCol && <th className="p-3 font-medium" />}
+            {hasActionsCol && (
+              <th scope="col" className="p-3 font-medium"><span className="sr-only">Actions</span></th>
+            )}
           </tr>
         </thead>
         <tbody className="divide-y divide-[#dbe7e0]">

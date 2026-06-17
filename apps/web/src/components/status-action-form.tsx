@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useReducer } from "react";
 import { applyProfessionalStatusAction } from "@/lib/admin/status-actions";
 import {
   allowedActions,
@@ -49,19 +49,60 @@ type Props = {
   currentStatus: ProfessionalStatus;
 };
 
+type State = {
+  action: StatusActionType | "";
+  reasonCode: string;
+  reasonText: string;
+  internalNotes: string;
+  reviewDate: string;
+  error: string | null;
+  pending: boolean;
+};
+
+type Action =
+  | { type: "set"; field: keyof Omit<State, "error" | "pending">; value: string | StatusActionType }
+  | { type: "pending" }
+  | { type: "error"; error: string }
+  | { type: "clear-form" };
+
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case "set":
+      return { ...state, [action.field]: action.value };
+    case "pending":
+      return { ...state, pending: true, error: null };
+    case "error":
+      return { ...state, pending: false, error: action.error };
+    case "clear-form":
+      return {
+        ...state,
+        reasonCode: "",
+        reasonText: "",
+        internalNotes: "",
+        reviewDate: "",
+        pending: false,
+        error: null,
+      };
+    default:
+      return state;
+  }
+}
+
 export function StatusActionForm({ professionalId, currentStatus }: Props) {
   const router = useRouter();
   const actions = allowedActions(currentStatus);
 
-  const [action, setAction] = useState<StatusActionType | "">(actions[0] ?? "");
-  const [reasonCode, setReasonCode] = useState("");
-  const [reasonText, setReasonText] = useState("");
-  const [internalNotes, setInternalNotes] = useState("");
-  const [reviewDate, setReviewDate] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [pending, setPending] = useState(false);
+  const [state, dispatch] = useReducer(reducer, {
+    action: actions[0] ?? "",
+    reasonCode: "",
+    reasonText: "",
+    internalNotes: "",
+    reviewDate: "",
+    error: null,
+    pending: false,
+  });
 
-  const isPunitive = action !== "" && PUNITIVE.includes(action as StatusActionType);
+  const isPunitive = state.action !== "" && PUNITIVE.includes(state.action as StatusActionType);
 
   if (actions.length === 0) {
     return (
@@ -73,38 +114,32 @@ export function StatusActionForm({ professionalId, currentStatus }: Props) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!action) return;
+    if (!state.action) return;
 
-    if (isPunitive && !reasonCode) {
-      setError("A reason code is required for this action.");
+    if (isPunitive && !state.reasonCode) {
+      dispatch({ type: "error", error: "A reason code is required for this action." });
       return;
     }
-    if (reasonCode === "other" && !reasonText.trim()) {
-      setError("Please describe the reason when selecting 'other'.");
+    if (state.reasonCode === "other" && !state.reasonText.trim()) {
+      dispatch({ type: "error", error: "Please describe the reason when selecting 'other'." });
       return;
     }
 
-    setPending(true);
-    setError(null);
+    dispatch({ type: "pending" });
 
-    const result = await applyProfessionalStatusAction(professionalId, action, {
-      reasonCode: reasonCode || undefined,
-      reasonText: reasonText.trim() || undefined,
-      internalNotes: internalNotes.trim() || undefined,
-      reviewDate: reviewDate || undefined,
+    const result = await applyProfessionalStatusAction(professionalId, state.action, {
+      reasonCode: state.reasonCode || undefined,
+      reasonText: state.reasonText.trim() || undefined,
+      internalNotes: state.internalNotes.trim() || undefined,
+      reviewDate: state.reviewDate || undefined,
     });
 
-    setPending(false);
-
     if ("error" in result) {
-      setError(result.error);
+      dispatch({ type: "error", error: result.error });
       return;
     }
 
-    setReasonCode("");
-    setReasonText("");
-    setInternalNotes("");
-    setReviewDate("");
+    dispatch({ type: "clear-form" });
     router.refresh();
   }
 
@@ -114,8 +149,8 @@ export function StatusActionForm({ professionalId, currentStatus }: Props) {
         Action
         <Select
           aria-label="Action"
-          value={action}
-          onValueChange={(v) => setAction(v as StatusActionType)}
+          value={state.action}
+          onValueChange={(v) => dispatch({ type: "set", field: "action", value: v as StatusActionType })}
           options={actions.map((a) => ({ value: a, label: formatLabel(a) }))}
         />
       </div>
@@ -124,8 +159,8 @@ export function StatusActionForm({ professionalId, currentStatus }: Props) {
         Reason code{isPunitive ? " (required)" : ""}
         <Select
           aria-label="Reason code"
-          value={reasonCode}
-          onValueChange={setReasonCode}
+          value={state.reasonCode}
+          onValueChange={(v) => dispatch({ type: "set", field: "reasonCode", value: v })}
           options={[
             { value: "", label: isPunitive ? "Select a reason…" : "None" },
             ...REASON_CODES.map((code) => ({ value: code, label: formatLabel(code) })),
@@ -136,19 +171,19 @@ export function StatusActionForm({ professionalId, currentStatus }: Props) {
       <label className="flex flex-col gap-1 text-[#5b6a62]">
         Reason text
         <textarea
-          value={reasonText}
-          onChange={(e) => setReasonText(e.target.value)}
+          value={state.reasonText}
+          onChange={(e) => dispatch({ type: "set", field: "reasonText", value: e.target.value })}
           rows={2}
           className={INPUT_CLASS}
-          placeholder={reasonCode === "other" ? "Required when reason is 'other'" : "Optional details"}
+          placeholder={state.reasonCode === "other" ? "Required when reason is 'other'" : "Optional details"}
         />
       </label>
 
       <label className="flex flex-col gap-1 text-[#5b6a62]">
         Internal notes
         <textarea
-          value={internalNotes}
-          onChange={(e) => setInternalNotes(e.target.value)}
+          value={state.internalNotes}
+          onChange={(e) => dispatch({ type: "set", field: "internalNotes", value: e.target.value })}
           rows={2}
           className={INPUT_CLASS}
         />
@@ -156,17 +191,21 @@ export function StatusActionForm({ professionalId, currentStatus }: Props) {
 
       <div className="flex flex-col gap-1 text-[#5b6a62]">
         Review date
-        <DatePicker aria-label="Review date" value={reviewDate} onValueChange={setReviewDate} />
+        <DatePicker
+          aria-label="Review date"
+          value={state.reviewDate}
+          onValueChange={(v) => dispatch({ type: "set", field: "reviewDate", value: v })}
+        />
       </div>
 
-      {error && <p className="text-sm text-[#da1e28]">{error}</p>}
+      {state.error && <p className="text-sm text-[#da1e28]">{state.error}</p>}
 
       <button
         type="submit"
-        disabled={pending}
+        disabled={state.pending}
         className="rounded-full bg-[#0c6e4f] px-4 py-1.5 text-white hover:bg-[#0a5c42] disabled:opacity-50"
       >
-        {pending ? "Applying…" : "Apply action"}
+        {state.pending ? "Applying…" : "Apply action"}
       </button>
     </form>
   );

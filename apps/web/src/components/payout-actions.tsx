@@ -73,6 +73,7 @@ export function MarkPayoutPaidForm({ payoutId }: { payoutId: string }) {
         <input
           type="text"
           placeholder="Reference"
+          aria-label="Payout reference"
           value={reference}
           onChange={(e) => setReference(e.target.value)}
           className="rounded-lg border border-[#dbe7e0] bg-white px-2 py-1 text-sm focus:border-[#198038] focus:outline-none"

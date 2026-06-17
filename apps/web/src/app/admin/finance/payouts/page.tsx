@@ -3,12 +3,12 @@ import { BackLink } from "@/components/back-link";
 import { createServiceClient } from "@/lib/supabase/service";
 import { requireAdmin } from "@/lib/auth/admin";
 import { RecordPayoutButton, MarkPayoutPaidForm } from "@/components/payout-actions";
+import { formatGbpMoney } from "@/lib/format/money";
 
 export const dynamic = "force-dynamic";
 
 function formatMoney(amount: number | null | undefined) {
-  if (amount == null) return "—";
-  return new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format(Number(amount));
+  return formatGbpMoney(amount);
 }
 
 export default async function AdminPayoutsPage() {
@@ -61,10 +61,12 @@ export default async function AdminPayoutsPage() {
     ),
   ];
   const last4Map = new Map<string, string | null>();
-  for (const profId of profIds) {
-    const { data } = await admin.rpc("get_payout_last4", { p_professional_id: profId });
-    last4Map.set(profId, (data as string | null) ?? null);
-  }
+  await Promise.all(
+    profIds.map(async (profId) => {
+      const { data } = await admin.rpc("get_payout_last4", { p_professional_id: profId });
+      last4Map.set(profId, (data as string | null) ?? null);
+    }),
+  );
 
   // 2. Recorded payouts (status = 'recorded') → "Mark paid".
   const { data: recordedPayouts } = await admin
@@ -74,19 +76,21 @@ export default async function AdminPayoutsPage() {
     .order("created_at", { ascending: false });
 
   // Fetch last4 for recorded payout professionals too.
-  const recordedProfIds = [
-    ...new Set(
-      (recordedPayouts ?? [])
-        .map((p) => (p.professionals as { id: string; full_name: string } | null)?.id)
-        .filter((id): id is string => !!id),
-    ),
-  ];
-  for (const profId of recordedProfIds) {
-    if (!last4Map.has(profId)) {
-      const { data } = await admin.rpc("get_payout_last4", { p_professional_id: profId });
-      last4Map.set(profId, (data as string | null) ?? null);
-    }
+  const recordedProfIds = new Set<string>();
+  for (const p of recordedPayouts ?? []) {
+    const id = (p.professionals as { id: string; full_name: string } | null)?.id;
+    if (id) recordedProfIds.add(id);
   }
+  const missingProfIds: string[] = [];
+  for (const profId of recordedProfIds) {
+    if (!last4Map.has(profId)) missingProfIds.push(profId);
+  }
+  await Promise.all(
+    missingProfIds.map(async (profId) => {
+        const { data } = await admin.rpc("get_payout_last4", { p_professional_id: profId });
+        last4Map.set(profId, (data as string | null) ?? null);
+      }),
+  );
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-10">
@@ -113,7 +117,7 @@ export default async function AdminPayoutsPage() {
                   <th className="p-3 font-medium">Professional</th>
                   <th className="p-3 font-medium">Account last 4</th>
                   <th className="p-3 font-medium">Payout amount</th>
-                  <th className="p-3 font-medium" />
+                  <th scope="col" className="p-3 font-medium"><span className="sr-only">Actions</span></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#dbe7e0]">

@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+const uuid = z.uuid("Select your professional role");
+
 export const employmentStatuses = [
   "nhs_employed",
   "private_sector_employed",
@@ -36,7 +38,7 @@ export const profileSchema = z.object({
       (v) => !v || /^[A-Za-z]{2}\d{6}[A-Za-z]$/.test(v.replace(/\s/g, "")),
       "Enter a valid National Insurance number, e.g. QQ123456C",
     ),
-  professionalRoleId: z.string().uuid("Select your professional role"),
+  professionalRoleId: uuid,
   professionalSummary: z.string().optional(),
   travelDistanceKm: z.coerce.number().int().min(0).max(1000).optional(),
   hasDrivingLicence: z.boolean().optional(),

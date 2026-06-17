@@ -3,15 +3,11 @@ import { ProfileForm } from "@/components/profile-form";
 
 export default async function ProfilePage() {
   const supabase = await createClient();
-  const { data: roles } = await supabase
-    .from("professional_roles")
-    .select("id, name")
-    .eq("is_active", true)
-    .order("name");
+  const [{ data: roles }, { data: { user } }] = await Promise.all([
+    supabase.from("professional_roles").select("id, name").eq("is_active", true).order("name"),
+    supabase.auth.getUser(),
+  ]);
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
   const { data: current } = user
     ? await supabase
         .from("professionals")

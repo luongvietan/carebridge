@@ -3,6 +3,7 @@ import { createServiceClient } from "@/lib/supabase/service";
 import Link from "next/link";
 import { BookingCancelButton } from "@/components/booking-cancel-button";
 import { PayNowButton } from "@/components/pay-now-button";
+import { formatGbpMoney } from "@/lib/format/money";
 
 export const dynamic = "force-dynamic";
 
@@ -14,8 +15,7 @@ function formatDate(iso: string) {
 }
 
 function formatMoney(amount: number | null) {
-  if (amount == null) return "—";
-  return new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format(amount);
+  return formatGbpMoney(amount);
 }
 
 export default async function OrganisationBookingsPage() {
@@ -78,7 +78,7 @@ export default async function OrganisationBookingsPage() {
                 <th className="p-3 font-medium">Status</th>
                 <th className="p-3 font-medium">Total</th>
                 <th className="p-3 font-medium">Payment</th>
-                <th className="p-3 font-medium" />
+                <th scope="col" className="p-3 font-medium"><span className="sr-only">Actions</span></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#dbe7e0]">
