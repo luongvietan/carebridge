@@ -2107,6 +2107,7 @@ export type Database = {
         }
         Returns: string
       }
+      fn_anonymise_user: { Args: { p_admin_id: string; p_user_id: string }; Returns: undefined }
       fn_run_compliance_sweep: { Args: never; Returns: undefined }
       get_payout_last4: { Args: { p_professional_id: string }; Returns: string }
       is_admin: { Args: never; Returns: boolean }

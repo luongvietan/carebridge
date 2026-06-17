@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AccountStatusControl } from "@/components/account-status-control";
+import { AnonymiseUserButton } from "@/components/anonymise-user-button";
 import { requireAdmin } from "@/lib/auth/admin";
 import type { AccountStatus } from "@/lib/admin/account-status";
 import { createServiceClient } from "@/lib/supabase/service";
@@ -129,7 +130,10 @@ export default async function AdminAccountsPage({
                   {isProtectedAccount(user) ? (
                     <span className="text-[#5b6a62]">—</span>
                   ) : (
-                    <AccountStatusControl userId={user.id} current={user.account_status} />
+                    <div className="flex flex-wrap items-center gap-3">
+                      <AccountStatusControl userId={user.id} current={user.account_status} />
+                      <AnonymiseUserButton userId={user.id} />
+                    </div>
                   )}
                 </td>
               </tr>
