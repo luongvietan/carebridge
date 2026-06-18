@@ -18,7 +18,21 @@ describe("organisationSchema", () => {
     expect(organisationSchema.safeParse({ organisationName: "Acme" }).success).toBe(false);
     expect(organisationSchema.safeParse({ contactPerson: "Jo" }).success).toBe(false);
   });
-  it("accepts name + contact, CQC optional", () => {
-    expect(organisationSchema.safeParse({ organisationName: "Acme", contactPerson: "Jo" }).success).toBe(true);
+  it("requires a billing email (orgs are invoiced for bookings)", () => {
+    expect(organisationSchema.safeParse({ organisationName: "Acme", contactPerson: "Jo" }).success).toBe(false);
+  });
+  it("rejects a malformed billing email", () => {
+    expect(
+      organisationSchema.safeParse({ organisationName: "Acme", contactPerson: "Jo", billingEmail: "nope" }).success,
+    ).toBe(false);
+  });
+  it("accepts name + contact + billing email, CQC optional", () => {
+    expect(
+      organisationSchema.safeParse({
+        organisationName: "Acme",
+        contactPerson: "Jo",
+        billingEmail: "billing@acme.test",
+      }).success,
+    ).toBe(true);
   });
 });

@@ -23,7 +23,8 @@ export const organisationSchema = z.object({
   city: z.string().optional(),
   postcode: z.string().optional(),
   cqcRegistrationNumber: z.string().optional(),
-  billingEmail: email.optional(),
+  // Organisations are invoiced for bookings, so a billing email is required (spec §5).
+  billingEmail: email,
   billingAddress: z.string().optional(),
 });
 export type OrganisationInput = z.infer<typeof organisationSchema>;

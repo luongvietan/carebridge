@@ -14,6 +14,18 @@ async function currentUser() {
   return user;
 }
 
+/** Create a Stripe customer, returning its id — or null if Stripe is
+ *  unavailable, so registration never fails on a payment-provider hiccup. */
+async function tryCreateCustomer(args: { email?: string; name: string }): Promise<string | null> {
+  try {
+    const customer = await createCustomer(args);
+    return customer.id;
+  } catch (err) {
+    console.error("Stripe customer creation failed; saving profile without it.", err);
+    return null;
+  }
+}
+
 export async function saveClientProfile(_prev: AccountResult, formData: FormData): Promise<AccountResult> {
   const parsed = clientSchema.safeParse({
     fullName: formData.get("fullName"),
@@ -37,11 +49,13 @@ export async function saveClientProfile(_prev: AccountResult, formData: FormData
 
   let stripeCustomerId = existing?.stripe_customer_id ?? null;
   if (!stripeCustomerId) {
-    const customer = await createCustomer({
+    // Don't couple registration to the payment provider: if Stripe is
+    // unavailable, still save the profile. Checkout creates the customer on
+    // first payment, so a null id here is backfilled later.
+    stripeCustomerId = await tryCreateCustomer({
       email: parsed.data.emailContact ?? user.email,
       name: parsed.data.fullName,
     });
-    stripeCustomerId = customer.id;
   }
 
   const { error } = await admin.from("private_clients").upsert(
@@ -89,11 +103,10 @@ export async function saveOrganisationProfile(_prev: AccountResult, formData: Fo
 
   let stripeCustomerId = existing?.stripe_customer_id ?? null;
   if (!stripeCustomerId) {
-    const customer = await createCustomer({
+    stripeCustomerId = await tryCreateCustomer({
       email: parsed.data.billingEmail ?? user.email,
       name: parsed.data.organisationName,
     });
-    stripeCustomerId = customer.id;
   }
 
   const { error } = await admin.from("organisations").upsert(

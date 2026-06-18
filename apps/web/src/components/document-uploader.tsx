@@ -77,6 +77,7 @@ export function DocumentUploader({ items }: { items: DocItem[] }) {
             <form onSubmit={(e) => onUpload(e, item)} className="mt-3 flex flex-wrap items-end gap-3">
               <input type="file" name="file" required aria-label={`Upload ${item.name}`} className="text-sm" />
               <input name="referenceNumber" placeholder="Reference no. (optional)" aria-label="Reference number" className={field} />
+              <input name="issuingBody" placeholder="Issuing body (e.g. NMC, optional)" aria-label="Issuing body" className={field} />
               <div className="text-xs text-[#5b6a62]">
                 Expiry{item.hasExpiry && <span className="text-[#da1e28]"> *</span>}
                 <DatePicker

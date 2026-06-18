@@ -90,7 +90,7 @@ export function AccountRegisterForm({ variant }: { variant: Variant }) {
           </label>
           <label className="block text-sm font-medium">
             Billing email
-            <input name="billingEmail" type="email" className={field} />
+            <input name="billingEmail" type="email" required className={field} />
           </label>
           <label className="block text-sm font-medium">
             Address line 1
