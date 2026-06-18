@@ -182,12 +182,22 @@ export default async function AdminUserDetailPage({
   const { data: professional } = await admin
     .from("professionals")
     .select(
-      "id, full_name, professional_status, compliance_status, professional_role_id, user_id, professional_roles(name)",
+      "id, full_name, professional_status, compliance_status, professional_role_id, user_id, profile_photo_path, registration_body, registration_number, professional_roles(name)",
     )
     .eq("id", id)
     .maybeSingle();
 
   if (!professional) notFound();
+
+  // The profile photo lives in the private documents bucket; sign a short-lived
+  // URL so the admin can view it during identity verification.
+  const photoUrl = professional.profile_photo_path
+    ? (
+        await admin.storage
+          .from("documents")
+          .createSignedUrl(professional.profile_photo_path, 600)
+      ).data?.signedUrl ?? null
+    : null;
 
   const [
     { data: user },
@@ -259,7 +269,20 @@ export default async function AdminUserDetailPage({
       </div>
 
       <section className="mt-8 rounded-2xl border border-[#dbe7e0] bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)] text-sm">
-        <h2 className="text-lg font-bold">Profile</h2>
+        <div className="flex items-start gap-4">
+          {photoUrl ? (
+            <img
+              src={photoUrl}
+              alt={`${professional.full_name} profile photo`}
+              className="h-20 w-20 shrink-0 rounded-full object-cover ring-1 ring-[#dbe7e0]"
+            />
+          ) : (
+            <div className="grid h-20 w-20 shrink-0 place-items-center rounded-full bg-[#eef5f0] text-xs text-[#7a8a81]">
+              No photo
+            </div>
+          )}
+          <h2 className="text-lg font-bold">Profile</h2>
+        </div>
         <dl className="mt-4 grid gap-3 sm:grid-cols-2">
           <div>
             <dt className="text-[#7a8a81]">Email</dt>
@@ -268,6 +291,14 @@ export default async function AdminUserDetailPage({
           <div>
             <dt className="text-[#7a8a81]">Role</dt>
             <dd>{(professional.professional_roles as { name: string } | null)?.name ?? "—"}</dd>
+          </div>
+          <div>
+            <dt className="text-[#7a8a81]">Professional registration</dt>
+            <dd>
+              {professional.registration_body || professional.registration_number
+                ? `${professional.registration_body ?? "—"} ${professional.registration_number ?? ""}`.trim()
+                : "—"}
+            </dd>
           </div>
           <div>
             <dt className="text-[#7a8a81]">Professional status</dt>
