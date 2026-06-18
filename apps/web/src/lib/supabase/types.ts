@@ -1581,6 +1581,8 @@ export type Database = {
           professional_status: Database["public"]["Enums"]["professional_status"]
           professional_summary: string | null
           profile_photo_path: string | null
+          registration_body: string | null
+          registration_number: string | null
           travel_distance_km: number | null
           updated_at: string
           user_id: string
@@ -1607,6 +1609,8 @@ export type Database = {
           professional_status?: Database["public"]["Enums"]["professional_status"]
           professional_summary?: string | null
           profile_photo_path?: string | null
+          registration_body?: string | null
+          registration_number?: string | null
           travel_distance_km?: number | null
           updated_at?: string
           user_id: string
@@ -1633,6 +1637,8 @@ export type Database = {
           professional_status?: Database["public"]["Enums"]["professional_status"]
           professional_summary?: string | null
           profile_photo_path?: string | null
+          registration_body?: string | null
+          registration_number?: string | null
           travel_distance_km?: number | null
           updated_at?: string
           user_id?: string

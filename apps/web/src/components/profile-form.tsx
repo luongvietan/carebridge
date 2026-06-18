@@ -25,6 +25,8 @@ type Current = {
   postcode: string | null;
   national_insurance_no: string | null;
   professional_summary: string | null;
+  registration_body: string | null;
+  registration_number: string | null;
   travel_distance_km: number | null;
   has_driving_licence: boolean | null;
   has_vehicle: boolean | null;
@@ -111,6 +113,25 @@ export function ProfileForm({
           National Insurance number
           <input name="nationalInsuranceNo" defaultValue={current?.national_insurance_no ?? ""} className={field} />
         </label>
+        <div className="grid grid-cols-2 gap-4">
+          <label className="block text-sm font-medium">
+            Registration body
+            <input
+              name="registrationBody"
+              placeholder="e.g. NMC, HCPC"
+              defaultValue={current?.registration_body ?? ""}
+              className={field}
+            />
+          </label>
+          <label className="block text-sm font-medium">
+            Registration number
+            <input
+              name="registrationNumber"
+              defaultValue={current?.registration_number ?? ""}
+              className={field}
+            />
+          </label>
+        </div>
         <label className="block text-sm font-medium">
           Professional summary
           <textarea name="professionalSummary" rows={3} defaultValue={current?.professional_summary ?? ""} className={field} />

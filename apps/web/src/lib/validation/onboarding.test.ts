@@ -26,6 +26,21 @@ describe("profileSchema National Insurance validation", () => {
   });
 });
 
+describe("profileSchema professional registration details", () => {
+  it("captures the registration body and number", () => {
+    const r = profileSchema.safeParse({
+      ...base,
+      registrationBody: "NMC",
+      registrationNumber: "12A3456E",
+    });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.registrationBody).toBe("NMC");
+      expect(r.data.registrationNumber).toBe("12A3456E");
+    }
+  });
+});
+
 describe("isPlausibleDateOfBirth", () => {
   const today = "2026-06-18";
 

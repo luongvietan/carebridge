@@ -85,6 +85,9 @@ export const profileSchema = z.object({
     ),
   professionalRoleId: uuid,
   professionalSummary: z.string().optional(),
+  // Professional registration details (spec §3): regulatory body + number, e.g. NMC/HCPC.
+  registrationBody: z.string().optional(),
+  registrationNumber: z.string().optional(),
   travelDistanceKm: z.coerce.number().int().min(0).max(1000).optional(),
   hasDrivingLicence: z.boolean().optional(),
   hasVehicle: z.boolean().optional(),
