@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { londonWallClockToUtc } from "./datetime";
+import { londonWallClockToUtc, londonDateRangeToUtc } from "./datetime";
 
 describe("londonWallClockToUtc", () => {
   it("treats a summer (BST, UTC+1) wall clock as London time", () => {
@@ -17,5 +17,30 @@ describe("londonWallClockToUtc", () => {
     expect(londonWallClockToUtc("")).toBeNull();
     expect(londonWallClockToUtc("2026-06-20")).toBeNull();
     expect(londonWallClockToUtc("nonsense")).toBeNull();
+  });
+  it("resolves a wall-clock just after the autumn fall-back to GMT", () => {
+    // BST→GMT is 2026-10-25 02:00. 03:00 local that day is firmly GMT (UTC+0).
+    expect(londonWallClockToUtc("2026-10-25T03:00")?.toISOString()).toBe("2026-10-25T03:00:00.000Z");
+  });
+});
+
+describe("londonDateRangeToUtc", () => {
+  it("includes the whole of the 'to' day with a half-open upper bound (BST)", () => {
+    const { gte, lt } = londonDateRangeToUtc("2026-06-01", "2026-06-18");
+    // Start of 1 June London (BST) is 2026-05-31T23:00Z; end is start of 19 June London.
+    expect(gte).toBe("2026-05-31T23:00:00.000Z");
+    expect(lt).toBe("2026-06-18T23:00:00.000Z");
+  });
+  it("uses UTC midnight bounds in winter (GMT)", () => {
+    const { gte, lt } = londonDateRangeToUtc("2026-01-01", "2026-01-31");
+    expect(gte).toBe("2026-01-01T00:00:00.000Z");
+    expect(lt).toBe("2026-02-01T00:00:00.000Z");
+  });
+  it("handles month/year rollover on the 'to' bound", () => {
+    // Day after 2026-12-31 is 2027-01-01; winter (GMT) start = 00:00Z.
+    expect(londonDateRangeToUtc(undefined, "2026-12-31").lt).toBe("2027-01-01T00:00:00.000Z");
+  });
+  it("returns an empty object when no dates are given", () => {
+    expect(londonDateRangeToUtc()).toEqual({});
   });
 });

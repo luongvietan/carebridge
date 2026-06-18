@@ -4,6 +4,7 @@ import { createServiceClient } from "@/lib/supabase/service";
 import { requireAdmin } from "@/lib/auth/admin";
 import { DatePicker } from "@/components/ui/date-picker";
 import { formatGbpMoney } from "@/lib/format/money";
+import { londonDateRangeToUtc } from "@/lib/format/datetime";
 
 export const dynamic = "force-dynamic";
 
@@ -24,20 +25,24 @@ export default async function AdminFinancePage({
   const { from, to } = await searchParams;
   const admin = createServiceClient();
 
+  // London calendar dates → half-open UTC instant bounds (BST-safe; includes the
+  // whole of the `to` day).
+  const { gte, lt } = londonDateRangeToUtc(from, to);
+
   // Payments — join bookings(id, scheduled_start) and payer.
   let paymentsQuery = admin
     .from("payments")
-    .select("id, booking_id, amount, currency, status, created_at, payer_user_id, bookings(id, scheduled_start)")
+    .select("id, booking_id, amount, refunded_amount, currency, status, created_at, payer_user_id, bookings(id, scheduled_start)")
     .order("created_at", { ascending: false });
-  if (from) paymentsQuery = paymentsQuery.gte("created_at", from);
-  if (to) paymentsQuery = paymentsQuery.lte("created_at", to + "T23:59:59Z");
+  if (gte) paymentsQuery = paymentsQuery.gte("created_at", gte);
+  if (lt) paymentsQuery = paymentsQuery.lt("created_at", lt);
 
   let payoutsQuery = admin
     .from("payouts")
     .select("id, booking_id, amount, currency, status, created_at, method, reference, professionals(full_name)")
     .order("created_at", { ascending: false });
-  if (from) payoutsQuery = payoutsQuery.gte("created_at", from);
-  if (to) payoutsQuery = payoutsQuery.lte("created_at", to + "T23:59:59Z");
+  if (gte) payoutsQuery = payoutsQuery.gte("created_at", gte);
+  if (lt) payoutsQuery = payoutsQuery.lt("created_at", lt);
 
   const [{ data: payments }, { data: payouts }, { data: revenueRows }] = await Promise.all([
     paymentsQuery,
@@ -45,10 +50,14 @@ export default async function AdminFinancePage({
     admin.from("v_platform_revenue").select("booking_id, platform_revenue"),
   ]);
 
-  // Headline figures.
-  const totalCollected = (payments ?? [])
-    .filter((p) => p.status === "succeeded")
-    .reduce((sum, p) => sum + Number(p.amount), 0);
+  // Headline figures. "Total collected" is NET of refunds — a partial refund
+  // keeps the payment `succeeded` but reduces the cash actually held.
+  const succeededPayments = (payments ?? []).filter((p) => p.status === "succeeded");
+  const totalRefunded = (payments ?? []).reduce((sum, p) => sum + Number(p.refunded_amount ?? 0), 0);
+  const totalCollected = succeededPayments.reduce(
+    (sum, p) => sum + Number(p.amount) - Number(p.refunded_amount ?? 0),
+    0,
+  );
 
   const totalPaidOut = (payouts ?? [])
     .filter((p) => p.status === "paid")
@@ -93,10 +102,14 @@ export default async function AdminFinancePage({
       </form>
 
       {/* Headline cards */}
-      <div className="mt-8 grid grid-cols-3 gap-4">
+      <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">
         <div className="rounded-2xl border border-[#dbe7e0] bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
-          <p className="text-xs tracking-wide text-[#5b6a62] uppercase">Total collected</p>
+          <p className="text-xs tracking-wide text-[#5b6a62] uppercase">Net collected</p>
           <p className="mt-2 text-2xl font-bold">{formatMoney(totalCollected)}</p>
+        </div>
+        <div className="rounded-2xl border border-[#dbe7e0] bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
+          <p className="text-xs tracking-wide text-[#5b6a62] uppercase">Total refunded</p>
+          <p className="mt-2 text-2xl font-bold">{formatMoney(totalRefunded)}</p>
         </div>
         <div className="rounded-2xl border border-[#dbe7e0] bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
           <p className="text-xs tracking-wide text-[#5b6a62] uppercase">Total paid out</p>
@@ -119,12 +132,14 @@ export default async function AdminFinancePage({
                   <th className="p-3 font-medium">Date</th>
                   <th className="p-3 font-medium">Booking start</th>
                   <th className="p-3 font-medium">Amount</th>
+                  <th className="p-3 font-medium">Refunded</th>
                   <th className="p-3 font-medium">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#dbe7e0]">
                 {payments.map((p) => {
                   const booking = p.bookings as { id: string; scheduled_start: string } | null;
+                  const refunded = Number(p.refunded_amount ?? 0);
                   return (
                     <tr key={p.id}>
                       <td className="p-3">{formatDate(p.created_at)}</td>
@@ -132,6 +147,7 @@ export default async function AdminFinancePage({
                         {booking?.scheduled_start ? formatDate(booking.scheduled_start) : "—"}
                       </td>
                       <td className="p-3">{formatMoney(p.amount)}</td>
+                      <td className="p-3">{refunded > 0 ? formatMoney(refunded) : "—"}</td>
                       <td className="p-3">
                         <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#5b6a62]">
                           {p.status.replace(/_/g, " ")}

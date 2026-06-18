@@ -2,7 +2,7 @@
 import { createServiceClient } from "@/lib/supabase/service";
 import { requireAdmin } from "@/lib/auth/admin";
 import { requireAuth } from "@/lib/auth/require-auth";
-import { nextPayoutStatus, type PayoutStatus } from "./record";
+import { nextPayoutStatus, netPayoutAmount, type PayoutStatus } from "./record";
 import { validateBankDetails } from "./bank";
 import { sendNotification } from "@/lib/notifications/send";
 
@@ -44,15 +44,24 @@ export async function recordPayout(bookingId: string): Promise<PayoutResult> {
   if (booking.status !== "completed") return { error: "Booking is not completed." };
   if (!booking.assigned_professional_id) return { error: "Booking has no assigned professional." };
 
-  // Reject if any payment row for this booking has ever been refunded — even
-  // if its current status is `succeeded`, a refund history must block payout.
-  const { count: refundedEver } = await admin.from("payments")
-    .select("id", { count: "exact", head: true }).eq("booking_id", bookingId).not("refunded_at", "is", null);
-  if ((refundedEver ?? 0) > 0) return { error: "Payment for this booking has been refunded; no payout will be made." };
-
-  const { count: paid } = await admin.from("payments")
-    .select("id", { count: "exact", head: true }).eq("booking_id", bookingId).eq("status", "succeeded");
-  if ((paid ?? 0) === 0) return { error: "The client payment has not succeeded yet." };
+  // Inspect every payment for this booking: a FULL refund (refunded_at set)
+  // blocks the payout entirely; PARTIAL refunds (refunded_amount, payment stays
+  // `succeeded`) are deducted from the payout per the Audit-v3 policy so the
+  // platform margin is preserved.
+  const { data: bookingPayments } = await admin.from("payments")
+    .select("status, refunded_at, refunded_amount").eq("booking_id", bookingId);
+  const rows = bookingPayments ?? [];
+  if (rows.some((p) => p.refunded_at !== null)) {
+    return { error: "Payment for this booking has been fully refunded; no payout will be made." };
+  }
+  if (!rows.some((p) => p.status === "succeeded")) {
+    return { error: "The client payment has not succeeded yet." };
+  }
+  const totalRefunded = rows.reduce((sum, p) => sum + Number(p.refunded_amount ?? 0), 0);
+  const payoutAmount = netPayoutAmount(Number(booking.total_payout), totalRefunded);
+  if (payoutAmount <= 0) {
+    return { error: "Refunds for this booking cover the full payout; nothing to pay." };
+  }
 
   const { count: existing } = await admin.from("payouts")
     .select("id", { count: "exact", head: true }).eq("booking_id", bookingId);
@@ -60,7 +69,7 @@ export async function recordPayout(bookingId: string): Promise<PayoutResult> {
 
   const { error } = await admin.from("payouts").insert({
     professional_id: booking.assigned_professional_id, booking_id: bookingId,
-    amount: Number(booking.total_payout), status: "recorded", recorded_by: adminId, recorded_at: new Date().toISOString(),
+    amount: payoutAmount, status: "recorded", recorded_by: adminId, recorded_at: new Date().toISOString(),
   });
   if (error) return { error: error.message };
   await admin.from("audit_log").insert({ actor_user_id: adminId, actor_type: "admin", action: "payout.recorded", entity_type: "booking", entity_id: bookingId });

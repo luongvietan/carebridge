@@ -4,6 +4,7 @@ import { createServiceClient } from "@/lib/supabase/service";
 import { requireAdmin } from "@/lib/auth/admin";
 import { RecordPayoutButton, MarkPayoutPaidForm } from "@/components/payout-actions";
 import { formatGbpMoney } from "@/lib/format/money";
+import { netPayoutAmount } from "@/lib/payouts/record";
 
 export const dynamic = "force-dynamic";
 
@@ -23,16 +24,27 @@ export default async function AdminPayoutsPage() {
     .not("assigned_professional_id", "is", null)
     .order("scheduled_start", { ascending: false });
 
-  // Filter to those with a succeeded payment.
+  // Filter to those with a succeeded payment, and track partial refunds so the
+  // displayed payout matches what recordPayout will actually record (total_payout
+  // minus refunds). Fully-refunded payments flip to status 'refunded' and so are
+  // naturally excluded from the succeeded set.
   const completedIds = (completedBookings ?? []).map((b) => b.id);
   let succeededBookingIds = new Set<string>();
+  const refundedByBooking = new Map<string, number>();
   if (completedIds.length > 0) {
     const { data: paidPayments } = await admin
       .from("payments")
-      .select("booking_id")
+      .select("booking_id, refunded_amount")
       .in("booking_id", completedIds)
       .eq("status", "succeeded");
     succeededBookingIds = new Set((paidPayments ?? []).map((p) => p.booking_id));
+    for (const p of paidPayments ?? []) {
+      if (!p.booking_id) continue;
+      refundedByBooking.set(
+        p.booking_id,
+        (refundedByBooking.get(p.booking_id) ?? 0) + Number(p.refunded_amount ?? 0),
+      );
+    }
   }
 
   // Filter to those with NO payout.
@@ -126,11 +138,20 @@ export default async function AdminPayoutsPage() {
                   const last4 = b.assigned_professional_id
                     ? (last4Map.get(b.assigned_professional_id) ?? null)
                     : null;
+                  const refunded = refundedByBooking.get(b.id) ?? 0;
+                  const net = netPayoutAmount(Number(b.total_payout), refunded);
                   return (
                     <tr key={b.id}>
                       <td className="p-3">{prof?.full_name ?? "—"}</td>
                       <td className="p-3">{last4 ? `****${last4}` : "—"}</td>
-                      <td className="p-3">{formatMoney(b.total_payout)}</td>
+                      <td className="p-3">
+                        {formatMoney(net)}
+                        {refunded > 0 && (
+                          <span className="block text-xs text-[#684e1b]">
+                            after {formatMoney(refunded)} refund (of {formatMoney(b.total_payout)})
+                          </span>
+                        )}
+                      </td>
                       <td className="p-3 text-right">
                         <RecordPayoutButton bookingId={b.id} />
                       </td>

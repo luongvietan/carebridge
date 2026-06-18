@@ -211,6 +211,17 @@ export async function uploadDocument(
     .upload(path, file, { contentType: verified.safeMime, upsert: true });
   if (upErr) return { error: `Upload failed: ${upErr.message}` };
 
+  // Re-upload ("Replace"): supersede any prior non-approved row of the same type
+  // so the review queue, the professional's list, and the compliance export don't
+  // accumulate stale duplicates. Approved rows are left intact.
+  await admin
+    .from("documents")
+    .update({ superseded_at: new Date().toISOString() })
+    .eq("professional_id", professionalId)
+    .eq("document_type_id", documentTypeId)
+    .is("superseded_at", null)
+    .neq("verification_status", "approved");
+
   const { data: inserted, error } = await admin
     .from("documents")
     .insert({

@@ -13,6 +13,7 @@ export default async function AdminCompliancePage() {
       "id, storage_path, reference_number, expiry_date, verification_status, professionals(full_name), document_types(name)",
     )
     .in("verification_status", ["pending_review", "further_info_required"])
+    .is("superseded_at", null)
     .order("created_at", { ascending: true });
 
   const nonCompliantQuery = admin

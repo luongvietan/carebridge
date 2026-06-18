@@ -52,9 +52,9 @@ export async function POST(req: NextRequest) {
     (typeof obj.payment_intent === "string" ? obj.payment_intent : undefined) ??
     (event.type.startsWith("payment_intent.") ? (obj.id as string) : undefined);
 
-  const sel = "id, status, payer_user_id, booking_id, stripe_payment_intent_id, refunded_at";
+  const sel = "id, status, payer_user_id, booking_id, stripe_payment_intent_id, refunded_at, amount";
   let payment:
-    | { id: string; status: string; payer_user_id: string | null; booking_id: string | null; stripe_payment_intent_id: string | null; refunded_at: string | null }
+    | { id: string; status: string; payer_user_id: string | null; booking_id: string | null; stripe_payment_intent_id: string | null; refunded_at: string | null; amount: number }
     | null = null;
   if (paymentIdMeta) {
     ({ data: payment } = await admin.from("payments").select(sel).eq("id", paymentIdMeta).maybeSingle());
@@ -62,8 +62,23 @@ export async function POST(req: NextRequest) {
     ({ data: payment } = await admin.from("payments").select(sel).eq("stripe_payment_intent_id", intentId).maybeSingle());
   }
   if (!payment) {
-    // The payment row may not be visible yet (created right before redirect).
-    // Release the claim and 500 so Stripe retries rather than us dropping it.
+    // The payment row may not be visible yet (created right before redirect) →
+    // retry. But a genuinely orphan event (references an unknown payment) would
+    // otherwise 500 on every redelivery for days and then be lost. Bound the
+    // retry window by event age: once it's clearly not a replication-lag case,
+    // dead-letter it to the audit log and keep the idempotency claim (return 200)
+    // so Stripe stops retrying and we still have a durable trace.
+    const ageMs = Date.now() - event.created * 1000;
+    if (ageMs > 60 * 60 * 1000) {
+      await admin.from("audit_log").insert({
+        actor_type: "system",
+        action: "payment.webhook_orphan",
+        entity_type: "payment",
+        entity_id: paymentIdMeta ?? intentId ?? event.id,
+        summary: `${event.type} — no matching payment row (event ${event.id})`,
+      });
+      return new Response("orphan event recorded", { status: 200 });
+    }
     await releaseClaim();
     return new Response("no payment row", { status: 500 });
   }
@@ -80,11 +95,17 @@ export async function POST(req: NextRequest) {
 
   // A partial refund must not flip the payment to fully `refunded` (which would
   // freeze the professional's payout). Record the refunded amount and stop.
+  // Clamp to the payment amount (a malformed/duplicate event must never store
+  // refunded_amount > amount) and only act on a `succeeded` payment (a refund on
+  // a pending/failed row is out-of-order and is ignored).
   let refundedAmount: number | null = null;
   if (event.type === "charge.refunded") {
     const info = refundInfoFromCharge(obj as Parameters<typeof refundInfoFromCharge>[0]);
-    refundedAmount = info.refundedAmount;
+    refundedAmount = Math.min(info.refundedAmount, Number(payment.amount));
     if (!info.isFullRefund) {
+      if (payment.status !== "succeeded") {
+        return new Response("partial refund ignored for non-succeeded payment", { status: 200 });
+      }
       await admin.from("payments").update({ refunded_amount: refundedAmount }).eq("id", payment.id);
       await admin.from("audit_log").insert({
         actor_type: "system",

@@ -5,6 +5,7 @@ import { DATASETS, type DatasetName } from "@/lib/export/datasets";
 import { toCsv } from "@/lib/export/csv";
 import { toXlsx } from "@/lib/export/xlsx";
 import { fetchAllPages } from "@/lib/export/fetch-all-rows";
+import { londonDateRangeToUtc } from "@/lib/format/datetime";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -21,8 +22,10 @@ export async function GET(
 
   const url = new URL(req.url);
   const format = url.searchParams.get("format") === "xlsx" ? "xlsx" : "csv";
-  const from = url.searchParams.get("from");
-  const to = url.searchParams.get("to");
+  const { gte, lt } = londonDateRangeToUtc(
+    url.searchParams.get("from"),
+    url.searchParams.get("to"),
+  );
   const entityType = url.searchParams.get("entity_type");
   const actorType = url.searchParams.get("actor_type");
 
@@ -38,8 +41,8 @@ export async function GET(
       // share an identical same-transaction `occurred_at`).
       .order("id", { ascending: true });
     if (entity === "audit") {
-      if (from) q = q.gte("occurred_at", from);
-      if (to) q = q.lte("occurred_at", to + "T23:59:59Z");
+      if (gte) q = q.gte("occurred_at", gte);
+      if (lt) q = q.lt("occurred_at", lt);
       if (entityType) q = q.eq("entity_type", entityType);
       if (actorType) q = q.eq("actor_type", actorType);
     }

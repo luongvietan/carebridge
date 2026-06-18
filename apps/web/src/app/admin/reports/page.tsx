@@ -3,6 +3,7 @@ import { requireAdmin } from "@/lib/auth/admin";
 import { createServiceClient } from "@/lib/supabase/service";
 import { DATASETS, type DatasetName } from "@/lib/export/datasets";
 import { DatePicker } from "@/components/ui/date-picker";
+import { londonDateRangeToUtc } from "@/lib/format/datetime";
 
 export const dynamic = "force-dynamic";
 
@@ -24,8 +25,9 @@ export default async function AdminReportsPage({
     .select("id, occurred_at, actor_type, action, entity_type, entity_id, summary")
     .order("occurred_at", { ascending: false })
     .limit(50);
-  if (from) auditQuery = auditQuery.gte("occurred_at", from);
-  if (to) auditQuery = auditQuery.lte("occurred_at", to + "T23:59:59Z");
+  const { gte, lt } = londonDateRangeToUtc(from, to);
+  if (gte) auditQuery = auditQuery.gte("occurred_at", gte);
+  if (lt) auditQuery = auditQuery.lt("occurred_at", lt);
   if (entity_type) auditQuery = auditQuery.eq("entity_type", entity_type);
   if (actor_type) auditQuery = auditQuery.eq("actor_type", actor_type);
   const { data: auditRows } = await auditQuery;

@@ -47,7 +47,8 @@ export default async function DocumentsPage() {
     supabase
       .from("documents")
       .select("document_type_id, verification_status")
-      .eq("professional_id", prof.id),
+      .eq("professional_id", prof.id)
+      .is("superseded_at", null),
   ]);
 
   const statusByType = new Map((existing ?? []).map((d) => [d.document_type_id, d.verification_status]));

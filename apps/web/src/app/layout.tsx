@@ -9,9 +9,22 @@ const plex = IBM_Plex_Sans({
   variable: "--font-plex",
 });
 
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://carebridgeconnect.co.uk";
+
 export const metadata: Metadata = {
-  title: "CareBridge Connect",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "CareBridge Connect",
+    template: "%s · CareBridge Connect",
+  },
   description: siteTagline,
+  openGraph: {
+    title: "CareBridge Connect",
+    description: siteTagline,
+    url: siteUrl,
+    siteName: "CareBridge Connect",
+    type: "website",
+  },
   icons: {
     icon: [
       { url: "/logo.jpeg", type: "image/jpeg" },

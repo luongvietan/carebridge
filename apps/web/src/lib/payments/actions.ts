@@ -68,7 +68,9 @@ export async function startCheckout(bookingId: string): Promise<PaymentActionRes
     payment_intent_data: { metadata: { booking_id: bookingId, payment_id: paymentId } },
   });
 
-  await admin.from("payments").update({ stripe_payment_intent_id: (session.payment_intent as string) ?? null }).eq("id", paymentId);
+  // The PaymentIntent id is null on a freshly-created Checkout Session, so we do
+  // NOT write it here (that only stored null). The webhook backfills
+  // stripe_payment_intent_id when it reconciles the payment via metadata.payment_id.
   return { ok: true, url: session.url ?? undefined };
 }
 

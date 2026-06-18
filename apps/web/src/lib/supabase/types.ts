@@ -784,6 +784,7 @@ export type Database = {
           reference_number: string | null
           rejection_reason: string | null
           storage_path: string
+          superseded_at: string | null
           updated_at: string
           uploaded_by: string | null
           verification_status: Database["public"]["Enums"]["document_status"]
@@ -803,6 +804,7 @@ export type Database = {
           reference_number?: string | null
           rejection_reason?: string | null
           storage_path: string
+          superseded_at?: string | null
           updated_at?: string
           uploaded_by?: string | null
           verification_status?: Database["public"]["Enums"]["document_status"]
@@ -822,6 +824,7 @@ export type Database = {
           reference_number?: string | null
           rejection_reason?: string | null
           storage_path?: string
+          superseded_at?: string | null
           updated_at?: string
           uploaded_by?: string | null
           verification_status?: Database["public"]["Enums"]["document_status"]

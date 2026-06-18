@@ -7,8 +7,23 @@ import { PUNITIVE, REASON_CODES, type ReasonCode } from "./status-constants";
 import { reinstateOutcome, type ComplianceStatus } from "./reinstate-compliance";
 import { evaluateActivation } from "@/lib/compliance/activation";
 import type { AccountStatus } from "./account-status";
+import { sendNotification, type NotificationType } from "@/lib/notifications/send";
 
 export type StatusActionResult = { ok: true } | { error: string };
+
+/**
+ * Which notification template fires for a punitive status action so the
+ * professional is told about a rejection / removal / restriction (spec §9/§10).
+ */
+const NOTIFY_TEMPLATE: Partial<Record<StatusActionType, NotificationType>> = {
+  reject: "professional_rejected",
+  remove: "account_removed",
+  suspend: "professional_suspended",
+  full_suspension: "professional_suspended",
+  booking_restriction: "professional_suspended",
+  compliance_hold: "professional_suspended",
+  under_investigation: "professional_suspended",
+};
 
 /**
  * Actions that also change platform-level account access. This is what makes a
@@ -97,5 +112,18 @@ export async function applyProfessionalStatusAction(
     actor_user_id: adminId, actor_type: "admin", action: `professional.${action}`,
     entity_type: "professional", entity_id: professionalId, summary: details.reasonText ?? null,
   });
+
+  // Notify the professional of a rejection / removal / restriction (best-effort;
+  // sendNotification never throws to the caller).
+  const template = NOTIFY_TEMPLATE[action];
+  if (template && prof.user_id) {
+    const reason =
+      details.reasonText?.trim() ||
+      (details.reasonCode ? details.reasonCode.replace(/_/g, " ") : "Not specified");
+    await sendNotification(template, prof.user_id, {
+      reason,
+      action: action.replace(/_/g, " "),
+    });
+  }
   return { ok: true };
 }
