@@ -129,6 +129,45 @@ async function seedEligiblePro(sb: SupabaseClient, stamp: number, roleId: string
   return pro;
 }
 
+/** Make a professional genuinely compliant — a passed assessment plus every
+ *  critical document approved. The reinstate flow re-validates live compliance
+ *  before restoring booking ability, so a fixture that only sets
+ *  compliance_status='approved' would (correctly) reinstate to booking_restricted. */
+async function seedFullCompliance(sb: SupabaseClient, proId: string, roleId: string) {
+  await sb.from("assessment_attempts").insert({
+    professional_id: proId,
+    attempt_number: 1,
+    served_question_ids: [],
+    score: 100,
+    passed: true,
+    completed_at: new Date().toISOString(),
+  });
+  const { data: reqs } = await sb
+    .from("compliance_requirements")
+    .select("document_type_id, document_types(is_compliance_critical)")
+    .eq("professional_role_id", roleId);
+  const critical = (reqs ?? [])
+    .filter((r) => {
+      const dt = r.document_types as unknown as
+        | { is_compliance_critical: boolean }
+        | { is_compliance_critical: boolean }[]
+        | null;
+      const docRow = Array.isArray(dt) ? dt[0] : dt;
+      return docRow?.is_compliance_critical;
+    })
+    .map((r) => r.document_type_id);
+  const expiry = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  for (const typeId of critical) {
+    await sb.from("documents").insert({
+      professional_id: proId,
+      document_type_id: typeId,
+      storage_path: `gov/${proId}/${typeId}.pdf`,
+      verification_status: "approved",
+      expiry_date: expiry,
+    });
+  }
+}
+
 function slot(hoursFromNow: number, durationHours: number) {
   const start = new Date(Date.now() + hoursFromNow * 3_600_000);
   start.setSeconds(0, 0);
@@ -225,6 +264,9 @@ test("admin suspends and reinstates a professional via UI", async ({ page }) => 
   const stamp = Date.now();
   const roleId = await rnRoleId(sb);
   const pro = await seedEligiblePro(sb, stamp, roleId);
+  // Reinstate re-validates live compliance, so the pro must be genuinely
+  // compliant for reinstate to legitimately restore `active` + booking access.
+  await seedFullCompliance(sb, pro.proId, roleId);
   const admin = await seedAdmin(sb, stamp + 1);
 
   await login(page, admin.email, /\/admin/);
