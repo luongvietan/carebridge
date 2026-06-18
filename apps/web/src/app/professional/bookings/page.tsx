@@ -16,7 +16,9 @@ export default async function ProfessionalBookingsPage() {
         .maybeSingle()
     : { data: null };
 
-  const { data: declines } = await supabase.from("booking_declines").select("booking_id");
+  const { data: declines } = prof
+    ? await supabase.from("booking_declines").select("booking_id").eq("professional_id", prof.id)
+    : { data: [] };
   const declined = new Set((declines ?? []).map((d) => d.booking_id));
 
   const { data: rows } = await supabase
@@ -27,8 +29,14 @@ export default async function ProfessionalBookingsPage() {
     .order("scheduled_start", { ascending: true });
 
   const roleId = prof?.professional_role_id ?? null;
+  // Only future, role-matching open bookings are acceptable — a past-start
+  // booking can never be accepted (the server + DB trigger reject it).
+  const now = Date.now();
   const forMyRole = (rows ?? []).filter(
-    (b) => b.status === "open" && b.professional_role_id === roleId,
+    (b) =>
+      b.status === "open" &&
+      b.professional_role_id === roleId &&
+      new Date(b.scheduled_start).getTime() > now,
   );
   const open = forMyRole.filter((b) => !declined.has(b.id));
   const declinedOpen = forMyRole.filter((b) => declined.has(b.id));

@@ -6,10 +6,11 @@ export const clientSchema = z.object({
   fullName: z.string().min(1),
   phone: z.string().optional(),
   emailContact: email.optional(),
-  addressLine1: z.string().optional(),
+  // Spec §5 lists address as required registration data.
+  addressLine1: z.string().min(1),
   addressLine2: z.string().optional(),
-  city: z.string().optional(),
-  postcode: z.string().optional(),
+  city: z.string().min(1),
+  postcode: z.string().min(1),
 });
 export type ClientInput = z.infer<typeof clientSchema>;
 
@@ -18,10 +19,11 @@ export const organisationSchema = z.object({
   contactPerson: z.string().min(1),
   phone: z.string().optional(),
   emailContact: email.optional(),
-  addressLine1: z.string().optional(),
+  // Spec §5 lists address as required registration data.
+  addressLine1: z.string().min(1),
   addressLine2: z.string().optional(),
-  city: z.string().optional(),
-  postcode: z.string().optional(),
+  city: z.string().min(1),
+  postcode: z.string().min(1),
   cqcRegistrationNumber: z.string().optional(),
   // Organisations are invoiced for bookings, so a billing email is required (spec §5).
   billingEmail: email,

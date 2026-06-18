@@ -49,7 +49,7 @@ export function AccountRegisterForm({ variant }: { variant: Variant }) {
           </label>
           <label className="block text-sm font-medium">
             Address line 1
-            <input name="addressLine1" className={field} />
+            <input name="addressLine1" required className={field} />
           </label>
           <label className="block text-sm font-medium">
             Address line 2
@@ -58,11 +58,11 @@ export function AccountRegisterForm({ variant }: { variant: Variant }) {
           <div className="grid grid-cols-2 gap-4">
             <label className="block text-sm font-medium">
               City
-              <input name="city" className={field} />
+              <input name="city" required className={field} />
             </label>
             <label className="block text-sm font-medium">
               Postcode
-              <input name="postcode" className={field} />
+              <input name="postcode" required className={field} />
             </label>
           </div>
         </>
@@ -94,7 +94,7 @@ export function AccountRegisterForm({ variant }: { variant: Variant }) {
           </label>
           <label className="block text-sm font-medium">
             Address line 1
-            <input name="addressLine1" className={field} />
+            <input name="addressLine1" required className={field} />
           </label>
           <label className="block text-sm font-medium">
             Address line 2
@@ -103,11 +103,11 @@ export function AccountRegisterForm({ variant }: { variant: Variant }) {
           <div className="grid grid-cols-2 gap-4">
             <label className="block text-sm font-medium">
               City
-              <input name="city" className={field} />
+              <input name="city" required className={field} />
             </label>
             <label className="block text-sm font-medium">
               Postcode
-              <input name="postcode" className={field} />
+              <input name="postcode" required className={field} />
             </label>
           </div>
           <label className="block text-sm font-medium">

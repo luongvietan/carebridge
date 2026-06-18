@@ -678,6 +678,33 @@ export type Database = {
           },
         ]
       }
+      contact_messages: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          subject: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          name: string
+          subject?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          subject?: string | null
+        }
+        Relationships: []
+      }
       content_pages: {
         Row: {
           body: string | null
@@ -1068,6 +1095,7 @@ export type Database = {
           id: string
           paid_at: string | null
           payer_user_id: string | null
+          refunded_amount: number | null
           refunded_at: string | null
           status: Database["public"]["Enums"]["payment_status"]
           stripe_payment_intent_id: string | null
@@ -1081,6 +1109,7 @@ export type Database = {
           id?: string
           paid_at?: string | null
           payer_user_id?: string | null
+          refunded_amount?: number | null
           refunded_at?: string | null
           status?: Database["public"]["Enums"]["payment_status"]
           stripe_payment_intent_id?: string | null
@@ -1094,6 +1123,7 @@ export type Database = {
           id?: string
           paid_at?: string | null
           payer_user_id?: string | null
+          refunded_amount?: number | null
           refunded_at?: string | null
           status?: Database["public"]["Enums"]["payment_status"]
           stripe_payment_intent_id?: string | null

@@ -17,6 +17,7 @@ const NO_AVAILABILITY_DAYS: number[] = [];
 type Role = { id: string; name: string };
 type Skill = { id: string; name: string };
 type Current = {
+  full_name: string | null;
   professional_role_id: string | null;
   date_of_birth: string | null;
   address_line1: string | null;
@@ -70,6 +71,10 @@ export function ProfileForm({
     <div>
       <OnboardingSteps current={3} />
       <form action={action} className="mt-8 space-y-4">
+        <label className="block text-sm font-medium">
+          Full name
+          <input name="fullName" required defaultValue={current?.full_name ?? ""} className={field} />
+        </label>
         <div className="block text-sm font-medium">
           Professional role
           <Select

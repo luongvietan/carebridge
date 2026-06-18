@@ -5,14 +5,15 @@ import { createBooking } from "@/lib/bookings/actions";
 import { Select } from "@/components/ui/select";
 import { DateTimePicker } from "@/components/ui/date-picker";
 import { MAX_SHIFT_HOURS } from "@/lib/validation/bookings";
+import { APP_TIME_ZONE, londonWallClockToUtc } from "@/lib/format/datetime";
 
 const field =
   "mt-1 w-full rounded-xl border border-[#dbe7e0] bg-white px-3.5 py-2.5 text-sm text-[#1e5a33] placeholder:text-[#9aa8a0] focus:border-[#2e7d32] focus:outline-none focus:ring-2 focus:ring-[#2e7d32]/15";
 
 type Role = { id: string; name: string };
 
-// Selectable shift lengths (whole hours), bounded by the server-side maximum.
-const DURATIONS = Array.from({ length: Math.min(12, MAX_SHIFT_HOURS) }, (_, i) => {
+// Selectable shift lengths (whole hours), up to the server-side maximum.
+const DURATIONS = Array.from({ length: MAX_SHIFT_HOURS }, (_, i) => {
   const h = i + 1;
   return { value: String(h), label: `${h} hour${h === 1 ? "" : "s"}` };
 });
@@ -35,9 +36,11 @@ export function BookingRequestForm({
 
   const listHref = requesterType === "client" ? "/client/bookings" : "/organisation/bookings";
 
-  const startDate = start ? new Date(start) : null;
+  // Interpret the picked wall-clock as London time so the stored instant is
+  // correct regardless of the requester's browser timezone.
+  const startDate = start ? londonWallClockToUtc(start) : null;
   const endPreview =
-    startDate && !Number.isNaN(startDate.getTime()) && duration
+    startDate && duration
       ? new Date(startDate.getTime() + Number(duration) * 3_600_000)
       : null;
 
@@ -48,9 +51,13 @@ export function BookingRequestForm({
       setError("Please choose a start time and shift duration.");
       return;
     }
-    const startIso = new Date(start);
-    if (Number.isNaN(startIso.getTime())) {
+    const startIso = londonWallClockToUtc(start);
+    if (!startIso) {
       setError("Please choose a valid start time.");
+      return;
+    }
+    if (startIso.getTime() <= Date.now()) {
+      setError("Please choose a start time in the future.");
       return;
     }
     const endIso = new Date(startIso.getTime() + Number(duration) * 3_600_000);
@@ -116,7 +123,7 @@ export function BookingRequestForm({
             year: "numeric",
             hour: "2-digit",
             minute: "2-digit",
-            timeZone: "Europe/London",
+            timeZone: APP_TIME_ZONE,
           })}
         </p>
       )}

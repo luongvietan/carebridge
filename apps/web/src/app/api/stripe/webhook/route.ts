@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import type Stripe from "stripe";
 import { stripe } from "@/lib/stripe/client";
-import { isAllowedTransition, paymentStatusForEvent } from "@/lib/stripe/events";
+import { isAllowedTransition, paymentStatusForEvent, refundInfoFromCharge } from "@/lib/stripe/events";
 import { createServiceClient } from "@/lib/supabase/service";
 import { sendNotification } from "@/lib/notifications/send";
 
@@ -78,6 +78,25 @@ export async function POST(req: NextRequest) {
     .update({ payment_id: payment.id })
     .eq("event_id", event.id);
 
+  // A partial refund must not flip the payment to fully `refunded` (which would
+  // freeze the professional's payout). Record the refunded amount and stop.
+  let refundedAmount: number | null = null;
+  if (event.type === "charge.refunded") {
+    const info = refundInfoFromCharge(obj as Parameters<typeof refundInfoFromCharge>[0]);
+    refundedAmount = info.refundedAmount;
+    if (!info.isFullRefund) {
+      await admin.from("payments").update({ refunded_amount: refundedAmount }).eq("id", payment.id);
+      await admin.from("audit_log").insert({
+        actor_type: "system",
+        action: "payment.partially_refunded",
+        entity_type: "payment",
+        entity_id: payment.id,
+        summary: `${event.type} — refunded ${refundedAmount}`,
+      });
+      return new Response("ok", { status: 200 });
+    }
+  }
+
   if (!isAllowedTransition(payment.status, status)) {
     return new Response("transition rejected", { status: 200 });
   }
@@ -86,10 +105,12 @@ export async function POST(req: NextRequest) {
     status: typeof status;
     paid_at?: string;
     refunded_at?: string;
+    refunded_amount?: number;
     stripe_payment_intent_id?: string;
   } = { status };
   if (status === "succeeded") patch.paid_at = new Date().toISOString();
   if (status === "refunded" && !payment.refunded_at) patch.refunded_at = new Date().toISOString();
+  if (status === "refunded" && refundedAmount != null) patch.refunded_amount = refundedAmount;
   if (intentId && !payment.stripe_payment_intent_id) patch.stripe_payment_intent_id = intentId;
 
   const { error: updateErr } = await admin.from("payments").update(patch).eq("id", payment.id);

@@ -2,11 +2,9 @@ import type { Metadata } from "next";
 import { PageHero } from "@/components/page-hero";
 import { SiteNav } from "@/components/site-nav";
 import { SiteFooter } from "@/components/site-footer";
+import { ContactForm } from "@/components/contact-form";
 
 export const metadata: Metadata = { title: "Contact — CareBridge Connect" };
-
-const field =
-  "mt-1.5 w-full rounded-xl border border-[#dbe7e0] bg-white px-4 py-2.5 text-sm text-[#14301e] placeholder:text-[#9aa8a0] focus:border-[#2e7d32] focus:outline-none focus:ring-2 focus:ring-[#2e7d32]/15";
 
 const details = [
   ["Email", "info@carebridgeconnect.co.uk", "M4 6h16v12H4zM4 7l8 6 8-6"],
@@ -25,37 +23,7 @@ export default function ContactPage() {
 
       <main className="mx-auto max-w-5xl px-5 py-16">
         <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr]">
-          <form
-            action="mailto:info@carebridgeconnect.co.uk"
-            method="post"
-            encType="text/plain"
-            className="rounded-3xl border border-[#e7efe9] bg-white p-7 sm:p-8"
-          >
-            <div className="grid gap-4 sm:grid-cols-2">
-              <label className="block text-sm font-medium text-[#33433a]">
-                Full name
-                <input name="name" required placeholder="Your name" className={field} />
-              </label>
-              <label className="block text-sm font-medium text-[#33433a]">
-                Email
-                <input type="email" name="email" required placeholder="you@email.com" className={field} />
-              </label>
-            </div>
-            <label className="mt-4 block text-sm font-medium text-[#33433a]">
-              Subject
-              <input name="subject" placeholder="How can we help?" className={field} />
-            </label>
-            <label className="mt-4 block text-sm font-medium text-[#33433a]">
-              Message
-              <textarea name="message" rows={5} required placeholder="Tell us a little more…" className={field} />
-            </label>
-            <button
-              type="submit"
-              className="mt-6 rounded-full bg-[#2e7d32] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#246627]"
-            >
-              Send message
-            </button>
-          </form>
+          <ContactForm />
 
           <div className="space-y-4">
             {details.map(([label, value, icon]) => (

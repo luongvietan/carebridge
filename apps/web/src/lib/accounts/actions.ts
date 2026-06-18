@@ -1,10 +1,32 @@
 "use server";
+import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { clientSchema, organisationSchema } from "@/lib/validation/accounts";
 import { createCustomer } from "@/lib/stripe/client";
 
 export type AccountResult = { ok: true } | { error: string } | null;
+
+const FIELD_LABELS: Record<string, string> = {
+  fullName: "Full name",
+  organisationName: "Organisation name",
+  contactPerson: "Contact person",
+  emailContact: "Contact email",
+  addressLine1: "Address line 1",
+  city: "City",
+  postcode: "Postcode",
+  billingEmail: "Billing email",
+};
+
+/** Name the fields that failed validation rather than a generic catch-all. */
+function validationMessage(error: z.ZodError): string {
+  const fields = [
+    ...new Set(error.issues.map((i) => FIELD_LABELS[String(i.path[0])] ?? String(i.path[0]))),
+  ];
+  return fields.length
+    ? `Please check these fields: ${fields.join(", ")}.`
+    : "Please complete the required fields.";
+}
 
 async function currentUser() {
   const supabase = await createClient();
@@ -36,7 +58,7 @@ export async function saveClientProfile(_prev: AccountResult, formData: FormData
     city: (formData.get("city") as string) || undefined,
     postcode: (formData.get("postcode") as string) || undefined,
   });
-  if (!parsed.success) return { error: "Please complete the required fields." };
+  if (!parsed.success) return { error: validationMessage(parsed.error) };
   const user = await currentUser();
   if (!user) return { error: "You must be signed in." };
 
@@ -90,7 +112,7 @@ export async function saveOrganisationProfile(_prev: AccountResult, formData: Fo
     billingEmail: (formData.get("billingEmail") as string) || undefined,
     billingAddress: (formData.get("billingAddress") as string) || undefined,
   });
-  if (!parsed.success) return { error: "Please complete the required fields." };
+  if (!parsed.success) return { error: validationMessage(parsed.error) };
   const user = await currentUser();
   if (!user) return { error: "You must be signed in." };
 

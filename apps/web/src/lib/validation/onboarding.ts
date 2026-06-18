@@ -63,6 +63,9 @@ export function isPlausibleDateOfBirth(value: string | null | undefined, today?:
 }
 
 export const profileSchema = z.object({
+  // Spec §3 lists full name as a profile field. Editable here so a signup typo
+  // or an email-derived fallback name can be corrected.
+  fullName: z.string().min(1),
   dateOfBirth: z
     .string()
     .optional()

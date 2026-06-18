@@ -2,11 +2,18 @@ import { describe, it, expect } from "vitest";
 import { profileSchema, isPlausibleDateOfBirth } from "./onboarding";
 
 const base = {
+  fullName: "Jane Doe",
   addressLine1: "1 Test Street",
   city: "London",
   postcode: "E1 6AN",
   professionalRoleId: "11111111-1111-4111-8111-111111111111",
 };
+
+describe("profileSchema full name", () => {
+  it("requires a full name (spec §3)", () => {
+    expect(profileSchema.safeParse({ ...base, fullName: "" }).success).toBe(false);
+  });
+});
 
 describe("profileSchema National Insurance validation", () => {
   it("accepts a profile with no NI number (optional)", () => {

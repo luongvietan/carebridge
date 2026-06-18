@@ -73,6 +73,7 @@ export type ProfileResult = { ok: true } | { error: string } | null;
 export async function saveProfile(_prev: ProfileResult, formData: FormData): Promise<ProfileResult> {
   const user = await requireAuth();
   const parsed = profileSchema.safeParse({
+    fullName: formData.get("fullName"),
     dateOfBirth: (formData.get("dateOfBirth") as string) || undefined,
     addressLine1: formData.get("addressLine1"),
     addressLine2: (formData.get("addressLine2") as string) || undefined,
@@ -119,6 +120,7 @@ export async function saveProfile(_prev: ProfileResult, formData: FormData): Pro
   const { error } = await supabase
     .from("professionals")
     .update({
+      full_name: parsed.data.fullName,
       date_of_birth: parsed.data.dateOfBirth ?? null,
       address_line1: parsed.data.addressLine1,
       address_line2: parsed.data.addressLine2 ?? null,
