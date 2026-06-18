@@ -31,9 +31,11 @@ on conflict (code) do nothing;
 insert into notification_templates (type, subject, body) values
   ('registration_confirmation','Welcome to CareBridge Connect','Your registration has been received.'),
   ('email_verification','Verify your email','Please verify your email address.'),
-  ('assessment_result','Your assessment result','Your competency assessment result is available.'),
+  ('assessment_result','Your assessment result','Your competency assessment has been scored: {{score}}%. Result: {{passed}}. Sign in to view your full result and next steps.'),
   ('compliance_approval','Compliance approved','Your compliance documents have been approved.'),
-  ('compliance_expiry_reminder','Document expiring soon','A compliance document is due to expire.'),
+  ('compliance_expiry_reminder','Document expiring soon','A compliance document is due to expire on {{due_date}}. Please sign in and upload an updated certificate before it lapses, or your ability to accept bookings will be restricted.'),
+  ('compliance_rejected','A compliance document was not accepted','One of your compliance documents was not accepted. Reason: {{reason}}. Please sign in and upload an updated document so your application can proceed.'),
+  ('further_info_required','Further information needed on your compliance documents','We need further information about one of your compliance documents. {{reason}} Please sign in to review and update your documents.'),
   ('booking_request','New booking request','A booking matching your role is available.'),
   ('booking_confirmation','Booking confirmed','Your booking has been confirmed.'),
   ('password_reset','Reset your password','Use the link to reset your password.')

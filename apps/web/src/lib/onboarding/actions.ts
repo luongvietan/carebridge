@@ -188,7 +188,7 @@ export async function uploadDocument(
   // non-null expiry_date) can never expire or alert on a lapsed certificate.
   const { data: docType } = await admin0
     .from("document_types")
-    .select("has_expiry")
+    .select("has_expiry, code")
     .eq("id", documentTypeId)
     .maybeSingle();
   if (!docType) return { error: "Unknown document type." };
@@ -209,16 +209,33 @@ export async function uploadDocument(
     .upload(path, file, { contentType: verified.safeMime, upsert: true });
   if (upErr) return { error: `Upload failed: ${upErr.message}` };
 
-  const { error } = await admin.from("documents").insert({
-    professional_id: professionalId,
-    document_type_id: documentTypeId,
-    storage_path: path,
-    original_filename: verified.safeName,
-    reference_number: (formData.get("referenceNumber") as string) || null,
-    issuing_body: (formData.get("issuingBody") as string) || null,
-    expiry_date: expiryRaw || null,
-    uploaded_by: user.id,
-  });
+  const { data: inserted, error } = await admin
+    .from("documents")
+    .insert({
+      professional_id: professionalId,
+      document_type_id: documentTypeId,
+      storage_path: path,
+      original_filename: verified.safeName,
+      reference_number: (formData.get("referenceNumber") as string) || null,
+      issuing_body: (formData.get("issuingBody") as string) || null,
+      expiry_date: expiryRaw || null,
+      uploaded_by: user.id,
+    })
+    .select("id")
+    .single();
   if (error) return { error: error.message };
+
+  // Spec §16 audit trail: record the document upload date. Best-effort — an
+  // audit failure must not fail the upload itself.
+  if (inserted) {
+    await admin.from("audit_log").insert({
+      actor_user_id: user.id,
+      actor_type: "user",
+      action: "document.uploaded",
+      entity_type: "document",
+      entity_id: inserted.id,
+      summary: docType.code ?? null,
+    });
+  }
   return { ok: true };
 }

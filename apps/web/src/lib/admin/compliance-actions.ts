@@ -40,7 +40,7 @@ export async function reviewDocument(
   const admin = createServiceClient();
   const { data: doc } = await admin
     .from("documents")
-    .select("id, professional_id")
+    .select("id, professional_id, document_type_id")
     .eq("id", documentId)
     .single();
   if (!doc) return { error: "Document not found." };
@@ -65,8 +65,51 @@ export async function reviewDocument(
     summary: note ?? null,
   });
 
+  if (decision === "rejected" || decision === "further_info_required") {
+    // Spec §9 "Request additional information": tell the professional they must
+    // act. (Approval is notified by recomputeCompliance once they activate.)
+    const { data: profUser } = await admin
+      .from("professionals")
+      .select("user_id")
+      .eq("id", doc.professional_id)
+      .maybeSingle();
+    if (profUser?.user_id) {
+      await sendNotification(
+        decision === "rejected" ? "compliance_rejected" : "further_info_required",
+        profUser.user_id,
+        { reason: note ?? "" },
+      );
+    }
+  } else if (decision === "approved") {
+    // Renewing + approving a document clears its outstanding expiry alerts, so
+    // the admin alert list drains and the reminder email loop stops.
+    await acknowledgeAlertsForDocType(admin, doc.professional_id, doc.document_type_id);
+  }
+
   await recomputeCompliance(doc.professional_id, adminId, decision);
   return { ok: true };
+}
+
+/** Acknowledge any outstanding expiry alerts tied to a professional's documents
+ * of a given type — called when one of those documents is approved (renewed). */
+async function acknowledgeAlertsForDocType(
+  admin: ReturnType<typeof createServiceClient>,
+  professionalId: string,
+  documentTypeId: string,
+): Promise<void> {
+  const { data: docs } = await admin
+    .from("documents")
+    .select("id")
+    .eq("professional_id", professionalId)
+    .eq("document_type_id", documentTypeId);
+  const docIds = (docs ?? []).map((d) => d.id);
+  if (docIds.length === 0) return;
+  await admin
+    .from("compliance_alerts")
+    .update({ acknowledged: true })
+    .eq("professional_id", professionalId)
+    .eq("acknowledged", false)
+    .in("document_id", docIds);
 }
 
 /** Professional statuses that are blocked *because of* compliance and should be

@@ -23,12 +23,13 @@ export async function startCheckout(bookingId: string): Promise<PaymentActionRes
 
   if (await alreadyPaid(admin, bookingId)) return { error: "This booking is already paid." };
 
+  // Reuse an outstanding pending payment for this booking (at most one exists —
+  // enforced by uq_payments_active_booking). Don't reuse failed/refunded rows.
   const { data: existing } = await admin
     .from("payments")
-    .select("id, status")
+    .select("id")
     .eq("booking_id", bookingId)
-    .neq("status", "succeeded")
-    .order("created_at", { ascending: false })
+    .eq("status", "pending")
     .maybeSingle();
 
   let paymentId = existing?.id ?? null;
@@ -38,8 +39,22 @@ export async function startCheckout(bookingId: string): Promise<PaymentActionRes
       .insert({ booking_id: bookingId, payer_user_id: user.id, amount: Number(booking.total_client_charge), currency: booking.snap_currency, status: "pending" })
       .select("id")
       .single();
-    if (error || !created) return { error: error?.message ?? "Could not start payment." };
-    paymentId = created.id;
+    if (error || !created) {
+      // A concurrent request won the race and created the pending payment first
+      // (unique-violation). Reuse that row instead of opening a second charge.
+      if (error?.code === "23505") {
+        const { data: race } = await admin
+          .from("payments")
+          .select("id")
+          .eq("booking_id", bookingId)
+          .eq("status", "pending")
+          .maybeSingle();
+        paymentId = race?.id ?? null;
+      }
+      if (!paymentId) return { error: error?.message ?? "Could not start payment." };
+    } else {
+      paymentId = created.id;
+    }
   }
 
   const roleName = (booking.professional_roles as { name: string } | null)?.name ?? "professional";

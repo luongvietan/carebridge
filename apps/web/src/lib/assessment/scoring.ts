@@ -18,6 +18,30 @@ export interface AttemptState {
   lockUntil: Date | null;
 }
 
+export interface CyclePlan {
+  /** Which reapplication cycle this next attempt belongs to (1-based). */
+  cycle: number;
+  /** Attempt number within that cycle (1..MAX_ATTEMPTS). */
+  attemptNumber: number;
+}
+
+/**
+ * Decide the cycle + attempt number for the *next* attempt given the cycles of
+ * all previously completed attempts. Must only be called once the reapply lock
+ * (if any) has elapsed — an active lock is handled before this point.
+ *
+ * - No prior attempts → cycle 1, attempt 1.
+ * - Latest cycle exhausted (>= MAX_ATTEMPTS completed) → start a fresh cycle.
+ * - Otherwise continue the latest cycle at the next attempt number.
+ */
+export function planNextCycle(completedCycles: number[], maxAttempts: number = MAX_ATTEMPTS): CyclePlan {
+  if (completedCycles.length === 0) return { cycle: 1, attemptNumber: 1 };
+  const latestCycle = Math.max(...completedCycles);
+  const completedInLatest = completedCycles.filter((c) => c === latestCycle).length;
+  if (completedInLatest >= maxAttempts) return { cycle: latestCycle + 1, attemptNumber: 1 };
+  return { cycle: latestCycle, attemptNumber: completedInLatest + 1 };
+}
+
 /**
  * After an attempt: a pass ends the process; a fail allows retry until MAX_ATTEMPTS,
  * after which the applicant is locked out for REAPPLY_LOCK_MONTHS.

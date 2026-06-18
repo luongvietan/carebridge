@@ -221,8 +221,9 @@ export default async function AdminUserDetailPage({
       .order("applied_at", { ascending: false }),
     admin
       .from("assessment_attempts")
-      .select("attempt_number, score, passed, completed_at")
+      .select("assessment_cycle, attempt_number, score, passed, completed_at")
       .eq("professional_id", id)
+      .order("assessment_cycle", { ascending: true })
       .order("attempt_number", { ascending: true }),
     admin
       .from("eligibility_screenings")
@@ -258,6 +259,10 @@ export default async function AdminUserDetailPage({
     null,
   );
   const hasPassed = completedAttempts.some((a) => a.passed);
+  // Attempts are counted per reapplication cycle (see migration 0051). Show the
+  // latest cycle's usage so "attempts used / 3" is meaningful after a reapply.
+  const latestCycle = completedAttempts.reduce((max, a) => Math.max(max, a.assessment_cycle ?? 1), 0);
+  const attemptsThisCycle = completedAttempts.filter((a) => (a.assessment_cycle ?? 1) === latestCycle).length;
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-10">
@@ -355,7 +360,10 @@ export default async function AdminUserDetailPage({
           </div>
           <div>
             <dt className="text-[#7a8a81]">Attempts used</dt>
-            <dd>{completedAttempts.length} / 3</dd>
+            <dd>
+              {attemptsThisCycle} / 3
+              {latestCycle > 1 ? ` (reapplication ${latestCycle})` : ""}
+            </dd>
           </div>
         </dl>
         {completedAttempts.length > 0 && (
@@ -371,8 +379,10 @@ export default async function AdminUserDetailPage({
               </thead>
               <tbody className="divide-y divide-[#dbe7e0]">
                 {completedAttempts.map((a) => (
-                  <tr key={a.attempt_number}>
-                    <td className="p-3">{a.attempt_number}</td>
+                  <tr key={`${a.assessment_cycle ?? 1}-${a.attempt_number}`}>
+                    <td className="p-3">
+                      {latestCycle > 1 ? `${a.assessment_cycle ?? 1}.${a.attempt_number}` : a.attempt_number}
+                    </td>
                     <td className="p-3">{a.score != null ? `${a.score}%` : "—"}</td>
                     <td className="p-3">{a.passed ? "Pass" : "Fail"}</td>
                     <td className="p-3 whitespace-nowrap">

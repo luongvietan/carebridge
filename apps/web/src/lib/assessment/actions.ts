@@ -3,7 +3,7 @@ import { createServiceClient } from "@/lib/supabase/service";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { ensureProfessional } from "@/lib/onboarding/professional-session";
 import { pickStratified } from "./selection";
-import { scorePercent, isPass, nextAttemptState, MAX_ATTEMPTS } from "./scoring";
+import { scorePercent, isPass, nextAttemptState, planNextCycle } from "./scoring";
 import { sendNotification } from "@/lib/notifications/send";
 
 // CareBridge MVP assessment format: 15 common + 5 role-specific = 20 questions.
@@ -42,6 +42,8 @@ export async function startAttempt(): Promise<StartResult> {
     .eq("id", professionalId)
     .single();
 
+  // While the reapply lock is still in the future the applicant cannot start a
+  // new attempt. Once it elapses, planNextCycle (below) grants a fresh cycle.
   if (prof?.assessment_locked_until && new Date(prof.assessment_locked_until) > new Date()) {
     return { locked: true, lockUntil: prof.assessment_locked_until };
   }
@@ -78,15 +80,25 @@ export async function startAttempt(): Promise<StartResult> {
     }
   }
 
-  // Count only COMPLETED attempts toward the limit.
-  const { count } = await admin
+  // Plan the next attempt by reapplication cycle. Each cycle is up to
+  // MAX_ATTEMPTS attempts; a fresh cycle opens only after the reapply lock has
+  // elapsed (checked above), so failing 3× is a temporary lockout, not permanent.
+  const { data: completed } = await admin
     .from("assessment_attempts")
-    .select("id", { count: "exact", head: true })
+    .select("assessment_cycle")
     .eq("professional_id", professionalId)
     .not("completed_at", "is", null);
-  const attemptNumber = (count ?? 0) + 1;
-  if (attemptNumber > MAX_ATTEMPTS) {
-    return { locked: true, lockUntil: prof?.assessment_locked_until ?? null };
+  const completedCycles = (completed ?? []).map((a) => a.assessment_cycle ?? 1);
+  const { cycle, attemptNumber } = planNextCycle(completedCycles);
+
+  // Starting a fresh cycle means a prior lock has elapsed — clear the stale
+  // lock date so the admin record and the runner no longer show it as locked.
+  const startingFreshCycle = attemptNumber === 1 && completedCycles.length > 0;
+  if (startingFreshCycle && prof?.assessment_locked_until) {
+    await admin
+      .from("professionals")
+      .update({ assessment_locked_until: null })
+      .eq("id", professionalId);
   }
 
   // Two pools: common questions (no role) and role-specific questions. The MVP
@@ -115,7 +127,7 @@ export async function startAttempt(): Promise<StartResult> {
 
   const { data: attempt, error } = await admin
     .from("assessment_attempts")
-    .insert({ professional_id: professionalId, attempt_number: attemptNumber, served_question_ids: servedIds })
+    .insert({ professional_id: professionalId, assessment_cycle: cycle, attempt_number: attemptNumber, served_question_ids: servedIds })
     .select("id")
     .single();
   if (error || !attempt) return { error: error?.message ?? "Could not start the assessment." };
@@ -179,6 +191,17 @@ export async function submitAttempt(
       .eq("id", professionalId);
   }
 
+  // Spec §16 audit trail: record assessment completion + score. Best-effort —
+  // an audit failure must not block the applicant's result.
+  await admin.from("audit_log").insert({
+    actor_user_id: user.id,
+    actor_type: "user",
+    action: "assessment.completed",
+    entity_type: "assessment_attempt",
+    entity_id: attemptId,
+    summary: `score=${score}%, passed=${passed ? "yes" : "no"}, attempt=${attempt.attempt_number}`,
+  });
+
   const { data: profRow } = await admin
     .from("professionals")
     .select("user_id")
@@ -187,7 +210,7 @@ export async function submitAttempt(
   if (profRow?.user_id) {
     await sendNotification("assessment_result", profRow.user_id, {
       score,
-      passed: passed ? "yes" : "no",
+      passed: passed ? "Passed" : "Not passed",
       attempt_number: attempt.attempt_number,
     });
   }

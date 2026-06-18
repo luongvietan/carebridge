@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { scorePercent, isPass, nextAttemptState } from "./scoring";
+import { scorePercent, isPass, nextAttemptState, planNextCycle } from "./scoring";
 
 describe("scorePercent", () => {
   it("computes percent correct", () => {
@@ -28,5 +28,22 @@ describe("nextAttemptState", () => {
     const s = nextAttemptState(3, false, now);
     expect(s.canRetry).toBe(false);
     expect(s.lockUntil?.toISOString().slice(0, 10)).toBe("2026-09-15");
+  });
+});
+
+describe("planNextCycle", () => {
+  it("starts at cycle 1, attempt 1 with no history", () => {
+    expect(planNextCycle([])).toEqual({ cycle: 1, attemptNumber: 1 });
+  });
+  it("continues the current cycle while attempts remain", () => {
+    expect(planNextCycle([1])).toEqual({ cycle: 1, attemptNumber: 2 });
+    expect(planNextCycle([1, 1])).toEqual({ cycle: 1, attemptNumber: 3 });
+  });
+  it("opens a fresh cycle once the latest cycle is exhausted (reapply after lock)", () => {
+    expect(planNextCycle([1, 1, 1])).toEqual({ cycle: 2, attemptNumber: 1 });
+    expect(planNextCycle([1, 1, 1, 2, 2, 2])).toEqual({ cycle: 3, attemptNumber: 1 });
+  });
+  it("counts only the latest cycle when continuing", () => {
+    expect(planNextCycle([1, 1, 1, 2])).toEqual({ cycle: 2, attemptNumber: 2 });
   });
 });

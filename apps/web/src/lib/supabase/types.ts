@@ -62,6 +62,7 @@ export type Database = {
       }
       assessment_attempts: {
         Row: {
+          assessment_cycle: number
           attempt_number: number
           completed_at: string | null
           id: string
@@ -72,6 +73,7 @@ export type Database = {
           started_at: string
         }
         Insert: {
+          assessment_cycle?: number
           attempt_number: number
           completed_at?: string | null
           id?: string
@@ -82,6 +84,7 @@ export type Database = {
           started_at?: string
         }
         Update: {
+          assessment_cycle?: number
           attempt_number?: number
           completed_at?: string | null
           id?: string
