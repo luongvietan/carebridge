@@ -38,6 +38,10 @@ export async function submitEligibility(
   // eligibility_screenings has admin-only RLS, so privileged server-side write is required.
   const admin = createServiceClient();
   const outcome = eligibilityOutcome(allCurrent);
+  // Replace any prior screening: re-entering the eligibility step must not leave
+  // duplicate / contradictory rows (the admin view and the activation guard read
+  // the latest screening, so a stale earlier attestation would silently linger).
+  await admin.from("eligibility_screenings").delete().eq("professional_id", professionalId);
   const { error } = await admin.from("eligibility_screenings").insert({
     professional_id: professionalId,
     employment_status: parsed.data.employmentStatus,
@@ -143,22 +147,34 @@ export async function saveProfile(_prev: ProfileResult, formData: FormData): Pro
 
   // Persist skills/specialities and weekly availability as a replace-set. Owner
   // self-RLS (0042) authorises these writes for the professional's own rows.
+  // Surface any error so a half-applied replace (old rows deleted, new insert
+  // failed) can't be reported as a silent success.
   const skillIds = parseSkillIds(formData.getAll("skillIds").map(String));
-  await supabase.from("professional_skills").delete().eq("professional_id", professionalId);
+  const { error: skillsDelErr } = await supabase
+    .from("professional_skills")
+    .delete()
+    .eq("professional_id", professionalId);
+  if (skillsDelErr) return { error: skillsDelErr.message };
   if (skillIds.length > 0) {
-    await supabase
+    const { error: skillsInsErr } = await supabase
       .from("professional_skills")
       .insert(skillIds.map((skill_id) => ({ professional_id: professionalId, skill_id })));
+    if (skillsInsErr) return { error: skillsInsErr.message };
   }
 
   const availabilityDays = parseAvailabilityDays(formData.getAll("availabilityDays").map(String));
-  await supabase.from("professional_availability").delete().eq("professional_id", professionalId);
+  const { error: availDelErr } = await supabase
+    .from("professional_availability")
+    .delete()
+    .eq("professional_id", professionalId);
+  if (availDelErr) return { error: availDelErr.message };
   if (availabilityDays.length > 0) {
-    await supabase
+    const { error: availInsErr } = await supabase
       .from("professional_availability")
       .insert(
         availabilityDays.map((day_of_week) => ({ professional_id: professionalId, day_of_week })),
       );
+    if (availInsErr) return { error: availInsErr.message };
   }
 
   return { ok: true };

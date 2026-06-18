@@ -46,12 +46,15 @@ export default async function DocumentsPage() {
       .eq("professional_role_id", prof.professional_role_id),
     supabase
       .from("documents")
-      .select("document_type_id, verification_status")
+      .select("document_type_id, verification_status, rejection_reason")
       .eq("professional_id", prof.id)
-      .is("superseded_at", null),
+      .is("superseded_at", null)
+      .order("created_at", { ascending: true }),
   ]);
 
+  // Latest non-superseded row per type wins (ordered ascending → last set).
   const statusByType = new Map((existing ?? []).map((d) => [d.document_type_id, d.verification_status]));
+  const reasonByType = new Map((existing ?? []).map((d) => [d.document_type_id, d.rejection_reason]));
 
   const items: DocItem[] = (required ?? []).map((r) => {
     const dt = r.document_types as {
@@ -66,6 +69,7 @@ export default async function DocumentsPage() {
       critical: dt?.is_compliance_critical ?? false,
       hasExpiry: dt?.has_expiry ?? false,
       status: statusByType.get(r.document_type_id) ?? null,
+      rejectionReason: reasonByType.get(r.document_type_id) ?? null,
     };
   });
 

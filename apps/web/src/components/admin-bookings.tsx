@@ -5,6 +5,7 @@ import { assignBooking, cancelBooking, completeBooking, markNoShow } from "@/lib
 import { Select } from "@/components/ui/select";
 
 import { formatGbpMoney } from "@/lib/format/money";
+import { formatLondon } from "@/lib/format/datetime";
 
 type AdminBooking = {
   id: string;
@@ -27,7 +28,7 @@ type Professional = {
 const TERMINAL = new Set(["completed", "cancelled", "no_show"]);
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" });
+  return formatLondon(iso);
 }
 
 function formatMoney(amount: number | null) {

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { BookingCancelButton } from "@/components/booking-cancel-button";
 import { PayNowButton } from "@/components/pay-now-button";
 import { formatGbpMoney } from "@/lib/format/money";
+import { formatLondon } from "@/lib/format/datetime";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +12,7 @@ const CANCELLABLE = new Set(["open", "accepted", "assigned"]);
 const PAYABLE = new Set(["accepted", "assigned"]);
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" });
+  return formatLondon(iso);
 }
 
 function formatMoney(amount: number | null) {

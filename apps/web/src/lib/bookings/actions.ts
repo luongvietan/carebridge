@@ -222,8 +222,13 @@ export async function assignBooking(bookingId: string, professionalId: string): 
   const adminId = await requireAdmin();
   if (!adminId) return { error: "Administrator access required." };
   const admin = createServiceClient();
-  const { data: booking } = await admin.from("bookings").select("status, requester_user_id, professional_role_id").eq("id", bookingId).single();
+  const { data: booking } = await admin.from("bookings").select("status, requester_user_id, professional_role_id, scheduled_start").eq("id", bookingId).single();
   if (!booking) return { error: "Booking not found." };
+  // A past-start booking can never be worked — mirror the guard acceptBooking has
+  // so an admin cannot assign a professional to an already-started shift.
+  if (new Date(booking.scheduled_start).getTime() <= Date.now()) {
+    return { error: "This booking can no longer be assigned — its start time has passed." };
+  }
   const t = applyTransition(booking.status, "assign", "admin");
   if (!t.ok) return { error: t.error };
 

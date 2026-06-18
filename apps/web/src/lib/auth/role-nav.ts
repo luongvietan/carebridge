@@ -14,6 +14,7 @@ export const ROLE_NAV: Record<AccountType, RoleNavItem[]> = {
     { href: "/professional", label: "Dashboard" },
     { href: "/professional/onboarding/eligibility", label: "Onboarding" },
     { href: "/professional/bookings", label: "Bookings" },
+    { href: "/professional/earnings", label: "Earnings" },
   ],
   private_client: [
     { href: "/client", label: "Dashboard" },
@@ -34,5 +35,6 @@ export const ROLE_NAV: Record<AccountType, RoleNavItem[]> = {
     { href: "/admin/rates", label: "Rates" },
     { href: "/admin/finance", label: "Finance" },
     { href: "/admin/reports", label: "Reports" },
+    { href: "/admin/audit", label: "Audit log" },
   ],
 };

@@ -85,6 +85,9 @@ export async function sendDueComplianceReminders(): Promise<{ sent: number }> {
       .from("notifications")
       .select("recipient_user_id, payload")
       .eq("type", "compliance_expiry_reminder")
+      // Only a SUCCESSFULLY delivered reminder suppresses a re-send — a prior
+      // failed send must not silence the warning for the whole dedup window.
+      .eq("status", "sent")
       .gte("created_at", since)
       .in("recipient_user_id", candidateUserIds);
     for (const n of recent ?? []) {
@@ -101,4 +104,45 @@ export async function sendDueComplianceReminders(): Promise<{ sent: number }> {
     });
   }
   return { sent: targets.length };
+}
+
+/**
+ * Email professionals auto-restricted by the nightly pg_cron compliance sweep.
+ * The sweep is pure SQL and cannot send email, so every still-open *automatic*
+ * booking restriction is notified here — deduplicated against any suspension
+ * notice already sent to that professional after the restriction was applied,
+ * so a pro is told exactly once that a lapsed document has blocked them (§9/§10).
+ */
+export async function sendDueAutoRestrictionNotices(): Promise<{ sent: number }> {
+  const admin = createServiceClient();
+  const { data: actions } = await admin
+    .from("professional_status_actions")
+    .select("professional_id, applied_at")
+    .eq("is_automatic", true)
+    .eq("action_type", "booking_restriction")
+    .is("resolved_at", null);
+  if (!actions || actions.length === 0) return { sent: 0 };
+
+  const profIds = [...new Set(actions.map((a) => a.professional_id))];
+  const { data: pros } = await admin.from("professionals").select("id, user_id").in("id", profIds);
+  const userIdByProf = new Map((pros ?? []).map((p) => [p.id, p.user_id]));
+
+  let sent = 0;
+  for (const a of actions) {
+    const userId = userIdByProf.get(a.professional_id);
+    if (!userId) continue;
+    const { count } = await admin
+      .from("notifications")
+      .select("id", { count: "exact", head: true })
+      .eq("recipient_user_id", userId)
+      .eq("type", "professional_suspended")
+      .gte("created_at", a.applied_at);
+    if ((count ?? 0) > 0) continue; // already notified for this restriction
+    await sendNotification("professional_suspended", userId, {
+      reason: "A required compliance document is missing or has expired.",
+      action: "booking restriction",
+    });
+    sent += 1;
+  }
+  return { sent };
 }

@@ -84,6 +84,26 @@ async function allProfessionalIds(admin: ServiceClient): Promise<string[]> {
   return (data ?? []).map((p) => p.id);
 }
 
+/** Professionals whose ROLE requires a document of the given type code. Used to
+ *  scope the "invalid" (missing/expired) filter so professionals for whom the
+ *  document is not required are not mislabelled as non-compliant. */
+async function professionalsRequiringDoc(admin: ServiceClient, code: string): Promise<Set<string>> {
+  const { data: docType } = await admin.from("document_types").select("id").eq("code", code).maybeSingle();
+  if (!docType) return new Set();
+  const { data: reqs } = await admin
+    .from("compliance_requirements")
+    .select("professional_role_id")
+    .eq("document_type_id", docType.id);
+  const roleIds = new Set((reqs ?? []).map((r) => r.professional_role_id));
+  if (roleIds.size === 0) return new Set();
+  const { data: pros } = await admin.from("professionals").select("id, professional_role_id");
+  const set = new Set<string>();
+  for (const p of pros ?? []) {
+    if (p.professional_role_id && roleIds.has(p.professional_role_id)) set.add(p.id);
+  }
+  return set;
+}
+
 /** Professionals holding an approved, unexpired document of the given type code. */
 async function professionalsWithValidDoc(admin: ServiceClient, code: string): Promise<Set<string>> {
   const today = new Date().toISOString().slice(0, 10);
@@ -128,26 +148,31 @@ async function fetchProfessionals(
   // Each id-based filter contributes a set of matching professional ids; the
   // final id filter is their intersection.
   const constraints: Set<string>[] = [];
-  const needAllIds =
-    filters.dbsStatus === "invalid" ||
-    filters.registrationStatus === "invalid" ||
-    filters.assessmentStatus === "not_passed";
-  const allIds = needAllIds ? await allProfessionalIds(admin) : [];
+  // The assessment "not passed" set is the complement against ALL professionals
+  // (everyone is in scope for the assessment). DBS/registration "invalid" is the
+  // complement only among professionals whose ROLE requires that document.
+  const allIds = filters.assessmentStatus === "not_passed" ? await allProfessionalIds(admin) : [];
 
   if (filters.requireValidDocs) {
     constraints.push(new Set(await getProfessionalsWithValidDocs(admin)));
   }
   if (filters.dbsStatus) {
     const valid = await professionalsWithValidDoc(admin, "enhanced_dbs");
-    constraints.push(
-      filters.dbsStatus === "valid" ? valid : new Set(allIds.filter((id) => !valid.has(id))),
-    );
+    if (filters.dbsStatus === "valid") {
+      constraints.push(valid);
+    } else {
+      const required = await professionalsRequiringDoc(admin, "enhanced_dbs");
+      constraints.push(new Set([...required].filter((id) => !valid.has(id))));
+    }
   }
   if (filters.registrationStatus) {
     const valid = await professionalsWithValidDoc(admin, "professional_registration");
-    constraints.push(
-      filters.registrationStatus === "valid" ? valid : new Set(allIds.filter((id) => !valid.has(id))),
-    );
+    if (filters.registrationStatus === "valid") {
+      constraints.push(valid);
+    } else {
+      const required = await professionalsRequiringDoc(admin, "professional_registration");
+      constraints.push(new Set([...required].filter((id) => !valid.has(id))));
+    }
   }
   if (filters.assessmentStatus) {
     const passed = await professionalsWhoPassedAssessment(admin);

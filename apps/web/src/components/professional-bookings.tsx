@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { acceptBooking, declineBooking, completeBooking, undoDecline } from "@/lib/bookings/actions";
 
 import { formatGbpMoney } from "@/lib/format/money";
+import { formatLondon } from "@/lib/format/datetime";
 
 type BookingRow = {
   id: string;
@@ -17,7 +18,7 @@ type BookingRow = {
 };
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" });
+  return formatLondon(iso);
 }
 
 function formatMoney(amount: number | null) {

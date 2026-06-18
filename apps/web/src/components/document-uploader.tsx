@@ -11,6 +11,7 @@ export type DocItem = {
   critical: boolean;
   hasExpiry: boolean; // type carries an expiry → an expiry date is required on upload
   status: string | null; // verification_status, or null if not uploaded
+  rejectionReason?: string | null; // admin's note for rejected / further-info docs
 };
 
 const STATUS_STYLE: Record<string, string> = {
@@ -74,6 +75,12 @@ export function DocumentUploader({ items }: { items: DocItem[] }) {
               </div>
               <Badge status={item.status} />
             </div>
+            {(item.status === "rejected" || item.status === "further_info_required") &&
+              item.rejectionReason && (
+                <p className="mt-2 rounded-lg bg-[#fff1f1] px-3 py-2 text-xs text-[#a2191f]">
+                  <span className="font-semibold">Administrator note:</span> {item.rejectionReason}
+                </p>
+              )}
             <form onSubmit={(e) => onUpload(e, item)} className="mt-3 flex flex-wrap items-end gap-3">
               <input type="file" name="file" required aria-label={`Upload ${item.name}`} className="text-sm" />
               <input name="referenceNumber" placeholder="Reference no. (optional)" aria-label="Reference number" className={field} />

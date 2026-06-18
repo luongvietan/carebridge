@@ -1,5 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { sendDueComplianceReminders } from "@/lib/compliance/reminders";
+import {
+  sendDueComplianceReminders,
+  sendDueAutoRestrictionNotices,
+} from "@/lib/compliance/reminders";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -21,5 +24,6 @@ export async function GET(req: NextRequest) {
   if (auth !== `Bearer ${secret}`) return new Response("Unauthorized", { status: 401 });
 
   const { sent } = await sendDueComplianceReminders();
-  return NextResponse.json({ ok: true, sent });
+  const { sent: restrictionNotices } = await sendDueAutoRestrictionNotices();
+  return NextResponse.json({ ok: true, sent, restrictionNotices });
 }

@@ -166,13 +166,20 @@ export async function submitAttempt(
     .in("id", servedIds);
   const correctById = new Map((questions ?? []).map((q) => [q.id, q.correct_option]));
 
-  const results = servedIds.map((qid) => answers[qid] === correctById.get(qid));
+  // Treat a missing correct answer (question deleted mid-attempt, or a null
+  // correct_option) as INCORRECT — never let `undefined === undefined` score a
+  // free mark when the served question is left blank.
+  const isCorrect = (qid: string) => {
+    const correct = correctById.get(qid);
+    return correct != null && answers[qid] === correct;
+  };
+  const results = servedIds.map((qid) => isCorrect(qid));
   await admin.from("assessment_answers").insert(
     servedIds.map((qid) => ({
       attempt_id: attemptId,
       question_id: qid,
       selected_option: answers[qid] ?? null,
-      is_correct: answers[qid] === correctById.get(qid),
+      is_correct: isCorrect(qid),
     })),
   );
 

@@ -10,8 +10,17 @@ describe("clientSchema", () => {
   it("requires an address (spec §5)", () => {
     expect(clientSchema.safeParse({ fullName: "Jane Doe" }).success).toBe(false);
   });
-  it("accepts a client with name + address", () => {
-    expect(clientSchema.safeParse({ fullName: "Jane Doe", ...clientAddress }).success).toBe(true);
+  it("accepts a client with name + address + a contact method", () => {
+    expect(
+      clientSchema.safeParse({ fullName: "Jane Doe", ...clientAddress, phone: "07700 900000" }).success,
+    ).toBe(true);
+    expect(
+      clientSchema.safeParse({ fullName: "Jane Doe", ...clientAddress, emailContact: "jane@test.co" })
+        .success,
+    ).toBe(true);
+  });
+  it("rejects a client with no contact method (spec §5)", () => {
+    expect(clientSchema.safeParse({ fullName: "Jane Doe", ...clientAddress }).success).toBe(false);
   });
   it("rejects a malformed contact email", () => {
     expect(

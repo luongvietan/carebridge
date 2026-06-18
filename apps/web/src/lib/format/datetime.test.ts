@@ -1,5 +1,20 @@
 import { describe, it, expect } from "vitest";
-import { londonWallClockToUtc, londonDateRangeToUtc } from "./datetime";
+import { londonWallClockToUtc, londonDateRangeToUtc, formatLondon } from "./datetime";
+
+describe("formatLondon", () => {
+  it("renders a UTC instant in Europe/London (BST = UTC+1)", () => {
+    // 13:00 UTC in June is 14:00 London — independent of the runtime timezone.
+    expect(formatLondon("2026-06-20T13:00:00.000Z")).toMatch(/14:00/);
+  });
+  it("renders a winter (GMT) instant unchanged", () => {
+    expect(formatLondon("2026-01-20T09:00:00.000Z")).toMatch(/09:00/);
+  });
+  it("returns an empty string for nullish or malformed input", () => {
+    expect(formatLondon(null)).toBe("");
+    expect(formatLondon(undefined)).toBe("");
+    expect(formatLondon("not-a-date")).toBe("");
+  });
+});
 
 describe("londonWallClockToUtc", () => {
   it("treats a summer (BST, UTC+1) wall clock as London time", () => {

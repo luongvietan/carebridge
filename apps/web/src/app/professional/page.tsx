@@ -27,6 +27,12 @@ export default async function ProfessionalHome() {
             description: "Browse open shifts in your role and manage your accepted assignments.",
             cta: "View bookings",
           },
+          {
+            href: "/professional/earnings",
+            title: "Earnings",
+            description: "See payouts recorded for your completed bookings and your total paid to date.",
+            cta: "View earnings",
+          },
         ]}
       />
     </main>

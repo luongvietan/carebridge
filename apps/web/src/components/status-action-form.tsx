@@ -92,8 +92,11 @@ export function StatusActionForm({ professionalId, currentStatus }: Props) {
   const router = useRouter();
   const actions = allowedActions(currentStatus);
 
+  // Default to no action so an admin must deliberately choose — never pre-select
+  // a destructive action (the first allowed action for a pending applicant is
+  // "reject", which is irreversible).
   const [state, dispatch] = useReducer(reducer, {
-    action: actions[0] ?? "",
+    action: "",
     reasonCode: "",
     reasonText: "",
     internalNotes: "",
@@ -114,7 +117,10 @@ export function StatusActionForm({ professionalId, currentStatus }: Props) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!state.action) return;
+    if (!state.action) {
+      dispatch({ type: "error", error: "Select an action to apply." });
+      return;
+    }
 
     if (isPunitive && !state.reasonCode) {
       dispatch({ type: "error", error: "A reason code is required for this action." });
@@ -122,6 +128,16 @@ export function StatusActionForm({ professionalId, currentStatus }: Props) {
     }
     if (state.reasonCode === "other" && !state.reasonText.trim()) {
       dispatch({ type: "error", error: "Please describe the reason when selecting 'other'." });
+      return;
+    }
+
+    // Confirm irreversible / high-impact transitions — reject and remove are
+    // terminal (no further actions) and full suspension locks platform access.
+    const IRREVERSIBLE: StatusActionType[] = ["reject", "remove", "full_suspension"];
+    if (
+      IRREVERSIBLE.includes(state.action as StatusActionType) &&
+      !window.confirm(`Apply "${formatLabel(state.action)}" to this professional? This is hard to undo.`)
+    ) {
       return;
     }
 
@@ -151,7 +167,10 @@ export function StatusActionForm({ professionalId, currentStatus }: Props) {
           aria-label="Action"
           value={state.action}
           onValueChange={(v) => dispatch({ type: "set", field: "action", value: v as StatusActionType })}
-          options={actions.map((a) => ({ value: a, label: formatLabel(a) }))}
+          options={[
+            { value: "", label: "Select an action…" },
+            ...actions.map((a) => ({ value: a, label: formatLabel(a) })),
+          ]}
         />
       </div>
 

@@ -33,13 +33,27 @@ export type ProfessionalFilters = {
 
 const DOC_STATUSES: DocStatusFilter[] = ["valid", "invalid"];
 const ASSESSMENT_STATUSES: AssessmentStatusFilter[] = ["passed", "not_passed"];
+// Mirror the DB enums (0001) so an arbitrary `?professionalStatus=xyz` query
+// param is dropped rather than passed to `.eq()` and crashing the query with an
+// invalid-enum (22P02) error that surfaces as a misleading "no results".
+const PROFESSIONAL_STATUSES = [
+  "pending_verification", "active", "compliance_hold", "booking_restricted",
+  "temporarily_suspended", "under_investigation", "rejected", "removed",
+];
+const COMPLIANCE_STATUSES = [
+  "pending_review", "approved", "rejected", "compliance_expired", "further_info_required",
+];
 
 export function buildProfessionalFilters(c: ProfessionalFilterCriteria): ProfessionalFilters {
   const f: ProfessionalFilters = {};
   const txt = c.text?.trim();
   if (txt) f.text = txt;
-  if (c.professionalStatus) f.professionalStatus = c.professionalStatus;
-  if (c.complianceStatus) f.complianceStatus = c.complianceStatus;
+  if (c.professionalStatus && PROFESSIONAL_STATUSES.includes(c.professionalStatus)) {
+    f.professionalStatus = c.professionalStatus;
+  }
+  if (c.complianceStatus && COMPLIANCE_STATUSES.includes(c.complianceStatus)) {
+    f.complianceStatus = c.complianceStatus;
+  }
   if (c.roleId) f.roleId = c.roleId;
   const pc = c.postcode?.trim();
   if (pc) f.postcode = pc;

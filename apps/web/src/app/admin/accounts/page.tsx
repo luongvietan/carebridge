@@ -114,7 +114,15 @@ export default async function AdminAccountsPage({
           <tbody className="divide-y divide-[#dbe7e0]">
             {users.map((user) => (
               <tr key={user.id}>
-                <td className="p-3">{user.email}</td>
+                <td className="p-3">
+                  {user.account_type === "private_client" || user.account_type === "organisation" ? (
+                    <Link href={`/admin/accounts/${user.id}`} className="text-[#2e7d32] hover:underline">
+                      {user.email}
+                    </Link>
+                  ) : (
+                    user.email
+                  )}
+                </td>
                 <td className="p-3">
                   <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#5b6a62]">
                     {formatLabel(user.account_type)}

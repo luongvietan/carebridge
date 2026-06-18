@@ -63,7 +63,8 @@ export const DATASETS: Record<DatasetName, Dataset> = {
   payments: {
     view: "v_export_payments",
     label: "Payments",
-    columns: ["id", "booking_id", "amount", "currency", "status", "paid_at", "created_at"],
+    columns: ["id", "booking_id", "amount", "currency", "status", "refunded_amount",
+      "refunded_at", "paid_at", "created_at"],
     orderBy: { column: "created_at" },
   },
   payouts: {

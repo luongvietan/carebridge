@@ -1,6 +1,23 @@
 /** CareBridge operates in the UK; all booking wall-clock times are London time. */
 export const APP_TIME_ZONE = "Europe/London";
 
+/**
+ * Format a stored UTC instant for display in London wall-clock time, regardless
+ * of the runtime's own timezone (Node on Vercel runs in UTC, so a bare
+ * `toLocaleString` would show booking times an hour early during BST).
+ * Returns "" for malformed input.
+ */
+export function formatLondon(iso: string | null | undefined): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleString("en-GB", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: APP_TIME_ZONE,
+  });
+}
+
 /** Offset (ms) of `timeZone` from UTC at the given instant (positive = ahead of UTC). */
 function zoneOffsetMs(instant: Date, timeZone: string): number {
   const dtf = new Intl.DateTimeFormat("en-US", {

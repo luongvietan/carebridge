@@ -106,7 +106,16 @@ export async function POST(req: NextRequest) {
       if (payment.status !== "succeeded") {
         return new Response("partial refund ignored for non-succeeded payment", { status: 200 });
       }
-      await admin.from("payments").update({ refunded_amount: refundedAmount }).eq("id", payment.id);
+      const { error: refundErr } = await admin
+        .from("payments")
+        .update({ refunded_amount: refundedAmount })
+        .eq("id", payment.id);
+      if (refundErr) {
+        // Don't keep the idempotency claim on a failed write, or Stripe's retry
+        // would be short-circuited as "already processed" and the refund lost.
+        await releaseClaim();
+        return new Response("db error", { status: 500 });
+      }
       await admin.from("audit_log").insert({
         actor_type: "system",
         action: "payment.partially_refunded",

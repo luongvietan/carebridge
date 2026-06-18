@@ -75,7 +75,9 @@ export async function recordPayout(bookingId: string): Promise<PayoutResult> {
   await admin.from("audit_log").insert({ actor_user_id: adminId, actor_type: "admin", action: "payout.recorded", entity_type: "booking", entity_id: bookingId });
   const { data: proRow } = await admin.from("professionals").select("user_id").eq("id", booking.assigned_professional_id).maybeSingle();
   if (proRow?.user_id) {
-    await sendNotification("payout_recorded", proRow.user_id, { booking_id: bookingId, amount: String(booking.total_payout) });
+    // Notify the NET amount actually recorded, not the gross total_payout — a
+    // partial refund may have reduced it.
+    await sendNotification("payout_recorded", proRow.user_id, { booking_id: bookingId, amount: String(payoutAmount) });
   }
   return { ok: true };
 }
@@ -88,19 +90,34 @@ export async function markPayoutPaid(payoutId: string, method: string, reference
   const ALLOWED_METHODS = ["bank_transfer", "bacs", "faster_payments", "cheque"];
   if (!ALLOWED_METHODS.includes(method)) return { error: "Invalid payout method." };
   const admin = createServiceClient();
-  const { data: payout } = await admin.from("payouts").select("id, status, booking_id").eq("id", payoutId).single();
+  const { data: payout } = await admin.from("payouts").select("id, status, booking_id, amount").eq("id", payoutId).single();
   if (!payout) return { error: "Payout not found." };
 
   // Re-check refunds at pay-out time: a refund may have arrived AFTER the payout
-  // was recorded, and we must not pay a professional on money returned to the client.
+  // was recorded, and we must not pay a professional on money returned to the
+  // client. A FULL refund blocks the payout entirely; a PARTIAL refund that now
+  // exceeds what was recorded means the recorded amount is stale (the partial
+  // refund landed between record and pay) — block so an admin re-records the net.
   if (payout.booking_id) {
-    const { count: refundedEver } = await admin
+    const { data: bookingPayments } = await admin
       .from("payments")
-      .select("id", { count: "exact", head: true })
-      .eq("booking_id", payout.booking_id)
-      .not("refunded_at", "is", null);
-    if ((refundedEver ?? 0) > 0) {
+      .select("refunded_at, refunded_amount")
+      .eq("booking_id", payout.booking_id);
+    const rows = bookingPayments ?? [];
+    if (rows.some((p) => p.refunded_at !== null)) {
       return { error: "Payment for this booking has been refunded; this payout cannot be paid." };
+    }
+    const { data: booking } = await admin
+      .from("bookings").select("total_payout").eq("id", payout.booking_id).maybeSingle();
+    if (booking) {
+      const totalRefunded = rows.reduce((sum, p) => sum + Number(p.refunded_amount ?? 0), 0);
+      const net = netPayoutAmount(Number(booking.total_payout), totalRefunded);
+      if (Number(payout.amount) > net) {
+        return {
+          error:
+            "A refund has reduced the payable amount since this payout was recorded. Delete and re-record the payout before marking it paid.",
+        };
+      }
     }
   }
 

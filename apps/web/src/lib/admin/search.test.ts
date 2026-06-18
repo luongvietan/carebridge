@@ -23,6 +23,11 @@ describe("buildProfessionalFilters", () => {
     expect(buildProfessionalFilters({ minTravelKm: "0" })).toEqual({});
     expect(buildProfessionalFilters({ minTravelKm: "abc" })).toEqual({});
   });
+  it("drops invalid status enums so a bad query param cannot crash the query", () => {
+    expect(
+      buildProfessionalFilters({ professionalStatus: "xyz", complianceStatus: "nope" }),
+    ).toEqual({});
+  });
   it("accepts a valid availability day and ignores invalid ones", () => {
     expect(buildProfessionalFilters({ availabilityDay: "3" })).toEqual({ availabilityDay: 3 });
     expect(buildProfessionalFilters({ availabilityDay: "0" })).toEqual({ availabilityDay: 0 });
