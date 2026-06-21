@@ -35,7 +35,7 @@ function ComplianceStatusCard({
             {chartBars.map((height, i) => (
               <span
                 key={i}
-                className="w-[7px] flex-1 rounded-full bg-gradient-to-t from-[#246627] via-[#2e7d32] to-[#9ee7b8] sm:w-2"
+                className="w-[7px] flex-1 rounded-full bg-gradient-to-t from-[#246627] via-[#2e7d32] to-[#82cf58] sm:w-2"
                 style={{ height: `${height}%`, minHeight: "4px" }}
               />
             ))}
@@ -60,7 +60,7 @@ export function ComplianceShowcase() {
           <h2 className={`leading-tight ${marketingHeading}`}>
             Verified professionals, continuous compliance
           </h2>
-          <p className="mt-4 max-w-md text-sm leading-relaxed text-[#5b6a62] sm:text-base">
+          <p className="mt-4 max-w-md text-sm leading-relaxed text-[#4a4a4a] sm:text-base">
             Every professional passes eligibility screening, competency assessment and document
             verification before approval — with automatic restriction when credentials lapse.
           </p>

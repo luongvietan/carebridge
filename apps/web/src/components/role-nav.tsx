@@ -40,7 +40,7 @@ export function RoleNav({ areaLabel, items, email }: RoleNavProps) {
         href={href}
         aria-current={active ? "page" : undefined}
         className={`flex items-center gap-2 whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-          active ? "bg-white text-[#1e5a33] shadow-sm" : "text-[#4a6358] hover:text-[#2e7d32]"
+          active ? "bg-white text-[#1e5a33] shadow-sm" : "text-[#4a4a4a] hover:text-[#2e7d32]"
         }`}
       >
         {active && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#2e7d32]" aria-hidden />}
@@ -60,7 +60,7 @@ export function RoleNav({ areaLabel, items, email }: RoleNavProps) {
         className={`block rounded-xl px-3 py-2 text-sm transition-colors ${
           active
             ? "bg-[#2e7d32] font-medium text-white"
-            : "text-[#445049] hover:bg-[#eef5f0] hover:text-[#2e7d32]"
+            : "text-[#4a4a4a] hover:bg-[#eef5f0] hover:text-[#2e7d32]"
         }`}
       >
         {label}
@@ -74,7 +74,7 @@ export function RoleNav({ areaLabel, items, email }: RoleNavProps) {
         <div className="flex items-center gap-3">
           <button
             type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#e3ece6] text-[#445049] lg:hidden"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#e3ece6] text-[#4a4a4a] lg:hidden"
             aria-expanded={menuOpen}
             aria-label={menuOpen ? "Close menu" : "Open menu"}
             onClick={() => setMenuOpen((open) => !open)}
@@ -91,7 +91,7 @@ export function RoleNav({ areaLabel, items, email }: RoleNavProps) {
 
         <div className="flex items-center gap-3">
           {email && (
-            <span className="hidden max-w-[12rem] truncate text-sm text-[#5b6a62] md:block" title={email}>
+            <span className="hidden max-w-[12rem] truncate text-sm text-[#4a4a4a] md:block" title={email}>
               {email}
             </span>
           )}
@@ -99,7 +99,7 @@ export function RoleNav({ areaLabel, items, email }: RoleNavProps) {
             type="button"
             onClick={handleSignOut}
             disabled={pending}
-            className="rounded-full px-4 py-2 text-sm font-medium text-[#445049] transition-colors hover:text-[#2e7d32] disabled:opacity-50"
+            className="rounded-full px-4 py-2 text-sm font-medium text-[#4a4a4a] transition-colors hover:text-[#2e7d32] disabled:opacity-50"
           >
             {pending ? "Signing out…" : "Sign out"}
           </button>

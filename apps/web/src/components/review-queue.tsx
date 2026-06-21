@@ -33,7 +33,7 @@ export function ReviewQueue({ items }: { items: ReviewItem[] }) {
   }
 
   if (items.length === 0) {
-    return <p className="mt-6 text-sm text-[#5b6a62]">No documents are awaiting review.</p>;
+    return <p className="mt-6 text-sm text-[#4a4a4a]">No documents are awaiting review.</p>;
   }
 
   return (
@@ -44,10 +44,10 @@ export function ReviewQueue({ items }: { items: ReviewItem[] }) {
           <div key={it.documentId} className="flex flex-wrap items-center justify-between gap-3 p-4">
             <div className="text-sm">
               <span className="font-semibold">{it.professionalName}</span>
-              <span className="text-[#5b6a62]"> — {it.docTypeName}</span>
+              <span className="text-[#4a4a4a]"> — {it.docTypeName}</span>
               {it.referenceNumber && <span className="text-[#7a8a81]"> · ref {it.referenceNumber}</span>}
               {it.expiryDate && <span className="text-[#7a8a81]"> · expires {it.expiryDate}</span>}
-              <span className="ml-2 rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#5b6a62]">
+              <span className="ml-2 rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#4a4a4a]">
                 {it.status.replace(/_/g, " ")}
               </span>
             </div>

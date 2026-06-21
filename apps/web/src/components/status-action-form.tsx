@@ -109,7 +109,7 @@ export function StatusActionForm({ professionalId, currentStatus }: Props) {
 
   if (actions.length === 0) {
     return (
-      <p className="text-sm text-[#5b6a62]">
+      <p className="text-sm text-[#4a4a4a]">
         No status actions are available for this professional.
       </p>
     );
@@ -161,7 +161,7 @@ export function StatusActionForm({ professionalId, currentStatus }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 text-sm">
-      <div className="flex flex-col gap-1 text-[#5b6a62]">
+      <div className="flex flex-col gap-1 text-[#4a4a4a]">
         Action
         <Select
           aria-label="Action"
@@ -174,7 +174,7 @@ export function StatusActionForm({ professionalId, currentStatus }: Props) {
         />
       </div>
 
-      <div className="flex flex-col gap-1 text-[#5b6a62]">
+      <div className="flex flex-col gap-1 text-[#4a4a4a]">
         Reason code{isPunitive ? " (required)" : ""}
         <Select
           aria-label="Reason code"
@@ -187,7 +187,7 @@ export function StatusActionForm({ professionalId, currentStatus }: Props) {
         />
       </div>
 
-      <label className="flex flex-col gap-1 text-[#5b6a62]">
+      <label className="flex flex-col gap-1 text-[#4a4a4a]">
         Reason text
         <textarea
           value={state.reasonText}
@@ -198,7 +198,7 @@ export function StatusActionForm({ professionalId, currentStatus }: Props) {
         />
       </label>
 
-      <label className="flex flex-col gap-1 text-[#5b6a62]">
+      <label className="flex flex-col gap-1 text-[#4a4a4a]">
         Internal notes
         <textarea
           value={state.internalNotes}
@@ -208,7 +208,7 @@ export function StatusActionForm({ professionalId, currentStatus }: Props) {
         />
       </label>
 
-      <div className="flex flex-col gap-1 text-[#5b6a62]">
+      <div className="flex flex-col gap-1 text-[#4a4a4a]">
         Review date
         <DatePicker
           aria-label="Review date"

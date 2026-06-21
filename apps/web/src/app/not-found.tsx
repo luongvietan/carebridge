@@ -33,7 +33,7 @@ export default function NotFound() {
             Page not found
           </h1>
 
-          <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-[#5b6a62] sm:text-base">
+          <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-[#4a4a4a] sm:text-base">
             The page you are looking for may have been moved, removed, or the address may be
             incorrect.
           </p>

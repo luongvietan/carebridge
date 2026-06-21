@@ -54,21 +54,21 @@ export default async function AdminAuditPage({
   return (
     <main className="mx-auto max-w-6xl px-4 py-10">
       <h1 className="mt-1 text-3xl font-bold">Audit log</h1>
-      <p className="mt-2 text-sm text-[#5b6a62]">
+      <p className="mt-2 text-sm text-[#4a4a4a]">
         Append-only record of registrations, document uploads, assessment completions, approvals,
         payments and administrator actions (spec §16). Showing the most recent {MAX_ROWS} entries.
       </p>
 
       <form method="GET" className="mt-6 flex flex-wrap items-end gap-4 text-sm">
-        <div className="flex flex-col gap-1 text-[#5b6a62]">
+        <div className="flex flex-col gap-1 text-[#4a4a4a]">
           From
           <input type="date" name="from" defaultValue={from ?? ""} className="rounded-xl border border-[#dbe7e0] px-3 py-2" />
         </div>
-        <div className="flex flex-col gap-1 text-[#5b6a62]">
+        <div className="flex flex-col gap-1 text-[#4a4a4a]">
           To
           <input type="date" name="to" defaultValue={to ?? ""} className="rounded-xl border border-[#dbe7e0] px-3 py-2" />
         </div>
-        <div className="flex flex-col gap-1 text-[#5b6a62]">
+        <div className="flex flex-col gap-1 text-[#4a4a4a]">
           Entity
           <Select
             name="entityType"
@@ -93,7 +93,7 @@ export default async function AdminAuditPage({
 
       <div className="mt-8 overflow-x-auto rounded-2xl border border-[#dbe7e0] shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
         <table className="w-full text-sm">
-          <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#5b6a62]">
+          <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#4a4a4a]">
             <tr>
               <th className="p-3 font-medium">When</th>
               <th className="p-3 font-medium">Actor</th>
@@ -105,19 +105,19 @@ export default async function AdminAuditPage({
           <tbody className="divide-y divide-[#dbe7e0]">
             {rows.map((r) => (
               <tr key={r.id}>
-                <td className="whitespace-nowrap p-3 text-[#5b6a62]">{formatLondon(r.occurred_at)}</td>
+                <td className="whitespace-nowrap p-3 text-[#4a4a4a]">{formatLondon(r.occurred_at)}</td>
                 <td className="p-3">{r.actor_type}</td>
                 <td className="p-3 font-medium">{r.action}</td>
-                <td className="p-3 text-[#5b6a62]">
+                <td className="p-3 text-[#4a4a4a]">
                   {r.entity_type ?? "—"}
                   {r.entity_id ? <span className="block text-xs text-[#9aa8a0]">{r.entity_id}</span> : null}
                 </td>
-                <td className="p-3 text-[#5b6a62]">{r.summary ?? "—"}</td>
+                <td className="p-3 text-[#4a4a4a]">{r.summary ?? "—"}</td>
               </tr>
             ))}
           </tbody>
         </table>
-        {rows.length === 0 && <p className="p-6 text-sm text-[#5b6a62]">No audit entries match these filters.</p>}
+        {rows.length === 0 && <p className="p-6 text-sm text-[#4a4a4a]">No audit entries match these filters.</p>}
       </div>
     </main>
   );

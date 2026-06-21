@@ -124,7 +124,7 @@ export default async function AdminPayoutsPage() {
         {pendingPayout.length > 0 ? (
           <div className="mt-4 overflow-x-auto rounded-2xl border border-[#dbe7e0] shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
             <table className="w-full text-sm">
-              <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#5b6a62]">
+              <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#4a4a4a]">
                 <tr>
                   <th className="p-3 font-medium">Professional</th>
                   <th className="p-3 font-medium">Account last 4</th>
@@ -162,7 +162,7 @@ export default async function AdminPayoutsPage() {
             </table>
           </div>
         ) : (
-          <p className="mt-3 text-sm text-[#5b6a62]">No bookings awaiting payout.</p>
+          <p className="mt-3 text-sm text-[#4a4a4a]">No bookings awaiting payout.</p>
         )}
       </section>
 
@@ -172,7 +172,7 @@ export default async function AdminPayoutsPage() {
         {recordedPayouts && recordedPayouts.length > 0 ? (
           <div className="mt-4 overflow-x-auto rounded-2xl border border-[#dbe7e0] shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
             <table className="w-full text-sm">
-              <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#5b6a62]">
+              <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#4a4a4a]">
                 <tr>
                   <th className="p-3 font-medium">Professional</th>
                   <th className="p-3 font-medium">Account last 4</th>
@@ -199,7 +199,7 @@ export default async function AdminPayoutsPage() {
             </table>
           </div>
         ) : (
-          <p className="mt-3 text-sm text-[#5b6a62]">No recorded payouts awaiting payment.</p>
+          <p className="mt-3 text-sm text-[#4a4a4a]">No recorded payouts awaiting payment.</p>
         )}
       </section>
     </main>

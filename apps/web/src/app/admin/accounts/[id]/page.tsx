@@ -73,7 +73,7 @@ export default async function AdminAccountDetailPage({
       <h1 className="mt-2 text-3xl font-bold">
         {org?.organisation_name ?? client?.full_name ?? user.email}
       </h1>
-      <p className="mt-1 text-sm text-[#5b6a62]">
+      <p className="mt-1 text-sm text-[#4a4a4a]">
         {formatLabel(user.account_type)} · {formatLabel(user.account_status)}
       </p>
 
@@ -115,7 +115,7 @@ export default async function AdminAccountDetailPage({
         <h2 className="text-lg font-bold">Bookings ({bookingRows.length})</h2>
         <div className="mt-3 overflow-x-auto rounded-2xl border border-[#dbe7e0]">
           <table className="w-full text-sm">
-            <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#5b6a62]">
+            <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#4a4a4a]">
               <tr>
                 <th className="p-3 font-medium">Start</th>
                 <th className="p-3 font-medium">Role</th>
@@ -127,16 +127,16 @@ export default async function AdminAccountDetailPage({
             <tbody className="divide-y divide-[#dbe7e0]">
               {bookingRows.map((b) => (
                 <tr key={b.id}>
-                  <td className="whitespace-nowrap p-3 text-[#5b6a62]">{formatLondon(b.scheduled_start)}</td>
+                  <td className="whitespace-nowrap p-3 text-[#4a4a4a]">{formatLondon(b.scheduled_start)}</td>
                   <td className="p-3">{(b.professional_roles as { name: string } | null)?.name ?? "—"}</td>
                   <td className="p-3">{formatLabel(b.status)}</td>
-                  <td className="p-3 text-[#5b6a62]">{b.location_address ?? "—"}</td>
+                  <td className="p-3 text-[#4a4a4a]">{b.location_address ?? "—"}</td>
                   <td className="p-3">{formatGbpMoney(Number(b.total_client_charge ?? 0))}</td>
                 </tr>
               ))}
             </tbody>
           </table>
-          {bookingRows.length === 0 && <p className="p-6 text-sm text-[#5b6a62]">No bookings for this account.</p>}
+          {bookingRows.length === 0 && <p className="p-6 text-sm text-[#4a4a4a]">No bookings for this account.</p>}
         </div>
       </section>
 
@@ -148,14 +148,14 @@ export default async function AdminAccountDetailPage({
               <li key={a.id} className="flex flex-wrap justify-between gap-2 p-3">
                 <span>
                   <span className="font-medium">{a.action}</span>
-                  {a.summary ? <span className="text-[#5b6a62]"> — {a.summary}</span> : null}
+                  {a.summary ? <span className="text-[#4a4a4a]"> — {a.summary}</span> : null}
                 </span>
                 <span className="text-[#9aa8a0]">{formatLondon(a.occurred_at)}</span>
               </li>
             ))}
           </ul>
         ) : (
-          <p className="mt-3 text-sm text-[#5b6a62]">No recorded actions on this account.</p>
+          <p className="mt-3 text-sm text-[#4a4a4a]">No recorded actions on this account.</p>
         )}
       </section>
     </main>

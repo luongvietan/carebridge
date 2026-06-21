@@ -49,7 +49,7 @@ export function SiteFooter() {
             <ul className="mt-8 space-y-4">
               {contactItems.map((item) => (
                 <li key={item.label} className="flex items-center gap-3 text-sm sm:text-base">
-                  <Icon icon={item.icon} size={20} color="#7ed7a0" strokeWidth={1.75} />
+                  <Icon icon={item.icon} size={20} color="#6cc24a" strokeWidth={1.75} />
                   <span className="text-white/90">{item.label}</span>
                 </li>
               ))}
@@ -115,7 +115,7 @@ export function SiteFooter() {
               type="button"
               onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
               aria-label="Back to top"
-              className="grid h-11 w-11 place-items-center rounded-full bg-[#7ed7a0] text-[#17492c] transition hover:scale-105 hover:bg-[#9ee7b8]"
+              className="grid h-11 w-11 place-items-center rounded-full bg-[#6cc24a] text-[#17492c] transition hover:scale-105 hover:bg-[#82cf58]"
             >
               <Icon icon={ArrowUp01Icon} size={20} color="#17492c" strokeWidth={2} />
             </button>

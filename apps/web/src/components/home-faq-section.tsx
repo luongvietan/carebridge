@@ -20,7 +20,7 @@ export function HomeFaqSection() {
         <FaqList faqs={faqs.slice(0, 5)} />
       </div>
 
-      <p data-reveal className="mt-8 text-center text-sm text-[#5b6a62]">
+      <p data-reveal className="mt-8 text-center text-sm text-[#4a4a4a]">
         <ForwardLink href="/faq" className="text-sm text-[#2e7d32] hover:underline">
           View all questions
         </ForwardLink>

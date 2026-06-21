@@ -26,7 +26,7 @@ function RegisterChoice() {
   return (
     <AuthShell wide>
       <div className="lg:hidden">
-        <BackLink href="/" className="text-[#5b6a62] hover:text-[#2e7d32]">
+        <BackLink href="/" className="text-[#4a4a4a] hover:text-[#2e7d32]">
           Back to home
         </BackLink>
       </div>
@@ -35,7 +35,7 @@ function RegisterChoice() {
         <h1 className="text-2xl font-bold tracking-tight text-[#1e5a33] sm:text-3xl">
           Get started with CareBridge Connect
         </h1>
-        <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-[#5b6a62] sm:text-base">
+        <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-[#4a4a4a] sm:text-base">
           {siteTagline}
         </p>
       </div>
@@ -51,7 +51,7 @@ function RegisterChoice() {
               {path.id === "professional" ? "For professionals" : "For clients"}
             </span>
             <h2 className="mt-4 text-xl font-bold text-[#1e5a33]">{path.title}</h2>
-            <p className="mt-3 flex-1 text-sm leading-relaxed text-[#5b6a62]">{path.description}</p>
+            <p className="mt-3 flex-1 text-sm leading-relaxed text-[#4a4a4a]">{path.description}</p>
             <span className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[#2e7d32] group-hover:underline">
               Continue
               <Icon icon={ArrowRight01Icon} size={16} strokeWidth={2} aria-hidden />
@@ -60,7 +60,7 @@ function RegisterChoice() {
         ))}
       </div>
 
-      <p className="mt-8 text-center text-sm text-[#5b6a62]">
+      <p className="mt-8 text-center text-sm text-[#4a4a4a]">
         Already registered?{" "}
         <Link href="/login" className="font-semibold text-[#2e7d32] hover:underline">
           Sign in
@@ -78,13 +78,13 @@ function RegisterForm({ mode }: { mode: RegisterMode }) {
     return (
       <AuthShell>
         <div className="lg:hidden">
-          <BackLink href="/" className="text-[#5b6a62] hover:text-[#2e7d32]">
+          <BackLink href="/" className="text-[#4a4a4a] hover:text-[#2e7d32]">
             Back to home
           </BackLink>
         </div>
 
         <h1 className="mt-4 text-2xl font-bold text-[#1e5a33] lg:mt-0">Check your email</h1>
-        <p className="mt-3 text-sm leading-relaxed text-[#5b6a62]">
+        <p className="mt-3 text-sm leading-relaxed text-[#4a4a4a]">
           We&apos;ve sent a confirmation link. Confirm your email, then{" "}
           <Link href="/login" className="font-semibold text-[#2e7d32] hover:underline">
             sign in
@@ -98,14 +98,14 @@ function RegisterForm({ mode }: { mode: RegisterMode }) {
   return (
     <AuthShell>
       <div className="lg:hidden">
-        <BackLink href="/" className="text-[#5b6a62] hover:text-[#2e7d32]">
+        <BackLink href="/" className="text-[#4a4a4a] hover:text-[#2e7d32]">
           Back to home
         </BackLink>
       </div>
 
       <BackLink
         href="/register"
-        className="mt-4 text-[#5b6a62] hover:text-[#2e7d32] lg:mt-0"
+        className="mt-4 text-[#4a4a4a] hover:text-[#2e7d32] lg:mt-0"
       >
         All registration options
       </BackLink>
@@ -113,7 +113,7 @@ function RegisterForm({ mode }: { mode: RegisterMode }) {
       <h1 className="mt-6 text-2xl font-bold text-[#1e5a33] sm:text-3xl">
         {isProfessional ? ctaLabels.joinProfessional : ctaLabels.createBookingRequest}
       </h1>
-      <p className="mt-2 text-sm leading-relaxed text-[#5b6a62]">
+      <p className="mt-2 text-sm leading-relaxed text-[#4a4a4a]">
         {isProfessional
           ? "Create your account to begin eligibility screening, competency assessment and document verification."
           : "Create your account to request verified healthcare professionals by role, date and location."}
@@ -136,7 +136,7 @@ function RegisterForm({ mode }: { mode: RegisterMode }) {
                 />
                 <span>
                   <span className="block font-medium text-[#1e5a33]">Private client</span>
-                  <span className="text-[#5b6a62]">Individual or family arranging care</span>
+                  <span className="text-[#4a4a4a]">Individual or family arranging care</span>
                 </span>
               </label>
               <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-[#e7efe9] bg-white px-4 py-3 has-[:checked]:border-[#2e7d32] has-[:checked]:bg-[#f3f9f5]">
@@ -148,7 +148,7 @@ function RegisterForm({ mode }: { mode: RegisterMode }) {
                 />
                 <span>
                   <span className="block font-medium text-[#1e5a33]">Organisation</span>
-                  <span className="text-[#5b6a62]">Care home, provider or healthcare organisation</span>
+                  <span className="text-[#4a4a4a]">Care home, provider or healthcare organisation</span>
                 </span>
               </label>
             </div>
@@ -167,7 +167,7 @@ function RegisterForm({ mode }: { mode: RegisterMode }) {
           Password
           <input type="password" name="password" required minLength={8} className={marketingInput} />
         </label>
-        <label className="flex items-start gap-2.5 text-sm text-[#445049]">
+        <label className="flex items-start gap-2.5 text-sm text-[#4a4a4a]">
           <input type="checkbox" name="acceptedTerms" required className="mt-1 accent-[#2e7d32]" />{" "}
           <span>
             I accept the{" "}
@@ -189,7 +189,7 @@ function RegisterForm({ mode }: { mode: RegisterMode }) {
         </button>
       </form>
 
-      <p className="mt-6 text-sm text-[#5b6a62]">
+      <p className="mt-6 text-sm text-[#4a4a4a]">
         {isProfessional ? (
           <>
             Need to request care instead?{" "}
@@ -210,7 +210,7 @@ function RegisterForm({ mode }: { mode: RegisterMode }) {
         )}
       </p>
 
-      <p className="mt-3 text-sm text-[#5b6a62]">
+      <p className="mt-3 text-sm text-[#4a4a4a]">
         Already registered?{" "}
         <Link href="/login" className="font-semibold text-[#2e7d32] hover:underline">
           Sign in

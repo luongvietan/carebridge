@@ -10,7 +10,7 @@ export default async function ProfessionalHome() {
   return (
     <main className="mx-auto max-w-4xl px-4 py-10">
       <h1 className="mt-1 text-3xl font-bold">Dashboard</h1>
-      {user?.email && <p className="mt-2 text-sm text-[#5b6a62]">Signed in as {user.email}</p>}
+      {user?.email && <p className="mt-2 text-sm text-[#4a4a4a]">Signed in as {user.email}</p>}
 
       <DashboardGrid
         cards={[

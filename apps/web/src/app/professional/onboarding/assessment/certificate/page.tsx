@@ -11,7 +11,7 @@ export default async function CertificatePage() {
   const user = await requireAuth();
   const professionalId = await ensureProfessional(user);
   if (!professionalId) {
-    return <p className="text-sm text-[#5b6a62]">You must be signed in as a professional.</p>;
+    return <p className="text-sm text-[#4a4a4a]">You must be signed in as a professional.</p>;
   }
 
   const admin = createServiceClient();
@@ -40,7 +40,7 @@ export default async function CertificatePage() {
     return (
       <div className="rounded-2xl border border-[#dbe7e0] bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
         <h2 className="text-xl font-bold">Certificate not available yet</h2>
-        <p className="mt-2 text-sm text-[#5b6a62]">
+        <p className="mt-2 text-sm text-[#4a4a4a]">
           Your competency assessment certificate is generated once you pass the assessment (80% or above).
         </p>
         <ForwardLink
@@ -72,17 +72,17 @@ export default async function CertificatePage() {
         <div className="border-4 border-[#dbe7e0] p-10">
           <p className="text-sm font-semibold tracking-[0.3em] text-[#2e7d32] uppercase">CareBridge Connect</p>
           <h1 className="mt-6 text-3xl font-bold text-[#14301e]">Competency Assessment Certificate</h1>
-          <p className="mt-8 text-sm text-[#5b6a62]">This is to certify that</p>
+          <p className="mt-8 text-sm text-[#4a4a4a]">This is to certify that</p>
           <p className="mt-2 text-2xl font-bold text-[#14301e]">{cert.fullName}</p>
-          <p className="mt-6 text-sm text-[#5b6a62]">
+          <p className="mt-6 text-sm text-[#4a4a4a]">
             has successfully completed the CareBridge Connect competency assessment for the role of
           </p>
           <p className="mt-2 text-lg font-semibold text-[#2e7d32]">{cert.roleName}</p>
-          <p className="mt-6 text-sm text-[#5b6a62]">
+          <p className="mt-6 text-sm text-[#4a4a4a]">
             achieving a score of <span className="font-bold text-[#14301e]">{cert.score}%</span> (pass mark 80%).
           </p>
 
-          <div className="mt-10 flex items-end justify-between text-xs text-[#5b6a62]">
+          <div className="mt-10 flex items-end justify-between text-xs text-[#4a4a4a]">
             <div className="text-left">
               <p className="font-semibold text-[#14301e]">{cert.dateCompleted}</p>
               <p className="mt-1 border-t border-[#dbe7e0] pt-1">Date of completion</p>

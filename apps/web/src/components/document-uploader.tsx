@@ -16,7 +16,7 @@ export type DocItem = {
 
 const STATUS_STYLE: Record<string, string> = {
   approved: "bg-[#defbe6] text-[#0e6027]",
-  pending_review: "bg-[#f5f7f6] text-[#5b6a62]",
+  pending_review: "bg-[#f5f7f6] text-[#4a4a4a]",
   further_info_required: "bg-[#fcf4d6] text-[#684e1b]",
   rejected: "bg-[#fff1f1] text-[#a2191f]",
   expired: "bg-[#fff1f1] text-[#a2191f]",
@@ -25,7 +25,7 @@ const STATUS_STYLE: Record<string, string> = {
 function Badge({ status }: { status: string | null }) {
   if (!status) return <span className="bg-[#f5f7f6] px-2 py-1 text-xs text-[#7a8a81]">Not uploaded</span>;
   return (
-    <span className={`px-2 py-1 text-xs ${STATUS_STYLE[status] ?? "bg-[#f5f7f6] text-[#5b6a62]"}`}>
+    <span className={`px-2 py-1 text-xs ${STATUS_STYLE[status] ?? "bg-[#f5f7f6] text-[#4a4a4a]"}`}>
       {status.replace(/_/g, " ")}
     </span>
   );
@@ -59,7 +59,7 @@ export function DocumentUploader({ items }: { items: DocItem[] }) {
   return (
     <div>
       <OnboardingSteps current={4} />
-      <p className="mt-8 text-sm text-[#5b6a62]">
+      <p className="mt-8 text-sm text-[#4a4a4a]">
         Upload each required document. Critical documents are checked by an administrator before
         you can accept bookings.
       </p>
@@ -85,7 +85,7 @@ export function DocumentUploader({ items }: { items: DocItem[] }) {
               <input type="file" name="file" required aria-label={`Upload ${item.name}`} className="text-sm" />
               <input name="referenceNumber" placeholder="Reference no. (optional)" aria-label="Reference number" className={field} />
               <input name="issuingBody" placeholder="Issuing body (e.g. NMC, optional)" aria-label="Issuing body" className={field} />
-              <div className="text-xs text-[#5b6a62]">
+              <div className="text-xs text-[#4a4a4a]">
                 Expiry{item.hasExpiry && <span className="text-[#da1e28]"> *</span>}
                 <DatePicker
                   name="expiryDate"

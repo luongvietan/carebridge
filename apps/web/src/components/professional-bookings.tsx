@@ -149,7 +149,7 @@ function BookingTable({ rows, showActions, showComplete, showUndo, eligible, onR
   onRefresh: () => void;
 }) {
   if (rows.length === 0) {
-    return <p className="mt-3 text-sm text-[#5b6a62]">None.</p>;
+    return <p className="mt-3 text-sm text-[#4a4a4a]">None.</p>;
   }
 
   const hasActionsCol = showActions || showComplete || showUndo;
@@ -157,7 +157,7 @@ function BookingTable({ rows, showActions, showComplete, showUndo, eligible, onR
   return (
     <div className="mt-4 overflow-x-auto rounded-2xl border border-[#dbe7e0] shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
       <table className="w-full text-sm">
-        <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#5b6a62]">
+        <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#4a4a4a]">
           <tr>
             <th className="p-3 font-medium">Start</th>
             <th className="p-3 font-medium">Location</th>
@@ -174,7 +174,7 @@ function BookingTable({ rows, showActions, showComplete, showUndo, eligible, onR
               <td className="p-3">{formatDate(b.scheduled_start)}</td>
               <td className="p-3">{b.location_address}</td>
               <td className="p-3">
-                <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#5b6a62]">
+                <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#4a4a4a]">
                   {b.status.replace(/_/g, " ")}
                 </span>
               </td>
@@ -225,7 +225,7 @@ export function ProfessionalBookings({
       {declined.length > 0 && (
         <section className="mt-12">
           <h2 className="text-xl font-bold">Declined bookings</h2>
-          <p className="mt-1 text-sm text-[#5b6a62]">
+          <p className="mt-1 text-sm text-[#4a4a4a]">
             Still open for others — undo a decline to offer it to yourself again.
           </p>
           <BookingTable rows={declined} showUndo onRefresh={() => router.refresh()} />

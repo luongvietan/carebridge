@@ -103,7 +103,7 @@ export function AssessmentRunner() {
         {state.phase === "intro" && (
           <div className="rounded-2xl border border-[#dbe7e0] bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
             <h2 className="text-xl font-bold">Competency assessment</h2>
-            <p className="mt-2 text-sm text-[#5b6a62]">
+            <p className="mt-2 text-sm text-[#4a4a4a]">
               {QUESTIONS_NOTE}
             </p>
             <button
@@ -121,7 +121,7 @@ export function AssessmentRunner() {
           <div className="space-y-6">
             {state.questions.map((q, i) => (
               <fieldset key={q.id} className="rounded-2xl border border-[#dbe7e0] bg-white p-5 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
-                <legend className="px-1 text-xs tracking-wide text-[#5b6a62] uppercase">
+                <legend className="px-1 text-xs tracking-wide text-[#4a4a4a] uppercase">
                   {q.topic.replace(/_/g, " ")}
                 </legend>
                 <p className="font-semibold">
@@ -200,7 +200,7 @@ export function AssessmentRunner() {
         {state.phase === "locked" && (
           <div className="rounded-2xl border border-[#dbe7e0] bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
             <h2 className="text-xl font-bold">Assessment locked</h2>
-            <p className="mt-2 text-sm text-[#5b6a62]">
+            <p className="mt-2 text-sm text-[#4a4a4a]">
               You have used all attempts for now. Please reapply after the lock period has passed.
             </p>
           </div>

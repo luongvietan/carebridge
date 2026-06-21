@@ -28,7 +28,7 @@ export function PayoutDetailsForm({ last4 }: { last4: string | null }) {
   return (
     <form action={action} className="mt-8 space-y-4">
       {last4 !== null && (
-        <p className="text-sm text-[#5b6a62]">
+        <p className="text-sm text-[#4a4a4a]">
           Current account ending ••••{last4}
         </p>
       )}

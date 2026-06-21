@@ -97,12 +97,12 @@ export function AmendRateForm({ roleId, roleName }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 text-sm">
-      <p className="text-[#5b6a62]">
+      <p className="text-[#4a4a4a]">
         Amend rates for <span className="font-medium text-[#14301e]">{roleName}</span>
       </p>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <label className="flex flex-col gap-1 text-[#5b6a62]">
+        <label className="flex flex-col gap-1 text-[#4a4a4a]">
           Client charge rate (£/hr)
           <input
             type="number"
@@ -116,7 +116,7 @@ export function AmendRateForm({ roleId, roleName }: Props) {
         </label>
 
         {showPayoutInput && (
-          <label className="flex flex-col gap-1 text-[#5b6a62]">
+          <label className="flex flex-col gap-1 text-[#4a4a4a]">
             Professional payout rate (£/hr)
             <input
               type="number"
@@ -130,7 +130,7 @@ export function AmendRateForm({ roleId, roleName }: Props) {
           </label>
         )}
 
-        <div className="flex flex-col gap-1 text-[#5b6a62]">
+        <div className="flex flex-col gap-1 text-[#4a4a4a]">
           Platform fee type
           <Select
             aria-label="Platform fee type"
@@ -145,7 +145,7 @@ export function AmendRateForm({ roleId, roleName }: Props) {
         </div>
 
         {showFeeValue && (
-          <label className="flex flex-col gap-1 text-[#5b6a62]">
+          <label className="flex flex-col gap-1 text-[#4a4a4a]">
             {state.platformFeeType === "percentage" ? "Platform fee (%)" : "Platform fee (£/hr)"}
             <input
               type="number"
@@ -159,7 +159,7 @@ export function AmendRateForm({ roleId, roleName }: Props) {
           </label>
         )}
 
-        <div className="flex flex-col gap-1 text-[#5b6a62]">
+        <div className="flex flex-col gap-1 text-[#4a4a4a]">
           Currency
           <Select
             aria-label="Currency"
@@ -172,7 +172,7 @@ export function AmendRateForm({ roleId, roleName }: Props) {
 
       {preview &&
         (preview.ok ? (
-          <p className="text-sm text-[#5b6a62]">
+          <p className="text-sm text-[#4a4a4a]">
             Professional payout will be{" "}
             <span className="font-semibold text-[#14301e]">
               {formatRate(preview.rate.professionalPayoutRate, state.currency)}/hr

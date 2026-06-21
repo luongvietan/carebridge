@@ -129,7 +129,7 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
   return (
     <form onSubmit={handleSubmit} className="mt-6 space-y-4 text-sm">
       <div className="flex flex-wrap items-end gap-3">
-        <label className="flex flex-col gap-1 text-[#5b6a62]">
+        <label className="flex flex-col gap-1 text-[#4a4a4a]">
           Name or email
           <input
             type="search"
@@ -139,7 +139,7 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
             className={INPUT_CLASS}
           />
         </label>
-        <div className="flex flex-col gap-1 text-[#5b6a62]">
+        <div className="flex flex-col gap-1 text-[#4a4a4a]">
           Professional status
           <Select
             className="w-52"
@@ -149,7 +149,7 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
             options={withAny(PROFESSIONAL_STATUSES)}
           />
         </div>
-        <div className="flex flex-col gap-1 text-[#5b6a62]">
+        <div className="flex flex-col gap-1 text-[#4a4a4a]">
           Compliance status
           <Select
             className="w-52"
@@ -159,7 +159,7 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
             options={withAny(COMPLIANCE_STATUSES)}
           />
         </div>
-        <div className="flex flex-col gap-1 text-[#5b6a62]">
+        <div className="flex flex-col gap-1 text-[#4a4a4a]">
           Role
           <Select
             className="w-48"
@@ -169,7 +169,7 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
             options={[{ value: "", label: "Any" }, ...roles.map((r) => ({ value: r.id, label: r.name }))]}
           />
         </div>
-        <div className="flex flex-col gap-1 text-[#5b6a62]">
+        <div className="flex flex-col gap-1 text-[#4a4a4a]">
           DBS status
           <Select
             className="w-44"
@@ -179,7 +179,7 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
             options={DOC_STATUS_OPTIONS}
           />
         </div>
-        <div className="flex flex-col gap-1 text-[#5b6a62]">
+        <div className="flex flex-col gap-1 text-[#4a4a4a]">
           Registration status
           <Select
             className="w-44"
@@ -189,7 +189,7 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
             options={DOC_STATUS_OPTIONS}
           />
         </div>
-        <div className="flex flex-col gap-1 text-[#5b6a62]">
+        <div className="flex flex-col gap-1 text-[#4a4a4a]">
           Assessment status
           <Select
             className="w-44"
@@ -199,7 +199,7 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
             options={ASSESSMENT_STATUS_OPTIONS}
           />
         </div>
-        <div className="flex flex-col gap-1 text-[#5b6a62]">
+        <div className="flex flex-col gap-1 text-[#4a4a4a]">
           Available on
           <Select
             className="w-44"
@@ -211,7 +211,7 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
         </div>
       </div>
       <div className="flex flex-wrap items-end gap-3">
-        <label className="flex flex-col gap-1 text-[#5b6a62]">
+        <label className="flex flex-col gap-1 text-[#4a4a4a]">
           Postcode
           <input
             type="text"
@@ -221,7 +221,7 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
             className={INPUT_CLASS}
           />
         </label>
-        <label className="flex flex-col gap-1 text-[#5b6a62]">
+        <label className="flex flex-col gap-1 text-[#4a4a4a]">
           Min travel (km)
           <input
             type="number"
@@ -232,7 +232,7 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
             className={`${INPUT_CLASS} w-24`}
           />
         </label>
-        <label className="flex items-center gap-2 self-end pb-1 text-[#5b6a62]">
+        <label className="flex items-center gap-2 self-end pb-1 text-[#4a4a4a]">
           <input
             type="checkbox"
             checked={filters.requireValidDocs}
@@ -251,7 +251,7 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
           <button
             type="button"
             onClick={() => router.push("/admin/users")}
-            className="text-[#5b6a62] underline hover:text-[#14301e]"
+            className="text-[#4a4a4a] underline hover:text-[#14301e]"
           >
             Clear
           </button>

@@ -41,13 +41,13 @@ export function FaqList({ faqs, showSidebar = true, defaultOpenIndex = 0 }: FaqL
                 <Icon
                   icon={isOpen ? MinusSignIcon : Add01Icon}
                   size={18}
-                  color="#445049"
+                  color="#4a4a4a"
                   strokeWidth={2}
                 />
               </span>
             </button>
             {isOpen && (
-              <p className="px-5 pb-5 text-sm leading-relaxed text-[#5b6a62] sm:px-6 sm:pb-6">
+              <p className="px-5 pb-5 text-sm leading-relaxed text-[#4a4a4a] sm:px-6 sm:pb-6">
                 {faq.answer}
               </p>
             )}

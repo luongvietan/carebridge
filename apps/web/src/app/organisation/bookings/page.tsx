@@ -72,7 +72,7 @@ export default async function OrganisationBookingsPage() {
       {bookings && bookings.length > 0 ? (
         <div className="mt-8 overflow-x-auto rounded-2xl border border-[#dbe7e0] shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
           <table className="w-full text-sm">
-            <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#5b6a62]">
+            <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#4a4a4a]">
               <tr>
                 <th className="p-3 font-medium">Date</th>
                 <th className="p-3 font-medium">Role</th>
@@ -91,18 +91,18 @@ export default async function OrganisationBookingsPage() {
                     <td className="p-3">{formatDate(b.scheduled_start)}</td>
                     <td className="p-3">{roleNames.get(b.professional_role_id) ?? b.professional_role_id}</td>
                     <td className="p-3">
-                      <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#5b6a62]">
+                      <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#4a4a4a]">
                         {b.status.replace(/_/g, " ")}
                       </span>
                     </td>
                     <td className="p-3">{formatMoney(b.total_client_charge)}</td>
                     <td className="p-3">
                       {payStatus ? (
-                        <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#5b6a62]">
+                        <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#4a4a4a]">
                           {payStatus.replace(/_/g, " ")}
                         </span>
                       ) : (
-                        <span className="text-[#5b6a62]">—</span>
+                        <span className="text-[#4a4a4a]">—</span>
                       )}
                     </td>
                     <td className="p-3 text-right">
@@ -118,7 +118,7 @@ export default async function OrganisationBookingsPage() {
           </table>
         </div>
       ) : (
-        <p className="mt-8 text-sm text-[#5b6a62]">No bookings yet.</p>
+        <p className="mt-8 text-sm text-[#4a4a4a]">No bookings yet.</p>
       )}
     </main>
   );

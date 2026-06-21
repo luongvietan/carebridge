@@ -18,7 +18,7 @@ export function DashboardGrid({ cards }: { cards: DashboardCard[] }) {
           className="group flex flex-col rounded-[28px] border border-[#dbe7e0] bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.12)] transition hover:-translate-y-0.5 hover:border-[#bcd8c7] hover:shadow-[0_12px_36px_-12px_rgba(15,38,28,0.18)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2e7d32]/30"
         >
           <h2 className="text-lg font-bold tracking-tight text-[#1e5a33] sm:text-xl">{card.title}</h2>
-          <p className="mt-2 flex-1 text-sm leading-relaxed text-[#5b6a62]">{card.description}</p>
+          <p className="mt-2 flex-1 text-sm leading-relaxed text-[#4a4a4a]">{card.description}</p>
           <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-[#2e7d32] transition-colors group-hover:text-[#246627]">
             {card.cta}
             <Icon

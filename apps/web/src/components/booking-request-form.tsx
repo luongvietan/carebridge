@@ -115,7 +115,7 @@ export function BookingRequestForm({
         </div>
       </div>
       {endPreview && (
-        <p className="text-sm text-[#5b6a62]">
+        <p className="text-sm text-[#4a4a4a]">
           Ends at{" "}
           {endPreview.toLocaleString("en-GB", {
             day: "2-digit",

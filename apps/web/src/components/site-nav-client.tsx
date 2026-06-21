@@ -56,11 +56,11 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
             href={link.href}
             onClick={onNavigate}
             className={`flex items-center gap-2 whitespace-nowrap px-4 py-2 text-[15px] font-medium transition-colors ${
-              isActive ? "text-[#1e5a33]" : "text-[#4a6358] hover:text-[#2e7d32]"
+              isActive ? "text-[#1e5a33]" : "text-[#4a4a4a] hover:text-[#2e7d32]"
             }`}
           >
             {isActive && (
-              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#2e7d32]" aria-hidden />
+              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#6cc24a]" aria-hidden />
             )}
             {link.label}
           </Link>
@@ -80,14 +80,14 @@ export function SiteNavClient({ dashboardHref }: SiteNavClientProps) {
   const accountLink = dashboardHref ? (
     <Link
       href={dashboardHref}
-      className="rounded-full px-4 py-2 text-sm font-medium text-[#445049] transition-colors hover:text-[#2e7d32]"
+      className="rounded-full px-4 py-2 text-sm font-medium text-[#4a4a4a] transition-colors hover:text-[#2e7d32]"
     >
       Dashboard
     </Link>
   ) : (
     <Link
       href="/login"
-      className="rounded-full px-4 py-2 text-sm font-medium text-[#445049] transition-colors hover:text-[#2e7d32]"
+      className="rounded-full px-4 py-2 text-sm font-medium text-[#4a4a4a] transition-colors hover:text-[#2e7d32]"
     >
       Sign in
     </Link>
@@ -104,7 +104,7 @@ export function SiteNavClient({ dashboardHref }: SiteNavClientProps) {
 
         <button
           type="button"
-          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#e3ece6] text-[#445049] lg:hidden"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#e3ece6] text-[#4a4a4a] lg:hidden"
           aria-expanded={menuOpen}
           aria-label={menuOpen ? "Close menu" : "Open menu"}
           onClick={() => setMenuOpen((open) => !open)}
@@ -129,7 +129,7 @@ export function SiteNavClient({ dashboardHref }: SiteNavClientProps) {
                 <Link
                   href={dashboardHref}
                   onClick={() => setMenuOpen(false)}
-                  className="rounded-full px-4 py-2 text-sm font-medium text-[#445049] transition-colors hover:text-[#2e7d32]"
+                  className="rounded-full px-4 py-2 text-sm font-medium text-[#4a4a4a] transition-colors hover:text-[#2e7d32]"
                 >
                   Dashboard
                 </Link>
@@ -137,7 +137,7 @@ export function SiteNavClient({ dashboardHref }: SiteNavClientProps) {
                 <Link
                   href="/login"
                   onClick={() => setMenuOpen(false)}
-                  className="rounded-full px-4 py-2 text-sm font-medium text-[#445049] transition-colors hover:text-[#2e7d32]"
+                  className="rounded-full px-4 py-2 text-sm font-medium text-[#4a4a4a] transition-colors hover:text-[#2e7d32]"
                 >
                   Sign in
                 </Link>

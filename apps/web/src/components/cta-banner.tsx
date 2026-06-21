@@ -25,7 +25,7 @@ export function CtaBanner() {
 
         <div className="relative flex min-h-[320px] flex-col justify-center px-8 py-12 sm:min-h-[360px] sm:px-12 sm:py-14 lg:min-h-[380px] lg:max-w-2xl lg:px-14">
           <p className="inline-flex items-center gap-2 text-sm text-white/85">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#7ed7a0]" aria-hidden />
+            <span className="h-1.5 w-1.5 rounded-full bg-[#6cc24a]" aria-hidden />
             Join the marketplace
           </p>
 

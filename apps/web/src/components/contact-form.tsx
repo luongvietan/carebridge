@@ -12,7 +12,7 @@ export function ContactForm() {
     return (
       <div className="rounded-3xl border border-[#e7efe9] bg-white p-7 sm:p-8">
         <h2 className="text-xl font-bold text-[#14301e]">Thanks — your message is on its way</h2>
-        <p className="mt-2 text-sm text-[#445049]">
+        <p className="mt-2 text-sm text-[#4a4a4a]">
           We&apos;ve received your message and will get back to you by email shortly.
         </p>
       </div>

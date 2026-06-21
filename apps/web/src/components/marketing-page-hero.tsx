@@ -79,7 +79,7 @@ export function MarketingPageHero({ title, description, badge, image }: Marketin
               data-page-hero-badge
               className="mb-4 inline-flex w-fit items-center gap-2 rounded-full border border-white/20 bg-black/25 px-4 py-2 text-sm text-white backdrop-blur-sm"
             >
-              <span className="h-1.5 w-1.5 rounded-full bg-[#7ed7a0]" aria-hidden />
+              <span className="h-1.5 w-1.5 rounded-full bg-[#6cc24a]" aria-hidden />
               {badge}
             </p>
           ) : null}

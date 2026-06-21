@@ -47,13 +47,13 @@ export default function LoginPage() {
   return (
     <AuthShell>
       <div className="lg:hidden">
-        <BackLink href="/" className="text-[#5b6a62] hover:text-[#2e7d32]">
+        <BackLink href="/" className="text-[#4a4a4a] hover:text-[#2e7d32]">
           Back to home
         </BackLink>
       </div>
 
       <h1 className="mt-4 text-2xl font-bold text-[#1e5a33] sm:text-3xl lg:mt-0">Sign in</h1>
-      <p className="mt-2 text-sm leading-relaxed text-[#5b6a62]">
+      <p className="mt-2 text-sm leading-relaxed text-[#4a4a4a]">
         Access your CareBridge Connect account — professionals, clients and organisations.
       </p>
 
@@ -76,12 +76,12 @@ export default function LoginPage() {
         </button>
       </form>
 
-      <p className="mt-6 text-sm text-[#5b6a62]">
+      <p className="mt-6 text-sm text-[#4a4a4a]">
         <Link href="/reset" className="font-semibold text-[#2e7d32] hover:underline">
           Forgot password?
         </Link>
       </p>
-      <p className="mt-3 text-sm text-[#5b6a62]">
+      <p className="mt-3 text-sm text-[#4a4a4a]">
         No account yet?{" "}
         <Link href="/register" className="font-semibold text-[#2e7d32] hover:underline">
           Create an account

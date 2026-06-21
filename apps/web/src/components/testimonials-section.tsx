@@ -54,7 +54,7 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
 
         <div className="mt-4 flex min-w-0 flex-1 flex-col sm:mt-0 sm:pl-5 lg:pl-6">
           <Icon icon={QuoteUpIcon} size={32} color="#2e7d32" strokeWidth={1.75} />
-          <blockquote className="mt-3 flex-1 text-sm leading-relaxed text-[#445049] sm:mt-4">
+          <blockquote className="mt-3 flex-1 text-sm leading-relaxed text-[#4a4a4a] sm:mt-4">
             {quote}
           </blockquote>
 
@@ -79,7 +79,7 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
       className={`flex flex-col rounded-[28px] ${marketingSurface} p-6 lg:col-span-1`}
     >
       <Icon icon={QuoteUpIcon} size={32} color="#2e7d32" strokeWidth={1.75} />
-      <blockquote className="mt-4 flex-1 text-sm leading-relaxed text-[#445049]">{quote}</blockquote>
+      <blockquote className="mt-4 flex-1 text-sm leading-relaxed text-[#4a4a4a]">{quote}</blockquote>
       <div className="mt-6 flex items-end justify-between gap-4">
         <figcaption>
           <p className="font-semibold text-[#1e5a33]">{name}</p>

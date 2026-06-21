@@ -237,7 +237,7 @@ export function Select({
           size={16}
           strokeWidth={2}
           aria-hidden
-          className={`shrink-0 text-[#5b6a62] transition-transform ${open ? "rotate-180" : ""}`}
+          className={`shrink-0 text-[#4a4a4a] transition-transform ${open ? "rotate-180" : ""}`}
         />
       </button>
 
@@ -279,7 +279,7 @@ export function Select({
                         ? "bg-[#eef5f0] text-[#1e5a33]"
                         : isSelected
                           ? "text-[#1e5a33]"
-                          : "text-[#445049]"
+                          : "text-[#4a4a4a]"
                   } ${isSelected ? "font-medium" : ""}`}
                 >
                   <span className="truncate">{opt.label}</span>

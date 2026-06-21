@@ -21,7 +21,7 @@ export default async function GatePage({ searchParams }: GatePageProps) {
           Private preview
         </p>
         <h1 className="mt-3 text-2xl font-bold text-[#1e5a33] sm:text-3xl">Access required</h1>
-        <p className="mt-2 text-sm leading-relaxed text-[#5b6a62]">
+        <p className="mt-2 text-sm leading-relaxed text-[#4a4a4a]">
           CareBridge Connect is not open to the public yet. Enter the access code to continue.
         </p>
         {configured ? (

@@ -67,7 +67,7 @@ export default async function AdminRatesPage() {
   return (
     <main className="mx-auto max-w-6xl px-4 py-10">
       <h1 className="mt-1 text-3xl font-bold">Rate cards</h1>
-      <p className="mt-2 text-sm text-[#5b6a62]">
+      <p className="mt-2 text-sm text-[#4a4a4a]">
         View effective-dated rates per role and amend the active card. Existing bookings keep their
         snapshotted rates.
       </p>
@@ -84,19 +84,19 @@ export default async function AdminRatesPage() {
               {active ? (
                 <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                   <div>
-                    <p className="text-xs tracking-wide text-[#5b6a62] uppercase">Client charge</p>
+                    <p className="text-xs tracking-wide text-[#4a4a4a] uppercase">Client charge</p>
                     <p className="mt-1 text-lg font-bold">
                       {formatRate(active.client_charge_rate, active.currency)}/hr
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs tracking-wide text-[#5b6a62] uppercase">Payout</p>
+                    <p className="text-xs tracking-wide text-[#4a4a4a] uppercase">Payout</p>
                     <p className="mt-1 text-lg font-bold">
                       {formatRate(active.professional_payout_rate, active.currency)}/hr
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs tracking-wide text-[#5b6a62] uppercase">Platform fee</p>
+                    <p className="text-xs tracking-wide text-[#4a4a4a] uppercase">Platform fee</p>
                     <p className="mt-1 text-lg font-bold">
                       {formatFeeType(
                         active.platform_fee_type,
@@ -107,18 +107,18 @@ export default async function AdminRatesPage() {
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs tracking-wide text-[#5b6a62] uppercase">Effective from</p>
-                    <p className="mt-1 text-sm text-[#5b6a62]">{formatDate(active.effective_from)}</p>
+                    <p className="text-xs tracking-wide text-[#4a4a4a] uppercase">Effective from</p>
+                    <p className="mt-1 text-sm text-[#4a4a4a]">{formatDate(active.effective_from)}</p>
                   </div>
                 </div>
               ) : (
-                <p className="mt-4 text-sm text-[#5b6a62]">No active rate card for this role.</p>
+                <p className="mt-4 text-sm text-[#4a4a4a]">No active rate card for this role.</p>
               )}
 
               {history.length > 0 && (
                 <div className="mt-6 overflow-x-auto rounded-2xl border border-[#dbe7e0] shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
                   <table className="w-full text-sm">
-                    <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#5b6a62]">
+                    <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#4a4a4a]">
                       <tr>
                         <th className="p-3 font-medium">Effective from</th>
                         <th className="p-3 font-medium">Effective to</th>
@@ -150,7 +150,7 @@ export default async function AdminRatesPage() {
                             )}
                           </td>
                           <td className="p-3">
-                            <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#5b6a62]">
+                            <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#4a4a4a]">
                               {card.effective_to === null ? "Active" : "Closed"}
                             </span>
                           </td>
@@ -169,7 +169,7 @@ export default async function AdminRatesPage() {
         })}
 
         {(roles ?? []).length === 0 && (
-          <p className="text-sm text-[#5b6a62]">No active professional roles found.</p>
+          <p className="text-sm text-[#4a4a4a]">No active professional roles found.</p>
         )}
       </div>
     </main>

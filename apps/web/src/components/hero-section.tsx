@@ -90,7 +90,7 @@ export function HeroSection() {
             data-hero-badge
             className="inline-flex w-fit items-center gap-2 rounded-full border border-white/20 bg-black/25 px-4 py-2 text-sm text-white backdrop-blur-sm"
           >
-            <Icon icon={StarIcon} size={16} color="#7ed7a0" strokeWidth={1.75} />
+            <Icon icon={StarIcon} size={16} color="#6cc24a" strokeWidth={1.75} />
             <span>Verified healthcare staffing</span>
           </div>
 
@@ -141,7 +141,7 @@ export function HeroSection() {
                   />
                 ))}
               </div>
-              <p className="text-sm font-medium text-[#445049]">4 verified role types</p>
+              <p className="text-sm font-medium text-[#4a4a4a]">4 verified role types</p>
             </div>
           </div>
         </div>

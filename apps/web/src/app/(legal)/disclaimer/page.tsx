@@ -19,9 +19,9 @@ export default function DisclaimerPage() {
         <h1 className="text-3xl font-semibold tracking-tight text-[#14301e]">
           {importantInformation.heading}
         </h1>
-        <p className="mt-5 leading-relaxed text-[#5b6a62]">{importantInformation.intro}</p>
+        <p className="mt-5 leading-relaxed text-[#4a4a4a]">{importantInformation.intro}</p>
         {importantInformation.paragraphs.map((paragraph) => (
-          <p key={paragraph} className="mt-4 leading-relaxed text-[#5b6a62]">
+          <p key={paragraph} className="mt-4 leading-relaxed text-[#4a4a4a]">
             {paragraph}
           </p>
         ))}
@@ -32,13 +32,13 @@ export default function DisclaimerPage() {
         </div>
 
         <h2 className="mt-10 text-xl font-semibold text-[#14301e]">Services we support</h2>
-        <p className="mt-3 leading-relaxed text-[#5b6a62]">
+        <p className="mt-3 leading-relaxed text-[#4a4a4a]">
           Services available through the platform are limited to the following non-regulated
           activities:
         </p>
         <ul className="mt-4 grid gap-2 sm:grid-cols-2">
           {supportedServices.map((service) => (
-            <li key={service} className="flex items-start gap-2 text-[#5b6a62]">
+            <li key={service} className="flex items-start gap-2 text-[#4a4a4a]">
               <span aria-hidden className="mt-1 text-[#2e7d32]">
                 •
               </span>
@@ -46,10 +46,10 @@ export default function DisclaimerPage() {
             </li>
           ))}
         </ul>
-        <p className="mt-4 leading-relaxed text-[#5b6a62]">…and other non-regulated activities.</p>
+        <p className="mt-4 leading-relaxed text-[#4a4a4a]">…and other non-regulated activities.</p>
 
         <h2 className="mt-10 text-xl font-semibold text-[#14301e]">Who the platform is for</h2>
-        <p className="mt-3 leading-relaxed text-[#5b6a62]">{importantInformation.audienceLabel}</p>
+        <p className="mt-3 leading-relaxed text-[#4a4a4a]">{importantInformation.audienceLabel}</p>
       </main>
       <SiteFooter />
     </>

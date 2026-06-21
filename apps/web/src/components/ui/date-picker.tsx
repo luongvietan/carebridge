@@ -153,7 +153,7 @@ function Calendar({
           type="button"
           aria-label="Previous month"
           onClick={() => shiftMonth(-1)}
-          className="grid h-8 w-8 place-items-center rounded-full text-[#445049] transition hover:bg-[#eef5f0] hover:text-[#2e7d32]"
+          className="grid h-8 w-8 place-items-center rounded-full text-[#4a4a4a] transition hover:bg-[#eef5f0] hover:text-[#2e7d32]"
         >
           <Icon icon={ArrowRight01Icon} size={16} strokeWidth={2} className="rotate-180" aria-hidden />
         </button>
@@ -164,7 +164,7 @@ function Calendar({
           type="button"
           aria-label="Next month"
           onClick={() => shiftMonth(1)}
-          className="grid h-8 w-8 place-items-center rounded-full text-[#445049] transition hover:bg-[#eef5f0] hover:text-[#2e7d32]"
+          className="grid h-8 w-8 place-items-center rounded-full text-[#4a4a4a] transition hover:bg-[#eef5f0] hover:text-[#2e7d32]"
         >
           <Icon icon={ArrowRight01Icon} size={16} strokeWidth={2} aria-hidden />
         </button>
@@ -286,7 +286,7 @@ export function DatePicker({
         <span className={selected ? "" : "text-[#9aa8a0]"}>
           {selected ? formatLong(selected) : placeholder}
         </span>
-        <Icon icon={Calendar03Icon} size={16} strokeWidth={2} aria-hidden className="shrink-0 text-[#5b6a62]" />
+        <Icon icon={Calendar03Icon} size={16} strokeWidth={2} aria-hidden className="shrink-0 text-[#4a4a4a]" />
       </button>
 
       {open && (
@@ -302,7 +302,7 @@ export function DatePicker({
                 setValue("");
                 setOpen(false);
               }}
-              className="font-medium text-[#5b6a62] hover:text-[#14301e] hover:underline"
+              className="font-medium text-[#4a4a4a] hover:text-[#14301e] hover:underline"
             >
               Clear
             </button>
@@ -368,14 +368,14 @@ export function DateTimePicker({
         className={triggerClass}
       >
         <span className={display ? "" : "text-[#9aa8a0]"}>{display ?? placeholder}</span>
-        <Icon icon={Calendar03Icon} size={16} strokeWidth={2} aria-hidden className="shrink-0 text-[#5b6a62]" />
+        <Icon icon={Calendar03Icon} size={16} strokeWidth={2} aria-hidden className="shrink-0 text-[#4a4a4a]" />
       </button>
 
       {open && (
         <dialog open aria-label={ariaLabel ?? "Choose date and time"} className={popoverClass}>
           <Calendar selected={selected} minDate={minDate} onSelect={(d) => commit(toYMD(d), hour || "09", minute || "00")} />
           <div className="mt-2 flex items-center gap-2 border-t border-[#eef5f0] px-1 pt-3">
-            <Icon icon={Clock01Icon} size={16} strokeWidth={2} aria-hidden className="text-[#5b6a62]" />
+            <Icon icon={Clock01Icon} size={16} strokeWidth={2} aria-hidden className="text-[#4a4a4a]" />
             <Select
               aria-label="Hour"
               className="w-20"
@@ -384,7 +384,7 @@ export function DateTimePicker({
               onValueChange={(h) => commit(date, h, minute || "00")}
               options={HOURS}
             />
-            <span className="text-[#5b6a62]">:</span>
+            <span className="text-[#4a4a4a]">:</span>
             <Select
               aria-label="Minute"
               className="w-20"

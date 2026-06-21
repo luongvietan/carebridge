@@ -9,14 +9,15 @@ import { ArrowUpRight01Icon, Icon } from "@/components/ui/icon";
 gsap.registerPlugin(useGSAP);
 
 const variantStyles = {
-  primary:
-    "bg-gradient-to-r from-[#2e7d32] to-[#7ed7a0] text-white hover:from-[#246627] hover:to-[#6bc98f]",
+  primary: "bg-[#2e7d32] text-white hover:bg-[#246627]",
   secondary: "bg-white text-[#14301e] hover:bg-[#f5f7f6]",
 } as const;
 
 const iconStyles = {
-  primary: "bg-white text-[#17492c]",
-  secondary: "bg-gradient-to-r from-[#2e7d32] to-[#7ed7a0] text-white",
+  // Bright primary-green chip on the deep-green button surfaces Ana's #6CC24A
+  // accessibly (dark arrow on bright green); secondary uses the teal accent.
+  primary: "bg-[#6cc24a] text-[#0f3d28]",
+  secondary: "bg-gradient-to-r from-[#00a99d] to-[#007a73] text-white",
 } as const;
 
 const shadowStyles = {

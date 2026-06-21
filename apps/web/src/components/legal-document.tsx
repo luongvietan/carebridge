@@ -14,17 +14,17 @@ export function LegalDocument({ title, sections }: LegalDocumentProps) {
           <section key={section.title}>
             <h2 className="text-xl font-semibold text-[#14301e]">{section.title}</h2>
             {section.intro && (
-              <p className="mt-3 leading-relaxed text-[#5b6a62]">{section.intro}</p>
+              <p className="mt-3 leading-relaxed text-[#4a4a4a]">{section.intro}</p>
             )}
             {section.paragraphs?.map((paragraph) => (
-              <p key={paragraph} className="mt-3 leading-relaxed text-[#5b6a62]">
+              <p key={paragraph} className="mt-3 leading-relaxed text-[#4a4a4a]">
                 {paragraph}
               </p>
             ))}
             {section.bullets && (
               <ul className="mt-3 space-y-2">
                 {section.bullets.map((bullet) => (
-                  <li key={bullet} className="flex items-start gap-2 text-[#5b6a62]">
+                  <li key={bullet} className="flex items-start gap-2 text-[#4a4a4a]">
                     <span aria-hidden className="mt-1 text-[#2e7d32]">
                       •
                     </span>

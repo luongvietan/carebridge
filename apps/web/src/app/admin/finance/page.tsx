@@ -80,11 +80,11 @@ export default async function AdminFinancePage({
 
       {/* Date filter */}
       <form method="GET" className="mt-6 flex items-center gap-3 text-sm">
-        <div className="flex items-center gap-2 text-[#5b6a62]">
+        <div className="flex items-center gap-2 text-[#4a4a4a]">
           From
           <DatePicker name="from" aria-label="From date" defaultValue={from ?? ""} className="w-40" />
         </div>
-        <div className="flex items-center gap-2 text-[#5b6a62]">
+        <div className="flex items-center gap-2 text-[#4a4a4a]">
           To
           <DatePicker name="to" aria-label="To date" defaultValue={to ?? ""} className="w-40" />
         </div>
@@ -95,7 +95,7 @@ export default async function AdminFinancePage({
           Filter
         </button>
         {(from || to) && (
-          <Link href="/admin/finance" className="text-[#5b6a62] underline hover:text-[#14301e]">
+          <Link href="/admin/finance" className="text-[#4a4a4a] underline hover:text-[#14301e]">
             Clear
           </Link>
         )}
@@ -104,19 +104,19 @@ export default async function AdminFinancePage({
       {/* Headline cards */}
       <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">
         <div className="rounded-2xl border border-[#dbe7e0] bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
-          <p className="text-xs tracking-wide text-[#5b6a62] uppercase">Net collected</p>
+          <p className="text-xs tracking-wide text-[#4a4a4a] uppercase">Net collected</p>
           <p className="mt-2 text-2xl font-bold">{formatMoney(totalCollected)}</p>
         </div>
         <div className="rounded-2xl border border-[#dbe7e0] bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
-          <p className="text-xs tracking-wide text-[#5b6a62] uppercase">Total refunded</p>
+          <p className="text-xs tracking-wide text-[#4a4a4a] uppercase">Total refunded</p>
           <p className="mt-2 text-2xl font-bold">{formatMoney(totalRefunded)}</p>
         </div>
         <div className="rounded-2xl border border-[#dbe7e0] bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
-          <p className="text-xs tracking-wide text-[#5b6a62] uppercase">Total paid out</p>
+          <p className="text-xs tracking-wide text-[#4a4a4a] uppercase">Total paid out</p>
           <p className="mt-2 text-2xl font-bold">{formatMoney(totalPaidOut)}</p>
         </div>
         <div className="rounded-2xl border border-[#dbe7e0] bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
-          <p className="text-xs tracking-wide text-[#5b6a62] uppercase">Platform revenue</p>
+          <p className="text-xs tracking-wide text-[#4a4a4a] uppercase">Platform revenue</p>
           <p className="mt-2 text-2xl font-bold">{formatMoney(platformRevenue)}</p>
         </div>
       </div>
@@ -127,7 +127,7 @@ export default async function AdminFinancePage({
         {payments && payments.length > 0 ? (
           <div className="mt-4 overflow-x-auto rounded-2xl border border-[#dbe7e0] shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
             <table className="w-full text-sm">
-              <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#5b6a62]">
+              <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#4a4a4a]">
                 <tr>
                   <th className="p-3 font-medium">Date</th>
                   <th className="p-3 font-medium">Booking start</th>
@@ -149,7 +149,7 @@ export default async function AdminFinancePage({
                       <td className="p-3">{formatMoney(p.amount)}</td>
                       <td className="p-3">{refunded > 0 ? formatMoney(refunded) : "—"}</td>
                       <td className="p-3">
-                        <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#5b6a62]">
+                        <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#4a4a4a]">
                           {p.status.replace(/_/g, " ")}
                         </span>
                       </td>
@@ -160,7 +160,7 @@ export default async function AdminFinancePage({
             </table>
           </div>
         ) : (
-          <p className="mt-3 text-sm text-[#5b6a62]">No payments.</p>
+          <p className="mt-3 text-sm text-[#4a4a4a]">No payments.</p>
         )}
       </section>
 
@@ -178,7 +178,7 @@ export default async function AdminFinancePage({
         {payouts && payouts.length > 0 ? (
           <div className="mt-4 overflow-x-auto rounded-2xl border border-[#dbe7e0] shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
             <table className="w-full text-sm">
-              <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#5b6a62]">
+              <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#4a4a4a]">
                 <tr>
                   <th className="p-3 font-medium">Date</th>
                   <th className="p-3 font-medium">Professional</th>
@@ -196,11 +196,11 @@ export default async function AdminFinancePage({
                       <td className="p-3">{prof?.full_name ?? "—"}</td>
                       <td className="p-3">{formatMoney(p.amount)}</td>
                       <td className="p-3">
-                        <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#5b6a62]">
+                        <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#4a4a4a]">
                           {p.status.replace(/_/g, " ")}
                         </span>
                       </td>
-                      <td className="p-3 text-[#5b6a62]">
+                      <td className="p-3 text-[#4a4a4a]">
                         {p.method && p.reference ? `${p.method} · ${p.reference}` : p.method ?? "—"}
                       </td>
                     </tr>
@@ -210,7 +210,7 @@ export default async function AdminFinancePage({
             </table>
           </div>
         ) : (
-          <p className="mt-3 text-sm text-[#5b6a62]">No payouts.</p>
+          <p className="mt-3 text-sm text-[#4a4a4a]">No payouts.</p>
         )}
       </section>
     </main>

@@ -112,7 +112,7 @@ export default function AboutPage() {
             className={`rounded-[28px] ${marketingSurface} p-6 sm:rounded-[32px] sm:p-10`}
           >
             <h2 className={marketingHeading}>{commitment.heading}</h2>
-            <p className="mt-4 text-sm leading-relaxed text-[#5b6a62] sm:text-base">
+            <p className="mt-4 text-sm leading-relaxed text-[#4a4a4a] sm:text-base">
               {commitment.intro}
             </p>
             <ul className="mt-6 space-y-3">
@@ -161,7 +161,7 @@ export default function AboutPage() {
             <h2 className={marketingHeading}>{importantInfo.heading}</h2>
             <div className="mt-6 space-y-4">
               {importantInfo.paragraphs.map((paragraph) => (
-                <p key={paragraph} className="text-sm leading-relaxed text-[#5b6a62] sm:text-base">
+                <p key={paragraph} className="text-sm leading-relaxed text-[#4a4a4a] sm:text-base">
                   {paragraph}
                 </p>
               ))}
@@ -185,7 +185,7 @@ export default function AboutPage() {
               {founder.quote.split("\n\n").map((paragraph) => (
                 <p
                   key={paragraph}
-                  className="mt-4 text-sm leading-relaxed text-[#5b6a62] first:mt-0 sm:text-base"
+                  className="mt-4 text-sm leading-relaxed text-[#4a4a4a] first:mt-0 sm:text-base"
                 >
                   {paragraph}
                 </p>
@@ -193,8 +193,8 @@ export default function AboutPage() {
             </blockquote>
             <div className="mt-8 border-t border-[#e7efe9] pt-6">
               <p className="font-bold text-[#1e5a33]">{founder.name}</p>
-              <p className="mt-1 text-sm text-[#5b6a62]">{founder.title}</p>
-              <p className="text-sm text-[#5b6a62]">{founder.company}</p>
+              <p className="mt-1 text-sm text-[#4a4a4a]">{founder.title}</p>
+              <p className="text-sm text-[#4a4a4a]">{founder.company}</p>
               <p className="mt-4 text-sm font-semibold text-[#2e7d32]">{founder.tagline}</p>
             </div>
           </div>

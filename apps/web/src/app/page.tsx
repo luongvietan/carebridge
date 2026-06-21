@@ -49,7 +49,7 @@ export default function HomePage() {
                   )}
                 </div>
                 <h3 className="mt-5 text-lg font-bold text-[#1e5a33] sm:text-xl">{step.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-[#5b6a62]">{step.description}</p>
+                <p className="mt-2 text-sm leading-relaxed text-[#4a4a4a]">{step.description}</p>
               </div>
             ))}
           </div>

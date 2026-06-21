@@ -31,7 +31,7 @@ export function AccountStatusControl({ userId, current }: Props) {
 
   if (legalNext.length === 0) {
     return (
-      <p className="text-sm text-[#5b6a62]">
+      <p className="text-sm text-[#4a4a4a]">
         Current account status: <span className="font-medium">{formatLabel(current)}</span>. No
         changes available.
       </p>
@@ -60,11 +60,11 @@ export function AccountStatusControl({ userId, current }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 text-sm">
-      <p className="text-[#5b6a62]">
+      <p className="text-[#4a4a4a]">
         Current: <span className="font-medium">{formatLabel(current)}</span>
       </p>
 
-      <div className="flex flex-col gap-1 text-[#5b6a62]">
+      <div className="flex flex-col gap-1 text-[#4a4a4a]">
         Set account status to
         <Select
           aria-label="Set account status to"
@@ -74,7 +74,7 @@ export function AccountStatusControl({ userId, current }: Props) {
         />
       </div>
 
-      <label className="flex flex-col gap-1 text-[#5b6a62]">
+      <label className="flex flex-col gap-1 text-[#4a4a4a]">
         Reason (optional)
         <textarea
           value={reason}

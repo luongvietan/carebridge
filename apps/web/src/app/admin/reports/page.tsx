@@ -47,10 +47,10 @@ export default async function AdminReportsPage({
 
       <section className="mt-8">
         <h2 className="text-xl font-bold">Data exports</h2>
-        <p className="mt-1 text-sm text-[#5b6a62]">Download any dataset as CSV or Excel.</p>
+        <p className="mt-1 text-sm text-[#4a4a4a]">Download any dataset as CSV or Excel.</p>
         <div className="mt-4 overflow-x-auto rounded-2xl border border-[#dbe7e0] shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
           <table className="w-full text-sm">
-            <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#5b6a62]">
+            <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#4a4a4a]">
               <tr>
                 <th className="p-3 font-medium">Dataset</th>
                 <th className="p-3 font-medium">Download</th>
@@ -90,11 +90,11 @@ export default async function AdminReportsPage({
       <section className="mt-12">
         <h2 className="text-xl font-bold">Audit report</h2>
         <form method="GET" className="mt-4 flex flex-wrap items-center gap-3 text-sm">
-          <div className="flex items-center gap-2 text-[#5b6a62]">
+          <div className="flex items-center gap-2 text-[#4a4a4a]">
             From
             <DatePicker name="from" aria-label="From date" defaultValue={from ?? ""} className="w-40" />
           </div>
-          <div className="flex items-center gap-2 text-[#5b6a62]">
+          <div className="flex items-center gap-2 text-[#4a4a4a]">
             To
             <DatePicker name="to" aria-label="To date" defaultValue={to ?? ""} className="w-40" />
           </div>
@@ -113,7 +113,7 @@ export default async function AdminReportsPage({
         {auditRows && auditRows.length > 0 ? (
           <div className="mt-4 overflow-x-auto rounded-2xl border border-[#dbe7e0] shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
             <table className="w-full text-sm">
-              <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#5b6a62]">
+              <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#4a4a4a]">
                 <tr>
                   <th className="p-3 font-medium">When</th>
                   <th className="p-3 font-medium">Actor</th>
@@ -128,15 +128,15 @@ export default async function AdminReportsPage({
                     <td className="p-3">{formatDate(a.occurred_at as string)}</td>
                     <td className="p-3">{a.actor_type as string}</td>
                     <td className="p-3">{a.action as string}</td>
-                    <td className="p-3 text-[#5b6a62]">{a.entity_type as string}</td>
-                    <td className="p-3 text-[#5b6a62]">{(a.summary as string) ?? "—"}</td>
+                    <td className="p-3 text-[#4a4a4a]">{a.entity_type as string}</td>
+                    <td className="p-3 text-[#4a4a4a]">{(a.summary as string) ?? "—"}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         ) : (
-          <p className="mt-3 text-sm text-[#5b6a62]">No audit entries match.</p>
+          <p className="mt-3 text-sm text-[#4a4a4a]">No audit entries match.</p>
         )}
       </section>
     </main>

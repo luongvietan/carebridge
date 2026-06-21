@@ -70,12 +70,12 @@ export default async function AdminAccountsPage({
   return (
     <main className="mx-auto max-w-6xl px-4 py-10">
       <h1 className="mt-1 text-3xl font-bold">All accounts</h1>
-      <p className="mt-2 text-sm text-[#5b6a62]">
+      <p className="mt-2 text-sm text-[#4a4a4a]">
         View and manage account status across professionals, clients and organisations.
       </p>
 
       <form method="GET" className="mt-6 flex flex-wrap items-end gap-4">
-        <div className="flex flex-col gap-1 text-sm text-[#5b6a62]">
+        <div className="flex flex-col gap-1 text-sm text-[#4a4a4a]">
           Account type
           <Select
             name="account_type"
@@ -103,7 +103,7 @@ export default async function AdminAccountsPage({
 
       <div className="mt-8 overflow-x-auto rounded-2xl border border-[#dbe7e0] shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
         <table className="w-full text-sm">
-          <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#5b6a62]">
+          <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#4a4a4a]">
             <tr>
               <th className="p-3 font-medium">Email</th>
               <th className="p-3 font-medium">Account type</th>
@@ -124,19 +124,19 @@ export default async function AdminAccountsPage({
                   )}
                 </td>
                 <td className="p-3">
-                  <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#5b6a62]">
+                  <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#4a4a4a]">
                     {formatLabel(user.account_type)}
                     {user.is_founder ? " (founder)" : ""}
                   </span>
                 </td>
                 <td className="p-3">
-                  <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#5b6a62]">
+                  <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#4a4a4a]">
                     {formatLabel(user.account_status)}
                   </span>
                 </td>
                 <td className="p-3">
                   {isProtectedAccount(user) ? (
-                    <span className="text-[#5b6a62]">—</span>
+                    <span className="text-[#4a4a4a]">—</span>
                   ) : (
                     <div className="flex flex-wrap items-center gap-3">
                       <AccountStatusControl userId={user.id} current={user.account_status} />
@@ -149,7 +149,7 @@ export default async function AdminAccountsPage({
           </tbody>
         </table>
         {users.length === 0 && (
-          <p className="p-6 text-sm text-[#5b6a62]">No accounts match this filter.</p>
+          <p className="p-6 text-sm text-[#4a4a4a]">No accounts match this filter.</p>
         )}
       </div>
     </main>

@@ -86,7 +86,7 @@ export default async function AdminCompliancePage() {
             ))}
           </ul>
         ) : (
-          <p className="mt-3 text-sm text-[#5b6a62]">No active alerts.</p>
+          <p className="mt-3 text-sm text-[#4a4a4a]">No active alerts.</p>
         )}
       </section>
 
@@ -104,7 +104,7 @@ export default async function AdminCompliancePage() {
             ))}
           </ul>
         ) : (
-          <p className="mt-3 text-sm text-[#5b6a62]">All professionals are compliant.</p>
+          <p className="mt-3 text-sm text-[#4a4a4a]">All professionals are compliant.</p>
         )}
       </section>
     </main>

@@ -42,18 +42,18 @@ export default async function ProfessionalEarningsPage() {
   return (
     <main className="mx-auto max-w-4xl px-4 py-10">
       <h1 className="mt-1 text-3xl font-bold">Earnings</h1>
-      <p className="mt-2 text-sm text-[#5b6a62]">
+      <p className="mt-2 text-sm text-[#4a4a4a]">
         Payouts recorded for your completed bookings. Amounts are net of any client refunds.
       </p>
 
       <div className="mt-6 rounded-2xl border border-[#dbe7e0] bg-[#f5f7f6] px-5 py-4">
-        <span className="text-sm text-[#5b6a62]">Total paid to date</span>
+        <span className="text-sm text-[#4a4a4a]">Total paid to date</span>
         <p className="text-2xl font-bold text-[#14301e]">{formatGbpMoney(totalPaid)}</p>
       </div>
 
       <div className="mt-8 overflow-x-auto rounded-2xl border border-[#dbe7e0] shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
         <table className="w-full text-sm">
-          <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#5b6a62]">
+          <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#4a4a4a]">
             <tr>
               <th className="p-3 font-medium">Amount</th>
               <th className="p-3 font-medium">Status</th>
@@ -69,21 +69,21 @@ export default async function ProfessionalEarningsPage() {
                 <td className="p-3 font-medium">{formatGbpMoney(Number(p.amount))}</td>
                 <td className="p-3">
                   <span
-                    className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_STYLE[p.status] ?? "bg-[#f5f7f6] text-[#5b6a62]"}`}
+                    className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_STYLE[p.status] ?? "bg-[#f5f7f6] text-[#4a4a4a]"}`}
                   >
                     {p.status}
                   </span>
                 </td>
                 <td className="p-3">{p.method ? p.method.replace(/_/g, " ") : "—"}</td>
                 <td className="p-3">{p.reference ?? "—"}</td>
-                <td className="p-3 text-[#5b6a62]">{p.recorded_at ? formatLondon(p.recorded_at) : "—"}</td>
-                <td className="p-3 text-[#5b6a62]">{p.paid_at ? formatLondon(p.paid_at) : "—"}</td>
+                <td className="p-3 text-[#4a4a4a]">{p.recorded_at ? formatLondon(p.recorded_at) : "—"}</td>
+                <td className="p-3 text-[#4a4a4a]">{p.paid_at ? formatLondon(p.paid_at) : "—"}</td>
               </tr>
             ))}
           </tbody>
         </table>
         {rows.length === 0 && (
-          <p className="p-6 text-sm text-[#5b6a62]">
+          <p className="p-6 text-sm text-[#4a4a4a]">
             No payouts yet. Payouts appear here once an administrator records payment for a completed
             booking.
           </p>

@@ -29,7 +29,7 @@ export default function TermsPage() {
         <h1 className="text-3xl font-semibold tracking-tight text-[#14301e]">
           Terms &amp; Conditions
         </h1>
-        <p className="mt-5 leading-relaxed text-[#5b6a62]">
+        <p className="mt-5 leading-relaxed text-[#4a4a4a]">
           CareBridge Connect provides separate terms for clients and healthcare professionals.
           Select the document that applies to you.
         </p>
@@ -42,7 +42,7 @@ export default function TermsPage() {
               className="block rounded-2xl border border-[#e7efe9] bg-white p-6 transition hover:border-[#2e7d32] hover:shadow-[0_8px_30px_-12px_rgba(15,38,28,0.12)]"
             >
               <h2 className="text-lg font-semibold text-[#1e5a33]">{link.title}</h2>
-              <p className="mt-2 text-sm leading-relaxed text-[#5b6a62]">{link.description}</p>
+              <p className="mt-2 text-sm leading-relaxed text-[#4a4a4a]">{link.description}</p>
               <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-[#2e7d32]">
                 Read document
                 <Icon icon={ArrowRight01Icon} size={16} strokeWidth={2} aria-hidden />

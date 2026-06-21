@@ -50,7 +50,7 @@ function EligibilityScreeningCard({
     <section className={cardClass}>
       <h2 className="text-lg font-bold">Eligibility screening</h2>
       {!screening ? (
-        <p className="mt-4 text-[#5b6a62]">No eligibility screening on record.</p>
+        <p className="mt-4 text-[#4a4a4a]">No eligibility screening on record.</p>
       ) : (
         <>
           <dl className="mt-4 grid gap-3 sm:grid-cols-3">
@@ -121,7 +121,7 @@ function StatusHistoryCard({
       <h2 className="text-lg font-bold">Status action history</h2>
       <div className="mt-4 overflow-x-auto rounded-2xl border border-[#dbe7e0] shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
         <table className="w-full text-sm">
-          <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#5b6a62]">
+          <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#4a4a4a]">
             <tr>
               <th className="p-3 font-medium">Applied</th>
               <th className="p-3 font-medium">Action</th>
@@ -162,7 +162,7 @@ function StatusHistoryCard({
           </tbody>
         </table>
         {history.length === 0 && (
-          <p className="p-6 text-sm text-[#5b6a62]">No status actions recorded yet.</p>
+          <p className="p-6 text-sm text-[#4a4a4a]">No status actions recorded yet.</p>
         )}
       </div>
     </section>
@@ -369,7 +369,7 @@ export default async function AdminUserDetailPage({
         {completedAttempts.length > 0 && (
           <div className="mt-4 overflow-x-auto rounded-xl border border-[#dbe7e0]">
             <table className="w-full text-sm">
-              <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#5b6a62]">
+              <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#4a4a4a]">
                 <tr>
                   <th className="p-3 font-medium">Attempt</th>
                   <th className="p-3 font-medium">Score</th>

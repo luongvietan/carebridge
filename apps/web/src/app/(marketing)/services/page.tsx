@@ -78,7 +78,7 @@ export default function ServicesPage() {
               </div>
             ))}
           </div>
-          <p className="mx-auto mt-6 max-w-2xl text-center text-sm text-[#5b6a62]">
+          <p className="mx-auto mt-6 max-w-2xl text-center text-sm text-[#4a4a4a]">
             …and other non-regulated activities.
           </p>
         </section>
@@ -103,7 +103,7 @@ export default function ServicesPage() {
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <h3 className="mt-3 text-lg font-bold text-[#1e5a33] sm:text-xl">{step.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-[#5b6a62]">{step.description}</p>
+                <p className="mt-2 text-sm leading-relaxed text-[#4a4a4a]">{step.description}</p>
               </div>
             ))}
           </div>
@@ -117,7 +117,7 @@ export default function ServicesPage() {
             <h2 className="text-2xl font-bold tracking-tight text-[#1e5a33] sm:text-3xl">
               Ready to create a booking request?
             </h2>
-            <p className="mx-auto mt-3 max-w-lg text-sm leading-relaxed text-[#5b6a62] sm:text-base">
+            <p className="mx-auto mt-3 max-w-lg text-sm leading-relaxed text-[#4a4a4a] sm:text-base">
               Register as a private client or organisation — or join as a verified professional.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">

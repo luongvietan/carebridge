@@ -1,5 +1,19 @@
 @import "tailwindcss";
 
+/* CareBridge Connect brand palette (Ana's spec, green-led + teal accent).
+   Exposed as Tailwind theme colours so components can use bg-brand / text-teal-dark
+   etc. --brand (#6CC24A) is the vibrant signature green; it fails WCAG AA as a
+   white-text button background or small text, so use --brand-strong for those. */
+@theme {
+  --color-brand: #6cc24a;          /* Primary — vibrant brand green: fills, accents, highlights */
+  --color-brand-strong: #2e7d32;   /* AA-safe green: buttons, links, strong text */
+  --color-brand-strong-hover: #246627;
+  --color-brand-ink: #1e5a33;      /* Deep green for headings */
+  --color-teal: #00a99d;           /* Secondary — teal accent */
+  --color-teal-dark: #007a73;      /* Accent — AA-safe teal for text/icons on white */
+  --color-ink: #4a4a4a;            /* Body text (Ana's dark grey) */
+}
+
 html.lenis,
 html.lenis body {
   height: auto;
@@ -33,7 +47,7 @@ select {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235b6a62' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%234a4a4a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 0.85rem center;
   background-size: 1rem;

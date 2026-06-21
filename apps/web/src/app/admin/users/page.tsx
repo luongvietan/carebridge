@@ -286,7 +286,7 @@ export default async function AdminUsersPage({
   return (
     <main className="mx-auto max-w-6xl px-4 py-10">
       <h1 className="mt-1 text-3xl font-bold">Professionals</h1>
-      <p className="mt-2 text-sm text-[#5b6a62]">
+      <p className="mt-2 text-sm text-[#4a4a4a]">
         Search and filter professionals by status, location and compliance.
       </p>
 
@@ -296,7 +296,7 @@ export default async function AdminUsersPage({
 
       <div className="mt-8 overflow-x-auto rounded-2xl border border-[#dbe7e0] shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
         <table className="w-full text-sm">
-          <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#5b6a62]">
+          <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#4a4a4a]">
             <tr>
               <th className="p-3 font-medium">Name</th>
               <th className="p-3 font-medium">Email</th>
@@ -320,17 +320,17 @@ export default async function AdminUsersPage({
                 <td className="p-3">{prof.users?.email ?? "—"}</td>
                 <td className="p-3">{prof.professional_roles?.name ?? "—"}</td>
                 <td className="p-3">
-                  <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#5b6a62]">
+                  <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#4a4a4a]">
                     {formatLabel(prof.professional_status)}
                   </span>
                 </td>
                 <td className="p-3">
-                  <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#5b6a62]">
+                  <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#4a4a4a]">
                     {formatLabel(prof.compliance_status)}
                   </span>
                 </td>
                 <td className="p-3">
-                  <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#5b6a62]">
+                  <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#4a4a4a]">
                     {prof.users?.account_status ? formatLabel(prof.users.account_status) : "—"}
                   </span>
                 </td>
@@ -339,7 +339,7 @@ export default async function AdminUsersPage({
           </tbody>
         </table>
         {professionals.length === 0 && (
-          <p className="p-6 text-sm text-[#5b6a62]">No professionals match these filters.</p>
+          <p className="p-6 text-sm text-[#4a4a4a]">No professionals match these filters.</p>
         )}
       </div>
     </main>
