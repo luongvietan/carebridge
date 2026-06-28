@@ -2,6 +2,7 @@ import { requireAuth } from "@/lib/auth/require-auth";
 import { ensureProfessional } from "@/lib/onboarding/professional-session";
 import { createServiceClient } from "@/lib/supabase/service";
 import { buildCertificate } from "@/lib/assessment/certificate";
+import { BackLink } from "@/components/back-link";
 import { ForwardLink } from "@/components/forward-link";
 import { PrintButton } from "@/components/print-button";
 
@@ -58,9 +59,9 @@ export default async function CertificatePage() {
       <style>{`@media print { .no-print { display: none !important; } @page { size: A4 landscape; margin: 0; } }`}</style>
 
       <div className="no-print mb-6 flex items-center justify-between">
-        <ForwardLink href="/professional/onboarding/profile" className="text-sm text-[#2e7d32] underline">
-          ← Back
-        </ForwardLink>
+        <BackLink href="/professional/onboarding/profile" className="text-sm text-[#2e7d32] underline">
+          Back
+        </BackLink>
         <PrintButton
           label="Download / Print certificate"
           className="rounded-full bg-[#2e7d32] px-4 py-3 text-sm text-white hover:bg-[#246627]"

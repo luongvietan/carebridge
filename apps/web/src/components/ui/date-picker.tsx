@@ -2,8 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
-  ArrowRight01Icon,
   Calendar03Icon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
   Clock01Icon,
   Icon,
 } from "@/components/ui/icon";
@@ -205,7 +206,7 @@ function Calendar({
             onClick={() => shiftMonth(-1)}
             className={navBtnClass}
           >
-            <Icon icon={ArrowRight01Icon} size={16} strokeWidth={2} className="rotate-180" aria-hidden />
+            <Icon icon={ChevronLeftIcon} size={16} strokeWidth={2} aria-hidden />
           </button>
         ) : (
           <button
@@ -214,7 +215,7 @@ function Calendar({
             onClick={goBack}
             className={navBtnClass}
           >
-            <Icon icon={ArrowRight01Icon} size={16} strokeWidth={2} className="rotate-180" aria-hidden />
+            <Icon icon={ChevronLeftIcon} size={16} strokeWidth={2} aria-hidden />
           </button>
         )}
 
@@ -236,7 +237,7 @@ function Calendar({
               onClick={() => setView(new Date(view.getFullYear() - 1, view.getMonth(), 1))}
               className={navBtnClass}
             >
-              <Icon icon={ArrowRight01Icon} size={16} strokeWidth={2} className="rotate-180" aria-hidden />
+              <Icon icon={ChevronLeftIcon} size={16} strokeWidth={2} aria-hidden />
             </button>
             <button
               type="button"
@@ -252,7 +253,7 @@ function Calendar({
               onClick={() => setView(new Date(view.getFullYear() + 1, view.getMonth(), 1))}
               className={navBtnClass}
             >
-              <Icon icon={ArrowRight01Icon} size={16} strokeWidth={2} aria-hidden />
+              <Icon icon={ChevronRightIcon} size={16} strokeWidth={2} aria-hidden />
             </button>
           </div>
         )}
@@ -264,7 +265,7 @@ function Calendar({
               onClick={() => setYearPage((p) => p - YEARS_PER_PAGE)}
               className={navBtnClass}
             >
-              <Icon icon={ArrowRight01Icon} size={16} strokeWidth={2} className="rotate-180" aria-hidden />
+              <Icon icon={ChevronLeftIcon} size={16} strokeWidth={2} aria-hidden />
             </button>
             <span className="min-w-[6.5rem] text-center text-sm font-semibold text-[#1e5a33]">
               {yearPage} – {yearPage + YEARS_PER_PAGE - 1}
@@ -275,7 +276,7 @@ function Calendar({
               onClick={() => setYearPage((p) => p + YEARS_PER_PAGE)}
               className={navBtnClass}
             >
-              <Icon icon={ArrowRight01Icon} size={16} strokeWidth={2} aria-hidden />
+              <Icon icon={ChevronRightIcon} size={16} strokeWidth={2} aria-hidden />
             </button>
           </div>
         )}
@@ -287,7 +288,7 @@ function Calendar({
             onClick={() => shiftMonth(1)}
             className={navBtnClass}
           >
-            <Icon icon={ArrowRight01Icon} size={16} strokeWidth={2} aria-hidden />
+            <Icon icon={ChevronRightIcon} size={16} strokeWidth={2} aria-hidden />
           </button>
         ) : (
           <span className="h-8 w-8" aria-hidden />

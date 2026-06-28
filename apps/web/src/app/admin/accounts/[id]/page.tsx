@@ -1,4 +1,5 @@
-import Link from "next/link";
+import { BackLink } from "@/components/back-link";
+import { ForwardLink } from "@/components/forward-link";
 import { notFound, redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth/admin";
 import { createServiceClient } from "@/lib/supabase/service";
@@ -67,9 +68,9 @@ export default async function AdminAccountDetailPage({
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-10">
-      <Link href="/admin/accounts" className="text-sm text-[#2e7d32] hover:underline">
-        ← All accounts
-      </Link>
+      <BackLink href="/admin/accounts" className="text-sm text-[#2e7d32] hover:underline">
+        All accounts
+      </BackLink>
       <h1 className="mt-2 text-3xl font-bold">
         {org?.organisation_name ?? client?.full_name ?? user.email}
       </h1>
@@ -105,9 +106,9 @@ export default async function AdminAccountDetailPage({
           )}
         </dl>
         {user.account_type === "professional" && (
-          <Link href="/admin/users" className="mt-4 inline-block text-sm text-[#2e7d32] hover:underline">
-            Open in Users →
-          </Link>
+          <ForwardLink href="/admin/users" className="mt-4 inline-block text-sm text-[#2e7d32] hover:underline">
+            Open in Users
+          </ForwardLink>
         )}
       </section>
 

@@ -31,6 +31,7 @@ export function Icon({
 
 export {
   Add01Icon,
+  ArrowLeft01Icon,
   ArrowRight01Icon,
   ArrowUp01Icon,
   ArrowUpRight01Icon,
@@ -39,6 +40,8 @@ export {
   Cancel01Icon,
   CheckmarkCircle01Icon,
   ChevronDownIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
   Clock01Icon,
   Facebook01Icon,
   InstagramIcon,
