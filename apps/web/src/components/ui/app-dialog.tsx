@@ -21,6 +21,21 @@ type ConfirmOptions = {
   variant?: "default" | "destructive";
 };
 
+type ConfirmDialogProps = ConfirmOptions & {
+  message: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+};
+
+type PromptDialogProps = {
+  message: string;
+  defaultValue?: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
+  onConfirm: (value: string) => void;
+  onCancel: () => void;
+};
+
 type PendingConfirm = ConfirmOptions & {
   message: string;
   resolve: (ok: boolean) => void;
@@ -41,7 +56,7 @@ function ConfirmDialog({
   variant = "default",
   onConfirm,
   onCancel,
-}: PendingConfirm & { onConfirm: () => void; onCancel: () => void }) {
+}: ConfirmDialogProps) {
   return (
     <Modal open onClose={onCancel}>
       <p className="text-sm leading-relaxed text-[#4a4a4a]">{message}</p>
@@ -68,7 +83,7 @@ function PromptDialog({
   cancelLabel = "Cancel",
   onConfirm,
   onCancel,
-}: PendingPrompt & { onConfirm: (value: string) => void; onCancel: () => void }) {
+}: PromptDialogProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [value, setValue] = useState(defaultValue);
 
