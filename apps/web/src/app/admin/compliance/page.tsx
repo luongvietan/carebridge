@@ -1,6 +1,7 @@
 import { createServiceClient } from "@/lib/supabase/service";
 import { ReviewQueue } from "@/components/review-queue";
 import { RunSweepButton } from "@/components/run-sweep-button";
+import { isImageStoragePath } from "@/lib/onboarding/upload-rules";
 
 export const dynamic = "force-dynamic";
 
@@ -10,7 +11,7 @@ export default async function AdminCompliancePage() {
   const pendingQuery = admin
     .from("documents")
     .select(
-      "id, storage_path, reference_number, expiry_date, verification_status, professionals(full_name), document_types(name)",
+      "id, storage_path, original_filename, reference_number, expiry_date, verification_status, professionals(full_name), document_types(name)",
     )
     .in("verification_status", ["pending_review", "further_info_required"])
     .is("superseded_at", null)
@@ -32,11 +33,16 @@ export default async function AdminCompliancePage() {
 
   const itemsPromise = Promise.all(
     (pending ?? []).map(async (d) => {
-      // Force Content-Disposition: attachment so user-supplied content cannot
-      // execute in the admin's browser context on the supabase.co storage origin.
-      const { data: signed } = await admin.storage
-        .from("documents")
-        .createSignedUrl(d.storage_path, 600, { download: true });
+      const isImage = isImageStoragePath(d.storage_path);
+      const downloadName = d.original_filename ?? undefined;
+      // Inline preview: JPEG/PNG are bucket-locked and safe in <img>; PDFs open in
+      // a sandboxed iframe. A separate attachment URL is kept for explicit download.
+      const [{ data: previewSigned }, { data: downloadSigned }] = await Promise.all([
+        admin.storage.from("documents").createSignedUrl(d.storage_path, 600),
+        admin.storage
+          .from("documents")
+          .createSignedUrl(d.storage_path, 600, { download: downloadName ?? true }),
+      ]);
       return {
         documentId: d.id,
         professionalName: (d.professionals as { full_name: string } | null)?.full_name ?? "Professional",
@@ -44,7 +50,9 @@ export default async function AdminCompliancePage() {
         status: d.verification_status,
         referenceNumber: d.reference_number,
         expiryDate: d.expiry_date,
-        viewUrl: signed?.signedUrl ?? null,
+        contentKind: isImage ? ("image" as const) : ("pdf" as const),
+        previewUrl: previewSigned?.signedUrl ?? null,
+        downloadUrl: downloadSigned?.signedUrl ?? null,
       };
     }),
   );

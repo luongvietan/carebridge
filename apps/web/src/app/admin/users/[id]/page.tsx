@@ -276,17 +276,31 @@ export default async function AdminUserDetailPage({
       <section className="mt-8 rounded-2xl border border-[#dbe7e0] bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)] text-sm">
         <div className="flex items-start gap-4">
           {photoUrl ? (
-            <img
-              src={photoUrl}
-              alt={`${professional.full_name} profile photo`}
-              className="h-20 w-20 shrink-0 rounded-full object-cover ring-1 ring-[#dbe7e0]"
-            />
+            <a
+              href={photoUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="group shrink-0"
+              title="Open profile photo"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={photoUrl}
+                alt={`${professional.full_name} profile photo`}
+                className="h-24 w-24 rounded-full object-cover ring-1 ring-[#dbe7e0] transition group-hover:ring-[#2e7d32]"
+              />
+            </a>
           ) : (
-            <div className="grid h-20 w-20 shrink-0 place-items-center rounded-full bg-[#eef5f0] text-xs text-[#7a8a81]">
+            <div className="grid h-24 w-24 shrink-0 place-items-center rounded-full bg-[#eef5f0] text-xs text-[#7a8a81]">
               No photo
             </div>
           )}
-          <h2 className="text-lg font-bold">Profile</h2>
+          <div>
+            <h2 className="text-lg font-bold">Profile</h2>
+            {photoUrl && (
+              <p className="mt-1 text-xs text-[#7a8a81]">Click photo to open full size</p>
+            )}
+          </div>
         </div>
         <dl className="mt-4 grid gap-3 sm:grid-cols-2">
           <div>

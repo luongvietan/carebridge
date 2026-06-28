@@ -6,6 +6,17 @@ export const ALLOWED_UPLOAD_MIME = [
 
 export const ALLOWED_UPLOAD_EXT = [".pdf", ".jpg", ".jpeg", ".png"] as const;
 
+const IMAGE_EXT = [".jpg", ".jpeg", ".png"] as const;
+
+export function isImageStoragePath(path: string): boolean {
+  const lower = path.toLowerCase();
+  return IMAGE_EXT.some((ext) => lower.endsWith(ext));
+}
+
+export function isPdfStoragePath(path: string): boolean {
+  return path.toLowerCase().endsWith(".pdf");
+}
+
 export const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
 
 const MAGIC = {
