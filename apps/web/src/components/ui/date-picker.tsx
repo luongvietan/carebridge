@@ -16,6 +16,19 @@ const MONTHS = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December",
 ];
+const MONTHS_SHORT = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+];
+
+type CalendarPanel = "days" | "months" | "years";
+
+const YEARS_PER_PAGE = 12;
+
+const navBtnClass =
+  "grid h-8 w-8 place-items-center rounded-full text-[#4a4a4a] transition hover:bg-[#eef5f0] hover:text-[#2e7d32]";
+const headerBtnClass =
+  "rounded-md px-2 py-1 text-sm font-semibold text-[#1e5a33] transition hover:bg-[#eef5f0]";
 
 function pad(n: number) {
   return String(n).padStart(2, "0");
@@ -95,6 +108,10 @@ function useToday() {
 
 /* ---------- calendar grid ---------- */
 
+function yearPageStart(year: number) {
+  return year - (year % YEARS_PER_PAGE);
+}
+
 function Calendar({
   selected,
   onSelect,
@@ -107,18 +124,26 @@ function Calendar({
   const today = useToday();
   const [view, setView] = useState(() => selected ?? new Date());
   const [focused, setFocused] = useState(() => selected ?? new Date());
+  const [panel, setPanel] = useState<CalendarPanel>("days");
+  const [yearPage, setYearPage] = useState(() => yearPageStart((selected ?? new Date()).getFullYear()));
   const gridRef = useRef<HTMLDivElement>(null);
 
   const minDay = minDate
     ? new Date(minDate.getFullYear(), minDate.getMonth(), minDate.getDate())
     : null;
+  const minYear = minDay?.getFullYear() ?? null;
+  const minMonth = minDay ? minDay.getFullYear() * 12 + minDay.getMonth() : null;
   const isDisabled = (d: Date) => (minDay ? d.getTime() < minDay.getTime() : false);
+  const isMonthDisabled = (year: number, month: number) =>
+    minMonth !== null && year * 12 + month < minMonth;
+  const isYearDisabled = (year: number) => minYear !== null && year < minYear;
 
   // Keep keyboard focus on the active day button.
   useEffect(() => {
+    if (panel !== "days") return;
     const el = gridRef.current?.querySelector<HTMLButtonElement>(`[data-ymd="${toYMD(focused)}"]`);
     el?.focus();
-  }, [focused]);
+  }, [focused, panel]);
 
   function move(days: number) {
     const next = new Date(focused);
@@ -144,74 +169,246 @@ function Calendar({
     setView(new Date(view.getFullYear(), view.getMonth() + delta, 1));
   }
 
+  function openMonths() {
+    setPanel("months");
+  }
+
+  function openYears() {
+    setYearPage(yearPageStart(view.getFullYear()));
+    setPanel("years");
+  }
+
+  function pickMonth(month: number) {
+    setView(new Date(view.getFullYear(), month, 1));
+    setPanel("days");
+  }
+
+  function pickYear(year: number) {
+    setView(new Date(year, view.getMonth(), 1));
+    setPanel("months");
+  }
+
+  function goBack() {
+    setPanel((p) => (p === "years" ? "months" : "days"));
+  }
+
   const days = calendarDays(view);
+  const years = Array.from({ length: YEARS_PER_PAGE }, (_, i) => yearPage + i);
 
   return (
     <div>
       <div className="flex items-center justify-between px-1 pb-2">
-        <button
-          type="button"
-          aria-label="Previous month"
-          onClick={() => shiftMonth(-1)}
-          className="grid h-8 w-8 place-items-center rounded-full text-[#4a4a4a] transition hover:bg-[#eef5f0] hover:text-[#2e7d32]"
-        >
-          <Icon icon={ArrowRight01Icon} size={16} strokeWidth={2} className="rotate-180" aria-hidden />
-        </button>
-        <span className="text-sm font-semibold text-[#1e5a33]">
-          {MONTHS[view.getMonth()]} {view.getFullYear()}
-        </span>
-        <button
-          type="button"
-          aria-label="Next month"
-          onClick={() => shiftMonth(1)}
-          className="grid h-8 w-8 place-items-center rounded-full text-[#4a4a4a] transition hover:bg-[#eef5f0] hover:text-[#2e7d32]"
-        >
-          <Icon icon={ArrowRight01Icon} size={16} strokeWidth={2} aria-hidden />
-        </button>
-      </div>
+        {panel === "days" ? (
+          <button
+            type="button"
+            aria-label="Previous month"
+            onClick={() => shiftMonth(-1)}
+            className={navBtnClass}
+          >
+            <Icon icon={ArrowRight01Icon} size={16} strokeWidth={2} className="rotate-180" aria-hidden />
+          </button>
+        ) : (
+          <button
+            type="button"
+            aria-label={panel === "years" ? "Back to months" : "Back to days"}
+            onClick={goBack}
+            className={navBtnClass}
+          >
+            <Icon icon={ArrowRight01Icon} size={16} strokeWidth={2} className="rotate-180" aria-hidden />
+          </button>
+        )}
 
-      <div className="grid grid-cols-7 gap-0.5 px-1 pb-1 text-center text-xs font-medium text-[#7a8a81]">
-        {WEEKDAYS.map((w) => (
-          <span key={w} className="py-1">{w}</span>
-        ))}
-      </div>
-
-      <div ref={gridRef} role="grid" tabIndex={-1} onKeyDown={onKeyDown} className="grid grid-cols-7 gap-0.5 px-1">
-        {days.map((d) => {
-          const inMonth = d.getMonth() === view.getMonth();
-          const isSelected = selected ? sameDay(d, selected) : false;
-          const isToday = today ? sameDay(d, today) : false;
-          const isFocusable = sameDay(d, focused);
-          const disabled = isDisabled(d);
-          return (
+        {panel === "days" && (
+          <button
+            type="button"
+            aria-label={`${MONTHS[view.getMonth()]} ${view.getFullYear()}, choose month and year`}
+            onClick={openMonths}
+            className={headerBtnClass}
+          >
+            {MONTHS[view.getMonth()]} {view.getFullYear()}
+          </button>
+        )}
+        {panel === "months" && (
+          <div className="flex items-center gap-0.5">
             <button
-              key={toYMD(d)}
               type="button"
-              data-ymd={toYMD(d)}
-              role="gridcell"
-              aria-selected={isSelected}
-              aria-disabled={disabled}
-              disabled={disabled}
-              aria-label={formatLong(d)}
-              tabIndex={isFocusable ? 0 : -1}
-              onClick={() => !disabled && onSelect(d)}
-              className={`grid h-9 w-9 place-items-center rounded-full text-sm transition ${
-                disabled
-                  ? "cursor-not-allowed text-[#c5cec8]"
-                  : isSelected
-                    ? "bg-[#2e7d32] font-semibold text-white"
-                    : isToday
-                      ? "font-semibold text-[#2e7d32] ring-1 ring-inset ring-[#bcd8c7] hover:bg-[#eef5f0]"
-                      : inMonth
-                        ? "text-[#1e5a33] hover:bg-[#eef5f0]"
-                        : "text-[#9aa8a0] hover:bg-[#f5f7f6]"
-              } focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2e7d32]/40`}
+              aria-label="Previous year"
+              onClick={() => setView(new Date(view.getFullYear() - 1, view.getMonth(), 1))}
+              className={navBtnClass}
             >
-              {d.getDate()}
+              <Icon icon={ArrowRight01Icon} size={16} strokeWidth={2} className="rotate-180" aria-hidden />
             </button>
-          );
-        })}
+            <button
+              type="button"
+              aria-label={`${view.getFullYear()}, choose year`}
+              onClick={openYears}
+              className={headerBtnClass}
+            >
+              {view.getFullYear()}
+            </button>
+            <button
+              type="button"
+              aria-label="Next year"
+              onClick={() => setView(new Date(view.getFullYear() + 1, view.getMonth(), 1))}
+              className={navBtnClass}
+            >
+              <Icon icon={ArrowRight01Icon} size={16} strokeWidth={2} aria-hidden />
+            </button>
+          </div>
+        )}
+        {panel === "years" && (
+          <div className="flex items-center gap-0.5">
+            <button
+              type="button"
+              aria-label="Previous years"
+              onClick={() => setYearPage((p) => p - YEARS_PER_PAGE)}
+              className={navBtnClass}
+            >
+              <Icon icon={ArrowRight01Icon} size={16} strokeWidth={2} className="rotate-180" aria-hidden />
+            </button>
+            <span className="min-w-[6.5rem] text-center text-sm font-semibold text-[#1e5a33]">
+              {yearPage} – {yearPage + YEARS_PER_PAGE - 1}
+            </span>
+            <button
+              type="button"
+              aria-label="Next years"
+              onClick={() => setYearPage((p) => p + YEARS_PER_PAGE)}
+              className={navBtnClass}
+            >
+              <Icon icon={ArrowRight01Icon} size={16} strokeWidth={2} aria-hidden />
+            </button>
+          </div>
+        )}
+
+        {panel === "days" ? (
+          <button
+            type="button"
+            aria-label="Next month"
+            onClick={() => shiftMonth(1)}
+            className={navBtnClass}
+          >
+            <Icon icon={ArrowRight01Icon} size={16} strokeWidth={2} aria-hidden />
+          </button>
+        ) : (
+          <span className="h-8 w-8" aria-hidden />
+        )}
       </div>
+
+      {panel === "days" && (
+        <>
+          <div className="grid grid-cols-7 gap-0.5 px-1 pb-1 text-center text-xs font-medium text-[#7a8a81]">
+            {WEEKDAYS.map((w) => (
+              <span key={w} className="py-1">{w}</span>
+            ))}
+          </div>
+
+          <div ref={gridRef} role="grid" tabIndex={-1} onKeyDown={onKeyDown} className="grid grid-cols-7 gap-0.5 px-1">
+            {days.map((d) => {
+              const inMonth = d.getMonth() === view.getMonth();
+              const isSelected = selected ? sameDay(d, selected) : false;
+              const isToday = today ? sameDay(d, today) : false;
+              const isFocusable = sameDay(d, focused);
+              const disabled = isDisabled(d);
+              return (
+                <button
+                  key={toYMD(d)}
+                  type="button"
+                  data-ymd={toYMD(d)}
+                  role="gridcell"
+                  aria-selected={isSelected}
+                  aria-disabled={disabled}
+                  disabled={disabled}
+                  aria-label={formatLong(d)}
+                  tabIndex={isFocusable ? 0 : -1}
+                  onClick={() => !disabled && onSelect(d)}
+                  className={`grid h-9 w-9 place-items-center rounded-full text-sm transition ${
+                    disabled
+                      ? "cursor-not-allowed text-[#c5cec8]"
+                      : isSelected
+                        ? "bg-[#2e7d32] font-semibold text-white"
+                        : isToday
+                          ? "font-semibold text-[#2e7d32] ring-1 ring-inset ring-[#bcd8c7] hover:bg-[#eef5f0]"
+                          : inMonth
+                            ? "text-[#1e5a33] hover:bg-[#eef5f0]"
+                            : "text-[#9aa8a0] hover:bg-[#f5f7f6]"
+                  } focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2e7d32]/40`}
+                >
+                  {d.getDate()}
+                </button>
+              );
+            })}
+          </div>
+        </>
+      )}
+
+      {panel === "months" && (
+        <div role="grid" className="grid grid-cols-3 gap-1 px-1">
+          {MONTHS_SHORT.map((label, month) => {
+            const isCurrent = today
+              ? today.getFullYear() === view.getFullYear() && today.getMonth() === month
+              : false;
+            const isSelectedMonth =
+              selected?.getFullYear() === view.getFullYear() && selected.getMonth() === month;
+            const disabled = isMonthDisabled(view.getFullYear(), month);
+            return (
+              <button
+                key={label}
+                type="button"
+                role="gridcell"
+                aria-selected={isSelectedMonth}
+                aria-disabled={disabled}
+                disabled={disabled}
+                aria-label={MONTHS[month]}
+                onClick={() => !disabled && pickMonth(month)}
+                className={`rounded-lg py-2.5 text-sm transition ${
+                  disabled
+                    ? "cursor-not-allowed text-[#c5cec8]"
+                    : isSelectedMonth
+                      ? "bg-[#2e7d32] font-semibold text-white"
+                      : isCurrent
+                        ? "font-semibold text-[#2e7d32] ring-1 ring-inset ring-[#bcd8c7] hover:bg-[#eef5f0]"
+                        : "text-[#1e5a33] hover:bg-[#eef5f0]"
+                } focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2e7d32]/40`}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {panel === "years" && (
+        <div role="grid" className="grid grid-cols-3 gap-1 px-1">
+          {years.map((year) => {
+            const isCurrent = today ? today.getFullYear() === year : false;
+            const isSelectedYear = selected?.getFullYear() === year;
+            const disabled = isYearDisabled(year);
+            return (
+              <button
+                key={year}
+                type="button"
+                role="gridcell"
+                aria-selected={isSelectedYear}
+                aria-disabled={disabled}
+                disabled={disabled}
+                aria-label={String(year)}
+                onClick={() => !disabled && pickYear(year)}
+                className={`rounded-lg py-2.5 text-sm transition ${
+                  disabled
+                    ? "cursor-not-allowed text-[#c5cec8]"
+                    : isSelectedYear
+                      ? "bg-[#2e7d32] font-semibold text-white"
+                      : isCurrent
+                        ? "font-semibold text-[#2e7d32] ring-1 ring-inset ring-[#bcd8c7] hover:bg-[#eef5f0]"
+                        : "text-[#1e5a33] hover:bg-[#eef5f0]"
+                } focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2e7d32]/40`}
+              >
+                {year}
+              </button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
