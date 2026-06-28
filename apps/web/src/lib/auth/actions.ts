@@ -1,5 +1,6 @@
 "use server";
 import { redirect } from "next/navigation";
+import { getAppUrl } from "@/lib/app-url";
 import { createClient } from "@/lib/supabase/server";
 import { registerSchema } from "@/lib/validation/auth";
 import { sendNotification } from "@/lib/notifications/send";
@@ -34,6 +35,7 @@ export async function signUp(_prev: SignUpResult, formData: FormData): Promise<S
     email: parsed.data.email,
     password: parsed.data.password,
     options: {
+      emailRedirectTo: `${getAppUrl()}/auth/confirm?next=/login`,
       // Privacy + T&C consent is recorded atomically by the handle_new_user
       // trigger (see migration 0038) so it can never be silently dropped if a
       // separate insert fails or the user object isn't returned.
