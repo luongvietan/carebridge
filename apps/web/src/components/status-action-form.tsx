@@ -10,6 +10,7 @@ import {
 } from "@/lib/admin/status-machine";
 import { Select } from "@/components/ui/select";
 import { DatePicker } from "@/components/ui/date-picker";
+import { useConfirmDialog } from "@/components/ui/app-dialog";
 
 const INPUT_CLASS =
   "w-full rounded-xl border border-[#dbe7e0] bg-white px-3.5 py-2.5 text-sm text-[#1e5a33] placeholder:text-[#9aa8a0] focus:border-[#2e7d32] focus:outline-none focus:ring-2 focus:ring-[#2e7d32]/15";
@@ -90,6 +91,7 @@ function reducer(state: State, action: Action): State {
 
 export function StatusActionForm({ professionalId, currentStatus }: Props) {
   const router = useRouter();
+  const { confirm, dialog } = useConfirmDialog();
   const actions = allowedActions(currentStatus);
 
   // Default to no action so an admin must deliberately choose — never pre-select
@@ -136,7 +138,10 @@ export function StatusActionForm({ professionalId, currentStatus }: Props) {
     const IRREVERSIBLE: StatusActionType[] = ["reject", "remove", "full_suspension"];
     if (
       IRREVERSIBLE.includes(state.action as StatusActionType) &&
-      !window.confirm(`Apply "${formatLabel(state.action)}" to this professional? This is hard to undo.`)
+      !(await confirm(`Apply "${formatLabel(state.action)}" to this professional? This is hard to undo.`, {
+        variant: "destructive",
+        confirmLabel: "Apply",
+      }))
     ) {
       return;
     }
@@ -161,6 +166,7 @@ export function StatusActionForm({ professionalId, currentStatus }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 text-sm">
+      {dialog}
       <div className="flex flex-col gap-1 text-[#4a4a4a]">
         Action
         <Select

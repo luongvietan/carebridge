@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { reviewDocument, type ReviewDecision } from "@/lib/admin/compliance-actions";
+import { usePromptDialog } from "@/components/ui/app-dialog";
 
 export type ReviewItem = {
   documentId: string;
@@ -54,14 +55,18 @@ function DocumentPreview({ item }: { item: ReviewItem }) {
 
 export function ReviewQueue({ items }: { items: ReviewItem[] }) {
   const router = useRouter();
+  const { prompt, dialog } = usePromptDialog();
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function decide(documentId: string, decision: ReviewDecision) {
     let note: string | undefined;
     if (decision !== "approved") {
-      note = window.prompt(decision === "rejected" ? "Reason for rejection:" : "What further information is needed?") ?? undefined;
-      if (note === undefined) return;
+      const input = await prompt(
+        decision === "rejected" ? "Reason for rejection:" : "What further information is needed?",
+      );
+      if (input === null) return;
+      note = input;
     }
     setBusy(documentId);
     setError(null);
@@ -77,6 +82,7 @@ export function ReviewQueue({ items }: { items: ReviewItem[] }) {
 
   return (
     <div className="mt-6">
+      {dialog}
       {error && <p className="mb-3 text-sm text-[#da1e28]">{error}</p>}
       <div className="divide-y divide-[#dbe7e0] border border-[#dbe7e0]">
         {items.map((it) => (

@@ -2,18 +2,20 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { anonymiseUser } from "@/lib/admin/gdpr-actions";
+import { useConfirmDialog } from "@/components/ui/app-dialog";
 
 const CONFIRM =
   "Permanently anonymise this user's personal data? Compliance and financial records are retained in anonymised form. This cannot be undone.";
 
 export function AnonymiseUserButton({ userId }: { userId: string }) {
   const router = useRouter();
+  const { confirm, dialog } = useConfirmDialog();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
 
   async function onClick() {
-    if (!window.confirm(CONFIRM)) return;
+    if (!(await confirm(CONFIRM, { variant: "destructive", confirmLabel: "Anonymise" }))) return;
     setBusy(true);
     setError(null);
     const r = await anonymiseUser(userId);
@@ -30,6 +32,7 @@ export function AnonymiseUserButton({ userId }: { userId: string }) {
 
   return (
     <span className="inline-flex flex-col gap-1">
+      {dialog}
       <button
         type="button"
         onClick={onClick}

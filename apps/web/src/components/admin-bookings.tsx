@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { assignBooking, cancelBooking, completeBooking, markNoShow } from "@/lib/bookings/actions";
 import { Select } from "@/components/ui/select";
+import { useConfirmDialog } from "@/components/ui/app-dialog";
 
 import { formatGbpMoney } from "@/lib/format/money";
 import { formatLondon } from "@/lib/format/datetime";
@@ -92,11 +93,12 @@ function AssignControl({
 }
 
 function CancelControl({ bookingId, onDone }: { bookingId: string; onDone: () => void }) {
+  const { confirm, dialog } = useConfirmDialog();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function handleCancel() {
-    if (!window.confirm("Cancel this booking?")) return;
+    if (!(await confirm("Cancel this booking?", { variant: "destructive", confirmLabel: "Cancel booking" }))) return;
     setBusy(true);
     setError(null);
     const result = await cancelBooking(bookingId);
@@ -107,6 +109,7 @@ function CancelControl({ bookingId, onDone }: { bookingId: string; onDone: () =>
 
   return (
     <div className="flex flex-col items-end gap-1">
+      {dialog}
       {error && <span className="text-xs text-[#da1e28]">{error}</span>}
       <button
         type="button"
@@ -121,11 +124,12 @@ function CancelControl({ bookingId, onDone }: { bookingId: string; onDone: () =>
 }
 
 function CompleteControl({ bookingId, onDone }: { bookingId: string; onDone: () => void }) {
+  const { confirm, dialog } = useConfirmDialog();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function handleComplete() {
-    if (!window.confirm("Mark this booking as completed?")) return;
+    if (!(await confirm("Mark this booking as completed?", { confirmLabel: "Mark completed" }))) return;
     setBusy(true);
     setError(null);
     const result = await completeBooking(bookingId);
@@ -136,6 +140,7 @@ function CompleteControl({ bookingId, onDone }: { bookingId: string; onDone: () 
 
   return (
     <div className="flex flex-col items-end gap-1">
+      {dialog}
       {error && <span className="text-xs text-[#da1e28]">{error}</span>}
       <button
         type="button"
@@ -150,11 +155,12 @@ function CompleteControl({ bookingId, onDone }: { bookingId: string; onDone: () 
 }
 
 function NoShowControl({ bookingId, onDone }: { bookingId: string; onDone: () => void }) {
+  const { confirm, dialog } = useConfirmDialog();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function handleNoShow() {
-    if (!window.confirm("Mark this booking as no-show?")) return;
+    if (!(await confirm("Mark this booking as no-show?", { confirmLabel: "Mark no-show" }))) return;
     setBusy(true);
     setError(null);
     const result = await markNoShow(bookingId);
@@ -165,6 +171,7 @@ function NoShowControl({ bookingId, onDone }: { bookingId: string; onDone: () =>
 
   return (
     <div className="flex flex-col items-end gap-1">
+      {dialog}
       {error && <span className="text-xs text-[#da1e28]">{error}</span>}
       <button
         type="button"

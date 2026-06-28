@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { acceptBooking, declineBooking, completeBooking, undoDecline } from "@/lib/bookings/actions";
+import { useConfirmDialog } from "@/components/ui/app-dialog";
 
 import { formatGbpMoney } from "@/lib/format/money";
 import { formatLondon } from "@/lib/format/datetime";
@@ -112,11 +113,12 @@ function UndoDeclineControl({ bookingId, onDone }: { bookingId: string; onDone: 
 }
 
 function CompleteControl({ bookingId, onDone }: { bookingId: string; onDone: () => void }) {
+  const { confirm, dialog } = useConfirmDialog();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function handleComplete() {
-    if (!window.confirm("Mark this booking as completed?")) return;
+    if (!(await confirm("Mark this booking as completed?", { confirmLabel: "Mark completed" }))) return;
     setBusy(true);
     setError(null);
     const result = await completeBooking(bookingId);
@@ -127,6 +129,7 @@ function CompleteControl({ bookingId, onDone }: { bookingId: string; onDone: () 
 
   return (
     <div className="flex flex-col items-end gap-1">
+      {dialog}
       {error && <span className="text-xs text-[#da1e28]">{error}</span>}
       <button
         type="button"
