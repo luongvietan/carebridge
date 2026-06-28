@@ -1,7 +1,7 @@
 "use client";
 import { useActionState } from "react";
 import { ForwardLink } from "@/components/forward-link";
-import { saveProfile, type ProfileResult } from "@/lib/onboarding/actions";
+import { saveProfile, type ProfileFormValues, type ProfileResult } from "@/lib/onboarding/actions";
 import { OnboardingSteps } from "@/components/onboarding-steps";
 import { Select } from "@/components/ui/select";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -47,8 +47,29 @@ export function ProfileForm({
   currentAvailabilityDays?: number[];
 }) {
   const [state, action, pending] = useActionState<ProfileResult, FormData>(saveProfile, null);
-  const skillSet = new Set(currentSkillIds);
-  const daySet = new Set(currentAvailabilityDays);
+  const draft = state && "values" in state ? state.values : undefined;
+  const formKey = draft ? `draft-${JSON.stringify(draft)}` : "initial";
+  const skillSet = new Set(draft?.skillIds ?? currentSkillIds);
+  const daySet = new Set(draft?.availabilityDays ?? currentAvailabilityDays);
+
+  const v: ProfileFormValues = draft ?? {
+    fullName: current?.full_name ?? "",
+    dateOfBirth: current?.date_of_birth ?? "",
+    addressLine1: current?.address_line1 ?? "",
+    addressLine2: current?.address_line2 ?? "",
+    city: current?.city ?? "",
+    postcode: current?.postcode ?? "",
+    nationalInsuranceNo: current?.national_insurance_no ?? "",
+    professionalRoleId: current?.professional_role_id ?? "",
+    professionalSummary: current?.professional_summary ?? "",
+    registrationBody: current?.registration_body ?? "",
+    registrationNumber: current?.registration_number ?? "",
+    travelDistanceKm: current?.travel_distance_km != null ? String(current.travel_distance_km) : "",
+    hasDrivingLicence: current?.has_driving_licence ?? false,
+    hasVehicle: current?.has_vehicle ?? false,
+    skillIds: currentSkillIds,
+    availabilityDays: currentAvailabilityDays,
+  };
 
   if (state && "ok" in state) {
     return (
@@ -70,10 +91,10 @@ export function ProfileForm({
   return (
     <div>
       <OnboardingSteps current={3} />
-      <form action={action} className="mt-8 space-y-4">
+      <form key={formKey} action={action} className="mt-8 space-y-4">
         <label className="block text-sm font-medium">
           Full name
-          <input name="fullName" required defaultValue={current?.full_name ?? ""} className={field} />
+          <input name="fullName" required defaultValue={v.fullName} className={field} />
         </label>
         <div className="block text-sm font-medium">
           Professional role
@@ -81,7 +102,7 @@ export function ProfileForm({
             name="professionalRoleId"
             aria-label="Professional role"
             required
-            defaultValue={current?.professional_role_id ?? ""}
+            defaultValue={v.professionalRoleId}
             placeholder="Select a role…"
             className="mt-1"
             options={roles.map((r) => ({ value: r.id, label: r.name }))}
@@ -92,31 +113,31 @@ export function ProfileForm({
           <DatePicker
             name="dateOfBirth"
             aria-label="Date of birth"
-            defaultValue={current?.date_of_birth ?? ""}
+            defaultValue={v.dateOfBirth}
             className="mt-1"
           />
         </div>
         <label className="block text-sm font-medium">
           Address line 1
-          <input name="addressLine1" required defaultValue={current?.address_line1 ?? ""} className={field} />
+          <input name="addressLine1" required defaultValue={v.addressLine1} className={field} />
         </label>
         <label className="block text-sm font-medium">
           Address line 2
-          <input name="addressLine2" defaultValue={current?.address_line2 ?? ""} className={field} />
+          <input name="addressLine2" defaultValue={v.addressLine2} className={field} />
         </label>
         <div className="grid grid-cols-2 gap-4">
           <label className="block text-sm font-medium">
             City
-            <input name="city" required defaultValue={current?.city ?? ""} className={field} />
+            <input name="city" required defaultValue={v.city} className={field} />
           </label>
           <label className="block text-sm font-medium">
             Postcode
-            <input name="postcode" required defaultValue={current?.postcode ?? ""} className={field} />
+            <input name="postcode" required defaultValue={v.postcode} className={field} />
           </label>
         </div>
         <label className="block text-sm font-medium">
           National Insurance number
-          <input name="nationalInsuranceNo" defaultValue={current?.national_insurance_no ?? ""} className={field} />
+          <input name="nationalInsuranceNo" defaultValue={v.nationalInsuranceNo} className={field} />
         </label>
         <div className="grid grid-cols-2 gap-4">
           <label className="block text-sm font-medium">
@@ -124,7 +145,7 @@ export function ProfileForm({
             <input
               name="registrationBody"
               placeholder="e.g. NMC, HCPC"
-              defaultValue={current?.registration_body ?? ""}
+              defaultValue={v.registrationBody}
               className={field}
             />
           </label>
@@ -132,14 +153,14 @@ export function ProfileForm({
             Registration number
             <input
               name="registrationNumber"
-              defaultValue={current?.registration_number ?? ""}
+              defaultValue={v.registrationNumber}
               className={field}
             />
           </label>
         </div>
         <label className="block text-sm font-medium">
           Professional summary
-          <textarea name="professionalSummary" rows={3} defaultValue={current?.professional_summary ?? ""} className={field} />
+          <textarea name="professionalSummary" rows={3} defaultValue={v.professionalSummary} className={field} />
         </label>
 
         <fieldset className="block text-sm font-medium">
@@ -183,14 +204,14 @@ export function ProfileForm({
 
         <label className="block text-sm font-medium">
           Willing to travel (km)
-          <input type="number" name="travelDistanceKm" min={0} defaultValue={current?.travel_distance_km ?? ""} className={field} />
+          <input type="number" name="travelDistanceKm" min={0} defaultValue={v.travelDistanceKm} className={field} />
         </label>
         <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" name="hasDrivingLicence" defaultChecked={current?.has_driving_licence ?? false} /> I hold a
+          <input type="checkbox" name="hasDrivingLicence" defaultChecked={v.hasDrivingLicence} /> I hold a
           valid driving licence
         </label>
         <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" name="hasVehicle" defaultChecked={current?.has_vehicle ?? false} /> I have access to a
+          <input type="checkbox" name="hasVehicle" defaultChecked={v.hasVehicle} /> I have access to a
           vehicle
         </label>
         <label className="block text-sm font-medium">

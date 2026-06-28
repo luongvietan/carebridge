@@ -9,6 +9,62 @@ import { verifyUpload } from "@/lib/onboarding/upload-rules";
 import { validateDocumentExpiry } from "@/lib/onboarding/document-expiry";
 import { parseSkillIds, parseAvailabilityDays } from "@/lib/onboarding/profile-children";
 import { eligibilityCompleted, assessmentPassed } from "@/lib/onboarding/progress";
+import { validationMessage } from "@/lib/validation/form-messages";
+
+const PROFILE_FIELD_LABELS: Record<string, string> = {
+  fullName: "Full name",
+  dateOfBirth: "Date of birth",
+  addressLine1: "Address line 1",
+  city: "City",
+  postcode: "Postcode",
+  nationalInsuranceNo: "National Insurance number",
+  professionalRoleId: "Professional role",
+  travelDistanceKm: "Travel distance",
+};
+
+export type ProfileFormValues = {
+  fullName: string;
+  dateOfBirth: string;
+  addressLine1: string;
+  addressLine2: string;
+  city: string;
+  postcode: string;
+  nationalInsuranceNo: string;
+  professionalRoleId: string;
+  professionalSummary: string;
+  registrationBody: string;
+  registrationNumber: string;
+  travelDistanceKm: string;
+  hasDrivingLicence: boolean;
+  hasVehicle: boolean;
+  skillIds: string[];
+  availabilityDays: number[];
+};
+
+function parseProfileFormValues(formData: FormData): ProfileFormValues {
+  return {
+    fullName: String(formData.get("fullName") ?? ""),
+    dateOfBirth: String(formData.get("dateOfBirth") ?? ""),
+    addressLine1: String(formData.get("addressLine1") ?? ""),
+    addressLine2: String(formData.get("addressLine2") ?? ""),
+    city: String(formData.get("city") ?? ""),
+    postcode: String(formData.get("postcode") ?? ""),
+    nationalInsuranceNo: String(formData.get("nationalInsuranceNo") ?? ""),
+    professionalRoleId: String(formData.get("professionalRoleId") ?? ""),
+    professionalSummary: String(formData.get("professionalSummary") ?? ""),
+    registrationBody: String(formData.get("registrationBody") ?? ""),
+    registrationNumber: String(formData.get("registrationNumber") ?? ""),
+    travelDistanceKm: String(formData.get("travelDistanceKm") ?? ""),
+    hasDrivingLicence: formData.get("hasDrivingLicence") === "on",
+    hasVehicle: formData.get("hasVehicle") === "on",
+    skillIds: parseSkillIds(formData.getAll("skillIds").map(String)),
+    availabilityDays: parseAvailabilityDays(formData.getAll("availabilityDays").map(String)),
+  };
+}
+
+function profileError(message: string, formData: FormData): { error: string; values: ProfileFormValues } {
+  return { error: message, values: parseProfileFormValues(formData) };
+}
 
 export type EligibilityResult = { ok: true; outcome: EligibilityOutcome } | { error: string } | null;
 
@@ -72,7 +128,7 @@ const ASSESSMENT_REQUIRED_ERROR =
 const ELIGIBILITY_REQUIRED_ERROR =
   "Please complete the eligibility screening before continuing your application.";
 
-export type ProfileResult = { ok: true } | { error: string } | null;
+export type ProfileResult = { ok: true } | { error: string; values?: ProfileFormValues } | null;
 
 export async function saveProfile(_prev: ProfileResult, formData: FormData): Promise<ProfileResult> {
   const user = await requireAuth();
@@ -92,17 +148,19 @@ export async function saveProfile(_prev: ProfileResult, formData: FormData): Pro
     hasDrivingLicence: formData.get("hasDrivingLicence") === "on",
     hasVehicle: formData.get("hasVehicle") === "on",
   });
-  if (!parsed.success) return { error: "Please complete the required fields." };
+  if (!parsed.success) {
+    return profileError(validationMessage(parsed.error, PROFILE_FIELD_LABELS), formData);
+  }
 
   const professionalId = await ensureProfessional(user);
-  if (!professionalId) return { error: "You must be signed in." };
+  if (!professionalId) return profileError("You must be signed in.", formData);
 
   const gateAdmin = createServiceClient();
   if (!(await eligibilityCompleted(gateAdmin, professionalId))) {
-    return { error: ELIGIBILITY_REQUIRED_ERROR };
+    return profileError(ELIGIBILITY_REQUIRED_ERROR, formData);
   }
   if (!(await assessmentPassed(gateAdmin, professionalId))) {
-    return { error: ASSESSMENT_REQUIRED_ERROR };
+    return profileError(ASSESSMENT_REQUIRED_ERROR, formData);
   }
 
   // Optional profile photo → private storage bucket.
@@ -110,14 +168,14 @@ export async function saveProfile(_prev: ProfileResult, formData: FormData): Pro
   const photo = formData.get("photo");
   if (photo instanceof File && photo.size > 0) {
     const verified = await verifyUpload(photo);
-    if (!verified.ok) return { error: verified.error };
+    if (!verified.ok) return profileError(verified.error, formData);
     const admin = createServiceClient();
     photoPath = `${professionalId}/profile/${crypto.randomUUID()}-${verified.safeName}`;
     const { error: upErr } = await admin.storage.from("documents").upload(photoPath, photo, {
       contentType: verified.safeMime,
       upsert: true,
     });
-    if (upErr) return { error: `Photo upload failed: ${upErr.message}` };
+    if (upErr) return profileError(`Photo upload failed: ${upErr.message}`, formData);
   }
 
   const supabase = await createClient();
@@ -143,7 +201,7 @@ export async function saveProfile(_prev: ProfileResult, formData: FormData): Pro
       ...(photoPath ? { profile_photo_path: photoPath } : {}),
     })
     .eq("id", professionalId);
-  if (error) return { error: error.message };
+  if (error) return profileError(error.message, formData);
 
   // Persist skills/specialities and weekly availability as a replace-set. Owner
   // self-RLS (0042) authorises these writes for the professional's own rows.
@@ -154,12 +212,12 @@ export async function saveProfile(_prev: ProfileResult, formData: FormData): Pro
     .from("professional_skills")
     .delete()
     .eq("professional_id", professionalId);
-  if (skillsDelErr) return { error: skillsDelErr.message };
+  if (skillsDelErr) return profileError(skillsDelErr.message, formData);
   if (skillIds.length > 0) {
     const { error: skillsInsErr } = await supabase
       .from("professional_skills")
       .insert(skillIds.map((skill_id) => ({ professional_id: professionalId, skill_id })));
-    if (skillsInsErr) return { error: skillsInsErr.message };
+    if (skillsInsErr) return profileError(skillsInsErr.message, formData);
   }
 
   const availabilityDays = parseAvailabilityDays(formData.getAll("availabilityDays").map(String));
@@ -167,14 +225,14 @@ export async function saveProfile(_prev: ProfileResult, formData: FormData): Pro
     .from("professional_availability")
     .delete()
     .eq("professional_id", professionalId);
-  if (availDelErr) return { error: availDelErr.message };
+  if (availDelErr) return profileError(availDelErr.message, formData);
   if (availabilityDays.length > 0) {
     const { error: availInsErr } = await supabase
       .from("professional_availability")
       .insert(
         availabilityDays.map((day_of_week) => ({ professional_id: professionalId, day_of_week })),
       );
-    if (availInsErr) return { error: availInsErr.message };
+    if (availInsErr) return profileError(availInsErr.message, formData);
   }
 
   return { ok: true };

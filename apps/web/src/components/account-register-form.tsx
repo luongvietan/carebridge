@@ -5,6 +5,8 @@ import {
   saveClientProfile,
   saveOrganisationProfile,
   type AccountResult,
+  type ClientFormValues,
+  type OrganisationFormValues,
 } from "@/lib/accounts/actions";
 
 const field =
@@ -16,6 +18,10 @@ export function AccountRegisterForm({ variant }: { variant: Variant }) {
   const action = variant === "client" ? saveClientProfile : saveOrganisationProfile;
   const bookingsHref = variant === "client" ? "/client/bookings" : "/organisation/bookings";
   const [state, formAction, pending] = useActionState<AccountResult, FormData>(action, null);
+  const draft = state && "values" in state ? state.values : undefined;
+  const formKey = draft ? `draft-${JSON.stringify(draft)}` : "initial";
+  const clientValues = (variant === "client" ? draft : undefined) as ClientFormValues | undefined;
+  const orgValues = (variant === "organisation" ? draft : undefined) as OrganisationFormValues | undefined;
 
   if (state && "ok" in state) {
     return (
@@ -32,37 +38,37 @@ export function AccountRegisterForm({ variant }: { variant: Variant }) {
   }
 
   return (
-    <form action={formAction} className="space-y-4">
+    <form key={formKey} action={formAction} className="space-y-4">
       {variant === "client" ? (
         <>
           <label className="block text-sm font-medium">
             Full name
-            <input name="fullName" required className={field} />
+            <input name="fullName" required defaultValue={clientValues?.fullName ?? ""} className={field} />
           </label>
           <label className="block text-sm font-medium">
             Phone
-            <input name="phone" type="tel" className={field} />
+            <input name="phone" type="tel" defaultValue={clientValues?.phone ?? ""} className={field} />
           </label>
           <label className="block text-sm font-medium">
             Contact email
-            <input name="emailContact" type="email" className={field} />
+            <input name="emailContact" type="email" defaultValue={clientValues?.emailContact ?? ""} className={field} />
           </label>
           <label className="block text-sm font-medium">
             Address line 1
-            <input name="addressLine1" required className={field} />
+            <input name="addressLine1" required defaultValue={clientValues?.addressLine1 ?? ""} className={field} />
           </label>
           <label className="block text-sm font-medium">
             Address line 2
-            <input name="addressLine2" className={field} />
+            <input name="addressLine2" defaultValue={clientValues?.addressLine2 ?? ""} className={field} />
           </label>
           <div className="grid grid-cols-2 gap-4">
             <label className="block text-sm font-medium">
               City
-              <input name="city" required className={field} />
+              <input name="city" required defaultValue={clientValues?.city ?? ""} className={field} />
             </label>
             <label className="block text-sm font-medium">
               Postcode
-              <input name="postcode" required className={field} />
+              <input name="postcode" required defaultValue={clientValues?.postcode ?? ""} className={field} />
             </label>
           </div>
         </>
@@ -70,49 +76,49 @@ export function AccountRegisterForm({ variant }: { variant: Variant }) {
         <>
           <label className="block text-sm font-medium">
             Organisation name
-            <input name="organisationName" required className={field} />
+            <input name="organisationName" required defaultValue={orgValues?.organisationName ?? ""} className={field} />
           </label>
           <label className="block text-sm font-medium">
             Contact person
-            <input name="contactPerson" required className={field} />
+            <input name="contactPerson" required defaultValue={orgValues?.contactPerson ?? ""} className={field} />
           </label>
           <label className="block text-sm font-medium">
             Phone
-            <input name="phone" type="tel" className={field} />
+            <input name="phone" type="tel" defaultValue={orgValues?.phone ?? ""} className={field} />
           </label>
           <label className="block text-sm font-medium">
             Contact email
-            <input name="emailContact" type="email" className={field} />
+            <input name="emailContact" type="email" defaultValue={orgValues?.emailContact ?? ""} className={field} />
           </label>
           <label className="block text-sm font-medium">
             CQC registration number
-            <input name="cqcRegistrationNumber" className={field} />
+            <input name="cqcRegistrationNumber" defaultValue={orgValues?.cqcRegistrationNumber ?? ""} className={field} />
           </label>
           <label className="block text-sm font-medium">
             Billing email
-            <input name="billingEmail" type="email" required className={field} />
+            <input name="billingEmail" type="email" required defaultValue={orgValues?.billingEmail ?? ""} className={field} />
           </label>
           <label className="block text-sm font-medium">
             Address line 1
-            <input name="addressLine1" required className={field} />
+            <input name="addressLine1" required defaultValue={orgValues?.addressLine1 ?? ""} className={field} />
           </label>
           <label className="block text-sm font-medium">
             Address line 2
-            <input name="addressLine2" className={field} />
+            <input name="addressLine2" defaultValue={orgValues?.addressLine2 ?? ""} className={field} />
           </label>
           <div className="grid grid-cols-2 gap-4">
             <label className="block text-sm font-medium">
               City
-              <input name="city" required className={field} />
+              <input name="city" required defaultValue={orgValues?.city ?? ""} className={field} />
             </label>
             <label className="block text-sm font-medium">
               Postcode
-              <input name="postcode" required className={field} />
+              <input name="postcode" required defaultValue={orgValues?.postcode ?? ""} className={field} />
             </label>
           </div>
           <label className="block text-sm font-medium">
             Billing address
-            <input name="billingAddress" className={field} />
+            <input name="billingAddress" defaultValue={orgValues?.billingAddress ?? ""} className={field} />
           </label>
         </>
       )}

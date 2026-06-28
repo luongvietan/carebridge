@@ -1,14 +1,48 @@
 "use server";
-import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { clientSchema, organisationSchema } from "@/lib/validation/accounts";
+import { validationMessage } from "@/lib/validation/form-messages";
 import { createCustomer } from "@/lib/stripe/client";
 
-export type AccountResult = { ok: true } | { error: string } | null;
+export type ClientFormValues = {
+  fullName: string;
+  phone: string;
+  emailContact: string;
+  addressLine1: string;
+  addressLine2: string;
+  city: string;
+  postcode: string;
+};
 
-const FIELD_LABELS: Record<string, string> = {
+export type OrganisationFormValues = {
+  organisationName: string;
+  contactPerson: string;
+  phone: string;
+  emailContact: string;
+  cqcRegistrationNumber: string;
+  billingEmail: string;
+  addressLine1: string;
+  addressLine2: string;
+  city: string;
+  postcode: string;
+  billingAddress: string;
+};
+
+export type AccountResult =
+  | { ok: true }
+  | { error: string; values?: ClientFormValues | OrganisationFormValues }
+  | null;
+
+const CLIENT_FIELD_LABELS: Record<string, string> = {
   fullName: "Full name",
+  emailContact: "Contact email",
+  addressLine1: "Address line 1",
+  city: "City",
+  postcode: "Postcode",
+};
+
+const ORGANISATION_FIELD_LABELS: Record<string, string> = {
   organisationName: "Organisation name",
   contactPerson: "Contact person",
   emailContact: "Contact email",
@@ -18,14 +52,32 @@ const FIELD_LABELS: Record<string, string> = {
   billingEmail: "Billing email",
 };
 
-/** Name the fields that failed validation rather than a generic catch-all. */
-function validationMessage(error: z.ZodError): string {
-  const fields = [
-    ...new Set(error.issues.map((i) => FIELD_LABELS[String(i.path[0])] ?? String(i.path[0]))),
-  ];
-  return fields.length
-    ? `Please check these fields: ${fields.join(", ")}.`
-    : "Please complete the required fields.";
+function parseClientFormValues(formData: FormData): ClientFormValues {
+  return {
+    fullName: String(formData.get("fullName") ?? ""),
+    phone: String(formData.get("phone") ?? ""),
+    emailContact: String(formData.get("emailContact") ?? ""),
+    addressLine1: String(formData.get("addressLine1") ?? ""),
+    addressLine2: String(formData.get("addressLine2") ?? ""),
+    city: String(formData.get("city") ?? ""),
+    postcode: String(formData.get("postcode") ?? ""),
+  };
+}
+
+function parseOrganisationFormValues(formData: FormData): OrganisationFormValues {
+  return {
+    organisationName: String(formData.get("organisationName") ?? ""),
+    contactPerson: String(formData.get("contactPerson") ?? ""),
+    phone: String(formData.get("phone") ?? ""),
+    emailContact: String(formData.get("emailContact") ?? ""),
+    cqcRegistrationNumber: String(formData.get("cqcRegistrationNumber") ?? ""),
+    billingEmail: String(formData.get("billingEmail") ?? ""),
+    addressLine1: String(formData.get("addressLine1") ?? ""),
+    addressLine2: String(formData.get("addressLine2") ?? ""),
+    city: String(formData.get("city") ?? ""),
+    postcode: String(formData.get("postcode") ?? ""),
+    billingAddress: String(formData.get("billingAddress") ?? ""),
+  };
 }
 
 async function currentUser() {
@@ -58,9 +110,16 @@ export async function saveClientProfile(_prev: AccountResult, formData: FormData
     city: (formData.get("city") as string) || undefined,
     postcode: (formData.get("postcode") as string) || undefined,
   });
-  if (!parsed.success) return { error: validationMessage(parsed.error) };
+  if (!parsed.success) {
+    return {
+      error: validationMessage(parsed.error, CLIENT_FIELD_LABELS),
+      values: parseClientFormValues(formData),
+    };
+  }
   const user = await currentUser();
-  if (!user) return { error: "You must be signed in." };
+  if (!user) {
+    return { error: "You must be signed in.", values: parseClientFormValues(formData) };
+  }
 
   const admin = createServiceClient();
   const { data: existing } = await admin
@@ -94,7 +153,9 @@ export async function saveClientProfile(_prev: AccountResult, formData: FormData
     },
     { onConflict: "user_id" },
   );
-  if (error) return { error: error.message };
+  if (error) {
+    return { error: error.message, values: parseClientFormValues(formData) };
+  }
   return { ok: true };
 }
 
@@ -112,9 +173,16 @@ export async function saveOrganisationProfile(_prev: AccountResult, formData: Fo
     billingEmail: (formData.get("billingEmail") as string) || undefined,
     billingAddress: (formData.get("billingAddress") as string) || undefined,
   });
-  if (!parsed.success) return { error: validationMessage(parsed.error) };
+  if (!parsed.success) {
+    return {
+      error: validationMessage(parsed.error, ORGANISATION_FIELD_LABELS),
+      values: parseOrganisationFormValues(formData),
+    };
+  }
   const user = await currentUser();
-  if (!user) return { error: "You must be signed in." };
+  if (!user) {
+    return { error: "You must be signed in.", values: parseOrganisationFormValues(formData) };
+  }
 
   const admin = createServiceClient();
   const { data: existing } = await admin
@@ -149,6 +217,8 @@ export async function saveOrganisationProfile(_prev: AccountResult, formData: Fo
     },
     { onConflict: "user_id" },
   );
-  if (error) return { error: error.message };
+  if (error) {
+    return { error: error.message, values: parseOrganisationFormValues(formData) };
+  }
   return { ok: true };
 }
