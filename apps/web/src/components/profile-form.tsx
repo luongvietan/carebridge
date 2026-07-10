@@ -5,6 +5,7 @@ import { saveProfile, type ProfileFormValues, type ProfileResult } from "@/lib/o
 import { OnboardingSteps } from "@/components/onboarding-steps";
 import { Select } from "@/components/ui/select";
 import { DatePicker } from "@/components/ui/date-picker";
+import { FilePreviewInput } from "@/components/ui/file-input";
 import { DAYS_OF_WEEK } from "@/lib/onboarding/profile-children";
 
 const field =
@@ -39,12 +40,14 @@ export function ProfileForm({
   current,
   currentSkillIds = NO_SKILL_IDS,
   currentAvailabilityDays = NO_AVAILABILITY_DAYS,
+  currentPhotoUrl = null,
 }: {
   roles: Role[];
   skills: Skill[];
   current: Current | null;
   currentSkillIds?: string[];
   currentAvailabilityDays?: number[];
+  currentPhotoUrl?: string | null;
 }) {
   const [state, action, pending] = useActionState<ProfileResult, FormData>(saveProfile, null);
   const draft = state && "values" in state ? state.values : undefined;
@@ -214,10 +217,21 @@ export function ProfileForm({
           <input type="checkbox" name="hasVehicle" defaultChecked={v.hasVehicle} /> I have access to a
           vehicle
         </label>
-        <label className="block text-sm font-medium">
+        <div className="block text-sm font-medium">
           Profile photo
-          <input type="file" name="photo" accept="image/*" className="mt-1 block text-sm" />
-        </label>
+          <div className="mt-1 font-normal">
+            <FilePreviewInput
+              name="photo"
+              variant="avatar"
+              accept="image/png,image/jpeg"
+              aria-label="Profile photo"
+              emptyLabel="No photo"
+              existing={
+                currentPhotoUrl ? { url: currentPhotoUrl, kind: "image", filename: "Current photo" } : null
+              }
+            />
+          </div>
+        </div>
 
         {state && "error" in state && <p className="text-sm text-[#da1e28]">{state.error}</p>}
         <button

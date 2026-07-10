@@ -33,7 +33,6 @@ function DocumentPreview({ item }: { item: ReviewItem }) {
         rel="noreferrer"
         className="block shrink-0 overflow-hidden rounded-xl border border-[#dbe7e0] bg-[#f5f7f6]"
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={item.previewUrl}
           alt={`${item.docTypeName} for ${item.professionalName}`}

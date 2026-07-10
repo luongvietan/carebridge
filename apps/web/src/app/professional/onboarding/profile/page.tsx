@@ -15,11 +15,21 @@ export default async function ProfilePage() {
     ? await supabase
         .from("professionals")
         .select(
-          "id, full_name, professional_role_id, date_of_birth, address_line1, address_line2, city, postcode, national_insurance_no, professional_summary, registration_body, registration_number, travel_distance_km, has_driving_licence, has_vehicle",
+          "id, full_name, professional_role_id, date_of_birth, address_line1, address_line2, city, postcode, national_insurance_no, professional_summary, registration_body, registration_number, travel_distance_km, has_driving_licence, has_vehicle, profile_photo_path",
         )
         .eq("user_id", user.id)
         .maybeSingle()
     : { data: null };
+
+  // Sign a short-lived URL so the professional can see the photo already on
+  // record (the bucket is private) and know whether they need to replace it.
+  const currentPhotoUrl = current?.profile_photo_path
+    ? ((
+        await supabase.storage
+          .from("documents")
+          .createSignedUrl(current.profile_photo_path, 600)
+      ).data?.signedUrl ?? null)
+    : null;
 
   const [{ data: currentSkills }, { data: currentAvailability }] = current
     ? await Promise.all([
@@ -40,6 +50,7 @@ export default async function ProfilePage() {
       currentAvailabilityDays={(currentAvailability ?? [])
         .map((a) => a.day_of_week)
         .filter((d): d is number => d != null)}
+      currentPhotoUrl={currentPhotoUrl}
     />
   );
 }

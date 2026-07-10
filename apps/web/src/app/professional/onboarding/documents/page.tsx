@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { DocumentUploader, type DocItem } from "@/components/document-uploader";
 import { OnboardingSteps } from "@/components/onboarding-steps";
 import { guardOnboardingStep } from "@/lib/onboarding/guard";
+import { isImageStoragePath } from "@/lib/onboarding/upload-rules";
+import type { ExistingFile } from "@/components/ui/file-input";
 
 export default async function DocumentsPage() {
   await guardOnboardingStep("documents");
@@ -46,7 +48,7 @@ export default async function DocumentsPage() {
       .eq("professional_role_id", prof.professional_role_id),
     supabase
       .from("documents")
-      .select("document_type_id, verification_status, rejection_reason")
+      .select("document_type_id, verification_status, rejection_reason, storage_path, original_filename")
       .eq("professional_id", prof.id)
       .is("superseded_at", null)
       .order("created_at", { ascending: true }),
@@ -55,6 +57,30 @@ export default async function DocumentsPage() {
   // Latest non-superseded row per type wins (ordered ascending → last set).
   const statusByType = new Map((existing ?? []).map((d) => [d.document_type_id, d.verification_status]));
   const reasonByType = new Map((existing ?? []).map((d) => [d.document_type_id, d.rejection_reason]));
+  const rowByType = new Map((existing ?? []).map((d) => [d.document_type_id, d]));
+
+  // Sign short-lived preview + download URLs so the professional can review the
+  // document they already submitted (the bucket is private).
+  const existingByType = new Map<string, ExistingFile>();
+  await Promise.all(
+    [...rowByType.values()].map(async (d) => {
+      if (!d.storage_path) return;
+      const downloadName = d.original_filename ?? undefined;
+      const [{ data: preview }, { data: download }] = await Promise.all([
+        supabase.storage.from("documents").createSignedUrl(d.storage_path, 600),
+        supabase.storage
+          .from("documents")
+          .createSignedUrl(d.storage_path, 600, { download: downloadName ?? true }),
+      ]);
+      if (!preview?.signedUrl) return;
+      existingByType.set(d.document_type_id, {
+        url: preview.signedUrl,
+        kind: isImageStoragePath(d.storage_path) ? "image" : "pdf",
+        filename: d.original_filename,
+        downloadUrl: download?.signedUrl ?? null,
+      });
+    }),
+  );
 
   const items: DocItem[] = (required ?? []).map((r) => {
     const dt = r.document_types as {
@@ -70,6 +96,7 @@ export default async function DocumentsPage() {
       hasExpiry: dt?.has_expiry ?? false,
       status: statusByType.get(r.document_type_id) ?? null,
       rejectionReason: reasonByType.get(r.document_type_id) ?? null,
+      existing: existingByType.get(r.document_type_id) ?? null,
     };
   });
 

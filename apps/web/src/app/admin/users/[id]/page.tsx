@@ -283,7 +283,6 @@ export default async function AdminUserDetailPage({
               className="group shrink-0"
               title="Open profile photo"
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={photoUrl}
                 alt={`${professional.full_name} profile photo`}

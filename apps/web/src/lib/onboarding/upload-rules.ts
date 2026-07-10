@@ -41,6 +41,35 @@ export function sniffUploadType(head: Uint8Array): "pdf" | "jpeg" | "png" | null
 
 const SNIFF_TO_MIME = { pdf: "application/pdf", jpeg: "image/jpeg", png: "image/png" } as const;
 
+export type SelectedUploadKind = "image" | "pdf";
+
+/** Human-readable file size, e.g. 512 B, 24.0 KB, 3.4 MB. */
+export function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  const kb = bytes / 1024;
+  if (kb < 1024) return `${kb.toFixed(1)} KB`;
+  return `${(kb / 1024).toFixed(1)} MB`;
+}
+
+/**
+ * Client-side, name/size-only check used to preview a chosen file before it is
+ * uploaded. It mirrors {@link verifyUpload}'s extension and size rules so the
+ * user gets immediate feedback, but the server still re-verifies by magic bytes.
+ */
+export function describeSelectedUpload(
+  file: { name: string; size: number },
+):
+  | { ok: true; kind: SelectedUploadKind }
+  | { ok: false; error: string } {
+  if (file.size === 0) return { ok: false, error: "Choose a file to upload." };
+  if (file.size > MAX_UPLOAD_BYTES) {
+    return { ok: false, error: `File exceeds the ${MAX_UPLOAD_BYTES / (1024 * 1024)}MB limit.` };
+  }
+  if (isPdfStoragePath(file.name)) return { ok: true, kind: "pdf" };
+  if (isImageStoragePath(file.name)) return { ok: true, kind: "image" };
+  return { ok: false, error: "Only PDF, JPEG and PNG files are accepted." };
+}
+
 /** Build a safe (sniffed) MIME type and storage filename. Rejects unsafe inputs. */
 export async function verifyUpload(file: File): Promise<
   | { ok: true; safeMime: string; safeName: string }

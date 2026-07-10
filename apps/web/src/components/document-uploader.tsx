@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { uploadDocument } from "@/lib/onboarding/actions";
 import { OnboardingSteps } from "@/components/onboarding-steps";
 import { DatePicker } from "@/components/ui/date-picker";
+import { FilePreviewInput, type ExistingFile } from "@/components/ui/file-input";
 
 export type DocItem = {
   typeId: string;
@@ -12,6 +13,7 @@ export type DocItem = {
   hasExpiry: boolean; // type carries an expiry → an expiry date is required on upload
   status: string | null; // verification_status, or null if not uploaded
   rejectionReason?: string | null; // admin's note for rejected / further-info docs
+  existing?: ExistingFile | null; // the file already on record, for preview
 };
 
 const STATUS_STYLE: Record<string, string> = {
@@ -82,7 +84,15 @@ export function DocumentUploader({ items }: { items: DocItem[] }) {
                 </p>
               )}
             <form onSubmit={(e) => onUpload(e, item)} className="mt-3 flex flex-wrap items-end gap-3">
-              <input type="file" name="file" required aria-label={`Upload ${item.name}`} className="text-sm" />
+              <div className="w-full sm:w-80">
+                <FilePreviewInput
+                  name="file"
+                  variant="document"
+                  required
+                  aria-label={`Upload ${item.name}`}
+                  existing={item.existing ?? null}
+                />
+              </div>
               <input name="referenceNumber" placeholder="Reference no. (optional)" aria-label="Reference number" className={field} />
               <input name="issuingBody" placeholder="Issuing body (e.g. NMC, optional)" aria-label="Issuing body" className={field} />
               <div className="text-xs text-[#4a4a4a]">
