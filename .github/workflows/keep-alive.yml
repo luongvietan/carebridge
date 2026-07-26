@@ -1,0 +1,57 @@
+name: Supabase keep-alive
+
+# Supabase pauses free-tier projects after 7 days with no database activity.
+# This job writes a heartbeat row (public.keep_alive_ping, migration 0063) every
+# 3 days so the project never reaches that threshold.
+#
+# `*/3` restarts on the 1st of each month, so the widest gap it can leave is the
+# 28th → the 1st of a 30-day month: 3 days, comfortably inside the 7-day budget.
+#
+# Note: GitHub disables scheduled workflows in a repository with no commits for
+# 60 days and emails the owner. If that happens, re-enable it on the Actions tab
+# (or push a commit) — otherwise the project starts drifting towards a pause.
+on:
+  schedule:
+    - cron: "17 4 */3 * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    # Forks inherit the schedule but not the secrets; only run on the main repo.
+    if: github.repository == 'luongvietan/carebridge'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping the production database
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${SUPABASE_URL}" ] || [ -z "${SUPABASE_ANON_KEY}" ]; then
+            echo "::error::Repository secrets SUPABASE_URL and SUPABASE_ANON_KEY are not set."
+            exit 1
+          fi
+
+          # A single dropped request would still leave 4 days of headroom, but
+          # retrying is cheap and keeps a transient blip out of the run history.
+          for attempt in 1 2 3; do
+            rm -f response.json
+            status=$(curl -sS --max-time 30 -o response.json -w '%{http_code}' \
+              -X POST "${SUPABASE_URL%/}/rest/v1/rpc/keep_alive_ping" \
+              -H "apikey: ${SUPABASE_ANON_KEY}" \
+              -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+              -H "Content-Type: application/json" \
+              -d '{}' || true)   # curl reports connection failures as status 000
+
+            if [ "${status}" = "200" ]; then
+              echo "Heartbeat accepted: $(cat response.json)"
+              exit 0
+            fi
+
+            echo "Attempt ${attempt} failed (HTTP ${status}): $(cat response.json 2>/dev/null)"
+            [ "${attempt}" = "3" ] || sleep $((attempt * 10))
+          done
+
+          echo "::error::Supabase keep-alive ping failed after 3 attempts (last status ${status})."
+          exit 1

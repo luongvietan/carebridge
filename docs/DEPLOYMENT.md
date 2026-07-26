@@ -148,6 +148,52 @@ Rotate the dev service-role key that was shared externally. Update `.env.local` 
 
 ---
 
+## Keeping a free-tier project awake
+
+Supabase pauses a free-tier project after **7 consecutive days without database
+activity**; un-pausing is a manual click in the dashboard, so the app stays down
+until someone notices. The `compliance-sweep-daily` `pg_cron` job does **not**
+count — pause detection looks at traffic reaching the project, not work the
+database does to itself.
+
+`.github/workflows/keep-alive.yml` runs every 3 days (`17 4 */3 * *`, plus manual
+`workflow_dispatch`) and POSTs to `/rest/v1/rpc/keep_alive_ping`. The RPC
+(migration `0063_keep_alive.sql`) updates a single-row `keep_alive` table, so
+every run is a real write. The widest gap the schedule can leave is 3 days —
+`*/3` restarts on the 1st of each month, so the 28th of a 30-day month is
+followed by the 1st.
+
+### Setup
+
+Add two **repository secrets** (Settings → Secrets and variables → Actions):
+
+| Secret | Value |
+|--------|-------|
+| `SUPABASE_URL` | `https://<REF>.supabase.co` — the project to keep awake |
+| `SUPABASE_ANON_KEY` | that project's anon / publishable key |
+
+The anon key is deliberate: `keep_alive_ping` is the only thing it can reach
+here, so no service-role key has to live in CI. The `keep_alive` table itself has
+RLS on with no policies and no grants for `anon`/`authenticated` — the ping goes
+through a `security definer` function, and the table cannot be read or written
+through the Data API.
+
+Point the secrets at production once `<PROD_REF>` exists; until then, aim them at
+hosted dev (`fnpozxbbbevdnpyfgyhs`), which has the same 7-day exposure. To keep
+both alive, duplicate the step with a second pair of secrets.
+
+### Caveats
+
+- GitHub disables scheduled workflows in a repository with **no commits for 60
+  days** and emails the owner. Re-enable it on the Actions tab (or push a commit)
+  — otherwise the pause clock starts running again.
+- Scheduled runs can be delayed when GitHub is under load. The 3-day cadence
+  leaves 4 days of slack, so a late or skipped run is not by itself a problem.
+- To confirm the heartbeat is landing:
+  `SELECT last_ping_at FROM keep_alive;` (SQL editor, or any service-role client).
+
+---
+
 ## Backups & restore
 
 ### Backup schedule
