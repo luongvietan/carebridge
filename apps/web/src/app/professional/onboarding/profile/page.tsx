@@ -6,7 +6,11 @@ export default async function ProfilePage() {
   await guardOnboardingStep("profile");
   const supabase = await createClient();
   const [{ data: roles }, { data: skills }, { data: { user } }] = await Promise.all([
-    supabase.from("professional_roles").select("id, name").eq("is_active", true).order("name"),
+    supabase
+      .from("professional_roles")
+      .select("id, name, code, role_categories(name, sort_order)")
+      .eq("is_active", true)
+      .order("name"),
     supabase.from("skills").select("id, name").eq("is_active", true).order("name"),
     supabase.auth.getUser(),
   ]);
@@ -15,7 +19,7 @@ export default async function ProfilePage() {
     ? await supabase
         .from("professionals")
         .select(
-          "id, full_name, professional_role_id, date_of_birth, address_line1, address_line2, city, postcode, national_insurance_no, professional_summary, registration_body, registration_number, travel_distance_km, has_driving_licence, has_vehicle, profile_photo_path",
+          "id, full_name, professional_role_id, date_of_birth, address_line1, address_line2, city, postcode, national_insurance_no, professional_summary, registration_body, registration_number, ofsted_registration_number, travel_distance_km, has_driving_licence, has_vehicle, profile_photo_path",
         )
         .eq("user_id", user.id)
         .maybeSingle()
@@ -43,7 +47,15 @@ export default async function ProfilePage() {
 
   return (
     <ProfileForm
-      roles={roles ?? []}
+      roles={(roles ?? [])
+        .map((r) => ({
+          id: r.id,
+          name: r.name,
+          code: r.code,
+          category: r.role_categories?.name ?? "",
+          categoryOrder: r.role_categories?.sort_order ?? 0,
+        }))
+        .sort((a, b) => a.categoryOrder - b.categoryOrder || a.name.localeCompare(b.name))}
       skills={skills ?? []}
       current={current}
       currentSkillIds={(currentSkills ?? []).map((s) => s.skill_id)}

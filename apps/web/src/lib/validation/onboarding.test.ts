@@ -15,6 +15,44 @@ describe("profileSchema full name", () => {
   });
 });
 
+describe("profileSchema Ofsted registration number", () => {
+  // The nanny-only requirement itself lives in saveProfile (role codes are data,
+  // not part of the schema); the schema only checks the format when supplied.
+  it("accepts a profile with no Ofsted number", () => {
+    expect(profileSchema.safeParse(base).success).toBe(true);
+  });
+
+  it("accepts a prefixed Ofsted URN", () => {
+    expect(
+      profileSchema.safeParse({ ...base, ofstedRegistrationNumber: "EY123456" }).success,
+    ).toBe(true);
+  });
+
+  it("accepts a plain numeric URN", () => {
+    expect(
+      profileSchema.safeParse({ ...base, ofstedRegistrationNumber: "1234567" }).success,
+    ).toBe(true);
+  });
+
+  it("ignores spaces", () => {
+    expect(
+      profileSchema.safeParse({ ...base, ofstedRegistrationNumber: "EY 123 456" }).success,
+    ).toBe(true);
+  });
+
+  it("rejects a number that is too short", () => {
+    expect(
+      profileSchema.safeParse({ ...base, ofstedRegistrationNumber: "EY123" }).success,
+    ).toBe(false);
+  });
+
+  it("rejects free text", () => {
+    expect(
+      profileSchema.safeParse({ ...base, ofstedRegistrationNumber: "registered" }).success,
+    ).toBe(false);
+  });
+});
+
 describe("profileSchema National Insurance validation", () => {
   it("accepts a profile with no NI number (optional)", () => {
     expect(profileSchema.safeParse(base).success).toBe(true);

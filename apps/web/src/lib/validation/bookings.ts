@@ -12,6 +12,10 @@ export const createBookingSchema = z
   .object({
     requesterType: z.enum(["client", "organisation"]),
     professionalRoleId: uuid,
+    // Optional: childcare roles offer a care type (overnight, after-school, …).
+    // Healthcare roles have none. The DB rejects a care type from a different
+    // category than the booked role (0063).
+    careTypeId: uuid.optional(),
     scheduledStart: isoDateTime,
     scheduledEnd: isoDateTime,
     locationAddress: z.string().min(1),

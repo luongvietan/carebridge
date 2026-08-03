@@ -9,7 +9,7 @@ export default async function AdminBookingsPage() {
     admin
       .from("bookings")
       .select(
-        "id, status, booking_type, scheduled_start, professional_role_id, assigned_professional_id, professional_roles(name), total_client_charge",
+        "id, status, booking_type, scheduled_start, professional_role_id, assigned_professional_id, professional_roles(name), care_types(name), total_client_charge",
       )
       .order("scheduled_start", { ascending: false }),
     admin

@@ -389,6 +389,7 @@ export type Database = {
           assigned_by: string | null
           assigned_professional_id: string | null
           booking_type: string
+          care_type_id: string | null
           created_at: string
           created_by: string | null
           duration_hours: number
@@ -417,6 +418,7 @@ export type Database = {
           assigned_by?: string | null
           assigned_professional_id?: string | null
           booking_type?: string
+          care_type_id?: string | null
           created_at?: string
           created_by?: string | null
           duration_hours: number
@@ -445,6 +447,7 @@ export type Database = {
           assigned_by?: string | null
           assigned_professional_id?: string | null
           booking_type?: string
+          care_type_id?: string | null
           created_at?: string
           created_by?: string | null
           duration_hours?: number
@@ -488,6 +491,13 @@ export type Database = {
             columns: ["assigned_professional_id"]
             isOneToOne: false
             referencedRelation: "v_export_professionals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_care_type_id_fkey"
+            columns: ["care_type_id"]
+            isOneToOne: false
+            referencedRelation: "care_types"
             referencedColumns: ["id"]
           },
           {
@@ -544,6 +554,47 @@ export type Database = {
             columns: ["requester_user_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      care_types: {
+        Row: {
+          category_id: string
+          code: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          sort_order: number
+        }
+        Insert: {
+          category_id: string
+          code: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          sort_order?: number
+        }
+        Update: {
+          category_id?: string
+          code?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "care_types_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "role_categories"
             referencedColumns: ["id"]
           },
         ]
@@ -1213,21 +1264,21 @@ export type Database = {
           {
             foreignKeyName: "payouts_booking_id_fkey"
             columns: ["booking_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "bookings"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "payouts_booking_id_fkey"
             columns: ["booking_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "v_export_bookings"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "payouts_booking_id_fkey"
             columns: ["booking_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "v_platform_revenue"
             referencedColumns: ["booking_id"]
           },
@@ -1396,6 +1447,7 @@ export type Database = {
       }
       professional_roles: {
         Row: {
+          category_id: string
           code: string
           created_at: string
           id: string
@@ -1403,6 +1455,7 @@ export type Database = {
           name: string
         }
         Insert: {
+          category_id: string
           code: string
           created_at?: string
           id?: string
@@ -1410,13 +1463,22 @@ export type Database = {
           name: string
         }
         Update: {
+          category_id?: string
           code?: string
           created_at?: string
           id?: string
           is_active?: boolean
           name?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "professional_roles_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "role_categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       professional_skills: {
         Row: {
@@ -1612,6 +1674,7 @@ export type Database = {
           has_vehicle: boolean | null
           id: string
           national_insurance_no: string | null
+          ofsted_registration_number: string | null
           postcode: string | null
           professional_role_id: string | null
           professional_status: Database["public"]["Enums"]["professional_status"]
@@ -1640,6 +1703,7 @@ export type Database = {
           has_vehicle?: boolean | null
           id?: string
           national_insurance_no?: string | null
+          ofsted_registration_number?: string | null
           postcode?: string | null
           professional_role_id?: string | null
           professional_status?: Database["public"]["Enums"]["professional_status"]
@@ -1668,6 +1732,7 @@ export type Database = {
           has_vehicle?: boolean | null
           id?: string
           national_insurance_no?: string | null
+          ofsted_registration_number?: string | null
           postcode?: string | null
           professional_role_id?: string | null
           professional_status?: Database["public"]["Enums"]["professional_status"]
@@ -1755,6 +1820,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      role_categories: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          sort_order: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          sort_order?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          sort_order?: number
+        }
+        Relationships: []
       }
       skills: {
         Row: {
@@ -2003,6 +2095,8 @@ export type Database = {
           currency: string | null
           id: string | null
           paid_at: string | null
+          refunded_amount: number | null
+          refunded_at: string | null
           status: Database["public"]["Enums"]["payment_status"] | null
         }
         Insert: {
@@ -2012,6 +2106,8 @@ export type Database = {
           currency?: string | null
           id?: string | null
           paid_at?: string | null
+          refunded_amount?: number | null
+          refunded_at?: string | null
           status?: Database["public"]["Enums"]["payment_status"] | null
         }
         Update: {
@@ -2021,6 +2117,8 @@ export type Database = {
           currency?: string | null
           id?: string | null
           paid_at?: string | null
+          refunded_amount?: number | null
+          refunded_at?: string | null
           status?: Database["public"]["Enums"]["payment_status"] | null
         }
         Relationships: [
@@ -2064,21 +2162,21 @@ export type Database = {
           {
             foreignKeyName: "payouts_booking_id_fkey"
             columns: ["booking_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "bookings"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "payouts_booking_id_fkey"
             columns: ["booking_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "v_export_bookings"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "payouts_booking_id_fkey"
             columns: ["booking_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "v_platform_revenue"
             referencedColumns: ["booking_id"]
           },
@@ -2149,7 +2247,10 @@ export type Database = {
         }
         Returns: string
       }
-      fn_anonymise_user: { Args: { p_admin_id: string; p_user_id: string }; Returns: undefined }
+      fn_anonymise_user: {
+        Args: { p_admin_id: string; p_user_id: string }
+        Returns: undefined
+      }
       fn_run_compliance_sweep: { Args: never; Returns: undefined }
       get_payout_last4: { Args: { p_professional_id: string }; Returns: string }
       is_admin: { Args: never; Returns: boolean }

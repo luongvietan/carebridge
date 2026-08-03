@@ -91,6 +91,17 @@ export const profileSchema = z.object({
   // Professional registration details (spec §3): regulatory body + number, e.g. NMC/HCPC.
   registrationBody: z.string().optional(),
   registrationNumber: z.string().optional(),
+  // Ofsted registration number for childcare. Optional here because the schema
+  // does not know which role was picked; saveProfile enforces that a nanny must
+  // supply one. Format is only checked when a value is present: Ofsted URNs are
+  // 6–8 digits, optionally prefixed (e.g. EY123456).
+  ofstedRegistrationNumber: z
+    .string()
+    .optional()
+    .refine(
+      (v) => !v || /^[A-Za-z]{0,3}\d{6,8}$/.test(v.replace(/\s/g, "")),
+      "Enter a valid Ofsted registration number, e.g. EY123456",
+    ),
   travelDistanceKm: z.coerce.number().int().min(0).max(1000).optional(),
   hasDrivingLicence: z.boolean().optional(),
   hasVehicle: z.boolean().optional(),

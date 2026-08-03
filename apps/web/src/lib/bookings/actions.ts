@@ -108,6 +108,7 @@ export async function createBooking(form: unknown): Promise<BookingActionResult>
         privateClientId: formData.requesterType === "client" ? profile.id : null,
         organisationId: formData.requesterType === "organisation" ? profile.id : null,
         professionalRoleId: formData.professionalRoleId,
+        careTypeId: formData.careTypeId,
         scheduledStart: formData.scheduledStart,
         scheduledEnd: formData.scheduledEnd,
         locationAddress: formData.locationAddress,

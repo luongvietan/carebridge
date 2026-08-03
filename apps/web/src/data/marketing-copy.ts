@@ -3,13 +3,13 @@
 import { marketingImages } from "./marketing-images";
 
 export const siteTagline =
-  "A secure, compliant healthcare marketplace connecting verified professionals with private clients and organisations.";
+  "A trusted marketplace connecting families and organisations with verified healthcare and childcare professionals, making it easy to find safe, reliable, and high-quality care when it's needed most.";
 
 export const heroHeadline =
-  "Connecting Clients and Organisations with Verified Healthcare Professionals within the Communities.";
+  "Connecting Families and Organisations with Verified Healthcare and Childcare Professionals within the Communities.";
 
 export const heroSubheadline =
-  "A healthcare marketplace — verified nurses, healthcare assistants, support workers and physiotherapists, screened, assessed and continuously monitored for compliance.";
+  "A trusted care marketplace — verified nurses, healthcare assistants, support workers, physiotherapists, nannies, babysitters and mother's helpers, screened, assessed and continuously monitored for compliance.";
 
 export const professionalRoles = [
   {
@@ -34,9 +34,37 @@ export const professionalRoles = [
   },
 ] as const;
 
+export const childcareRoles = [
+  {
+    title: "Nannies",
+    description:
+      "Ofsted-registered nannies only. Every nanny's Ofsted registration number is verified against the Ofsted register before they can accept a booking. Available full-time, part-time and overnight.",
+  },
+  {
+    title: "Babysitters",
+    description:
+      "Experienced babysitters for evening, occasional and short-notice care, DBS-checked and paediatric first aid trained.",
+  },
+  {
+    title: "Mother's Helpers",
+    description:
+      "Practical support alongside the parent — helping with the children and the household during the day rather than taking sole charge.",
+  },
+] as const;
+
+/** Scheduling options families choose when booking childcare. */
+export const childcareCareTypes = [
+  "Full-time",
+  "Part-time",
+  "After-school care",
+  "Overnight",
+  "Holiday childcare",
+  "Emergency childcare",
+] as const;
+
 export const stats = [
   { value: "100%", label: "Verified before first booking" },
-  { value: "4", label: "Professional roles" },
+  { value: "7", label: "Professional roles" },
   { value: "80%", label: "Competency pass mark" },
   { value: "CSV / XLSX", label: "Full data export anytime" },
 ] as const;

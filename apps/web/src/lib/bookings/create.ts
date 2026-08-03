@@ -5,6 +5,7 @@ export type CreateBookingInput = {
   privateClientId?: string | null;
   organisationId?: string | null;
   professionalRoleId: string;
+  careTypeId?: string | null;
   scheduledStart: string;
   scheduledEnd: string;
   locationAddress: string;
@@ -17,6 +18,7 @@ export type BookingInsert = RateSnapshot & {
   private_client_id: string | null;
   organisation_id: string | null;
   professional_role_id: string;
+  care_type_id: string | null;
   scheduled_start: string;
   scheduled_end: string;
   duration_hours: number;
@@ -52,6 +54,7 @@ export function buildBookingInsert(input: CreateBookingInput, rateCard: RateCard
     private_client_id: input.privateClientId ?? null,
     organisation_id: input.organisationId ?? null,
     professional_role_id: input.professionalRoleId,
+    care_type_id: input.careTypeId ?? null,
     scheduled_start: input.scheduledStart,
     scheduled_end: input.scheduledEnd,
     duration_hours: duration,

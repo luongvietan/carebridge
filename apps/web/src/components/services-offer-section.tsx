@@ -49,8 +49,9 @@ export function ServicesOfferSection() {
       <div data-reveal className="text-center">
         <h2 className={marketingHeading}>Professional roles we cover</h2>
         <p className={`${marketingSubheading} max-w-lg`}>
-          Registered nurses, healthcare assistants, support workers and physiotherapists —
-          available for booking requests from private clients and organisations.
+          Healthcare and childcare professionals — from registered nurses and support workers to
+          Ofsted-registered nannies — available for booking requests from families and
+          organisations.
         </p>
       </div>
 
@@ -70,10 +71,9 @@ export function ServicesOfferSection() {
       </div>
 
       <p className="mx-auto mt-8 max-w-2xl text-center text-sm text-[#4a4a4a]">
-        Physiotherapists (HCPC-registered) are also available for rehabilitation and mobility
-        programmes.{" "}
+        Physiotherapists, nannies, babysitters and mother&apos;s helpers are also available.{" "}
         <ForwardLink href="/services" className="text-sm text-[#2e7d32] hover:underline">
-          View all four roles
+          View all seven roles
         </ForwardLink>
       </p>
     </section>

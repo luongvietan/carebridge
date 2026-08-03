@@ -7,7 +7,13 @@ import { MarketingPageMotion } from "@/components/motion/marketing-page-motion";
 import { RoleCard } from "@/components/role-card";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteNav } from "@/components/site-nav";
-import { onboardingSteps, professionalRoles, supportedServices } from "@/data/marketing-copy";
+import {
+  childcareCareTypes,
+  childcareRoles,
+  onboardingSteps,
+  professionalRoles,
+  supportedServices,
+} from "@/data/marketing-copy";
 import { marketingImages } from "@/data/marketing-images";
 import {
   marketingCardShadow,
@@ -28,14 +34,14 @@ export default function ServicesPage() {
       <MarketingPageHero
         badge="Professional roles"
         title="Professional roles we cover"
-        description="Compliance-checked healthcare staffing for private clients and organisations — verified professionals across four roles, matched via booking requests."
+        description="Compliance-checked healthcare and childcare staffing for families and organisations — verified professionals across seven roles, matched via booking requests."
         image={marketingImages.pageHero.services}
       />
 
       <main>
         <section className={marketingSection}>
           <div data-reveal className="text-center">
-            <h2 className={marketingHeading}>Four verified role types</h2>
+            <h2 className={marketingHeading}>Healthcare professionals</h2>
             <p className={`${marketingSubheading} max-w-lg`}>
               Registered nurses, healthcare assistants, support workers and physiotherapists —
               each verified before their first booking.
@@ -55,6 +61,49 @@ export default function ServicesPage() {
                 />
               );
             })}
+          </div>
+        </section>
+
+        <section className={`${marketingSection} pt-0`}>
+          <div data-reveal className="text-center">
+            <h2 className={marketingHeading}>Childcare professionals</h2>
+            <p className={`${marketingSubheading} max-w-2xl`}>
+              CareBridge Connect accepts Ofsted-registered nannies only. Every nanny&apos;s Ofsted
+              registration number is checked against the Ofsted register, and no nanny can accept a
+              booking until that registration has been verified.
+            </p>
+          </div>
+
+          <div data-reveal-stagger className="mt-12 grid gap-6 sm:grid-cols-2">
+            {childcareRoles.map((role, i) => {
+              const img = marketingImages.childcareRoleCards[i];
+              return (
+                <RoleCard
+                  key={role.title}
+                  title={role.title}
+                  description={role.description}
+                  image={img.src}
+                  alt={img.alt}
+                />
+              );
+            })}
+          </div>
+
+          <div data-reveal className="mx-auto mt-10 max-w-3xl text-center">
+            <h3 className="text-lg font-bold text-[#1e5a33]">Childcare booking options</h3>
+            <p className="mt-2 text-sm text-[#4a4a4a]">
+              Choose the arrangement that fits your family when you make a booking request.
+            </p>
+            <div className="mt-5 flex flex-wrap justify-center gap-2">
+              {childcareCareTypes.map((type) => (
+                <span
+                  key={type}
+                  className={`rounded-full bg-white px-4 py-2 text-sm font-medium text-[#1e5a33] ${marketingCardShadow}`}
+                >
+                  {type}
+                </span>
+              ))}
+            </div>
           </div>
         </section>
 

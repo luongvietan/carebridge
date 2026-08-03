@@ -66,4 +66,11 @@ describe("buildBookingInsert", () => {
   it("rejects a non-positive window", () => {
     expect(() => buildBookingInsert({ ...input, scheduledEnd: input.scheduledStart }, rc)).toThrow();
   });
+  it("carries a childcare care type through to the insert", () => {
+    const b = buildBookingInsert({ ...input, careTypeId: "care1" }, rc);
+    expect(b.care_type_id).toBe("care1");
+  });
+  it("leaves care type null when none is chosen (healthcare roles)", () => {
+    expect(buildBookingInsert(input, rc).care_type_id).toBeNull();
+  });
 });

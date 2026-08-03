@@ -1,16 +1,13 @@
 import { createClient } from "@/lib/supabase/server";
 import { BookingRequestForm } from "@/components/booking-request-form";
 import { BackLink } from "@/components/back-link";
+import { fetchBookingReference } from "@/lib/bookings/reference";
 
 export const dynamic = "force-dynamic";
 
 export default async function ClientNewBookingPage() {
   const supabase = await createClient();
-  const { data: roles } = await supabase
-    .from("professional_roles")
-    .select("id, name")
-    .eq("is_active", true)
-    .order("name");
+  const { roles, careTypes } = await fetchBookingReference(supabase);
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-10">
@@ -21,7 +18,7 @@ export default async function ClientNewBookingPage() {
         </BackLink>
       </p>
       <div className="mt-8">
-        <BookingRequestForm roles={roles ?? []} requesterType="client" />
+        <BookingRequestForm roles={roles} careTypes={careTypes} requesterType="client" />
       </div>
     </main>
   );

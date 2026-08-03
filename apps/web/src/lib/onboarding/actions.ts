@@ -19,8 +19,15 @@ const PROFILE_FIELD_LABELS: Record<string, string> = {
   postcode: "Postcode",
   nationalInsuranceNo: "National Insurance number",
   professionalRoleId: "Professional role",
+  ofstedRegistrationNumber: "Ofsted registration number",
   travelDistanceKm: "Travel distance",
 };
+
+// CareBridge Connect accepts Ofsted-registered nannies only, so the number is a
+// condition of completing a nanny profile. The DB carries an independent guard
+// (0063) preventing activation without it.
+const OFSTED_REQUIRED_ERROR =
+  "An Ofsted registration number is required to apply as a nanny. CareBridge Connect accepts Ofsted-registered nannies only.";
 
 export type ProfileFormValues = {
   fullName: string;
@@ -34,6 +41,7 @@ export type ProfileFormValues = {
   professionalSummary: string;
   registrationBody: string;
   registrationNumber: string;
+  ofstedRegistrationNumber: string;
   travelDistanceKm: string;
   hasDrivingLicence: boolean;
   hasVehicle: boolean;
@@ -54,6 +62,7 @@ function parseProfileFormValues(formData: FormData): ProfileFormValues {
     professionalSummary: String(formData.get("professionalSummary") ?? ""),
     registrationBody: String(formData.get("registrationBody") ?? ""),
     registrationNumber: String(formData.get("registrationNumber") ?? ""),
+    ofstedRegistrationNumber: String(formData.get("ofstedRegistrationNumber") ?? ""),
     travelDistanceKm: String(formData.get("travelDistanceKm") ?? ""),
     hasDrivingLicence: formData.get("hasDrivingLicence") === "on",
     hasVehicle: formData.get("hasVehicle") === "on",
@@ -144,6 +153,7 @@ export async function saveProfile(_prev: ProfileResult, formData: FormData): Pro
     professionalSummary: (formData.get("professionalSummary") as string) || undefined,
     registrationBody: (formData.get("registrationBody") as string) || undefined,
     registrationNumber: (formData.get("registrationNumber") as string) || undefined,
+    ofstedRegistrationNumber: (formData.get("ofstedRegistrationNumber") as string) || undefined,
     travelDistanceKm: (formData.get("travelDistanceKm") as string) || undefined,
     hasDrivingLicence: formData.get("hasDrivingLicence") === "on",
     hasVehicle: formData.get("hasVehicle") === "on",
@@ -161,6 +171,18 @@ export async function saveProfile(_prev: ProfileResult, formData: FormData): Pro
   }
   if (!(await assessmentPassed(gateAdmin, professionalId))) {
     return profileError(ASSESSMENT_REQUIRED_ERROR, formData);
+  }
+
+  // Role codes are not known to the schema (roles are data, not an enum), so the
+  // nanny-only Ofsted requirement is enforced here against the selected role.
+  const { data: selectedRole } = await gateAdmin
+    .from("professional_roles")
+    .select("code")
+    .eq("id", parsed.data.professionalRoleId)
+    .maybeSingle();
+  const ofstedNumber = parsed.data.ofstedRegistrationNumber?.replace(/\s/g, "").toUpperCase();
+  if (selectedRole?.code === "nanny" && !ofstedNumber) {
+    return profileError(OFSTED_REQUIRED_ERROR, formData);
   }
 
   // Optional profile photo → private storage bucket.
@@ -195,6 +217,7 @@ export async function saveProfile(_prev: ProfileResult, formData: FormData): Pro
       professional_summary: parsed.data.professionalSummary ?? null,
       registration_body: parsed.data.registrationBody ?? null,
       registration_number: parsed.data.registrationNumber ?? null,
+      ofsted_registration_number: ofstedNumber || null,
       travel_distance_km: parsed.data.travelDistanceKm ?? null,
       has_driving_licence: parsed.data.hasDrivingLicence ?? null,
       has_vehicle: parsed.data.hasVehicle ?? null,

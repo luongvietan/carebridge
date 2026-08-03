@@ -16,6 +16,7 @@ type AdminBooking = {
   professional_role_id: string;
   assigned_professional_id: string | null;
   professional_roles: { name: string } | null;
+  care_types?: { name: string } | null;
   total_client_charge: number | null;
 };
 
@@ -211,7 +212,12 @@ export function AdminBookings({
           {bookings.map((b) => (
             <tr key={b.id}>
               <td className="p-3">{formatDate(b.scheduled_start)}</td>
-              <td className="p-3">{b.professional_roles?.name ?? b.professional_role_id}</td>
+              <td className="p-3">
+                {b.professional_roles?.name ?? b.professional_role_id}
+                {b.care_types?.name && (
+                  <span className="mt-0.5 block text-xs text-[#7a8a81]">{b.care_types.name}</span>
+                )}
+              </td>
               <td className="p-3">{b.booking_type.replace(/_/g, " ")}</td>
               <td className="p-3">
                 <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#4a4a4a]">

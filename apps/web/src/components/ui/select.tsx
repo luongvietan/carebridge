@@ -4,7 +4,13 @@ import { useEffect, useReducer, useId, useRef, useSyncExternalStore } from "reac
 import { createPortal } from "react-dom";
 import { ChevronDownIcon, Icon, Tick01Icon } from "@/components/ui/icon";
 
-export type SelectOption = { value: string; label: string; disabled?: boolean };
+export type SelectOption = {
+  value: string;
+  label: string;
+  disabled?: boolean;
+  /** Optional heading the option sits under. Options sharing a group must be adjacent. */
+  group?: string;
+};
 
 type SelectProps = {
   options: SelectOption[];
@@ -263,7 +269,19 @@ export function Select({
             {options.map((opt, i) => {
               const isSelected = opt.value === current;
               const isActive = i === activeIndex;
-              return (
+              // Group heading whenever the group changes. Headings are plain
+              // markup, not options, so activeIndex stays aligned with `options`.
+              const heading =
+                opt.group && opt.group !== options[i - 1]?.group ? (
+                  <div
+                    key={`group-${opt.group}`}
+                    role="presentation"
+                    className="px-3 pt-3 pb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#7a8a81]"
+                  >
+                    {opt.group}
+                  </div>
+                ) : null;
+              const option = (
                 <button
                   key={opt.value || `opt-${i}`}
                   type="button"
@@ -287,6 +305,13 @@ export function Select({
                     <Icon icon={Tick01Icon} size={16} strokeWidth={2} aria-hidden className="shrink-0 text-[#2e7d32]" />
                   )}
                 </button>
+              );
+              if (!heading) return option;
+              return (
+                <div key={`grp-${opt.value || opt.label}`} role="presentation">
+                  {heading}
+                  {option}
+                </div>
               );
             })}
           </div>,

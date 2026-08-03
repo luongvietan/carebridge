@@ -182,7 +182,7 @@ export default async function AdminUserDetailPage({
   const { data: professional } = await admin
     .from("professionals")
     .select(
-      "id, full_name, professional_status, compliance_status, professional_role_id, user_id, profile_photo_path, registration_body, registration_number, professional_roles(name)",
+      "id, full_name, professional_status, compliance_status, professional_role_id, user_id, profile_photo_path, registration_body, registration_number, ofsted_registration_number, professional_roles(name, code)",
     )
     .eq("id", id)
     .maybeSingle();
@@ -308,8 +308,22 @@ export default async function AdminUserDetailPage({
           </div>
           <div>
             <dt className="text-[#7a8a81]">Role</dt>
-            <dd>{(professional.professional_roles as { name: string } | null)?.name ?? "—"}</dd>
+            <dd>
+              {(professional.professional_roles as { name: string } | null)?.name ?? "—"}
+            </dd>
           </div>
+          {(professional.professional_roles as { code: string } | null)?.code === "nanny" && (
+            <div>
+              <dt className="text-[#7a8a81]">Ofsted registration</dt>
+              <dd>
+                {professional.ofsted_registration_number ?? "—"}
+                <span className="mt-0.5 block text-xs text-[#7a8a81]">
+                  Check this number on the Ofsted register before approving the Ofsted
+                  registration certificate.
+                </span>
+              </dd>
+            </div>
+          )}
           <div>
             <dt className="text-[#7a8a81]">Professional registration</dt>
             <dd>

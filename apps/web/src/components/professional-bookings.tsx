@@ -16,6 +16,7 @@ type BookingRow = {
   professional_role_id: string;
   assigned_professional_id: string | null;
   total_payout: number | null;
+  care_types?: { name: string } | null;
 };
 
 function formatDate(iso: string) {
@@ -163,6 +164,7 @@ function BookingTable({ rows, showActions, showComplete, showUndo, eligible, onR
         <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#4a4a4a]">
           <tr>
             <th className="p-3 font-medium">Start</th>
+            <th className="p-3 font-medium">Type of care</th>
             <th className="p-3 font-medium">Location</th>
             <th className="p-3 font-medium">Status</th>
             <th className="p-3 font-medium">Payout</th>
@@ -175,6 +177,7 @@ function BookingTable({ rows, showActions, showComplete, showUndo, eligible, onR
           {rows.map((b) => (
             <tr key={b.id}>
               <td className="p-3">{formatDate(b.scheduled_start)}</td>
+              <td className="p-3">{b.care_types?.name ?? "—"}</td>
               <td className="p-3">{b.location_address}</td>
               <td className="p-3">
                 <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#4a4a4a]">

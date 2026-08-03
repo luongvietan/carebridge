@@ -1,5 +1,5 @@
 "use client";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { ForwardLink } from "@/components/forward-link";
 import { saveProfile, type ProfileFormValues, type ProfileResult } from "@/lib/onboarding/actions";
 import { OnboardingSteps } from "@/components/onboarding-steps";
@@ -15,11 +15,12 @@ const field =
 const NO_SKILL_IDS: string[] = [];
 const NO_AVAILABILITY_DAYS: number[] = [];
 
-type Role = { id: string; name: string };
+type Role = { id: string; name: string; code: string; category: string; categoryOrder: number };
 type Skill = { id: string; name: string };
 type Current = {
   full_name: string | null;
   professional_role_id: string | null;
+  ofsted_registration_number: string | null;
   date_of_birth: string | null;
   address_line1: string | null;
   address_line2: string | null;
@@ -51,6 +52,12 @@ export function ProfileForm({
 }) {
   const [state, action, pending] = useActionState<ProfileResult, FormData>(saveProfile, null);
   const draft = state && "values" in state ? state.values : undefined;
+  const [roleId, setRoleId] = useState(
+    draft?.professionalRoleId ?? current?.professional_role_id ?? "",
+  );
+  // Ofsted registration is a condition of listing as a nanny, so the field only
+  // appears — and is only required — for that role.
+  const requiresOfsted = roles.find((r) => r.id === roleId)?.code === "nanny";
   const formKey = draft ? `draft-${JSON.stringify(draft)}` : "initial";
   const skillSet = new Set(draft?.skillIds ?? currentSkillIds);
   const daySet = new Set(draft?.availabilityDays ?? currentAvailabilityDays);
@@ -67,6 +74,7 @@ export function ProfileForm({
     professionalSummary: current?.professional_summary ?? "",
     registrationBody: current?.registration_body ?? "",
     registrationNumber: current?.registration_number ?? "",
+    ofstedRegistrationNumber: current?.ofsted_registration_number ?? "",
     travelDistanceKm: current?.travel_distance_km != null ? String(current.travel_distance_km) : "",
     hasDrivingLicence: current?.has_driving_licence ?? false,
     hasVehicle: current?.has_vehicle ?? false,
@@ -106,11 +114,29 @@ export function ProfileForm({
             aria-label="Professional role"
             required
             defaultValue={v.professionalRoleId}
+            onValueChange={setRoleId}
             placeholder="Select a role…"
             className="mt-1"
-            options={roles.map((r) => ({ value: r.id, label: r.name }))}
+            options={roles.map((r) => ({ value: r.id, label: r.name, group: r.category }))}
           />
         </div>
+        {requiresOfsted && (
+          <label className="block text-sm font-medium">
+            Ofsted registration number
+            <input
+              name="ofstedRegistrationNumber"
+              required
+              placeholder="e.g. EY123456"
+              defaultValue={v.ofstedRegistrationNumber}
+              className={field}
+            />
+            <span className="mt-1 block text-xs font-normal text-[#7a8a81]">
+              CareBridge Connect accepts Ofsted-registered nannies only. Upload your Ofsted
+              registration certificate at the next step — your registration is checked against the
+              Ofsted register before you can accept any bookings.
+            </span>
+          </label>
+        )}
         <div className="block text-sm font-medium">
           Date of birth
           <DatePicker

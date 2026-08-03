@@ -63,6 +63,22 @@ export const marketingImages = {
     },
   ],
 
+  /** One image per childcare role card */
+  childcareRoleCards: [
+    {
+      src: pexels(3661264, 600, 450),
+      alt: "Nanny reading a book with a young child at home",
+    },
+    {
+      src: pexels(8613089, 600, 450),
+      alt: "Babysitter playing with children in a living room",
+    },
+    {
+      src: pexels(4145153, 600, 450),
+      alt: "Parent and helper caring for a child together at home",
+    },
+  ],
+
   pageHero: {
     about: {
       src: pexels(4386464, 1600, 700),
