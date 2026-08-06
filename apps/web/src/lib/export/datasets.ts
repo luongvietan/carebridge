@@ -21,8 +21,9 @@ export const DATASETS: Record<DatasetName, Dataset> = {
   professionals: {
     view: "v_export_professionals",
     label: "Professionals",
-    columns: ["id", "full_name", "role", "professional_status", "compliance_status",
-      "can_accept_bookings", "city", "postcode", "employment_status", "created_at"],
+    columns: ["id", "full_name", "role", "category", "ofsted_registration_number",
+      "professional_status", "compliance_status", "can_accept_bookings", "city",
+      "postcode", "employment_status", "created_at"],
     orderBy: { column: "created_at" },
   },
   clients: {
@@ -41,9 +42,10 @@ export const DATASETS: Record<DatasetName, Dataset> = {
   bookings: {
     view: "v_export_bookings",
     label: "Bookings",
-    columns: ["id", "status", "booking_type", "role", "scheduled_start", "scheduled_end",
-      "duration_hours", "location_address", "location_postcode", "total_client_charge",
-      "total_payout", "platform_revenue", "snap_currency", "created_at"],
+    columns: ["id", "status", "booking_type", "role", "category", "care_type",
+      "scheduled_start", "scheduled_end", "duration_hours", "location_address",
+      "location_postcode", "total_client_charge", "total_payout", "platform_revenue",
+      "snap_currency", "created_at"],
     orderBy: { column: "scheduled_start" },
   },
   assessments: {

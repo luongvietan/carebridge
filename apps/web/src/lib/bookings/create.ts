@@ -39,6 +39,36 @@ export function isFutureStart(startIso: string, now: Date = new Date()): boolean
   return new Date(startIso).getTime() > now.getTime();
 }
 
+/** The care type chosen on the booking, as read back from `care_types`. */
+export type ChosenCareType = { categoryId: string; isActive: boolean } | null;
+
+/**
+ * A category either offers care types or it does not, and the booking must
+ * match. Childcare bookings without a type of care would reach the professional
+ * as "Nanny, 8 hours" with no way to tell an overnight shift from an
+ * after-school one; healthcare roles have no care types at all, so carrying one
+ * would be meaningless. The form already enforces this — this is the rule for
+ * every other route into `createBooking`.
+ *
+ * The category match is also a DB trigger (0063); repeating it here turns a
+ * raised exception into a message the requester can act on.
+ */
+export function careTypeError(input: {
+  categoryOffersCareTypes: boolean;
+  roleCategoryId: string;
+  chosen: ChosenCareType;
+}): string | null {
+  if (!input.categoryOffersCareTypes) {
+    return input.chosen ? "This role does not offer a type of care." : null;
+  }
+  if (!input.chosen) return "Please choose a type of care for this booking.";
+  if (!input.chosen.isActive) return "That type of care is no longer offered.";
+  if (input.chosen.categoryId !== input.roleCategoryId) {
+    return "That type of care does not apply to the selected role.";
+  }
+  return null;
+}
+
 export function buildBookingInsert(input: CreateBookingInput, rateCard: RateCard): BookingInsert {
   const hasClient = !!input.privateClientId;
   const hasOrg = !!input.organisationId;

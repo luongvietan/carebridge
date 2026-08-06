@@ -65,6 +65,7 @@ type FilterState = {
   requireValidDocs: boolean;
   dbsStatus: string;
   registrationStatus: string;
+  ofstedStatus: string;
   assessmentStatus: string;
   availabilityDay: string;
 };
@@ -93,6 +94,7 @@ function initialFilters(searchParams: URLSearchParams): FilterState {
     requireValidDocs: searchParams.get("requireValidDocs") === "true",
     dbsStatus: searchParams.get("dbsStatus") ?? "",
     registrationStatus: searchParams.get("registrationStatus") ?? "",
+    ofstedStatus: searchParams.get("ofstedStatus") ?? "",
     assessmentStatus: searchParams.get("assessmentStatus") ?? "",
     availabilityDay: searchParams.get("availabilityDay") ?? "",
   };
@@ -118,6 +120,7 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
     if (criteria.requireValidDocs) params.set("requireValidDocs", "true");
     if (filters.dbsStatus) params.set("dbsStatus", filters.dbsStatus);
     if (filters.registrationStatus) params.set("registrationStatus", filters.registrationStatus);
+    if (filters.ofstedStatus) params.set("ofstedStatus", filters.ofstedStatus);
     if (filters.assessmentStatus) params.set("assessmentStatus", filters.assessmentStatus);
     if (filters.availabilityDay) params.set("availabilityDay", filters.availabilityDay);
     const qs = params.toString();
@@ -186,6 +189,16 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
             aria-label="Registration status"
             value={filters.registrationStatus}
             onValueChange={(v) => dispatch({ type: "set", field: "registrationStatus", value: v })}
+            options={DOC_STATUS_OPTIONS}
+          />
+        </div>
+        <div className="flex flex-col gap-1 text-[#4a4a4a]">
+          Ofsted status
+          <Select
+            className="w-44"
+            aria-label="Ofsted status"
+            value={filters.ofstedStatus}
+            onValueChange={(v) => dispatch({ type: "set", field: "ofstedStatus", value: v })}
             options={DOC_STATUS_OPTIONS}
           />
         </div>

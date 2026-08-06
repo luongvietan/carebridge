@@ -28,6 +28,11 @@ describe("buildProfessionalFilters", () => {
       buildProfessionalFilters({ professionalStatus: "xyz", complianceStatus: "nope" }),
     ).toEqual({});
   });
+  it("accepts an Ofsted document status and drops an invalid one", () => {
+    expect(buildProfessionalFilters({ ofstedStatus: "invalid" })).toEqual({ ofstedStatus: "invalid" });
+    expect(buildProfessionalFilters({ ofstedStatus: "valid" })).toEqual({ ofstedStatus: "valid" });
+    expect(buildProfessionalFilters({ ofstedStatus: "maybe" })).toEqual({});
+  });
   it("accepts a valid availability day and ignores invalid ones", () => {
     expect(buildProfessionalFilters({ availabilityDay: "3" })).toEqual({ availabilityDay: 3 });
     expect(buildProfessionalFilters({ availabilityDay: "0" })).toEqual({ availabilityDay: 0 });

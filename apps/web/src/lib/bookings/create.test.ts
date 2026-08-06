@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildBookingInsert, hoursBetween, isFutureStart } from "./create";
+import { buildBookingInsert, careTypeError, hoursBetween, isFutureStart } from "./create";
 import type { RateCard } from "@/lib/rates/snapshot";
 
 const rc: RateCard = {
@@ -39,6 +39,43 @@ describe("isFutureStart", () => {
   });
   it("rejects a start equal to now", () => {
     expect(isFutureStart("2026-06-15T12:00:00.000Z", now)).toBe(false);
+  });
+});
+
+describe("careTypeError", () => {
+  const childcare = { categoryOffersCareTypes: true, roleCategoryId: "childcare" };
+
+  it("requires a care type for a category that offers them", () => {
+    expect(careTypeError({ ...childcare, chosen: null })).toMatch(/choose a type of care/i);
+  });
+  it("accepts an active care type from the role's own category", () => {
+    expect(
+      careTypeError({ ...childcare, chosen: { categoryId: "childcare", isActive: true } }),
+    ).toBeNull();
+  });
+  it("rejects a care type from another category", () => {
+    expect(
+      careTypeError({ ...childcare, chosen: { categoryId: "healthcare", isActive: true } }),
+    ).toMatch(/does not apply/i);
+  });
+  it("rejects a withdrawn care type", () => {
+    expect(
+      careTypeError({ ...childcare, chosen: { categoryId: "childcare", isActive: false } }),
+    ).toMatch(/no longer offered/i);
+  });
+  it("allows no care type when the category offers none", () => {
+    expect(
+      careTypeError({ categoryOffersCareTypes: false, roleCategoryId: "healthcare", chosen: null }),
+    ).toBeNull();
+  });
+  it("rejects a care type on a category that offers none", () => {
+    expect(
+      careTypeError({
+        categoryOffersCareTypes: false,
+        roleCategoryId: "healthcare",
+        chosen: { categoryId: "childcare", isActive: true },
+      }),
+    ).toMatch(/does not offer/i);
   });
 });
 

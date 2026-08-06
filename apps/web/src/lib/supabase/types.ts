@@ -1986,6 +1986,8 @@ export type Database = {
       v_export_bookings: {
         Row: {
           booking_type: string | null
+          care_type: string | null
+          category: string | null
           created_at: string | null
           duration_hours: number | null
           id: string | null
@@ -2185,6 +2187,7 @@ export type Database = {
       v_export_professionals: {
         Row: {
           can_accept_bookings: boolean | null
+          category: string | null
           city: string | null
           compliance_status:
             | Database["public"]["Enums"]["compliance_status"]
@@ -2195,6 +2198,7 @@ export type Database = {
             | null
           full_name: string | null
           id: string | null
+          ofsted_registration_number: string | null
           postcode: string | null
           professional_status:
             | Database["public"]["Enums"]["professional_status"]

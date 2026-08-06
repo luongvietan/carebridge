@@ -2,7 +2,13 @@
 import { createServiceClient } from "@/lib/supabase/service";
 import { requireAdmin } from "@/lib/auth/admin";
 import { requireAuth } from "@/lib/auth/require-auth";
-import { buildBookingInsert, isFutureStart, type CreateBookingInput } from "./create";
+import {
+  buildBookingInsert,
+  careTypeError,
+  isFutureStart,
+  type ChosenCareType,
+  type CreateBookingInput,
+} from "./create";
 import type { RateCard } from "@/lib/rates/snapshot";
 import { applyTransition, type Actor } from "./transitions";
 import { canAccept } from "./eligibility";
@@ -91,6 +97,41 @@ export async function createBooking(form: unknown): Promise<BookingActionResult>
   const table = formData.requesterType === "client" ? "private_clients" : "organisations";
   const { data: profile } = await admin.from(table).select("id").eq("user_id", user.id).maybeSingle();
   if (!profile) return { error: `Complete your ${formData.requesterType} profile first.` };
+
+  const { data: role } = await admin
+    .from("professional_roles")
+    .select("category_id")
+    .eq("id", formData.professionalRoleId)
+    .maybeSingle();
+  if (!role) return { error: "That professional role is no longer available." };
+
+  const [{ count: careTypesInCategory }, { data: chosenCareType }] = await Promise.all([
+    admin
+      .from("care_types")
+      .select("id", { count: "exact", head: true })
+      .eq("category_id", role.category_id)
+      .eq("is_active", true),
+    formData.careTypeId
+      ? admin
+          .from("care_types")
+          .select("category_id, is_active")
+          .eq("id", formData.careTypeId)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+  ]);
+  // A supplied id that matches no row would otherwise reach the insert as a
+  // foreign-key violation with an opaque message.
+  if (formData.careTypeId && !chosenCareType) {
+    return { error: "That type of care is no longer offered." };
+  }
+  const careError = careTypeError({
+    categoryOffersCareTypes: (careTypesInCategory ?? 0) > 0,
+    roleCategoryId: role.category_id,
+    chosen: chosenCareType
+      ? ({ categoryId: chosenCareType.category_id, isActive: chosenCareType.is_active } satisfies ChosenCareType)
+      : null,
+  });
+  if (careError) return { error: careError };
 
   const { data: rateCard } = await admin
     .from("rate_cards")

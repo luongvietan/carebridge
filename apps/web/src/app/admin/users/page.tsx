@@ -174,6 +174,17 @@ async function fetchProfessionals(
       constraints.push(new Set([...required].filter((id) => !valid.has(id))));
     }
   }
+  if (filters.ofstedStatus) {
+    // Scoped like DBS/registration: only nannies are required to hold an Ofsted
+    // certificate, so nobody else can be "missing" one.
+    const valid = await professionalsWithValidDoc(admin, "ofsted_registration");
+    if (filters.ofstedStatus === "valid") {
+      constraints.push(valid);
+    } else {
+      const required = await professionalsRequiringDoc(admin, "ofsted_registration");
+      constraints.push(new Set([...required].filter((id) => !valid.has(id))));
+    }
+  }
   if (filters.assessmentStatus) {
     const passed = await professionalsWhoPassedAssessment(admin);
     constraints.push(
@@ -262,6 +273,7 @@ function criteriaFromSearchParams(
     requireValidDocs: pick("requireValidDocs") === "true",
     dbsStatus: pick("dbsStatus"),
     registrationStatus: pick("registrationStatus"),
+    ofstedStatus: pick("ofstedStatus"),
     assessmentStatus: pick("assessmentStatus"),
     availabilityDay: pick("availabilityDay"),
   };

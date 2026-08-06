@@ -13,6 +13,8 @@ export type ProfessionalFilterCriteria = {
   requireValidDocs?: boolean;
   dbsStatus?: string;
   registrationStatus?: string;
+  /** Ofsted certificate status — only nannies are required to hold one. */
+  ofstedStatus?: string;
   assessmentStatus?: string;
   availabilityDay?: string | number;
 };
@@ -27,6 +29,7 @@ export type ProfessionalFilters = {
   requireValidDocs?: boolean;
   dbsStatus?: DocStatusFilter;
   registrationStatus?: DocStatusFilter;
+  ofstedStatus?: DocStatusFilter;
   assessmentStatus?: AssessmentStatusFilter;
   availabilityDay?: number;
 };
@@ -64,6 +67,9 @@ export function buildProfessionalFilters(c: ProfessionalFilterCriteria): Profess
   if (DOC_STATUSES.includes(c.dbsStatus as DocStatusFilter)) f.dbsStatus = c.dbsStatus as DocStatusFilter;
   if (DOC_STATUSES.includes(c.registrationStatus as DocStatusFilter)) {
     f.registrationStatus = c.registrationStatus as DocStatusFilter;
+  }
+  if (DOC_STATUSES.includes(c.ofstedStatus as DocStatusFilter)) {
+    f.ofstedStatus = c.ofstedStatus as DocStatusFilter;
   }
   if (ASSESSMENT_STATUSES.includes(c.assessmentStatus as AssessmentStatusFilter)) {
     f.assessmentStatus = c.assessmentStatus as AssessmentStatusFilter;
