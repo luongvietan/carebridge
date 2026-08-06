@@ -1,7 +1,7 @@
 name: Supabase keep-alive
 
 # Supabase pauses free-tier projects after 7 days with no database activity.
-# This job writes a heartbeat row (public.keep_alive_ping, migration 0063) every
+# This job writes a heartbeat row (public.keep_alive_ping, migration 0065) every
 # 3 days so the project never reaches that threshold.
 #
 # `*/3` restarts on the 1st of each month, so the widest gap it can leave is the

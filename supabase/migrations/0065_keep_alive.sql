@@ -4,6 +4,11 @@
 -- calls public.keep_alive_ping() every 3 days, guaranteeing a real write well
 -- inside that window.
 --
+-- Numbered 0065, not 0063: it was first written as a second 0063 alongside
+-- 0063_childcare_category.sql, and `supabase db push` treats a version already in
+-- the remote history as applied — so this file was silently skipped and every
+-- scheduled ping hit a function that did not exist.
+--
 -- The heartbeat is a single fixed row, not an append-only log. The ping runs with
 -- the publishable anon key (so no service-role secret has to live in CI), which
 -- means anyone holding that public key can call it — bounding the effect to one
