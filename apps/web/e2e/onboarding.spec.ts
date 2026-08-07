@@ -45,8 +45,9 @@ async function registerConfirmLogin(page: Page, api: APIRequestContext, email: s
   await expect(page).toHaveURL(/\/professional/);
 }
 
-// Correct option TEXT for each seeded placeholder question. The bank has 20
-// common questions and no role-specific ones, so the 15+5 format serves all 20.
+// Correct option TEXT for each seeded common question. The applicant has not
+// chosen a role yet at this point in the wizard, so the 15+5 selection has no
+// role pool to draw from and serves the 20 common questions.
 const CORRECT = [
   "Report it to the safeguarding lead promptly",
   "Hand hygiene",
@@ -150,7 +151,7 @@ test("professional completes the onboarding wizard and writes persist", async ({
   expect(docs).toBeGreaterThan(0);
 });
 
-test("admin approving the final critical document activates the professional", async ({ page, browser }) => {
+test("a regulated professional activates only once documents are approved AND the register is checked", async ({ page, browser }) => {
   const sb = service();
   const stamp = Date.now();
   const proName = `FixturePro${stamp}`;
@@ -236,15 +237,41 @@ test("admin approving the final critical document activates the professional", a
   await reviewRow.getByRole("button", { name: /^approve$/i }).click();
   await expect(reviewRow).toBeHidden({ timeout: 10000 });
 
-  // The professional is now active and can accept bookings.
-  const { data: after } = await sb
+  // Every document is approved, but this is a nursing role: until an
+  // administrator has checked the NMC register, the professional must NOT be
+  // able to accept bookings (client requirement, 7 Aug 2026).
+  const { data: beforeVerification } = await sb
     .from("professionals")
-    .select("professional_status, compliance_status, can_accept_bookings")
+    .select("professional_status, can_accept_bookings")
     .eq("id", pro!.id)
     .single();
-  expect(after?.professional_status).toBe("active");
-  expect(after?.compliance_status).toBe("approved");
-  expect(after?.can_accept_bookings).toBe(true);
+  expect(beforeVerification?.professional_status).not.toBe("active");
+  expect(beforeVerification?.can_accept_bookings).toBe(false);
+
+  // Record the register check through the admin UI.
+  const checkForm = adminPage.locator("form", { hasText: proName });
+  await expect(checkForm).toBeVisible();
+  await checkForm.locator('input[name="reference"]').fill("12A3456E");
+  await chooseFrom(
+    adminPage,
+    checkForm.getByRole("combobox", { name: "What the register showed" }),
+    "Registration is active and details match",
+  );
+  await checkForm.locator('input[name="confirmActive"]').check();
+  await checkForm.locator('input[name="confirmIdentity"]').check();
+  await checkForm.getByRole("button", { name: /record verification/i }).click();
+
+  // Only now is the professional active and bookable.
+  await expect(async () => {
+    const { data: after } = await sb
+      .from("professionals")
+      .select("professional_status, compliance_status, can_accept_bookings")
+      .eq("id", pro!.id)
+      .single();
+    expect(after?.professional_status).toBe("active");
+    expect(after?.compliance_status).toBe("approved");
+    expect(after?.can_accept_bookings).toBe(true);
+  }).toPass({ timeout: 15_000 });
 
   await ctx.close();
   // Cleanup

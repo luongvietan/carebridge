@@ -70,7 +70,7 @@ async function seedClient(sb: SupabaseClient, stamp: number) {
   await new Promise((r) => setTimeout(r, 800));
   const { data: client, error: cErr } = await sb
     .from("private_clients")
-    .insert({ user_id: data.user.id, full_name: "E2E Client", stripe_customer_id: "cus_stub_e2e" })
+    .insert({ user_id: data.user.id, full_name: "E2E Client", stripe_customer_id: "cus_stub_e2e", address_line1: "1 Test Street", city: "Manchester", postcode: "M1 1AA" })
     .select("id")
     .single();
   if (cErr || !client) throw cErr ?? new Error("private_clients insert");

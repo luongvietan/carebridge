@@ -78,7 +78,7 @@ async function seedClient(sb: SupabaseClient, stamp: number) {
   await new Promise((r) => setTimeout(r, 800));
   const { data: client, error: cErr } = await sb
     .from("private_clients")
-    .insert({ user_id: data.user.id, full_name: "Gov E2E Client", stripe_customer_id: "cus_stub_gov" })
+    .insert({ user_id: data.user.id, full_name: "Gov E2E Client", stripe_customer_id: "cus_stub_gov", address_line1: "1 Test Street", city: "Manchester", postcode: "M1 1AA" })
     .select("id")
     .single();
   if (cErr || !client) throw cErr ?? new Error("private_clients insert");
@@ -164,6 +164,23 @@ async function seedFullCompliance(sb: SupabaseClient, proId: string, roleId: str
       storage_path: `gov/${proId}/${typeId}.pdf`,
       verification_status: "approved",
       expiry_date: expiry,
+    });
+  }
+
+  // A nursing role answers to the NMC, and since 0070 no regulated professional
+  // activates — or reinstates — without a current register check on file.
+  const { data: role } = await sb
+    .from("professional_roles")
+    .select("registration_register")
+    .eq("id", roleId)
+    .single();
+  if (role?.registration_register) {
+    await sb.from("registration_verifications").insert({
+      professional_id: proId,
+      register: role.registration_register,
+      reference: role.registration_register === "nmc" ? "12A3456E" : "EY123456",
+      outcome: "active",
+      valid_until: expiry,
     });
   }
 }
