@@ -160,7 +160,7 @@ async function seedBooking(
       status: opts.initialStatus,
       assigned_professional_id: opts.proId,
     })
-    .select("id, total_payout")
+    .select("id, total_payout, scheduled_start, scheduled_end")
     .single();
   if (error || !booking) throw error ?? new Error("booking insert");
 
@@ -294,6 +294,18 @@ test("payout recording: admin records payout and marks it paid via UI", async ({
     intentId,
     status: "succeeded",
     amount: Number(booking.total_payout),
+  });
+
+  // Since 0071 a payout cannot be recorded until the hours worked have been
+  // confirmed by the client, so the fixture confirms them.
+  await sb.from("timesheets").insert({
+    booking_id: booking.id,
+    professional_id: pro.proId,
+    actual_start: booking.scheduled_start,
+    actual_end: booking.scheduled_end,
+    break_minutes: 0,
+    status: "confirmed",
+    confirmed_at: new Date().toISOString(),
   });
 
   // Log in as admin and visit payouts page

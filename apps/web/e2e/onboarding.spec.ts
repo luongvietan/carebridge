@@ -100,6 +100,8 @@ test("professional completes the onboarding wizard and writes persist", async ({
     page.getByRole("combobox", { name: "Right to work in the UK" }),
     "I am a British or Irish citizen (passport)",
   );
+  // Adult Nurse is an NMC role, so the PIN is required and format-checked.
+  await page.locator('input[name="registrationNumber"]').fill("12A3456E");
   await page.locator('input[name="addressLine1"]').fill("1 Test Street");
   await page.locator('input[name="city"]').fill("London");
   await page.locator('input[name="postcode"]').fill("E1 6AN");
