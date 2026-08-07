@@ -102,6 +102,19 @@ export const profileSchema = z.object({
       (v) => !v || /^[A-Za-z]{0,3}\d{6,8}$/.test(v.replace(/\s/g, "")),
       "Enter a valid Ofsted registration number, e.g. EY123456",
     ),
+  // Right to work. British and Irish citizens evidence it with a passport;
+  // everyone else with a Home Office share code. Optional in the schema and
+  // enforced in saveProfile, in the same way as the Ofsted number, so the
+  // per-basis rule lives in one place. Share codes are 9 alphanumeric
+  // characters, conventionally shown in three groups of three.
+  rightToWorkBasis: z.enum(["uk_irish_citizen", "share_code"]).optional(),
+  rightToWorkShareCode: z
+    .string()
+    .optional()
+    .refine(
+      (v) => !v || /^[A-Za-z0-9]{9}$/.test(v.replace(/\s/g, "")),
+      "Enter a valid 9-character share code, e.g. W12 A34 B56",
+    ),
   travelDistanceKm: z.coerce.number().int().min(0).max(1000).optional(),
   hasDrivingLicence: z.boolean().optional(),
   hasVehicle: z.boolean().optional(),

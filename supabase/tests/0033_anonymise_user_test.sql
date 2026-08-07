@@ -13,8 +13,8 @@ insert into users (id, email, account_type) values
   ('00000000-0000-0000-0000-0000000000f2', 'adminactor@test.dev', 'admin')
   on conflict (id) do nothing;
 
-insert into professional_roles (id, code, name)
-  values ('00000000-0000-0000-0000-0000000000a9', 'rn_anon_test', 'RN (anon test)');
+insert into professional_roles (id, code, name, category_id)
+  values ('00000000-0000-0000-0000-0000000000a9', 'rn_anon_test', 'RN (anon test)', (select id from role_categories where code = 'healthcare'));
 insert into professionals
     (id, user_id, full_name, professional_role_id, national_insurance_no, postcode, professional_status)
   values ('00000000-0000-0000-0000-0000000000b9', '00000000-0000-0000-0000-0000000000f1', 'Jane Doe',

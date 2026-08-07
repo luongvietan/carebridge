@@ -14,15 +14,15 @@ insert into auth.users (id, email) values
 insert into users (id, email, account_type) values
   ('00000000-0000-0000-0000-0000000d0010','proa@test.dev','professional'),
   ('00000000-0000-0000-0000-0000000d0011','prob@test.dev','professional') on conflict do nothing;
-insert into professional_roles (id, code, name, is_active)
-  values ('00000000-0000-0000-0000-0000000d0001','rn_d','RN D', true) on conflict do nothing;
+insert into professional_roles (id, code, name, is_active, category_id)
+  values ('00000000-0000-0000-0000-0000000d0001','rn_d','RN D', true, (select id from role_categories where code = 'healthcare')) on conflict do nothing;
 insert into professionals (id, user_id, full_name, professional_role_id, professional_status, compliance_status)
   values
   ('00000000-0000-0000-0000-0000000d0020','00000000-0000-0000-0000-0000000d0010','Pro A','00000000-0000-0000-0000-0000000d0001','active','approved'),
   ('00000000-0000-0000-0000-0000000d0021','00000000-0000-0000-0000-0000000d0011','Pro B','00000000-0000-0000-0000-0000000d0001','active','approved')
   on conflict do nothing;
-insert into private_clients (id, user_id, full_name)
-  values ('00000000-0000-0000-0000-0000000d0030','00000000-0000-0000-0000-0000000d0010','Client') on conflict do nothing;
+insert into private_clients (id, user_id, full_name, address_line1, city, postcode)
+  values ('00000000-0000-0000-0000-0000000d0030','00000000-0000-0000-0000-0000000d0010','Client', '1 Test Street', 'Manchester', 'M1 1AA') on conflict do nothing;
 insert into bookings (id, requester_user_id, private_client_id, professional_role_id,
   scheduled_start, scheduled_end, duration_hours, location_address,
   snap_client_charge_rate, snap_payout_rate, snap_platform_fee)

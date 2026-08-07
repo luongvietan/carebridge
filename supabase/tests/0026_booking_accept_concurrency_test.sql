@@ -2,8 +2,8 @@ begin;
 select plan(2);
 
 -- Fixtures: open booking + two eligible professionals (same role).
-insert into professional_roles (id, code, name, is_active)
-  values ('00000000-0000-0000-0000-0000000c0001','rn_c','RN C', true) on conflict do nothing;
+insert into professional_roles (id, code, name, is_active, category_id)
+  values ('00000000-0000-0000-0000-0000000c0001','rn_c','RN C', true, (select id from role_categories where code = 'healthcare')) on conflict do nothing;
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-0000000c0010','req@test.dev'),
   ('00000000-0000-0000-0000-0000000c0011','pro1@test.dev'),
@@ -13,8 +13,8 @@ insert into professionals (id, user_id, full_name, professional_role_id, profess
   ('00000000-0000-0000-0000-0000000c0020','00000000-0000-0000-0000-0000000c0011','Pro 1','00000000-0000-0000-0000-0000000c0001','active','approved'),
   ('00000000-0000-0000-0000-0000000c0021','00000000-0000-0000-0000-0000000c0012','Pro 2','00000000-0000-0000-0000-0000000c0001','active','approved')
   on conflict do nothing;
-insert into private_clients (id, user_id, full_name)
-  values ('00000000-0000-0000-0000-0000000c0030','00000000-0000-0000-0000-0000000c0010','Client') on conflict do nothing;
+insert into private_clients (id, user_id, full_name, address_line1, city, postcode)
+  values ('00000000-0000-0000-0000-0000000c0030','00000000-0000-0000-0000-0000000c0010','Client', '1 Test Street', 'Manchester', 'M1 1AA') on conflict do nothing;
 insert into bookings (id, requester_user_id, private_client_id, professional_role_id,
   scheduled_start, scheduled_end, duration_hours, location_address,
   snap_client_charge_rate, snap_payout_rate, snap_platform_fee, status)

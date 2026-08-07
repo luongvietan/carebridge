@@ -5,9 +5,11 @@ import { uploadDocument } from "@/lib/onboarding/actions";
 import { OnboardingSteps } from "@/components/onboarding-steps";
 import { DatePicker } from "@/components/ui/date-picker";
 import { FilePreviewInput, type ExistingFile } from "@/components/ui/file-input";
+import { guidanceFor } from "@/lib/onboarding/document-guidance";
 
 export type DocItem = {
   typeId: string;
+  code: string; // document_types.code — keys the acceptable-documents guidance
   name: string;
   critical: boolean;
   hasExpiry: boolean; // type carries an expiry → an expiry date is required on upload
@@ -68,7 +70,9 @@ export function DocumentUploader({ items }: { items: DocItem[] }) {
       {error && <p className="mt-3 text-sm text-[#da1e28]">{error}</p>}
 
       <div className="mt-6 divide-y divide-[#dbe7e0] border border-[#dbe7e0]">
-        {items.map((item) => (
+        {items.map((item) => {
+          const guidance = guidanceFor(item.code);
+          return (
           <div key={item.typeId} className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -77,6 +81,11 @@ export function DocumentUploader({ items }: { items: DocItem[] }) {
               </div>
               <Badge status={item.status} />
             </div>
+            {guidance && (
+              <p className="mt-2 text-xs leading-relaxed text-[#4a4a4a]">
+                <span className="font-semibold text-[#1e5a33]">We accept:</span> {guidance.accepted}
+              </p>
+            )}
             {(item.status === "rejected" || item.status === "further_info_required") &&
               item.rejectionReason && (
                 <p className="mt-2 rounded-lg bg-[#fff1f1] px-3 py-2 text-xs text-[#a2191f]">
@@ -96,6 +105,17 @@ export function DocumentUploader({ items }: { items: DocItem[] }) {
               <input name="referenceNumber" placeholder="Reference no. (optional)" aria-label="Reference number" className={field} />
               <input name="issuingBody" placeholder="Issuing body (e.g. NMC, optional)" aria-label="Issuing body" className={field} />
               <div className="text-xs text-[#4a4a4a]">
+                Issued{guidance?.maxAgeMonths && <span className="text-[#da1e28]"> *</span>}
+                <DatePicker
+                  name="issuedDate"
+                  required={Boolean(guidance?.maxAgeMonths)}
+                  aria-label={
+                    guidance?.maxAgeMonths ? "Issue date (required)" : "Issue date"
+                  }
+                  className="mt-1 w-40"
+                />
+              </div>
+              <div className="text-xs text-[#4a4a4a]">
                 Expiry{item.hasExpiry && <span className="text-[#da1e28]"> *</span>}
                 <DatePicker
                   name="expiryDate"
@@ -113,7 +133,8 @@ export function DocumentUploader({ items }: { items: DocItem[] }) {
               </button>
             </form>
           </div>
-        ))}
+          );
+        })}
       </div>
 
       {allUploaded && (

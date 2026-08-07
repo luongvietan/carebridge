@@ -8,10 +8,10 @@ select has_table('booking_cancellations');
 -- Behavioural: snapshot totals are frozen
 insert into auth.users (id, email, raw_user_meta_data)
   values ('00000000-0000-0000-0000-0000000000c1','c1@test.dev','{"account_type":"private_client"}'::jsonb);
-insert into private_clients (id, user_id, full_name)
-  values ('00000000-0000-0000-0000-0000000000d1','00000000-0000-0000-0000-0000000000c1','Client One');
-insert into professional_roles (id, code, name)
-  values ('00000000-0000-0000-0000-0000000000a1','rn_book_test','Registered Nurse (booking test)');
+insert into private_clients (id, user_id, full_name, address_line1, city, postcode)
+  values ('00000000-0000-0000-0000-0000000000d1','00000000-0000-0000-0000-0000000000c1','Client One', '1 Test Street', 'Manchester', 'M1 1AA');
+insert into professional_roles (id, code, name, category_id)
+  values ('00000000-0000-0000-0000-0000000000a1','rn_book_test','Registered Nurse (booking test)', (select id from role_categories where code = 'healthcare'));
 insert into rate_cards (id, professional_role_id, client_charge_rate, professional_payout_rate)
   values ('00000000-0000-0000-0000-0000000000b1','00000000-0000-0000-0000-0000000000a1', 40, 28);
 

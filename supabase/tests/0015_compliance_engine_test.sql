@@ -6,8 +6,8 @@ select has_function('public','fn_run_compliance_sweep','compliance sweep functio
 -- Fixtures: a role requiring DBS, a professional currently active+approved with an expired DBS
 insert into auth.users (id, email, raw_user_meta_data)
   values ('00000000-0000-0000-0000-0000000000e1','e1@test.dev','{"account_type":"professional"}'::jsonb);
-insert into professional_roles (id, code, name)
-  values ('00000000-0000-0000-0000-0000000000a1','rn_eng_test','Registered Nurse (engine test)');
+insert into professional_roles (id, code, name, category_id)
+  values ('00000000-0000-0000-0000-0000000000a1','rn_eng_test','Registered Nurse (engine test)', (select id from role_categories where code = 'healthcare'));
 insert into document_types (id, code, name, category, is_compliance_critical)
   values ('00000000-0000-0000-0000-0000000000f1','enhanced_dbs_eng_test','Enhanced DBS (engine test)','dbs', true);
 insert into compliance_requirements (professional_role_id, document_type_id)

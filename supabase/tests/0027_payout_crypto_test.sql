@@ -1,8 +1,8 @@
 begin;
 select plan(2);
 
-insert into professional_roles (id, code, name, is_active)
-  values ('00000000-0000-0000-0000-0000000c0001','rn_pay','RN Pay', true) on conflict do nothing;
+insert into professional_roles (id, code, name, is_active, category_id)
+  values ('00000000-0000-0000-0000-0000000c0001','rn_pay','RN Pay', true, (select id from role_categories where code = 'healthcare')) on conflict do nothing;
 insert into auth.users (id, email) values ('00000000-0000-0000-0000-0000000c0010','pay@test.dev') on conflict do nothing;
 insert into professionals (id, user_id, full_name, professional_role_id)
   values ('00000000-0000-0000-0000-0000000c0020','00000000-0000-0000-0000-0000000c0010','Pay Pro','00000000-0000-0000-0000-0000000c0001')

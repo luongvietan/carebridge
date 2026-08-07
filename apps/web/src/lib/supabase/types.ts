@@ -1682,6 +1682,8 @@ export type Database = {
           profile_photo_path: string | null
           registration_body: string | null
           registration_number: string | null
+          right_to_work_basis: string | null
+          right_to_work_share_code: string | null
           travel_distance_km: number | null
           updated_at: string
           user_id: string
@@ -1711,6 +1713,8 @@ export type Database = {
           profile_photo_path?: string | null
           registration_body?: string | null
           registration_number?: string | null
+          right_to_work_basis?: string | null
+          right_to_work_share_code?: string | null
           travel_distance_km?: number | null
           updated_at?: string
           user_id: string
@@ -1740,6 +1744,8 @@ export type Database = {
           profile_photo_path?: string | null
           registration_body?: string | null
           registration_number?: string | null
+          right_to_work_basis?: string | null
+          right_to_work_share_code?: string | null
           travel_distance_km?: number | null
           updated_at?: string
           user_id?: string

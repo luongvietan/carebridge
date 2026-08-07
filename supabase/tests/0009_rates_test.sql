@@ -3,8 +3,8 @@ select plan(4);
 
 select has_table('rate_cards');
 
-insert into professional_roles (id, code, name)
-  values ('00000000-0000-0000-0000-0000000000a1','rn_rates_test','Registered Nurse (rates test)');
+insert into professional_roles (id, code, name, category_id)
+  values ('00000000-0000-0000-0000-0000000000a1','rn_rates_test','Registered Nurse (rates test)', (select id from role_categories where code = 'healthcare'));
 
 -- first active card OK
 insert into rate_cards (professional_role_id, client_charge_rate, professional_payout_rate)

@@ -31,6 +31,8 @@ type Current = {
   professional_summary: string | null;
   registration_body: string | null;
   registration_number: string | null;
+  right_to_work_basis: string | null;
+  right_to_work_share_code: string | null;
   travel_distance_km: number | null;
   has_driving_licence: boolean | null;
   has_vehicle: boolean | null;
@@ -75,6 +77,8 @@ export function ProfileForm({
     professionalSummary: current?.professional_summary ?? "",
     registrationBody: current?.registration_body ?? "",
     registrationNumber: current?.registration_number ?? "",
+    rightToWorkBasis: current?.right_to_work_basis ?? "",
+    rightToWorkShareCode: current?.right_to_work_share_code ?? "",
     ofstedRegistrationNumber: current?.ofsted_registration_number ?? "",
     travelDistanceKm: current?.travel_distance_km != null ? String(current.travel_distance_km) : "",
     hasDrivingLicence: current?.has_driving_licence ?? false,
@@ -82,6 +86,7 @@ export function ProfileForm({
     skillIds: currentSkillIds,
     availabilityDays: currentAvailabilityDays,
   };
+  const [rightToWorkBasis, setRightToWorkBasis] = useState(v.rightToWorkBasis);
 
   if (state && "ok" in state) {
     return (
@@ -170,6 +175,44 @@ export function ProfileForm({
           National Insurance number
           <input name="nationalInsuranceNo" defaultValue={v.nationalInsuranceNo} className={field} />
         </label>
+        <div className="rounded-xl border border-[#dbe7e0] bg-[#f9fbfa] p-4">
+          <div className="block text-sm font-medium">
+            Right to work in the UK
+            <Select
+              name="rightToWorkBasis"
+              aria-label="Right to work in the UK"
+              required
+              value={rightToWorkBasis}
+              onValueChange={setRightToWorkBasis}
+              placeholder="How do you evidence your right to work?"
+              className="mt-1"
+              options={[
+                { value: "uk_irish_citizen", label: "I am a British or Irish citizen (passport)" },
+                { value: "share_code", label: "I have a Home Office share code" },
+              ]}
+            />
+          </div>
+          {rightToWorkBasis === "share_code" ? (
+            <label className="mt-3 block text-sm font-medium">
+              Share code
+              <input
+                name="rightToWorkShareCode"
+                required
+                placeholder="e.g. W12 A34 B56"
+                defaultValue={v.rightToWorkShareCode}
+                className={field}
+              />
+              <span className="mt-1 block text-xs font-normal text-[#7a8a81]">
+                Generate a share code at gov.uk/prove-right-to-work and enter it here. An
+                administrator checks it directly with the Home Office before approving you.
+              </span>
+            </label>
+          ) : (
+            <p className="mt-3 text-xs text-[#7a8a81]">
+              Upload your passport as your Right to Work document at the next step.
+            </p>
+          )}
+        </div>
         <div className="grid grid-cols-2 gap-4">
           <label className="block text-sm font-medium">
             Registration body

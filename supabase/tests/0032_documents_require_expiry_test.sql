@@ -6,8 +6,8 @@ select has_function('public','guard_documents_expiry_present','expiry guard func
 -- Fixtures: one expiring document type, one non-expiring type, one professional.
 insert into auth.users (id, email, raw_user_meta_data)
   values ('00000000-0000-0000-0000-0000000000d1','d1@test.dev','{"account_type":"professional"}'::jsonb);
-insert into professional_roles (id, code, name)
-  values ('00000000-0000-0000-0000-0000000000b1','rn_exp_test','Registered Nurse (expiry test)');
+insert into professional_roles (id, code, name, category_id)
+  values ('00000000-0000-0000-0000-0000000000b1','rn_exp_test','Registered Nurse (expiry test)', (select id from role_categories where code = 'healthcare'));
 insert into document_types (id, code, name, category, is_compliance_critical, has_expiry) values
   ('00000000-0000-0000-0000-0000000000c1','dbs_exp_test','Enhanced DBS (expiry test)','dbs', true, true),
   ('00000000-0000-0000-0000-0000000000c2','ref_exp_test','Reference (no-expiry test)','reference', false, false);

@@ -37,3 +37,43 @@ export function validateDocumentExpiry(args: {
   }
   return { ok: true };
 }
+
+/**
+ * Some documents prove nothing by having an expiry date — a utility bill is
+ * evidence of where somebody lived when it was ISSUED. For those the client
+ * asked for a recency rule instead: generally issued within the last 3 months
+ * (`maxAgeMonths`, from DOCUMENT_GUIDANCE).
+ *
+ * A document dated in the future is rejected as well; that is a typo or a
+ * fabrication, and either way it should not pass review.
+ */
+export function validateDocumentIssueDate(args: {
+  maxAgeMonths: number | undefined;
+  issuedDate: string | null | undefined;
+  today?: string;
+}): DocumentExpiryCheck {
+  if (!args.maxAgeMonths) return { ok: true };
+
+  const value = (args.issuedDate ?? "").trim();
+  if (!value) {
+    return { ok: false, error: "An issue date is required for this document." };
+  }
+  if (!ISO_DATE.test(value) || Number.isNaN(Date.parse(value))) {
+    return { ok: false, error: "Enter a valid issue date." };
+  }
+
+  const today = args.today ?? todayIso();
+  if (value > today) {
+    return { ok: false, error: "The issue date cannot be in the future." };
+  }
+
+  const earliest = new Date(`${today}T00:00:00Z`);
+  earliest.setUTCMonth(earliest.getUTCMonth() - args.maxAgeMonths);
+  if (value < earliest.toISOString().slice(0, 10)) {
+    return {
+      ok: false,
+      error: `This document must have been issued within the last ${args.maxAgeMonths} months.`,
+    };
+  }
+  return { ok: true };
+}

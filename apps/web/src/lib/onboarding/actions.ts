@@ -7,7 +7,8 @@ import { eligibilitySchema, profileSchema, mandatoryTrainingItems } from "@/lib/
 import { eligibilityOutcome, type EligibilityOutcome } from "@/lib/compliance/requirements";
 import { requiresOfstedRegistration } from "@/lib/compliance/regulated-roles";
 import { verifyUpload } from "@/lib/onboarding/upload-rules";
-import { validateDocumentExpiry } from "@/lib/onboarding/document-expiry";
+import { validateDocumentExpiry, validateDocumentIssueDate } from "@/lib/onboarding/document-expiry";
+import { guidanceFor } from "@/lib/onboarding/document-guidance";
 import { parseSkillIds, parseAvailabilityDays } from "@/lib/onboarding/profile-children";
 import { eligibilityCompleted, assessmentPassed } from "@/lib/onboarding/progress";
 import { validationMessage } from "@/lib/validation/form-messages";
@@ -21,6 +22,8 @@ const PROFILE_FIELD_LABELS: Record<string, string> = {
   nationalInsuranceNo: "National Insurance number",
   professionalRoleId: "Professional role",
   ofstedRegistrationNumber: "Ofsted registration number",
+  rightToWorkBasis: "Right to work",
+  rightToWorkShareCode: "Share code",
   travelDistanceKm: "Travel distance",
 };
 
@@ -29,6 +32,12 @@ const PROFILE_FIELD_LABELS: Record<string, string> = {
 // independent guard (0063, widened in 0067) preventing activation without it.
 const OFSTED_REQUIRED_ERROR =
   "An Ofsted registration number is required for this role. CareBridge Connect accepts Ofsted-registered nannies and childminders only.";
+
+const RIGHT_TO_WORK_REQUIRED_ERROR =
+  "Tell us how you evidence your right to work in the UK.";
+
+const SHARE_CODE_REQUIRED_ERROR =
+  "A Home Office share code is required. Generate one at gov.uk/prove-right-to-work and enter it here.";
 
 export type ProfileFormValues = {
   fullName: string;
@@ -43,6 +52,8 @@ export type ProfileFormValues = {
   registrationBody: string;
   registrationNumber: string;
   ofstedRegistrationNumber: string;
+  rightToWorkBasis: string;
+  rightToWorkShareCode: string;
   travelDistanceKm: string;
   hasDrivingLicence: boolean;
   hasVehicle: boolean;
@@ -64,6 +75,8 @@ function parseProfileFormValues(formData: FormData): ProfileFormValues {
     registrationBody: String(formData.get("registrationBody") ?? ""),
     registrationNumber: String(formData.get("registrationNumber") ?? ""),
     ofstedRegistrationNumber: String(formData.get("ofstedRegistrationNumber") ?? ""),
+    rightToWorkBasis: String(formData.get("rightToWorkBasis") ?? ""),
+    rightToWorkShareCode: String(formData.get("rightToWorkShareCode") ?? ""),
     travelDistanceKm: String(formData.get("travelDistanceKm") ?? ""),
     hasDrivingLicence: formData.get("hasDrivingLicence") === "on",
     hasVehicle: formData.get("hasVehicle") === "on",
@@ -155,6 +168,8 @@ export async function saveProfile(_prev: ProfileResult, formData: FormData): Pro
     registrationBody: (formData.get("registrationBody") as string) || undefined,
     registrationNumber: (formData.get("registrationNumber") as string) || undefined,
     ofstedRegistrationNumber: (formData.get("ofstedRegistrationNumber") as string) || undefined,
+    rightToWorkBasis: (formData.get("rightToWorkBasis") as string) || undefined,
+    rightToWorkShareCode: (formData.get("rightToWorkShareCode") as string) || undefined,
     travelDistanceKm: (formData.get("travelDistanceKm") as string) || undefined,
     hasDrivingLicence: formData.get("hasDrivingLicence") === "on",
     hasVehicle: formData.get("hasVehicle") === "on",
@@ -184,6 +199,17 @@ export async function saveProfile(_prev: ProfileResult, formData: FormData): Pro
   const ofstedNumber = parsed.data.ofstedRegistrationNumber?.replace(/\s/g, "").toUpperCase();
   if (requiresOfstedRegistration(selectedRole?.code) && !ofstedNumber) {
     return profileError(OFSTED_REQUIRED_ERROR, formData);
+  }
+
+  // Right to work: everyone states how they evidence it, and a share code is
+  // required from anyone who is not a British or Irish citizen. The code is only
+  // kept for that basis — the DB rejects the other combination (0069).
+  const shareCode = parsed.data.rightToWorkShareCode?.replace(/\s/g, "").toUpperCase();
+  if (!parsed.data.rightToWorkBasis) {
+    return profileError(RIGHT_TO_WORK_REQUIRED_ERROR, formData);
+  }
+  if (parsed.data.rightToWorkBasis === "share_code" && !shareCode) {
+    return profileError(SHARE_CODE_REQUIRED_ERROR, formData);
   }
 
   // Optional profile photo → private storage bucket.
@@ -219,6 +245,9 @@ export async function saveProfile(_prev: ProfileResult, formData: FormData): Pro
       registration_body: parsed.data.registrationBody ?? null,
       registration_number: parsed.data.registrationNumber ?? null,
       ofsted_registration_number: ofstedNumber || null,
+      right_to_work_basis: parsed.data.rightToWorkBasis,
+      right_to_work_share_code:
+        parsed.data.rightToWorkBasis === "share_code" ? (shareCode ?? null) : null,
       travel_distance_km: parsed.data.travelDistanceKm ?? null,
       has_driving_licence: parsed.data.hasDrivingLicence ?? null,
       has_vehicle: parsed.data.hasVehicle ?? null,
@@ -299,6 +328,15 @@ export async function uploadDocument(
   });
   if (!expiryCheck.ok) return { error: expiryCheck.error };
 
+  // Proof of address and the like prove nothing by their expiry date — what
+  // matters is that they were issued recently (client request, 7 Aug).
+  const issuedRaw = (formData.get("issuedDate") as string) || "";
+  const issueCheck = validateDocumentIssueDate({
+    maxAgeMonths: guidanceFor(docType.code)?.maxAgeMonths,
+    issuedDate: issuedRaw,
+  });
+  if (!issueCheck.ok) return { error: issueCheck.error };
+
   const verified = await verifyUpload(file);
   if (!verified.ok) return { error: verified.error };
 
@@ -329,6 +367,7 @@ export async function uploadDocument(
       original_filename: verified.safeName,
       reference_number: (formData.get("referenceNumber") as string) || null,
       issuing_body: (formData.get("issuingBody") as string) || null,
+      issued_date: issuedRaw || null,
       expiry_date: expiryRaw || null,
       uploaded_by: user.id,
     })

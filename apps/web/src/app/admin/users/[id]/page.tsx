@@ -12,6 +12,7 @@ import {
   mandatoryTrainingItems,
 } from "@/lib/validation/onboarding";
 import { DAYS_OF_WEEK } from "@/lib/onboarding/profile-children";
+import { requiresOfstedRegistration } from "@/lib/compliance/regulated-roles";
 
 export const dynamic = "force-dynamic";
 
@@ -182,7 +183,7 @@ export default async function AdminUserDetailPage({
   const { data: professional } = await admin
     .from("professionals")
     .select(
-      "id, full_name, professional_status, compliance_status, professional_role_id, user_id, profile_photo_path, registration_body, registration_number, ofsted_registration_number, professional_roles(name, code)",
+      "id, full_name, professional_status, compliance_status, professional_role_id, user_id, profile_photo_path, registration_body, registration_number, ofsted_registration_number, right_to_work_basis, right_to_work_share_code, professional_roles(name, code)",
     )
     .eq("id", id)
     .maybeSingle();
@@ -312,9 +313,11 @@ export default async function AdminUserDetailPage({
               {(professional.professional_roles as { name: string } | null)?.name ?? "—"}
             </dd>
           </div>
-          {(professional.professional_roles as { code: string } | null)?.code === "nanny" && (
+          {requiresOfstedRegistration(
+            (professional.professional_roles as { code: string } | null)?.code,
+          ) && (
             <div>
-              <dt className="text-[#7a8a81]">Ofsted registration</dt>
+              <dt className="text-[#7a8a81]">Ofsted registration (URN)</dt>
               <dd>
                 {professional.ofsted_registration_number ?? "—"}
                 <span className="mt-0.5 block text-xs text-[#7a8a81]">
@@ -324,6 +327,24 @@ export default async function AdminUserDetailPage({
               </dd>
             </div>
           )}
+          <div>
+            <dt className="text-[#7a8a81]">Right to work</dt>
+            <dd>
+              {professional.right_to_work_basis === "share_code" ? (
+                <>
+                  Share code {professional.right_to_work_share_code ?? "—"}
+                  <span className="mt-0.5 block text-xs text-[#7a8a81]">
+                    Redeem this code at gov.uk/view-right-to-work with the professional&apos;s date
+                    of birth, and confirm the result before approving the Right to Work document.
+                  </span>
+                </>
+              ) : professional.right_to_work_basis === "uk_irish_citizen" ? (
+                "British or Irish citizen (passport)"
+              ) : (
+                "—"
+              )}
+            </dd>
+          </div>
           <div>
             <dt className="text-[#7a8a81]">Professional registration</dt>
             <dd>

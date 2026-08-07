@@ -1,8 +1,8 @@
 begin;
 select plan(3);
 
-insert into professional_roles (id, code, name, is_active)
-  values ('00000000-0000-0000-0000-0000000d0001','rn_rate','RN Rate', true) on conflict do nothing;
+insert into professional_roles (id, code, name, is_active, category_id)
+  values ('00000000-0000-0000-0000-0000000d0001','rn_rate','RN Rate', true, (select id from role_categories where code = 'healthcare')) on conflict do nothing;
 insert into rate_cards (professional_role_id, client_charge_rate, professional_payout_rate, platform_fee_type, currency)
   values ('00000000-0000-0000-0000-0000000d0001', 40, 28, 'derived', 'GBP') on conflict do nothing;
 

@@ -94,6 +94,11 @@ test("professional completes the onboarding wizard and writes persist", async ({
   // Profile
   await page.goto("/professional/onboarding/profile");
   await chooseFrom(page, page.getByRole("combobox", { name: "Professional role" }), "Adult Nurse");
+  await chooseFrom(
+    page,
+    page.getByRole("combobox", { name: "Right to work in the UK" }),
+    "I am a British or Irish citizen (passport)",
+  );
   await page.locator('input[name="addressLine1"]').fill("1 Test Street");
   await page.locator('input[name="city"]').fill("London");
   await page.locator('input[name="postcode"]').fill("E1 6AN");

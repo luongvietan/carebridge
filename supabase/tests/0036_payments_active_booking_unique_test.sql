@@ -2,14 +2,14 @@ begin;
 select plan(2);
 
 -- Fixtures: a role, a client, and an open booking to pay for.
-insert into professional_roles (id, code, name, is_active)
-  values ('00000000-0000-0000-0000-0000000d0001','rn_d','RN D', true) on conflict do nothing;
+insert into professional_roles (id, code, name, is_active, category_id)
+  values ('00000000-0000-0000-0000-0000000d0001','rn_d','RN D', true, (select id from role_categories where code = 'healthcare')) on conflict do nothing;
 
 insert into auth.users (id, email)
   values ('00000000-0000-0000-0000-0000000d0010','pay@test.dev') on conflict do nothing;
 
-insert into private_clients (id, user_id, full_name)
-  values ('00000000-0000-0000-0000-0000000d0030','00000000-0000-0000-0000-0000000d0010','Pay Client')
+insert into private_clients (id, user_id, full_name, address_line1, city, postcode)
+  values ('00000000-0000-0000-0000-0000000d0030','00000000-0000-0000-0000-0000000d0010','Pay Client', '1 Test Street', 'Manchester', 'M1 1AA')
   on conflict do nothing;
 
 insert into bookings (id, requester_user_id, private_client_id, professional_role_id,

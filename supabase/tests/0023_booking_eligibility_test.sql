@@ -2,11 +2,11 @@ begin;
 select plan(4);
 
 -- Fixtures: a role, an active+approved professional (eligible), and a pending one (ineligible).
-insert into professional_roles (id, code, name, is_active)
-  values ('00000000-0000-0000-0000-0000000b0001','rn_test','RN Test', true) on conflict do nothing;
+insert into professional_roles (id, code, name, is_active, category_id)
+  values ('00000000-0000-0000-0000-0000000b0001','rn_test','RN Test', true, (select id from role_categories where code = 'healthcare')) on conflict do nothing;
 
-insert into professional_roles (id, code, name, is_active)
-  values ('00000000-0000-0000-0000-0000000b0002','hca_test','HCA Test', true) on conflict do nothing;
+insert into professional_roles (id, code, name, is_active, category_id)
+  values ('00000000-0000-0000-0000-0000000b0002','hca_test','HCA Test', true, (select id from role_categories where code = 'healthcare')) on conflict do nothing;
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-0000000b0010','elig@test.dev'),
@@ -20,8 +20,8 @@ insert into professionals (id, user_id, full_name, professional_role_id, profess
   ('00000000-0000-0000-0000-0000000b0022','00000000-0000-0000-0000-0000000b0012','Wrong Role Pro','00000000-0000-0000-0000-0000000b0002','active','approved')
   on conflict do nothing;
 
-insert into private_clients (id, user_id, full_name)
-  values ('00000000-0000-0000-0000-0000000b0030','00000000-0000-0000-0000-0000000b0010','Client') on conflict do nothing;
+insert into private_clients (id, user_id, full_name, address_line1, city, postcode)
+  values ('00000000-0000-0000-0000-0000000b0030','00000000-0000-0000-0000-0000000b0010','Client', '1 Test Street', 'Manchester', 'M1 1AA') on conflict do nothing;
 
 -- An open booking (no assignee -> trigger is a no-op on insert).
 insert into bookings (id, requester_user_id, private_client_id, professional_role_id,
