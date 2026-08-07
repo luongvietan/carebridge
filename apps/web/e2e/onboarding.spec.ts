@@ -93,7 +93,7 @@ test("professional completes the onboarding wizard and writes persist", async ({
 
   // Profile
   await page.goto("/professional/onboarding/profile");
-  await chooseFrom(page, page.getByRole("combobox", { name: "Professional role" }), "Registered Nurse");
+  await chooseFrom(page, page.getByRole("combobox", { name: "Professional role" }), "Adult Nurse");
   await page.locator('input[name="addressLine1"]').fill("1 Test Street");
   await page.locator('input[name="city"]').fill("London");
   await page.locator('input[name="postcode"]').fill("E1 6AN");
@@ -173,7 +173,7 @@ test("admin approving the final critical document activates the professional", a
     user_metadata: { account_type: "professional", full_name: proName },
   });
   expect(proUser?.user, JSON.stringify({ proUser, proErr })).toBeTruthy();
-  const { data: role } = await sb.from("professional_roles").select("id").eq("code", "registered_nurse").single();
+  const { data: role } = await sb.from("professional_roles").select("id").eq("code", "adult_nurse").single();
   const { data: pro } = await sb
     .from("professionals")
     .insert({ user_id: proUser.user!.id, full_name: proName, professional_role_id: role!.id })

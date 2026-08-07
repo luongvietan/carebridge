@@ -46,9 +46,9 @@ async function rnRoleId(sb: SupabaseClient) {
   const { data: role } = await sb
     .from("professional_roles")
     .select("id")
-    .eq("code", "registered_nurse")
+    .eq("code", "adult_nurse")
     .single();
-  if (!role) throw new Error("registered_nurse role missing");
+  if (!role) throw new Error("adult_nurse role missing");
   return role.id as string;
 }
 

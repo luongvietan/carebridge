@@ -7,21 +7,37 @@ export const heroHeadline =
   "Connecting Families and Organisations with Verified Healthcare and Childcare Professionals within the Communities.";
 
 export const heroSubheadline =
-  "A trusted care marketplace — verified nurses, healthcare assistants, support workers, physiotherapists, nannies, babysitters and mother's helpers, screened, assessed and continuously monitored for compliance.";
+  "A trusted care marketplace — verified nurses, healthcare assistants, support workers, physiotherapists, nannies, childminders, babysitters and mother's helpers, screened, assessed and continuously monitored for compliance.";
 
+/** `featuredOnHome` picks the three cards shown on the homepage; the services
+ *  page lists every role. Order here is the order shown, and it is index-matched
+ *  to `marketingImages.roleCards`. */
 export const professionalRoles = [
   {
-    title: "Registered Nurses",
+    title: "Adult Nurses",
+    featuredOnHome: true,
     description:
-      "NMC-registered nurses providing clinical care, medication management and assessments within their professional scope of practice, subject to verification and compliance requirements.",
+      "NMC-registered adult nurses providing clinical care, medication management and assessments within their professional scope of practice, subject to verification and compliance requirements.",
+  },
+  {
+    title: "Children's (Paediatric) Nurses",
+    description:
+      "NMC-registered children's nurses caring for infants, children and young people, with paediatric assessment and escalation within their scope of practice.",
+  },
+  {
+    title: "Mental Health Nurses",
+    description:
+      "NMC-registered mental health nurses supporting people experiencing mental ill health, with risk assessment, de-escalation and recovery-focused care within their scope of practice.",
   },
   {
     title: "Healthcare Assistants",
+    featuredOnHome: true,
     description:
       "Experienced HCAs providing companionship, wellbeing support, appointment and community access, sitting services and other non-regulated support activities. They do not provide regulated personal care services through CareBridge Connect.",
   },
   {
     title: "Support Workers",
+    featuredOnHome: true,
     description:
       "Support Workers provide companionship, community access, appointment support, wellbeing support, respite sitting services and other non-regulated support activities.",
   },
@@ -37,6 +53,11 @@ export const childcareRoles = [
     title: "Nannies",
     description:
       "Ofsted-registered nannies only. Every nanny's Ofsted registration number is verified against the Ofsted register before they can accept a booking. Available full-time, part-time and overnight.",
+  },
+  {
+    title: "Childminders",
+    description:
+      "Ofsted-registered childminders caring for children in their own home, within the numbers and ratios their registration allows. Registration number mandatory and checked before any booking.",
   },
   {
     title: "Babysitters",
@@ -62,7 +83,7 @@ export const childcareCareTypes = [
 
 export const stats = [
   { value: "100%", label: "Verified before first booking" },
-  { value: "7", label: "Professional roles" },
+  { value: "10", label: "Professional roles" },
   { value: "80%", label: "Competency pass mark" },
   { value: "CSV / XLSX", label: "Full data export anytime" },
 ] as const;

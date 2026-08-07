@@ -7,6 +7,7 @@ import { Select } from "@/components/ui/select";
 import { DatePicker } from "@/components/ui/date-picker";
 import { FilePreviewInput } from "@/components/ui/file-input";
 import { DAYS_OF_WEEK } from "@/lib/onboarding/profile-children";
+import { requiresOfstedRegistration } from "@/lib/compliance/regulated-roles";
 
 const field =
   "mt-1 w-full rounded-xl border border-[#dbe7e0] bg-white px-3.5 py-2.5 text-sm text-[#1e5a33] placeholder:text-[#9aa8a0] focus:border-[#2e7d32] focus:outline-none focus:ring-2 focus:ring-[#2e7d32]/15";
@@ -55,9 +56,9 @@ export function ProfileForm({
   const [roleId, setRoleId] = useState(
     draft?.professionalRoleId ?? current?.professional_role_id ?? "",
   );
-  // Ofsted registration is a condition of listing as a nanny, so the field only
-  // appears — and is only required — for that role.
-  const requiresOfsted = roles.find((r) => r.id === roleId)?.code === "nanny";
+  // Ofsted registration is a condition of listing as a nanny or childminder, so
+  // the field only appears — and is only required — for those roles.
+  const requiresOfsted = requiresOfstedRegistration(roles.find((r) => r.id === roleId)?.code);
   const formKey = draft ? `draft-${JSON.stringify(draft)}` : "initial";
   const skillSet = new Set(draft?.skillIds ?? currentSkillIds);
   const daySet = new Set(draft?.availabilityDays ?? currentAvailabilityDays);
@@ -122,7 +123,7 @@ export function ProfileForm({
         </div>
         {requiresOfsted && (
           <label className="block text-sm font-medium">
-            Ofsted registration number
+            Ofsted Unique Reference Number (URN)
             <input
               name="ofstedRegistrationNumber"
               required
@@ -131,9 +132,10 @@ export function ProfileForm({
               className={field}
             />
             <span className="mt-1 block text-xs font-normal text-[#7a8a81]">
-              CareBridge Connect accepts Ofsted-registered nannies only. Upload your Ofsted
-              registration certificate at the next step — your registration is checked against the
-              Ofsted register before you can accept any bookings.
+              CareBridge Connect accepts Ofsted-registered nannies and childminders only. Upload
+              your Ofsted registration certificate at the next step — an administrator checks this
+              number against the Ofsted register, and confirms the registration is active, before
+              you can accept any bookings.
             </span>
           </label>
         )}

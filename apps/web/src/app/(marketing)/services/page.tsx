@@ -34,7 +34,7 @@ export default function ServicesPage() {
       <MarketingPageHero
         badge="Professional roles"
         title="Professional roles we cover"
-        description="Compliance-checked healthcare and childcare staffing for families and organisations — verified professionals across seven roles, matched via booking requests."
+        description="Compliance-checked healthcare and childcare staffing for families and organisations — verified professionals across ten roles, matched via booking requests."
         image={marketingImages.pageHero.services}
       />
 

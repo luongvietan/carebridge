@@ -1,45 +1,10 @@
-insert into professional_roles (code, name) values
-  ('registered_nurse','Registered Nurse'),
-  ('healthcare_assistant','Healthcare Assistant'),
-  ('support_worker','Support Worker'),
-  ('physiotherapist','Physiotherapist')
-on conflict (code) do nothing;
-
-insert into mandatory_training_types (code, name) values
-  ('safeguarding_adults','Safeguarding Adults'),
-  ('safeguarding_children','Safeguarding Children'),
-  ('basic_life_support','Basic Life Support'),
-  ('infection_prevention_control','Infection Prevention & Control'),
-  ('health_safety','Health & Safety'),
-  ('moving_handling','Moving & Handling'),
-  ('gdpr_confidentiality','GDPR & Confidentiality')
-on conflict (code) do nothing;
-
-insert into document_types (code, name, category, is_compliance_critical, has_expiry) values
-  ('photo_id','Photo ID','identity', false, true),
-  ('right_to_work','Right to Work','right_to_work', true, true),
-  ('enhanced_dbs','Enhanced DBS Certificate','dbs', true, true),
-  ('dbs_update_service','DBS Update Service','dbs', false, false),
-  ('professional_registration','Professional Registration (NMC/HCPC)','registration', true, true),
-  ('qualification','Qualification','qualification', false, false),
-  ('mandatory_training_certificate','Mandatory Training Certificate','training', true, true),
-  ('professional_reference','Professional Reference','reference', false, false),
-  ('professional_indemnity_insurance','Professional Indemnity Insurance','insurance', true, true),
-  ('bank_details','Bank Details','bank', false, false)
-on conflict (code) do nothing;
-
-insert into notification_templates (type, subject, body) values
-  ('registration_confirmation','Welcome to CareBridge Connect','Your registration has been received.'),
-  ('email_verification','Verify your email','Please verify your email address.'),
-  ('assessment_result','Your assessment result','Your competency assessment has been scored: {{score}}%. Result: {{passed}}. Sign in to view your full result and next steps.'),
-  ('compliance_approval','Compliance approved','Your compliance documents have been approved.'),
-  ('compliance_expiry_reminder','Document expiring soon','A compliance document is due to expire on {{due_date}}. Please sign in and upload an updated certificate before it lapses, or your ability to accept bookings will be restricted.'),
-  ('compliance_rejected','A compliance document was not accepted','One of your compliance documents was not accepted. Reason: {{reason}}. Please sign in and upload an updated document so your application can proceed.'),
-  ('further_info_required','Further information needed on your compliance documents','We need further information about one of your compliance documents. {{reason}} Please sign in to review and update your documents.'),
-  ('booking_request','New booking request','A booking matching your role is available.'),
-  ('booking_confirmation','Booking confirmed','Your booking has been confirmed.'),
-  ('password_reset','Reset your password','Use the link to reset your password.')
-on conflict (type) do nothing;
+-- Local development fixtures ONLY.
+--
+-- Reference data (roles, training types, document types, notification templates
+-- and per-role compliance requirements) is seeded by migrations — 0039, 0061 and
+-- 0063 — so that a migrations-only deploy is functional. Re-inserting it here
+-- silently diverged the two: after 0063 made professional_roles.category_id NOT
+-- NULL this file could not run at all, which is what has been failing CI.
 
 -- PLACEHOLDER competency questions (role_id NULL = applies to all roles).
 -- Replace with Ana's real per-role question bank when delivered. Fixed UUIDs keep the seed idempotent.
@@ -66,17 +31,6 @@ insert into assessment_question_bank (id, professional_role_id, topic, question_
   ('00000000-0000-0000-0000-0000000a0020', null, 'health_safety', 'The correct order for putting on PPE generally starts with:', '[{"key":"a","text":"Gloves"},{"key":"b","text":"Apron/gown"},{"key":"c","text":"Eye protection"},{"key":"d","text":"Mask last"}]', 'b')
 on conflict (id) do nothing;
 
--- Required documents per role: the critical documents + photo ID, plus the
--- remaining supporting uploads (qualifications, references, DBS update service).
--- Bank details are collected via the encrypted payout-details form, not here.
-insert into compliance_requirements (professional_role_id, document_type_id)
-select r.id, d.id
-from professional_roles r
-join document_types d on d.code in
-  ('photo_id','right_to_work','enhanced_dbs','professional_registration',
-   'mandatory_training_certificate','professional_indemnity_insurance',
-   'qualification','professional_reference','dbs_update_service')
-on conflict (professional_role_id, document_type_id) do nothing;
 
 -- One active, effective-dated rate card per role so booking creation can resolve a snapshot.
 insert into rate_cards (professional_role_id, client_charge_rate, professional_payout_rate, platform_fee_type, currency)
@@ -86,10 +40,6 @@ where not exists (
   select 1 from rate_cards rc where rc.professional_role_id = r.id and rc.effective_to is null
 );
 
--- Fix booking_request copy: sent to the requester on create, not to professionals.
-update notification_templates
-   set body = 'Your booking request ({{booking_id}}) has been submitted.'
- where type = 'booking_request';
 
 -- ============================================================================
 -- TEST USERS FOR USER FLOW SCREENSHOTS
@@ -157,7 +107,7 @@ ON CONFLICT (id) DO NOTHING;
 -- Insert professional profile for Professional user
 INSERT INTO professionals (user_id, full_name, professional_role_id, employment_status, professional_status, created_at, updated_at) VALUES
   ('00000000-0000-0000-0000-000000000001', 'Jane Smith',
-   (SELECT id FROM professional_roles WHERE code = 'registered_nurse' LIMIT 1),
+   (SELECT id FROM professional_roles WHERE code = 'adult_nurse' LIMIT 1),
    'nhs_employed', 'active', now(), now())
 ON CONFLICT (user_id) DO NOTHING;
 

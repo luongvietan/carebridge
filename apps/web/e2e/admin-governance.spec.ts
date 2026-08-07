@@ -45,9 +45,9 @@ async function rnRoleId(sb: SupabaseClient) {
   const { data: role } = await sb
     .from("professional_roles")
     .select("id")
-    .eq("code", "registered_nurse")
+    .eq("code", "adult_nurse")
     .single();
-  if (!role) throw new Error("registered_nurse role missing");
+  if (!role) throw new Error("adult_nurse role missing");
   return role.id as string;
 }
 
@@ -391,7 +391,7 @@ test("admin amends rate card without changing existing booking snapshots", async
   await login(page, admin.email, /\/admin/);
   await page.goto("/admin/rates");
 
-  const rnSection = page.locator("section", { has: page.getByRole("heading", { name: "Registered Nurse" }) });
+  const rnSection = page.locator("section", { has: page.getByRole("heading", { name: "Adult Nurse" }) });
   await rnSection.getByLabel(/client charge rate/i).fill("45");
   await rnSection.getByLabel(/professional payout rate/i).fill("30");
   await rnSection.getByRole("button", { name: /amend rate card/i }).click();

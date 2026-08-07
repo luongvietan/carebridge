@@ -38,8 +38,8 @@ async function login(page: Page, email: string, urlPattern: RegExp) {
 }
 
 async function rnRoleId(sb: SupabaseClient) {
-  const { data: role } = await sb.from("professional_roles").select("id").eq("code", "registered_nurse").single();
-  if (!role) throw new Error("registered_nurse role missing");
+  const { data: role } = await sb.from("professional_roles").select("id").eq("code", "adult_nurse").single();
+  if (!role) throw new Error("adult_nurse role missing");
   return role.id as string;
 }
 
@@ -168,7 +168,7 @@ async function pickDate(page: Page, triggerName: string, d: Date) {
 }
 
 async function fillBookingForm(page: Page, location: string, start: Date, durationLabel: string) {
-  await chooseFrom(page, page.getByRole("combobox", { name: "Professional role" }), "Registered Nurse");
+  await chooseFrom(page, page.getByRole("combobox", { name: "Professional role" }), "Adult Nurse");
   await pickDate(page, "Start", start);
   await chooseFrom(page, page.getByRole("combobox", { name: "Shift duration" }), durationLabel);
   await page.locator('input[name="locationAddress"]').fill(location);

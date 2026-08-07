@@ -43,11 +43,19 @@ export const marketingImages = {
     pexels(1181519, 64, 64),
   ],
 
-  /** One image per professional role card on the homepage */
+  /** One image per professional role card, index-matched to `professionalRoles` */
   roleCards: [
     {
       src: unsplash("photo-1576091160550-2173dba999ef", 600, 450),
-      alt: "Registered nurse preparing clinical equipment in a care setting",
+      alt: "Adult nurse preparing clinical equipment in a care setting",
+    },
+    {
+      src: pexels(3985163, 600, 450),
+      alt: "Children's nurse caring for a young child",
+    },
+    {
+      src: pexels(7176026, 600, 450),
+      alt: "Mental health nurse listening to a person during a supportive conversation",
     },
     {
       src: pexels(4167544, 600, 450),
@@ -68,6 +76,10 @@ export const marketingImages = {
     {
       src: pexels(3661264, 600, 450),
       alt: "Nanny reading a book with a young child at home",
+    },
+    {
+      src: pexels(8422144, 600, 450),
+      alt: "Childminder supervising young children at play in a home setting",
     },
     {
       src: pexels(8613089, 600, 450),

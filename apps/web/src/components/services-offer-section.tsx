@@ -56,24 +56,29 @@ export function ServicesOfferSection() {
       </div>
 
       <div data-reveal-stagger className="mt-10 grid gap-6 sm:mt-12 lg:grid-cols-3">
-        {professionalRoles.slice(0, 3).map((service, i) => {
-          const img = marketingImages.roleCards[i];
-          return (
-            <ServiceCard
-              key={service.title}
-              title={service.title}
-              description={service.description}
-              image={img.src}
-              alt={img.alt}
-            />
-          );
-        })}
+        {professionalRoles
+          // Keep the original index so each card keeps its own image.
+          .map((service, i) => ({ service, i }))
+          .filter(({ service }) => "featuredOnHome" in service && service.featuredOnHome)
+          .map(({ service, i }) => {
+            const img = marketingImages.roleCards[i];
+            return (
+              <ServiceCard
+                key={service.title}
+                title={service.title}
+                description={service.description}
+                image={img.src}
+                alt={img.alt}
+              />
+            );
+          })}
       </div>
 
       <p className="mx-auto mt-8 max-w-2xl text-center text-sm text-[#4a4a4a]">
-        Physiotherapists, nannies, babysitters and mother&apos;s helpers are also available.{" "}
+        Children&apos;s and mental health nurses, physiotherapists, nannies, childminders,
+        babysitters and mother&apos;s helpers are also available.{" "}
         <ForwardLink href="/services" className="text-sm text-[#2e7d32] hover:underline">
-          View all seven roles
+          View all ten roles
         </ForwardLink>
       </p>
     </section>

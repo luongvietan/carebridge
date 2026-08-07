@@ -5,6 +5,7 @@ import { requireAuth } from "@/lib/auth/require-auth";
 import { ensureProfessional } from "@/lib/onboarding/professional-session";
 import { eligibilitySchema, profileSchema, mandatoryTrainingItems } from "@/lib/validation/onboarding";
 import { eligibilityOutcome, type EligibilityOutcome } from "@/lib/compliance/requirements";
+import { requiresOfstedRegistration } from "@/lib/compliance/regulated-roles";
 import { verifyUpload } from "@/lib/onboarding/upload-rules";
 import { validateDocumentExpiry } from "@/lib/onboarding/document-expiry";
 import { parseSkillIds, parseAvailabilityDays } from "@/lib/onboarding/profile-children";
@@ -23,11 +24,11 @@ const PROFILE_FIELD_LABELS: Record<string, string> = {
   travelDistanceKm: "Travel distance",
 };
 
-// CareBridge Connect accepts Ofsted-registered nannies only, so the number is a
-// condition of completing a nanny profile. The DB carries an independent guard
-// (0063) preventing activation without it.
+// CareBridge Connect accepts Ofsted-registered nannies and childminders only, so
+// the number is a condition of completing their profile. The DB carries an
+// independent guard (0063, widened in 0067) preventing activation without it.
 const OFSTED_REQUIRED_ERROR =
-  "An Ofsted registration number is required to apply as a nanny. CareBridge Connect accepts Ofsted-registered nannies only.";
+  "An Ofsted registration number is required for this role. CareBridge Connect accepts Ofsted-registered nannies and childminders only.";
 
 export type ProfileFormValues = {
   fullName: string;
@@ -174,14 +175,14 @@ export async function saveProfile(_prev: ProfileResult, formData: FormData): Pro
   }
 
   // Role codes are not known to the schema (roles are data, not an enum), so the
-  // nanny-only Ofsted requirement is enforced here against the selected role.
+  // Ofsted requirement is enforced here against the selected role.
   const { data: selectedRole } = await gateAdmin
     .from("professional_roles")
     .select("code")
     .eq("id", parsed.data.professionalRoleId)
     .maybeSingle();
   const ofstedNumber = parsed.data.ofstedRegistrationNumber?.replace(/\s/g, "").toUpperCase();
-  if (selectedRole?.code === "nanny" && !ofstedNumber) {
+  if (requiresOfstedRegistration(selectedRole?.code) && !ofstedNumber) {
     return profileError(OFSTED_REQUIRED_ERROR, formData);
   }
 
