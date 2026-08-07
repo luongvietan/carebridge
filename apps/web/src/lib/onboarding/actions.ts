@@ -5,7 +5,8 @@ import { requireAuth } from "@/lib/auth/require-auth";
 import { ensureProfessional } from "@/lib/onboarding/professional-session";
 import { eligibilitySchema, profileSchema, mandatoryTrainingItems } from "@/lib/validation/onboarding";
 import { eligibilityOutcome, type EligibilityOutcome } from "@/lib/compliance/requirements";
-import { requiresOfstedRegistration } from "@/lib/compliance/regulated-roles";
+import { registerForRole, requiresOfstedRegistration } from "@/lib/compliance/regulated-roles";
+import { isValidReference, referenceLabel } from "@/lib/compliance/registration-verification";
 import { verifyUpload } from "@/lib/onboarding/upload-rules";
 import { validateDocumentExpiry, validateDocumentIssueDate } from "@/lib/onboarding/document-expiry";
 import { guidanceFor } from "@/lib/onboarding/document-guidance";
@@ -199,6 +200,20 @@ export async function saveProfile(_prev: ProfileResult, formData: FormData): Pro
   const ofstedNumber = parsed.data.ofstedRegistrationNumber?.replace(/\s/g, "").toUpperCase();
   if (requiresOfstedRegistration(selectedRole?.code) && !ofstedNumber) {
     return profileError(OFSTED_REQUIRED_ERROR, formData);
+  }
+
+  // A clinical register number is required for the roles that answer to one, and
+  // is format-checked so an administrator is not sent hunting the NMC register
+  // for a PIN that was mistyped.
+  const clinicalRegister = registerForRole(selectedRole?.code);
+  if (clinicalRegister === "nmc" || clinicalRegister === "hcpc") {
+    const number = parsed.data.registrationNumber?.replace(/\s/g, "").toUpperCase() ?? "";
+    if (!number) {
+      return profileError(`Your ${referenceLabel(clinicalRegister)} is required for this role.`, formData);
+    }
+    if (!isValidReference(clinicalRegister, number)) {
+      return profileError(`Enter a valid ${referenceLabel(clinicalRegister)}.`, formData);
+    }
   }
 
   // Right to work: everyone states how they evidence it, and a share code is

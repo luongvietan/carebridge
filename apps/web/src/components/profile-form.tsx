@@ -7,7 +7,8 @@ import { Select } from "@/components/ui/select";
 import { DatePicker } from "@/components/ui/date-picker";
 import { FilePreviewInput } from "@/components/ui/file-input";
 import { DAYS_OF_WEEK } from "@/lib/onboarding/profile-children";
-import { requiresOfstedRegistration } from "@/lib/compliance/regulated-roles";
+import { registerForRole, requiresOfstedRegistration } from "@/lib/compliance/regulated-roles";
+import { referenceLabel } from "@/lib/compliance/registration-verification";
 
 const field =
   "mt-1 w-full rounded-xl border border-[#dbe7e0] bg-white px-3.5 py-2.5 text-sm text-[#1e5a33] placeholder:text-[#9aa8a0] focus:border-[#2e7d32] focus:outline-none focus:ring-2 focus:ring-[#2e7d32]/15";
@@ -60,7 +61,13 @@ export function ProfileForm({
   );
   // Ofsted registration is a condition of listing as a nanny or childminder, so
   // the field only appears — and is only required — for those roles.
-  const requiresOfsted = requiresOfstedRegistration(roles.find((r) => r.id === roleId)?.code);
+  const selectedRoleCode = roles.find((r) => r.id === roleId)?.code;
+  const requiresOfsted = requiresOfstedRegistration(selectedRoleCode);
+  // Nurses register with the NMC and physiotherapists with the HCPC; naming the
+  // field after the regulator (and checking the format) is what the client asked
+  // for, and it is what the administrator later checks against the register.
+  const register = registerForRole(selectedRoleCode);
+  const clinicalRegister = register === "nmc" || register === "hcpc" ? register : null;
   const formKey = draft ? `draft-${JSON.stringify(draft)}` : "initial";
   const skillSet = new Set(draft?.skillIds ?? currentSkillIds);
   const daySet = new Set(draft?.availabilityDays ?? currentAvailabilityDays);
@@ -213,25 +220,52 @@ export function ProfileForm({
             </p>
           )}
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        {clinicalRegister ? (
           <label className="block text-sm font-medium">
-            Registration body
+            {referenceLabel(clinicalRegister)}
             <input
+              type="hidden"
               name="registrationBody"
-              placeholder="e.g. NMC, HCPC"
-              defaultValue={v.registrationBody}
-              className={field}
+              value={clinicalRegister.toUpperCase()}
             />
-          </label>
-          <label className="block text-sm font-medium">
-            Registration number
             <input
               name="registrationNumber"
+              required
+              placeholder={clinicalRegister === "nmc" ? "e.g. 12A3456E" : "e.g. PH123456"}
               defaultValue={v.registrationNumber}
               className={field}
             />
+            <span className="mt-1 block text-xs font-normal text-[#7a8a81]">
+              Upload your{" "}
+              {clinicalRegister === "nmc"
+                ? "NMC Confirmation of Registration (or CCPS where appropriate)"
+                : "HCPC registration confirmation"}{" "}
+              at the next step. An administrator checks this number against the{" "}
+              {clinicalRegister.toUpperCase()} register and confirms the registration is active
+              before you can accept bookings.
+            </span>
           </label>
-        </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-4">
+            <label className="block text-sm font-medium">
+              Registration body
+              <input
+                name="registrationBody"
+                placeholder="e.g. NMC, HCPC"
+                defaultValue={v.registrationBody}
+                className={field}
+              />
+            </label>
+            <label className="block text-sm font-medium">
+              Registration number
+              <input
+                name="registrationNumber"
+                defaultValue={v.registrationNumber}
+                className={field}
+              />
+            </label>
+          </div>
+        )}
         <label className="block text-sm font-medium">
           Professional summary
           <textarea name="professionalSummary" rows={3} defaultValue={v.professionalSummary} className={field} />

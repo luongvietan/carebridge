@@ -2,6 +2,12 @@ import { createServiceClient } from "@/lib/supabase/service";
 import { ReviewQueue } from "@/components/review-queue";
 import { RunSweepButton } from "@/components/run-sweep-button";
 import { isImageStoragePath } from "@/lib/onboarding/upload-rules";
+import {
+  RegistrationVerificationPanel,
+  type RegistrationCheckItem,
+} from "@/components/registration-verification-panel";
+import { registerForRole } from "@/lib/compliance/regulated-roles";
+import { isVerificationCurrent } from "@/lib/compliance/registration-verification";
 
 export const dynamic = "force-dynamic";
 
@@ -28,6 +34,22 @@ export default async function AdminCompliancePage() {
     .select("id, alert_type, due_date, professionals(full_name)")
     .eq("acknowledged", false)
     .order("due_date", { ascending: true });
+
+  // Regulated professionals and their latest register check. The client's
+  // requirement is that they cannot be approved until the registration has been
+  // verified, so this list is the administrator's queue for doing it.
+  const regulatedQuery = admin
+    .from("professionals")
+    .select(
+      "id, full_name, ofsted_registration_number, registration_number, professional_status, professional_roles(name, code)",
+    )
+    .not("professional_role_id", "is", null)
+    .neq("professional_status", "removed")
+    .order("created_at", { ascending: true });
+
+  const verificationsQuery = admin
+    .from("v_current_registration_verification")
+    .select("professional_id, register, outcome, checked_at, valid_until");
 
   const { data: pending } = await pendingQuery;
 
@@ -57,11 +79,32 @@ export default async function AdminCompliancePage() {
     }),
   );
 
-  const [items, { data: nonCompliant }, { data: alerts }] = await Promise.all([
-    itemsPromise,
-    nonCompliantQuery,
-    alertsQuery,
-  ]);
+  const [items, { data: nonCompliant }, { data: alerts }, { data: regulated }, { data: verifications }] =
+    await Promise.all([itemsPromise, nonCompliantQuery, alertsQuery, regulatedQuery, verificationsQuery]);
+
+  const verificationByProfessional = new Map(
+    (verifications ?? []).map((v) => [`${v.professional_id}-${v.register}`, v]),
+  );
+
+  const registrationChecks: RegistrationCheckItem[] = (regulated ?? []).flatMap((p) => {
+    const role = p.professional_roles as { name: string; code: string } | null;
+    const register = registerForRole(role?.code);
+    if (!register) return [];
+    const current = verificationByProfessional.get(`${p.id}-${register}`) ?? null;
+    if (isVerificationCurrent(current)) return [];
+    return [
+      {
+        professionalId: p.id,
+        professionalName: p.full_name,
+        roleName: role?.name ?? "",
+        register,
+        reference: register === "ofsted" ? p.ofsted_registration_number : p.registration_number,
+        lastOutcome: current?.outcome ?? null,
+        lastCheckedAt: current?.checked_at ?? null,
+        validUntil: current?.valid_until ?? null,
+      },
+    ];
+  });
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-10">
@@ -78,6 +121,15 @@ export default async function AdminCompliancePage() {
       </section>
 
       <section className="mt-12">
+        <h2 className="text-xl font-bold">Registrations awaiting verification</h2>
+        <p className="mt-2 text-sm text-[#4a4a4a]">
+          Nurses, nannies and childminders cannot be activated until their registration has been
+          checked against the public register. A check lasts twelve months.
+        </p>
+        <RegistrationVerificationPanel items={registrationChecks} />
+      </section>
+
+      <section className="mt-12">
         <h2 className="text-xl font-bold">Compliance alerts</h2>
         {alerts && alerts.length > 0 ? (
           <ul className="mt-4 divide-y divide-[#dbe7e0] border border-[#dbe7e0] text-sm">
@@ -85,8 +137,12 @@ export default async function AdminCompliancePage() {
               <li key={a.id} className="flex justify-between p-3">
                 <span>
                   {(a.professionals as { full_name: string } | null)?.full_name ?? "Professional"} —{" "}
-                  <span className={a.alert_type === "expired" ? "text-[#da1e28]" : "text-[#684e1b]"}>
-                    {a.alert_type}
+                  <span
+                    className={
+                      a.alert_type.endsWith("expired") ? "text-[#da1e28]" : "text-[#684e1b]"
+                    }
+                  >
+                    {a.alert_type.replace(/_/g, " ")}
                   </span>
                 </span>
                 {a.due_date && <span className="text-[#7a8a81]">due {a.due_date}</span>}

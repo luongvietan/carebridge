@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { DATASETS, type DatasetName } from "./datasets";
 
 describe("DATASETS", () => {
-  it("covers all nine export datasets", () => {
+  it("covers every export dataset the founder can download", () => {
     expect(Object.keys(DATASETS).sort()).toEqual(
       [
         "assessments",
@@ -14,6 +14,7 @@ describe("DATASETS", () => {
         "payments",
         "payouts",
         "professionals",
+        "registration_verifications",
       ].sort(),
     );
   });

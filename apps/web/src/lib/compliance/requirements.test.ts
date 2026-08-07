@@ -91,3 +91,33 @@ describe("canActivateProfessional", () => {
     ).toBe(true);
   });
 });
+
+describe("canActivateProfessional — registration verification", () => {
+  const base = {
+    documentsCompliant: true,
+    assessmentPassed: true,
+    trainingAttestedCurrent: true,
+    hasApprovedTrainingCertificate: true,
+  };
+
+  it("blocks a regulated professional whose registration is unverified", () => {
+    expect(canActivateProfessional({ ...base, registrationVerified: false })).toBe(false);
+  });
+
+  it("activates once the register check is recorded", () => {
+    expect(canActivateProfessional({ ...base, registrationVerified: true })).toBe(true);
+  });
+
+  it("leaves unregulated roles unaffected when the flag is absent", () => {
+    expect(canActivateProfessional(base)).toBe(true);
+  });
+
+  it("still requires documents and the assessment even when verified", () => {
+    expect(
+      canActivateProfessional({ ...base, documentsCompliant: false, registrationVerified: true }),
+    ).toBe(false);
+    expect(
+      canActivateProfessional({ ...base, assessmentPassed: false, registrationVerified: true }),
+    ).toBe(false);
+  });
+});

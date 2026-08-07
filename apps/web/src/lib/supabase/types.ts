@@ -1447,6 +1447,7 @@ export type Database = {
       }
       professional_roles: {
         Row: {
+          registration_register: string | null
           category_id: string
           code: string
           created_at: string
@@ -1655,6 +1656,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      registration_verifications: {
+        Row: {
+          checked_at: string
+          checked_by: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          outcome: string
+          professional_id: string
+          reference: string
+          register: string
+          valid_until: string
+        }
+        Insert: {
+          checked_at?: string
+          checked_by?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          outcome: string
+          professional_id: string
+          reference: string
+          register: string
+          valid_until: string
+        }
+        Update: {
+          checked_at?: string
+          checked_by?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          outcome?: string
+          professional_id?: string
+          reference?: string
+          register?: string
+          valid_until?: string
+        }
+        Relationships: []
       }
       professionals: {
         Row: {
@@ -1989,6 +2029,33 @@ export type Database = {
         }
         Relationships: []
       }
+      v_current_registration_verification: {
+        Row: {
+          checked_at: string | null
+          checked_by: string | null
+          outcome: string | null
+          professional_id: string | null
+          reference: string | null
+          register: string | null
+          valid_until: string | null
+        }
+        Relationships: []
+      }
+      v_export_registration_verifications: {
+        Row: {
+          checked_at: string | null
+          checked_by: string | null
+          id: string | null
+          notes: string | null
+          outcome: string | null
+          reference: string | null
+          register: string | null
+          role: string | null
+          full_name: string | null
+          valid_until: string | null
+        }
+        Relationships: []
+      }
       v_export_bookings: {
         Row: {
           booking_type: string | null
@@ -2261,6 +2328,7 @@ export type Database = {
         Args: { p_admin_id: string; p_user_id: string }
         Returns: undefined
       }
+      fn_registration_verified: { Args: { p_professional_id: string }; Returns: boolean }
       fn_run_compliance_sweep: { Args: never; Returns: undefined }
       get_payout_last4: { Args: { p_professional_id: string }; Returns: string }
       is_admin: { Args: never; Returns: boolean }

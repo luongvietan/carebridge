@@ -5,6 +5,8 @@ import { isCompliant, canActivateProfessional } from "./requirements";
 export type ActivationState = {
   roleId: string | null;
   documentsCompliant: boolean;
+  /** False when the role answers to a register and no current check is on file. */
+  registrationVerified: boolean;
   activate: boolean;
 };
 
@@ -24,7 +26,9 @@ export async function evaluateActivation(
     .eq("id", professionalId)
     .single();
   const roleId = prof?.professional_role_id ?? null;
-  if (!roleId) return { roleId: null, documentsCompliant: false, activate: false };
+  if (!roleId) {
+    return { roleId: null, documentsCompliant: false, registrationVerified: false, activate: false };
+  }
 
   const { data: reqs } = await admin
     .from("compliance_requirements")
@@ -68,11 +72,20 @@ export async function evaluateActivation(
     .eq("passed", true);
   const assessmentPassed = (passedCount ?? 0) > 0;
 
+  // A regulated role needs a current, active register check on file. The DB
+  // function is the same one the nightly sweep uses, so an approval and the
+  // sweep can never disagree about whether somebody is verified.
+  const { data: verified } = await admin.rpc("fn_registration_verified", {
+    p_professional_id: professionalId,
+  });
+  const registrationVerified = verified !== false;
+
   const activate = canActivateProfessional({
     documentsCompliant,
     assessmentPassed,
     trainingAttestedCurrent,
     hasApprovedTrainingCertificate,
+    registrationVerified,
   });
-  return { roleId, documentsCompliant, activate };
+  return { roleId, documentsCompliant, registrationVerified, activate };
 }

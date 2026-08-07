@@ -5,6 +5,7 @@ export type DatasetName =
   | "bookings"
   | "assessments"
   | "compliance"
+  | "registration_verifications"
   | "payments"
   | "payouts"
   | "audit";
@@ -61,6 +62,13 @@ export const DATASETS: Record<DatasetName, Dataset> = {
     columns: ["id", "full_name", "document_type", "is_compliance_critical",
       "verification_status", "issued_date", "expiry_date", "reference_number", "issuing_body"],
     orderBy: { column: "expiry_date" },
+  },
+  registration_verifications: {
+    view: "v_export_registration_verifications",
+    label: "Registration verifications",
+    columns: ["id", "full_name", "role", "register", "reference", "outcome",
+      "checked_at", "valid_until", "checked_by", "notes"],
+    orderBy: { column: "checked_at", ascending: false },
   },
   payments: {
     view: "v_export_payments",
