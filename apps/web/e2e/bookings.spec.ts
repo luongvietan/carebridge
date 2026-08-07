@@ -15,6 +15,11 @@ function service(): SupabaseClient {
 }
 
 
+/** The wall clock a picker committed, shown back unchanged by the app. */
+function formatPickedDate(date: Date) {
+  return date.toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" });
+}
+
 function formatDate(iso: string) {
   // The app renders booking times in Europe/London (formatLondon), so the test
   // has to as well — on a CI runner in UTC, a BST booking rendered an hour out
@@ -198,10 +203,9 @@ test("open-market happy path: client creates booking, professional accepts", asy
   // now a Select; pick a whole-hour preset and let the form compute the end.
   const start = new Date(Date.now() + 48 * 3_600_000);
   start.setHours(9, 0, 0, 0);
-  const happyStartIso = start.toISOString();
   await fillBookingForm(page, location, start, "8 hours"); // submits the form
   await expect(page).toHaveURL(/\/client\/bookings\/?$/);
-  await expect(page.locator("tr", { hasText: formatDate(happyStartIso) })).toBeVisible();
+  await expect(page.locator("tr", { hasText: formatPickedDate(start) })).toBeVisible();
 
   const { data: created } = await sb
     .from("bookings")
@@ -411,11 +415,12 @@ test("client last-minute cancel after accept", async ({ page, browser }) => {
   await expect(proPage.locator("tr", { hasText: location }).getByText(/accepted/i)).toBeVisible({ timeout: 15_000 });
   await proCtx.close();
 
-  page.on("dialog", (d) => d.accept());
   await login(page, client.email, /\/client/);
   await page.goto("/client/bookings");
   const cancelTr = page.locator("tr", { hasText: formatDate(startIso) });
   await cancelTr.getByRole("button", { name: /^cancel$/i }).click();
+  // The app uses its own confirmation dialog, not window.confirm.
+  await page.getByRole("button", { name: /^cancel booking$/i }).click();
   await expect(cancelTr.getByText(/cancelled/i)).toBeVisible({ timeout: 15_000 });
 
   const { data: cancelRow } = await sb
