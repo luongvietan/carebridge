@@ -9,7 +9,6 @@ import { ServicesOfferSection } from "@/components/services-offer-section";
 import { SiteNav } from "@/components/site-nav";
 import { SiteFooter } from "@/components/site-footer";
 import { StatsBand } from "@/components/stats-band";
-import { TestimonialsSection } from "@/components/testimonials-section";
 import { onboardingSteps } from "@/data/marketing-copy";
 import { marketingHeading, marketingSection, marketingSubheading } from "@/lib/marketing-ui";
 
@@ -56,8 +55,6 @@ export default function HomePage() {
         </section>
 
         <ImportantInfoCallout />
-
-        <TestimonialsSection />
 
         <CtaBanner />
 

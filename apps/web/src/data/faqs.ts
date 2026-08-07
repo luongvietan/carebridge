@@ -12,7 +12,12 @@ export const faqs = [
   {
     question: "How are professionals verified?",
     answer:
-      "Every professional completes eligibility screening, an online competency assessment and document uploads. Administrators review Enhanced DBS, Right to Work, professional registration (NMC/HCPC), indemnity insurance, mandatory training and references before approval.",
+      "Every professional completes eligibility screening, an online competency assessment and document uploads. Administrators review Enhanced DBS, Right to Work, professional registration, indemnity insurance, mandatory training and references before approval. Nobody can accept a booking until that review is complete.",
+  },
+  {
+    question: "How are childcare professionals checked?",
+    answer:
+      "Childcare professionals are checked to the same standard as our healthcare professionals, with childcare-specific requirements on top: an Enhanced DBS, a current paediatric first aid certificate, and — for nannies and childminders — Ofsted registration. We accept Ofsted-registered nannies only. The Ofsted registration number is mandatory at application and is checked before any booking can be accepted.",
   },
   {
     question: "What happens if a document expires?",

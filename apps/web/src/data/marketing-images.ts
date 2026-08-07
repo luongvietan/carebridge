@@ -118,9 +118,4 @@ export const marketingImages = {
     src: pexels(8376232, 640, 448),
     alt: "Care professional visiting a client at home",
   },
-
-  portraits: {
-    operationsDirector: pexels(2379004, 240, 240),
-    familyCarer: pexels(774909, 240, 240),
-  },
 } as const;

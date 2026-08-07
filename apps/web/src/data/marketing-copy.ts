@@ -1,7 +1,5 @@
 /** Public marketing copy aligned with CareBridge Connect MVP Overview.pdf */
 
-import { marketingImages } from "./marketing-images";
-
 export const siteTagline =
   "A trusted marketplace connecting families and organisations with verified healthcare and childcare professionals, making it easy to find safe, reliable, and high-quality care when it's needed most.";
 
@@ -144,63 +142,6 @@ export const registrationPaths = [
       "Register as a private client or organisation to request verified nurses, HCAs, support workers or physiotherapists.",
   },
 ] as const;
-
-export type Testimonial = {
-  quote: string;
-  name: string;
-  role: string;
-  featured?: boolean;
-  photo?: string;
-};
-
-export const testimonialsSection = {
-  heading: "Trusted by clients and professionals",
-  subheading:
-    "From care homes to private families — organisations and professionals rely on CareBridge Connect for verified staffing and continuous compliance.",
-} as const;
-
-export const testimonials: Testimonial[] = [
-  {
-    quote:
-      "The verification gave us total peace of mind — every professional was DBS-checked and registered before they set foot on site.",
-    name: "Sarah Mitchell",
-    role: "Care Home Manager",
-  },
-  {
-    quote:
-      "We needed cover at short notice and CareBridge matched us with qualified staff within hours. Compliance was already handled — no chasing paperwork.",
-    name: "James Okonkwo",
-    role: "Operations Director",
-    featured: true,
-    photo: marketingImages.portraits.operationsDirector,
-  },
-  {
-    quote:
-      "Creating a booking request for a physiotherapist took minutes and the compliance was already handled. Exactly what we needed for my father's recovery.",
-    name: "Emma Richardson",
-    role: "Private Client",
-  },
-  {
-    quote:
-      "As a nurse, onboarding was clear and quick. I was matched to suitable shifts almost immediately after passing verification.",
-    name: "Priya Sharma",
-    role: "Registered Nurse",
-  },
-  {
-    quote:
-      "Document tracking and auto-restriction when credentials lapse means we never worry about placing non-compliant staff on shifts.",
-    name: "David Chen",
-    role: "HR Manager",
-  },
-  {
-    quote:
-      "Finding trusted, verified carers for my mother felt overwhelming until we found CareBridge. The whole process was straightforward and reassuring.",
-    name: "Helen Brooks",
-    role: "Family Carer",
-    featured: true,
-    photo: marketingImages.portraits.familyCarer,
-  },
-];
 
 /** Short disclaimer line shown in the global footer on every page. */
 export const regulatoryDisclaimer =
