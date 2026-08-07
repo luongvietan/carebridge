@@ -16,7 +16,14 @@ function service(): SupabaseClient {
 
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" });
+  // The app renders booking times in Europe/London (formatLondon), so the test
+  // has to as well — on a CI runner in UTC, a BST booking rendered an hour out
+  // and no row matched.
+  return new Date(iso).toLocaleString("en-GB", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "Europe/London",
+  });
 }
 
 function slot(hoursFromNow: number, durationHours: number) {

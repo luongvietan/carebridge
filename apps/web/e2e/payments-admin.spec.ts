@@ -449,8 +449,17 @@ test("webhook: charge.refunded sets payment status to refunded", async ({ reques
     amount: Number(booking.total_payout),
   });
 
-  // POST a charge.refunded event — data.object has payment_intent field
-  const { payload, header } = signedEvent("charge.refunded", { payment_intent: intentId });
+  // POST a FULL charge.refunded event. Stripe marks a fully-refunded charge with
+  // refunded: true and amount_refunded equal to the captured amount; since audit
+  // v3 a partial refund deliberately leaves the payment `succeeded`, so an event
+  // carrying no amounts at all is a £0 partial and must not flip the status.
+  const capturedPence = Math.round(Number(booking.total_payout) * 100);
+  const { payload, header } = signedEvent("charge.refunded", {
+    payment_intent: intentId,
+    refunded: true,
+    amount_captured: capturedPence,
+    amount_refunded: capturedPence,
+  });
   const res = await request.post("/api/stripe/webhook", {
     headers: { "stripe-signature": header, "content-type": "application/json" },
     data: payload,

@@ -234,7 +234,12 @@ test("a regulated professional activates only once documents are approved AND th
   await expect(adminPage).toHaveURL(/\/admin/);
 
   await adminPage.goto("/admin/compliance");
-  const reviewRow = adminPage.locator("div.flex.flex-wrap", { hasText: proName });
+  // Scope to the review queue: the registration panel below it also carries the
+  // professional's name in a flex-wrap row.
+  const reviewSection = adminPage.locator("section", {
+    has: adminPage.getByRole("heading", { name: "Documents awaiting review" }),
+  });
+  const reviewRow = reviewSection.locator("div.flex.flex-wrap", { hasText: proName });
   await expect(reviewRow).toBeVisible();
   await reviewRow.getByRole("button", { name: /^approve$/i }).click();
   await expect(reviewRow).toBeHidden({ timeout: 10000 });
@@ -251,7 +256,10 @@ test("a regulated professional activates only once documents are approved AND th
   expect(beforeVerification?.can_accept_bookings).toBe(false);
 
   // Record the register check through the admin UI.
-  const checkForm = adminPage.locator("form", { hasText: proName });
+  const registrationSection = adminPage.locator("section", {
+    has: adminPage.getByRole("heading", { name: "Registrations awaiting verification" }),
+  });
+  const checkForm = registrationSection.locator("form", { hasText: proName });
   await expect(checkForm).toBeVisible();
   await checkForm.locator('input[name="reference"]').fill("12A3456E");
   await chooseFrom(
