@@ -39,10 +39,30 @@ export async function recordPayout(bookingId: string): Promise<PayoutResult> {
   const admin = createServiceClient();
 
   const { data: booking } = await admin
-    .from("bookings").select("id, status, assigned_professional_id, total_payout").eq("id", bookingId).single();
+    .from("bookings").select("id, status, assigned_professional_id, total_payout, requires_timesheet").eq("id", bookingId).single();
   if (!booking) return { error: "Booking not found." };
   if (booking.status !== "completed") return { error: "Booking is not completed." };
   if (!booking.assigned_professional_id) return { error: "Booking has no assigned professional." };
+
+  // Client request, 7 Aug: the hours actually worked must be confirmed by the
+  // client or manager before payment is released. Bookings completed before
+  // timesheets existed carry requires_timesheet = false and are unaffected.
+  if (booking.requires_timesheet) {
+    const { data: timesheet } = await admin
+      .from("timesheets")
+      .select("status")
+      .eq("booking_id", bookingId)
+      .maybeSingle();
+    if (!timesheet) {
+      return { error: "The professional has not submitted their hours for this booking yet." };
+    }
+    if (timesheet.status === "disputed") {
+      return { error: "The hours for this booking are under query and cannot be paid yet." };
+    }
+    if (timesheet.status !== "confirmed") {
+      return { error: "The hours for this booking have not been confirmed by the client yet." };
+    }
+  }
 
   // Inspect every payment for this booking: a FULL refund (refunded_at set)
   // blocks the payout entirely; PARTIAL refunds (refunded_amount, payment stays

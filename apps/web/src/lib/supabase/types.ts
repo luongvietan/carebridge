@@ -385,6 +385,7 @@ export type Database = {
       }
       bookings: {
         Row: {
+          requires_timesheet: boolean
           accepted_at: string | null
           assigned_by: string | null
           assigned_professional_id: string | null
@@ -414,6 +415,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          requires_timesheet?: boolean
           accepted_at?: string | null
           assigned_by?: string | null
           assigned_professional_id?: string | null
@@ -443,6 +445,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          requires_timesheet?: boolean
           accepted_at?: string | null
           assigned_by?: string | null
           assigned_professional_id?: string | null
@@ -1948,6 +1951,76 @@ export type Database = {
           },
         ]
       }
+      timesheets: {
+        Row: {
+          actual_end: string
+          actual_start: string
+          auto_confirmed: boolean
+          booking_id: string
+          break_minutes: number
+          confirmed_at: string | null
+          confirmed_by: string | null
+          created_at: string
+          dispute_reason: string | null
+          id: string
+          professional_id: string
+          professional_note: string | null
+          status: string
+          submitted_at: string
+          updated_at: string
+          worked_hours: number | null
+        }
+        Insert: {
+          actual_end: string
+          actual_start: string
+          auto_confirmed?: boolean
+          booking_id: string
+          break_minutes?: number
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string
+          dispute_reason?: string | null
+          id?: string
+          professional_id: string
+          professional_note?: string | null
+          status?: string
+          submitted_at?: string
+          updated_at?: string
+        }
+        Update: {
+          actual_end?: string
+          actual_start?: string
+          auto_confirmed?: boolean
+          booking_id?: string
+          break_minutes?: number
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string
+          dispute_reason?: string | null
+          id?: string
+          professional_id?: string
+          professional_note?: string | null
+          status?: string
+          submitted_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timesheets_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: true
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timesheets_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       users: {
         Row: {
           account_status: Database["public"]["Enums"]["account_status"]
@@ -2053,6 +2126,27 @@ export type Database = {
           role: string | null
           full_name: string | null
           valid_until: string | null
+        }
+        Relationships: []
+      }
+      v_export_timesheets: {
+        Row: {
+          actual_end: string | null
+          actual_start: string | null
+          auto_confirmed: boolean | null
+          booked_hours: number | null
+          booking_id: string | null
+          break_minutes: number | null
+          confirmed_at: string | null
+          dispute_reason: string | null
+          id: string | null
+          professional: string | null
+          role: string | null
+          scheduled_end: string | null
+          scheduled_start: string | null
+          status: string | null
+          submitted_at: string | null
+          worked_hours: number | null
         }
         Relationships: []
       }

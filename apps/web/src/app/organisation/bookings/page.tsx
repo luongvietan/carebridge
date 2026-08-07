@@ -5,6 +5,7 @@ import { BookingCancelButton } from "@/components/booking-cancel-button";
 import { PayNowButton } from "@/components/pay-now-button";
 import { formatGbpMoney } from "@/lib/format/money";
 import { formatLondon } from "@/lib/format/datetime";
+import { ReviewHoursPanel, type HoursForReview } from "@/components/timesheet-forms";
 
 export const dynamic = "force-dynamic";
 
@@ -27,7 +28,7 @@ export default async function OrganisationBookingsPage() {
     supabase
       .from("bookings")
       .select(
-        "id, status, scheduled_start, scheduled_end, location_address, professional_role_id, total_client_charge",
+        "id, status, scheduled_start, scheduled_end, duration_hours, location_address, professional_role_id, total_client_charge",
       )
       .order("scheduled_start", { ascending: false }),
     supabase.from("professional_roles").select("id, name"),
@@ -55,11 +56,53 @@ export default async function OrganisationBookingsPage() {
     }
   }
 
+  // Hours submitted against this account's bookings, waiting to be confirmed
+  // before the professional's payout can be released.
+  const submittedSheets = bookingIds.length
+    ? (
+        await admin
+          .from("timesheets")
+          .select(
+            "id, booking_id, actual_start, actual_end, break_minutes, worked_hours, professional_note, status, professionals(full_name)",
+          )
+          .in("booking_id", bookingIds)
+          .eq("status", "submitted")
+      ).data
+    : [];
+  const bookingById = new Map((bookings ?? []).map((b) => [b.id, b]));
+  const hoursForReview: HoursForReview[] = (submittedSheets ?? []).map((t) => {
+    const booking = bookingById.get(t.booking_id);
+    return {
+      timesheetId: t.id,
+      bookingId: t.booking_id,
+      professionalName:
+        (t.professionals as { full_name: string } | null)?.full_name ?? "The professional",
+      scheduledStart: booking?.scheduled_start ?? t.actual_start,
+      bookedHours: Number(booking?.duration_hours ?? 0),
+      workedHours: Number(t.worked_hours ?? 0),
+      breakMinutes: t.break_minutes,
+      actualStart: t.actual_start,
+      actualEnd: t.actual_end,
+      note: t.professional_note,
+    };
+  });
+
   return (
     <main className="mx-auto max-w-4xl px-4 py-10">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="mt-1 text-3xl font-bold">Bookings</h1>
+      {hoursForReview.length > 0 && (
+        <section className="mt-10">
+          <h2 className="text-xl font-bold">Hours awaiting your confirmation</h2>
+          <p className="mt-2 text-sm text-[#4a4a4a]">
+            Confirm the hours worked so the professional can be paid. If you do not respond within
+            three working days they are confirmed automatically.
+          </p>
+          <ReviewHoursPanel items={hoursForReview} />
+        </section>
+      )}
+
         </div>
         <Link
           href="/organisation/bookings/new"

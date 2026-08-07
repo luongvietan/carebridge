@@ -7,7 +7,8 @@ export type NotificationType =
   | "payment_receipt" | "payout_recorded"
   | "registration_confirmation" | "email_verification"
   | "compliance_expiry_reminder" | "password_reset"
-  | "professional_rejected" | "account_removed" | "professional_suspended";
+  | "professional_rejected" | "account_removed" | "professional_suspended"
+  | "timesheet_submitted" | "timesheet_confirmed" | "timesheet_disputed";
 
 export type ChannelSender = (msg: { to: string; subject: string; body: string }) => Promise<void>;
 

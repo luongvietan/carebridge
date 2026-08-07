@@ -15,6 +15,7 @@ describe("DATASETS", () => {
         "payouts",
         "professionals",
         "registration_verifications",
+        "timesheets",
       ].sort(),
     );
   });
