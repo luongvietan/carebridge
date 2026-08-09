@@ -1,5 +1,38 @@
 import { DashboardGrid } from "@/components/dashboard-grid";
+import { ForwardLink } from "@/components/forward-link";
 import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/service";
+import { loadDashboardMetrics, loadNotificationItems } from "@/lib/admin/dashboard-metrics";
+import { loadComplianceOverview } from "@/lib/compliance/overview";
+import { formatGbpMoney } from "@/lib/format/money";
+
+export const dynamic = "force-dynamic";
+
+const TONE = {
+  neutral: "border-[#dbe7e0] bg-white",
+  amber: "border-[#f0dfa0] bg-[#fefbf0]",
+  red: "border-[#f5b8bb] bg-[#fff5f5]",
+} as const;
+
+function Tile({
+  label,
+  value,
+  hint,
+  tone = "neutral",
+}: {
+  label: string;
+  value: string | number;
+  hint?: string;
+  tone?: keyof typeof TONE;
+}) {
+  return (
+    <div className={`rounded-2xl border p-4 ${TONE[tone]}`}>
+      <p className="text-2xl font-bold text-[#1e5a33]">{value}</p>
+      <p className="mt-1 text-sm text-[#4a4a4a]">{label}</p>
+      {hint && <p className="mt-0.5 text-xs text-[#7a8a81]">{hint}</p>}
+    </div>
+  );
+}
 
 export default async function AdminHome() {
   const supabase = await createClient();
@@ -7,10 +40,95 @@ export default async function AdminHome() {
     data: { user },
   } = await supabase.auth.getUser();
 
+  const admin = createServiceClient();
+  const [metrics, overview] = await Promise.all([
+    loadDashboardMetrics(admin),
+    loadComplianceOverview(admin),
+  ]);
+  const notifications = await loadNotificationItems(admin, overview.counts.expiring30);
+
   return (
     <main className="mx-auto max-w-4xl px-4 py-10">
       <h1 className="mt-1 text-3xl font-bold">Dashboard</h1>
       {user?.email && <p className="mt-2 text-sm text-[#4a4a4a]">Signed in as {user.email}</p>}
+
+      <section className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <Tile
+          label="Professionals"
+          value={metrics.professionals}
+          hint={`${metrics.activeProfessionals} active`}
+        />
+        <Tile
+          label="Clients and organisations"
+          value={metrics.clients + metrics.organisations}
+          hint={`${metrics.clients} private, ${metrics.organisations} organisations`}
+        />
+        <Tile
+          label="Pending approvals"
+          value={metrics.documentsAwaitingReview + metrics.applicationsAwaitingApproval}
+          hint={`${metrics.documentsAwaitingReview} documents, ${metrics.applicationsAwaitingApproval} applications`}
+          tone={
+            metrics.documentsAwaitingReview + metrics.applicationsAwaitingApproval > 0
+              ? "amber"
+              : "neutral"
+          }
+        />
+        <Tile label="Active bookings" value={metrics.activeBookings} />
+        <Tile
+          label="Expiring compliance documents"
+          value={overview.counts.expiring30}
+          hint="Within the next 30 days"
+          tone={overview.counts.expiring30 > 0 ? "amber" : "neutral"}
+        />
+        <Tile
+          label="Restricted professionals"
+          value={metrics.restrictedProfessionals}
+          hint="Automatically blocked from bookings"
+          tone={metrics.restrictedProfessionals > 0 ? "red" : "neutral"}
+        />
+        <Tile
+          label="Platform revenue this month"
+          value={formatGbpMoney(metrics.monthlyRevenue)}
+          hint="Margin on bookings paid this month"
+        />
+        <Tile
+          label="Compliance status"
+          value={`${overview.counts.green} / ${overview.professionals.length}`}
+          hint={`${overview.counts.amber} expiring, ${overview.counts.red} expired`}
+        />
+      </section>
+
+      <section className="mt-10">
+        <h2 className="text-xl font-bold">Needs your attention</h2>
+        {notifications.length === 0 ? (
+          <p className="mt-3 text-sm text-[#4a4a4a]">Nothing is waiting on you right now.</p>
+        ) : (
+          <ul className="mt-4 divide-y divide-[#dbe7e0] rounded-2xl border border-[#dbe7e0] text-sm">
+            {notifications.map((item) => (
+              <li key={item.key} className="flex items-center justify-between gap-4 p-3">
+                <span className="flex items-center gap-3">
+                  <span
+                    aria-hidden
+                    className={`inline-flex h-6 min-w-6 items-center justify-center rounded-full px-1.5 text-xs font-semibold ${
+                      item.tone === "red"
+                        ? "bg-[#fff1f1] text-[#a2191f]"
+                        : item.tone === "amber"
+                          ? "bg-[#fcf4d6] text-[#684e1b]"
+                          : "bg-[#f5f7f6] text-[#4a4a4a]"
+                    }`}
+                  >
+                    {item.count}
+                  </span>
+                  {item.label}
+                </span>
+                <ForwardLink href={item.href} className="text-[#2e7d32] hover:underline">
+                  Open
+                </ForwardLink>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       <DashboardGrid
         cards={[
