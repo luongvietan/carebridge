@@ -192,6 +192,12 @@ export default async function AdminHome() {
             cta: "Manage accounts",
           },
           {
+            href: "/admin/incidents",
+            title: "Complaints and incidents",
+            description: "Record concerns, track investigations and close them with an outcome.",
+            cta: "Open concerns",
+          },
+          {
             href: "/admin/rates",
             title: "Rate cards",
             description: "View and amend effective-dated rate cards by professional role.",

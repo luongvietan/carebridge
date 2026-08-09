@@ -7,6 +7,7 @@ export type DatasetName =
   | "compliance"
   | "registration_verifications"
   | "timesheets"
+  | "incidents"
   | "payments"
   | "payouts"
   | "audit";
@@ -78,6 +79,13 @@ export const DATASETS: Record<DatasetName, Dataset> = {
       "actual_start", "actual_end", "break_minutes", "worked_hours", "status",
       "submitted_at", "confirmed_at", "auto_confirmed", "dispute_reason"],
     orderBy: { column: "submitted_at", ascending: false },
+  },
+  incidents: {
+    view: "v_export_incidents",
+    label: "Complaints and incidents",
+    columns: ["reference", "category", "severity", "status", "subject", "professional",
+      "booking_id", "reported_by", "raised_at", "resolved_at", "closed_at", "outcome"],
+    orderBy: { column: "raised_at", ascending: false },
   },
   payments: {
     view: "v_export_payments",

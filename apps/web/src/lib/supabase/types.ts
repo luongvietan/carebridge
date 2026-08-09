@@ -1013,6 +1013,86 @@ export type Database = {
         }
         Relationships: []
       }
+      incidents: {
+        Row: {
+          assigned_to: string | null
+          booking_id: string | null
+          category: string
+          closed_at: string | null
+          created_at: string
+          details: string
+          id: string
+          investigation: string | null
+          opened_by: string | null
+          organisation_id: string | null
+          outcome: string | null
+          private_client_id: string | null
+          professional_id: string | null
+          raised_at: string
+          reference: string
+          reported_by: string | null
+          resolved_at: string | null
+          severity: string
+          status: string
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          booking_id?: string | null
+          category: string
+          closed_at?: string | null
+          created_at?: string
+          details: string
+          id?: string
+          investigation?: string | null
+          opened_by?: string | null
+          organisation_id?: string | null
+          outcome?: string | null
+          private_client_id?: string | null
+          professional_id?: string | null
+          raised_at?: string
+          reference: string
+          reported_by?: string | null
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          booking_id?: string | null
+          category?: string
+          closed_at?: string | null
+          created_at?: string
+          details?: string
+          id?: string
+          investigation?: string | null
+          opened_by?: string | null
+          organisation_id?: string | null
+          outcome?: string | null
+          private_client_id?: string | null
+          professional_id?: string | null
+          raised_at?: string
+          reference?: string
+          reported_by?: string | null
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "incidents_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_templates: {
         Row: {
           body: string
@@ -2147,6 +2227,23 @@ export type Database = {
           status: string | null
           submitted_at: string | null
           worked_hours: number | null
+        }
+        Relationships: []
+      }
+      v_export_incidents: {
+        Row: {
+          booking_id: string | null
+          category: string | null
+          closed_at: string | null
+          outcome: string | null
+          professional: string | null
+          raised_at: string | null
+          reference: string | null
+          reported_by: string | null
+          resolved_at: string | null
+          severity: string | null
+          status: string | null
+          subject: string | null
         }
         Relationships: []
       }

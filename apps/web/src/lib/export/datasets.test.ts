@@ -10,6 +10,7 @@ describe("DATASETS", () => {
         "bookings",
         "clients",
         "compliance",
+        "incidents",
         "organisations",
         "payments",
         "payouts",
