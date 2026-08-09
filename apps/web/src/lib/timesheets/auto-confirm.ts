@@ -1,6 +1,6 @@
 import { createServiceClient } from "@/lib/supabase/service";
 import { sendNotification } from "@/lib/notifications/send";
-import { autoConfirmCutoff, AUTO_CONFIRM_WORKING_DAYS } from "./rules";
+import { autoConfirmCutoff, isAutoConfirmable, AUTO_CONFIRM_WORKING_DAYS } from "./rules";
 
 /**
  * Confirm timesheets the client has left unanswered.
@@ -20,12 +20,15 @@ export async function autoConfirmDueTimesheets(now: Date = new Date()): Promise<
 
   const { data: due } = await admin
     .from("timesheets")
-    .select("id, booking_id, professional_id")
+    .select("id, booking_id, professional_id, status")
     .eq("status", "submitted")
     .lte("submitted_at", cutoff);
 
   let confirmed = 0;
   for (const sheet of due ?? []) {
+    // Belt and braces against the query above: a queried sheet is never
+    // auto-confirmed, however it came to be selected.
+    if (!isAutoConfirmable(sheet.status)) continue;
     const { error } = await admin
       .from("timesheets")
       .update({

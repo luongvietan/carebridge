@@ -93,3 +93,44 @@ export function autoConfirmCutoff(
   }
   return cutoff;
 }
+
+/**
+ * Whether a payout may be released for a booking.
+ *
+ * The client confirmed on 10 August that a query raised inside the three
+ * working days must pause both the automatic confirmation and the payout until
+ * it has been reviewed. Both guards therefore key on the timesheet status and
+ * live here, so the payout screen and the nightly job cannot drift apart.
+ */
+export type PayoutGate = { ok: true } | { ok: false; reason: string };
+
+export function payoutGate(
+  timesheet: { status: string } | null | undefined,
+  requiresTimesheet: boolean,
+): PayoutGate {
+  if (!requiresTimesheet) return { ok: true };
+  if (!timesheet) {
+    return {
+      ok: false,
+      reason: "The professional has not submitted their hours for this booking yet.",
+    };
+  }
+  if (timesheet.status === "disputed") {
+    return {
+      ok: false,
+      reason: "The hours for this booking are under query and cannot be paid until it is resolved.",
+    };
+  }
+  if (timesheet.status !== "confirmed") {
+    return {
+      ok: false,
+      reason: "The hours for this booking have not been confirmed by the client yet.",
+    };
+  }
+  return { ok: true };
+}
+
+/** Only hours still awaiting an answer auto-confirm; a query is an answer. */
+export function isAutoConfirmable(status: string): boolean {
+  return status === "submitted";
+}

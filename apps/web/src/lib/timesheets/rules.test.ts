@@ -3,6 +3,8 @@ import {
   autoConfirmCutoff,
   checkSubmittedHours,
   hoursDifferFromBooking,
+  isAutoConfirmable,
+  payoutGate,
   workedHours,
 } from "./rules";
 
@@ -108,5 +110,43 @@ describe("autoConfirmCutoff", () => {
     expect(autoConfirmCutoff(new Date("2026-08-11T09:00:00Z")).toISOString().slice(0, 10)).toBe(
       "2026-08-06",
     );
+  });
+});
+
+describe("payoutGate", () => {
+  it("lets a legacy booking through when no timesheet is required", () => {
+    expect(payoutGate(null, false)).toEqual({ ok: true });
+  });
+
+  it("holds the payout until hours are submitted", () => {
+    const gate = payoutGate(null, true);
+    expect(gate.ok).toBe(false);
+    expect(gate).toMatchObject({ reason: expect.stringMatching(/not submitted/i) });
+  });
+
+  it("holds the payout while the hours are only submitted", () => {
+    expect(payoutGate({ status: "submitted" }, true).ok).toBe(false);
+  });
+
+  it("holds the payout while a query is open — the client's 10 Aug rule", () => {
+    const gate = payoutGate({ status: "disputed" }, true);
+    expect(gate.ok).toBe(false);
+    expect(gate).toMatchObject({ reason: expect.stringMatching(/under query/i) });
+  });
+
+  it("releases once the hours are confirmed", () => {
+    expect(payoutGate({ status: "confirmed" }, true)).toEqual({ ok: true });
+  });
+});
+
+describe("isAutoConfirmable", () => {
+  it("only picks up hours still awaiting an answer", () => {
+    expect(isAutoConfirmable("submitted")).toBe(true);
+  });
+  it("never auto-confirms a queried sheet, so a dispute pauses the clock", () => {
+    expect(isAutoConfirmable("disputed")).toBe(false);
+  });
+  it("does not re-confirm an already confirmed sheet", () => {
+    expect(isAutoConfirmable("confirmed")).toBe(false);
   });
 });

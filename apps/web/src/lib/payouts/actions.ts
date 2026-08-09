@@ -4,6 +4,7 @@ import { requireAdmin } from "@/lib/auth/admin";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { nextPayoutStatus, netPayoutAmount, type PayoutStatus } from "./record";
 import { validateBankDetails } from "./bank";
+import { payoutGate } from "@/lib/timesheets/rules";
 import { sendNotification } from "@/lib/notifications/send";
 
 export type PayoutResult = { ok: true } | { error: string };
@@ -47,22 +48,13 @@ export async function recordPayout(bookingId: string): Promise<PayoutResult> {
   // Client request, 7 Aug: the hours actually worked must be confirmed by the
   // client or manager before payment is released. Bookings completed before
   // timesheets existed carry requires_timesheet = false and are unaffected.
-  if (booking.requires_timesheet) {
-    const { data: timesheet } = await admin
-      .from("timesheets")
-      .select("status")
-      .eq("booking_id", bookingId)
-      .maybeSingle();
-    if (!timesheet) {
-      return { error: "The professional has not submitted their hours for this booking yet." };
-    }
-    if (timesheet.status === "disputed") {
-      return { error: "The hours for this booking are under query and cannot be paid yet." };
-    }
-    if (timesheet.status !== "confirmed") {
-      return { error: "The hours for this booking have not been confirmed by the client yet." };
-    }
-  }
+  const { data: timesheet } = await admin
+    .from("timesheets")
+    .select("status")
+    .eq("booking_id", bookingId)
+    .maybeSingle();
+  const gate = payoutGate(timesheet, booking.requires_timesheet);
+  if (!gate.ok) return { error: gate.reason };
 
   // Inspect every payment for this booking: a FULL refund (refunded_at set)
   // blocks the payout entirely; PARTIAL refunds (refunded_amount, payment stays
