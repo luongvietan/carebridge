@@ -5,7 +5,14 @@ import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { CtaPillLink } from "@/components/cta-pill-link";
-import { ctaLabels, heroHeadline, heroSubheadline, registerLinks, regulatoryDisclaimer } from "@/data/marketing-copy";
+import {
+  ctaLabels,
+  heroHeadline,
+  heroSubheadline,
+  markets,
+  registerLinks,
+  regulatoryDisclaimer,
+} from "@/data/marketing-copy";
 import { marketingImages } from "@/data/marketing-images";
 import { Icon, StarIcon } from "@/components/ui/icon";
 import { marketingCard, marketingSectionShell } from "@/lib/marketing-ui";
@@ -91,7 +98,7 @@ export function HeroSection() {
             className="inline-flex w-fit items-center gap-2 rounded-full border border-white/20 bg-black/25 px-4 py-2 text-sm text-white backdrop-blur-sm"
           >
             <Icon icon={StarIcon} size={16} color="#6cc24a" strokeWidth={1.75} />
-            <span>Verified healthcare staffing</span>
+            <span>Verified healthcare &amp; childcare staffing</span>
           </div>
 
           <div className="mt-auto max-w-2xl pb-2 pt-10 sm:pb-4 lg:max-w-3xl">
@@ -107,6 +114,19 @@ export function HeroSection() {
             >
               {heroSubheadline}
             </p>
+
+            <ul className="mt-5 flex flex-wrap gap-2" aria-label="Countries we serve">
+              {markets.map((market) => (
+                <li
+                  key={market.code}
+                  className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/25 px-3.5 py-1.5 text-sm text-white backdrop-blur-sm"
+                >
+                  <span aria-hidden>{market.flag}</span>
+                  {market.name}
+                  {!market.live && <span className="text-xs text-white/70">launching soon</span>}
+                </li>
+              ))}
+            </ul>
 
             <p className="mt-4 max-w-xl rounded-xl border border-white/20 bg-black/30 px-4 py-3 text-sm leading-relaxed text-white/90 backdrop-blur-sm">
               {regulatoryDisclaimer}
@@ -141,7 +161,7 @@ export function HeroSection() {
                   />
                 ))}
               </div>
-              <p className="text-sm font-medium text-[#4a4a4a]">4 verified role types</p>
+              <p className="text-sm font-medium text-[#4a4a4a]">10 verified role types</p>
             </div>
           </div>
         </div>

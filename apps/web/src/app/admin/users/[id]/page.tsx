@@ -13,6 +13,8 @@ import {
 } from "@/lib/validation/onboarding";
 import { DAYS_OF_WEEK } from "@/lib/onboarding/profile-children";
 import { requiresOfstedRegistration } from "@/lib/compliance/regulated-roles";
+import { loadVerificationSummary } from "@/lib/compliance/load-verification";
+import { VerifiedBadge } from "@/components/verified-badge";
 
 export const dynamic = "force-dynamic";
 
@@ -207,6 +209,7 @@ export default async function AdminUserDetailPage({
     { data: screening },
     { data: skillRows },
     { data: availabilityRows },
+    verification,
   ] = await Promise.all([
     admin
       .from("users")
@@ -235,6 +238,7 @@ export default async function AdminUserDetailPage({
       .maybeSingle(),
     admin.from("professional_skills").select("skills(name)").eq("professional_id", id),
     admin.from("professional_availability").select("day_of_week").eq("professional_id", id),
+    loadVerificationSummary(admin, id),
   ]);
 
   const actorIds = [
@@ -269,6 +273,11 @@ export default async function AdminUserDetailPage({
     <main className="mx-auto max-w-4xl px-4 py-10">
       <div className="mt-1 flex flex-wrap items-baseline gap-x-4 gap-y-1">
         <h1 className="text-3xl font-bold">{professional.full_name}</h1>
+        {verification && (
+          <div className="mt-3">
+            <VerifiedBadge checks={verification.checks} fullyVerified={verification.fullyVerified} />
+          </div>
+        )}
         <BackLink href="/admin/users" className="text-sm text-[#2e7d32] hover:underline">
           Back to list
         </BackLink>

@@ -32,11 +32,14 @@ export default function HomePage() {
           <div data-reveal className="text-center">
             <h2 className={marketingHeading}>How it works</h2>
             <p className={marketingSubheading}>
-              From onboarding to booking — a clear path for professionals, private clients and
-              organisations.
+              From verification to payment — the full journey for professionals, families, private
+              clients and organisations.
             </p>
           </div>
-          <div data-reveal-stagger className="mt-12 grid gap-10 md:grid-cols-3 md:gap-8">
+          <div
+            data-reveal-stagger
+            className="mt-12 grid gap-10 sm:grid-cols-2 md:gap-8 lg:grid-cols-4"
+          >
             {onboardingSteps.map((step, i) => (
               <div key={step.title} data-reveal-child className="relative">
                 <div className="flex items-center gap-4">

@@ -4,7 +4,18 @@ export const siteTagline =
   "A trusted marketplace connecting families and organisations with verified healthcare and childcare professionals, making it easy to find safe, reliable, and high-quality care when it's needed most.";
 
 export const heroHeadline =
-  "Connecting Families and Organisations with Verified Healthcare and Childcare Professionals within the Communities.";
+  "Connecting Families and Organisations with Verified Healthcare and Childcare Professionals.";
+
+/** The markets CareBridge Connect operates in. `live: false` renders as
+ *  "launching soon" — claiming a country where no professional can yet
+ *  register would mislead the families and professionals who read it. */
+export const markets = [
+  { code: "GB", flag: "\u{1F1EC}\u{1F1E7}", name: "United Kingdom", live: true },
+  { code: "PT", flag: "\u{1F1F5}\u{1F1F9}", name: "Portugal", live: false },
+] as const;
+
+export const marketsLine =
+  "Serving the United Kingdom, with Portugal launching next — each country with its own professional roles, regulators and compliance requirements.";
 
 export const heroSubheadline =
   "A trusted care marketplace — verified nurses, healthcare assistants, support workers, physiotherapists, nannies, childminders, babysitters and mother's helpers, screened, assessed and continuously monitored for compliance.";
@@ -50,12 +61,12 @@ export const professionalRoles = [
 
 export const childcareRoles = [
   {
-    title: "Nannies",
+    title: "Ofsted Registered Nannies",
     description:
       "Ofsted-registered nannies only. Every nanny's Ofsted registration number is verified against the Ofsted register before they can accept a booking. Available full-time, part-time and overnight.",
   },
   {
-    title: "Childminders",
+    title: "Registered Childminders",
     description:
       "Ofsted-registered childminders caring for children in their own home, within the numbers and ratios their registration allows. Registration number mandatory and checked before any booking.",
   },
@@ -92,17 +103,22 @@ export const onboardingSteps = [
   {
     title: "Register & verify",
     description:
-      "Professionals complete eligibility screening, an online competency assessment (80% pass, up to three attempts) and document uploads — all reviewed by administrators.",
+      "Every professional completes identity verification, professional registration checks against the regulator's own register, an online competency assessment and document uploads — all reviewed and approved by the CareBridge Connect team before they can be booked.",
   },
   {
     title: "Request or match",
     description:
-      "Clients and organisations create booking requests by role, date, time and location. Verified professionals accept open bookings, or administrators assign directly.",
+      "Families, private clients and organisations request healthcare or childcare professionals by role, date, time and location. Verified professionals accept open bookings, or an administrator assigns one directly.",
   },
   {
     title: "Book with confidence",
     description:
-      "Compliance is enforced when a booking is accepted or assigned. Expired credentials automatically restrict new bookings until re-approved.",
+      "Only fully verified professionals can accept bookings. Continuous compliance monitoring automatically restricts anyone whose registration or mandatory documents expire, until they are renewed and re-approved.",
+  },
+  {
+    title: "Complete & get paid",
+    description:
+      "The professional logs the hours actually worked, the client or manager confirms them, and payment is released. Both sides keep a full booking history.",
   },
 ] as const;
 
@@ -111,14 +127,14 @@ export const complianceFeatures = [
     title: "Why clients trust us",
     bullets: [
       "Every professional passes eligibility screening, competency assessment and document verification before approval.",
-      "Enhanced DBS, Right to Work, professional registration (NMC/HCPC), indemnity insurance and mandatory training are tracked continuously.",
+      "Professional registration is checked against the regulator's own register — the NMC for nurses, the HCPC for physiotherapists, Ofsted for nannies and childminders — and re-checked every year.",
     ],
   },
   {
     title: "Personalised staffing programmes",
     bullets: [
-      "Booking requests matched across four roles — nurses, HCAs, support workers and physiotherapists.",
-      "Flexible cover for private clients, healthcare organisations, supported living services, care providers and healthcare facilities.",
+      "Booking requests matched across ten roles — adult, children's and mental health nurses, healthcare assistants, support workers and physiotherapists, plus Ofsted-registered nannies, registered childminders, babysitters and mother's helpers.",
+      "Flexible cover for families, private clients, healthcare organisations, supported living services, care providers and healthcare facilities.",
     ],
   },
   {
@@ -128,6 +144,19 @@ export const complianceFeatures = [
       "Professionals become available again only after updated documents are uploaded and approved.",
     ],
   },
+] as const;
+
+/** What "verified" means, spelled out — the evidence behind the Fully Verified
+ *  badge on an approved professional's profile. */
+export const verificationChecklist = [
+  "Professional registration or licence",
+  "Right to Work",
+  "Identity verification",
+  "Proof of address",
+  "DBS (United Kingdom) or criminal record certificate (Portugal)",
+  "Mandatory training",
+  "References",
+  "Ongoing monitoring with automatic expiry alerts",
 ] as const;
 
 export const aboutFeatures = [

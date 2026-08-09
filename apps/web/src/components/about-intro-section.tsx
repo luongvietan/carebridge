@@ -15,8 +15,8 @@ export function AboutIntroSection() {
     <section className={marketingSection}>
       <div data-reveal className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between lg:gap-12">
         <h2 className={`max-w-3xl leading-tight ${marketingHeading}`}>
-          A secure healthcare marketplace — only suitable, verified professionals join
-          our platform
+          A secure healthcare and childcare marketplace — only suitable, verified professionals
+          join our platform
         </h2>
 
         <div className="flex shrink-0 items-center gap-4">

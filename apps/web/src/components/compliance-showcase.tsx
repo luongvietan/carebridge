@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import { CtaPillLink } from "@/components/cta-pill-link";
-import { complianceFeatures } from "@/data/marketing-copy";
+import { complianceFeatures, verificationChecklist } from "@/data/marketing-copy";
 import { marketingImages } from "@/data/marketing-images";
 import { ChevronDownIcon, Icon } from "@/components/ui/icon";
 import { marketingHeading, marketingSection, marketingSurface } from "@/lib/marketing-ui";
@@ -61,9 +61,20 @@ export function ComplianceShowcase() {
             Verified professionals, continuous compliance
           </h2>
           <p className="mt-4 max-w-md text-sm leading-relaxed text-[#4a4a4a] sm:text-base">
-            Every professional passes eligibility screening, competency assessment and document
-            verification before approval — with automatic restriction when credentials lapse.
+            No professional — healthcare or childcare — can accept a booking until every one of
+            these has been checked and approved, and each one is monitored for expiry afterwards.
           </p>
+
+          <ul className="mt-6 grid gap-x-6 gap-y-2 text-sm text-[#1e5a33] sm:grid-cols-2">
+            {verificationChecklist.map((item) => (
+              <li key={item} className="flex items-start gap-2">
+                <span aria-hidden className="font-semibold text-[#2e7d32]">
+                  &#10003;
+                </span>
+                {item}
+              </li>
+            ))}
+          </ul>
 
           <div className="mt-8 space-y-3">
             {complianceFeatures.map((item, index) => {

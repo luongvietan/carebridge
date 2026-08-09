@@ -32,8 +32,8 @@ export const marketingImages = {
       alt: "Registered nurse in a clinical setting",
     },
     secondary: {
-      src: pexels(7551657, 700, 500),
-      alt: "Healthcare assistant providing companionship and wellbeing support",
+      src: pexels(4473775, 700, 500),
+      alt: "Nanny sitting with two young children at home",
     },
   },
   aboutAvatars: [
@@ -97,8 +97,8 @@ export const marketingImages = {
       alt: "Healthcare professional in a clinical care environment",
     },
     services: {
-      src: unsplash("photo-1576091160550-2173dba999ef", 1600, 700),
-      alt: "Registered nurse in a care setting",
+      src: pexels(3662667, 1600, 700),
+      alt: "Two young children playing together in a childcare setting",
     },
     faq: {
       src: pexels(7659572, 1600, 700),
@@ -122,12 +122,12 @@ export const marketingImages = {
   },
 
   ctaBanner: {
-    src: pexels(5215024, 1400, 600),
-    alt: "Physiotherapist guiding a client through rehabilitation exercises",
+    src: pexels(8500352, 1400, 600),
+    alt: "Two school-age children studying together during after-school care",
   },
 
   footer: {
-    src: pexels(8376232, 640, 448),
-    alt: "Care professional visiting a client at home",
+    src: pexels(3933276, 640, 448),
+    alt: "Young child playing with wooden blocks at home",
   },
 } as const;
