@@ -2,12 +2,43 @@
 import { redirect } from "next/navigation";
 import { getAppUrl } from "@/lib/app-url";
 import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/service";
 import { registerSchema } from "@/lib/validation/auth";
 import { sendNotification } from "@/lib/notifications/send";
 
 const CONSENT_VERSION = "v1";
 
 export type SignUpResult = { ok: true } | { error: string } | null;
+
+/**
+ * Record a successful sign-in in the audit trail (client request, 7 Aug).
+ *
+ * Called after the browser has authenticated, and it re-reads the session on the
+ * server rather than trusting an id from the caller — otherwise anybody could
+ * post entries claiming to be somebody else.
+ *
+ * FAILED sign-ins are deliberately not recorded here. Authentication happens
+ * inside Supabase, so the platform never sees a failed attempt; the only way to
+ * capture them from the app would be an endpoint anonymous callers can write to,
+ * which turns the audit log into something anyone can fill with noise. Failed
+ * attempts belong to a Supabase auth hook or its log drain.
+ */
+export async function recordSignIn(): Promise<void> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+
+  await createServiceClient().from("audit_log").insert({
+    actor_user_id: user.id,
+    actor_type: "user",
+    action: "auth.signed_in",
+    entity_type: "user",
+    entity_id: user.id,
+    summary: user.email ?? null,
+  });
+}
 
 export async function signOut(): Promise<void> {
   const supabase = await createClient();

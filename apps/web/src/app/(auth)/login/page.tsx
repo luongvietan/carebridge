@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { recordSignIn } from "@/lib/auth/actions";
 import { AuthShell } from "@/components/auth-shell";
 import { BackLink } from "@/components/back-link";
 import { createClient } from "@/lib/supabase/browser";
@@ -40,6 +41,9 @@ export default function LoginPage() {
       setPending(false);
       return;
     }
+    // Audit the sign-in before navigating (client request, 7 Aug). Best-effort:
+    // a failure to record must never stop somebody logging in.
+    await recordSignIn().catch(() => {});
     router.push(roleHome((row?.account_type ?? "private_client") as AccountType));
     router.refresh();
   }

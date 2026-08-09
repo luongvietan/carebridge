@@ -7,6 +7,8 @@ import { Select } from "@/components/ui/select";
 
 export const dynamic = "force-dynamic";
 
+const ACTOR_TYPES = ["user", "admin", "system"];
+
 const MAX_ROWS = 500;
 
 const ENTITY_TYPES = [
@@ -36,6 +38,9 @@ export default async function AdminAuditPage({
   const to = pick(params, "to");
   const entityType = pick(params, "entityType");
   const entityTypeFilter = entityType && ENTITY_TYPES.includes(entityType) ? entityType : undefined;
+  const search = pick(params, "search")?.trim();
+  const actorType = pick(params, "actorType");
+  const actorTypeFilter = actorType && ACTOR_TYPES.includes(actorType) ? actorType : undefined;
   const { gte, lt } = londonDateRangeToUtc(from, to);
 
   const admin = createServiceClient();
@@ -47,6 +52,13 @@ export default async function AdminAuditPage({
   if (gte) query = query.gte("occurred_at", gte);
   if (lt) query = query.lt("occurred_at", lt);
   if (entityTypeFilter) query = query.eq("entity_type", entityTypeFilter);
+  if (actorTypeFilter) query = query.eq("actor_type", actorTypeFilter);
+  if (search) {
+    // Search covers the action, the free-text summary and the entity id, so a
+    // professional's or booking's id pasted straight from a URL finds its trail.
+    const pattern = `%${search.replace(/[,()*\\]/g, " ")}%`;
+    query = query.or(`action.ilike.${pattern},summary.ilike.${pattern},entity_id.ilike.${pattern}`);
+  }
 
   const { data } = await query;
   const rows = data ?? [];
@@ -81,10 +93,33 @@ export default async function AdminAuditPage({
             ]}
           />
         </div>
+        <div className="flex flex-col gap-1 text-[#4a4a4a]">
+          Actor
+          <Select
+            name="actorType"
+            aria-label="Actor type"
+            defaultValue={actorTypeFilter ?? ""}
+            className="w-40"
+            options={[
+              { value: "", label: "Anyone" },
+              ...ACTOR_TYPES.map((t) => ({ value: t, label: t })),
+            ]}
+          />
+        </div>
+        <label className="flex flex-col gap-1 text-[#4a4a4a]">
+          Search
+          <input
+            type="search"
+            name="search"
+            defaultValue={search ?? ""}
+            placeholder="Action, details, or paste an id"
+            className="w-64 rounded-xl border border-[#dbe7e0] px-3 py-2"
+          />
+        </label>
         <button type="submit" className="rounded-full bg-[#2e7d32] px-4 py-2 text-white hover:bg-[#246627]">
           Apply filter
         </button>
-        {(from || to || entityTypeFilter) && (
+        {(from || to || entityTypeFilter || actorTypeFilter || search) && (
           <Link href="/admin/audit" className="text-[#2e7d32] hover:underline">
             Clear
           </Link>

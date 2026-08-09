@@ -303,6 +303,19 @@ export async function saveProfile(_prev: ProfileResult, formData: FormData): Pro
     if (availInsErr) return profileError(availInsErr.message, formData);
   }
 
+  // Spec §16 / client request 7 Aug: profile changes belong in the audit trail —
+  // a professional editing their name or registration number after approval is
+  // exactly the sort of change an auditor asks about. Best-effort, as with the
+  // upload trail: an audit failure must not lose the professional's edit.
+  await createServiceClient().from("audit_log").insert({
+    actor_user_id: user.id,
+    actor_type: "user",
+    action: "profile.updated",
+    entity_type: "professional",
+    entity_id: professionalId,
+    summary: `Role, contact and registration details saved`,
+  });
+
   return { ok: true };
 }
 
