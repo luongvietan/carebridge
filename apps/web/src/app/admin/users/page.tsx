@@ -2,6 +2,8 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { UserFilters } from "@/components/user-filters";
+import { ComplianceLightBadge } from "@/components/compliance-light";
+import { loadComplianceOverview } from "@/lib/compliance/overview";
 import { requireAdmin } from "@/lib/auth/admin";
 import {
   buildProfessionalFilters,
@@ -290,10 +292,14 @@ export default async function AdminUsersPage({
   const filters = buildProfessionalFilters(criteriaFromSearchParams(params));
   const admin = createServiceClient();
 
-  const [{ data: roles }, professionals] = await Promise.all([
+  const [{ data: roles }, professionals, overview] = await Promise.all([
     admin.from("professional_roles").select("id, name").eq("is_active", true).order("name"),
     fetchProfessionals(admin, filters),
+    loadComplianceOverview(admin),
   ]);
+  const lightByProfessional = new Map(
+    overview.professionals.map((row) => [row.professionalId, row.light]),
+  );
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-10">
@@ -315,6 +321,7 @@ export default async function AdminUsersPage({
               <th className="p-3 font-medium">Role</th>
               <th className="p-3 font-medium">Professional status</th>
               <th className="p-3 font-medium">Compliance</th>
+              <th className="p-3 font-medium">Status</th>
               <th className="p-3 font-medium">Account</th>
             </tr>
           </thead>
@@ -335,6 +342,9 @@ export default async function AdminUsersPage({
                   <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#4a4a4a]">
                     {formatLabel(prof.professional_status)}
                   </span>
+                </td>
+                <td className="p-3">
+                  <ComplianceLightBadge light={lightByProfessional.get(prof.id) ?? "pending"} />
                 </td>
                 <td className="p-3">
                   <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#4a4a4a]">
