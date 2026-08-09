@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { loadDashboardMetrics, loadNotificationItems } from "@/lib/admin/dashboard-metrics";
 import { loadComplianceOverview } from "@/lib/compliance/overview";
+import { loadUpcoming } from "@/lib/admin/upcoming";
 import { formatGbpMoney } from "@/lib/format/money";
 
 export const dynamic = "force-dynamic";
@@ -41,9 +42,10 @@ export default async function AdminHome() {
   } = await supabase.auth.getUser();
 
   const admin = createServiceClient();
-  const [metrics, overview] = await Promise.all([
+  const [metrics, overview, upcoming] = await Promise.all([
     loadDashboardMetrics(admin),
     loadComplianceOverview(admin),
+    loadUpcoming(admin),
   ]);
   const notifications = await loadNotificationItems(admin, overview.counts.expiring30);
 
@@ -96,6 +98,51 @@ export default async function AdminHome() {
           value={`${overview.counts.green} / ${overview.professionals.length}`}
           hint={`${overview.counts.amber} expiring, ${overview.counts.red} expired`}
         />
+      </section>
+
+      <section className="mt-10">
+        <h2 className="text-xl font-bold">Next 30 days</h2>
+        {upcoming.length === 0 ? (
+          <p className="mt-3 text-sm text-[#4a4a4a]">
+            No bookings, expiries or payouts scheduled in the next 30 days.
+          </p>
+        ) : (
+          <ol className="mt-4 space-y-3">
+            {upcoming.map((day) => (
+              <li key={day.date} className="rounded-2xl border border-[#dbe7e0] p-4">
+                <p className="text-sm font-semibold text-[#1e5a33]">
+                  {new Date(`${day.date}T12:00:00Z`).toLocaleDateString("en-GB", {
+                    weekday: "short",
+                    day: "numeric",
+                    month: "short",
+                  })}
+                </p>
+                <ul className="mt-2 space-y-1.5 text-sm">
+                  {day.events.map((event, index) => (
+                    <li key={`${event.kind}-${index}`} className="flex flex-wrap items-center gap-2">
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                          event.kind === "expiry"
+                            ? "bg-[#fcf4d6] text-[#684e1b]"
+                            : event.kind === "payout"
+                              ? "bg-[#e8f1fb] text-[#0f62fe]"
+                              : "bg-[#f5f7f6] text-[#4a4a4a]"
+                        }`}
+                      >
+                        {event.kind === "expiry" ? "expires" : event.kind}
+                      </span>
+                      <span className="text-[#1e5a33]">{event.title}</span>
+                      {event.detail && <span className="text-[#7a8a81]">{event.detail}</span>}
+                      <ForwardLink href={event.href} className="text-xs text-[#2e7d32] hover:underline">
+                        Open
+                      </ForwardLink>
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            ))}
+          </ol>
+        )}
       </section>
 
       <section className="mt-10">
