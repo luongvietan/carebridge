@@ -8,6 +8,7 @@ export type DatasetName =
   | "registration_verifications"
   | "timesheets"
   | "incidents"
+  | "messages"
   | "payments"
   | "payouts"
   | "audit";
@@ -86,6 +87,12 @@ export const DATASETS: Record<DatasetName, Dataset> = {
     columns: ["reference", "category", "severity", "status", "subject", "professional",
       "booking_id", "reported_by", "raised_at", "resolved_at", "closed_at", "outcome"],
     orderBy: { column: "raised_at", ascending: false },
+  },
+  messages: {
+    view: "v_export_messages",
+    label: "Messages",
+    columns: ["id", "subject", "booking_id", "sender", "body", "created_at"],
+    orderBy: { column: "created_at", ascending: false },
   },
   payments: {
     view: "v_export_payments",

@@ -10,20 +10,31 @@ export default async function ClientHome() {
   return (
     <main className="mx-auto max-w-4xl px-4 py-10">
       <h1 className="mt-1 text-3xl font-bold">Dashboard</h1>
-      {user?.email && <p className="mt-2 text-sm text-[#4a4a4a]">Signed in as {user.email}</p>}
+      {user?.email && (
+        <p className="mt-2 text-sm text-[#4a4a4a]">Signed in as {user.email}</p>
+      )}
 
       <DashboardGrid
         cards={[
           {
+            href: "/client/messages",
+            title: "Messages",
+            description:
+              "Message the CareBridge Connect team and read their replies.",
+            cta: "Open messages",
+          },
+          {
             href: "/client/register",
             title: "Your profile",
-            description: "Register your care requirements, address and billing details.",
+            description:
+              "Register your care requirements, address and billing details.",
             cta: "Manage profile",
           },
           {
             href: "/client/bookings",
             title: "Bookings",
-            description: "Request care sessions and track the status of your bookings.",
+            description:
+              "Request care sessions and track the status of your bookings.",
             cta: "View bookings",
           },
         ]}

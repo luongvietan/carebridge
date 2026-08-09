@@ -192,6 +192,12 @@ export default async function AdminHome() {
             cta: "Manage accounts",
           },
           {
+            href: "/admin/messages",
+            title: "Messages",
+            description: "Conversations with professionals, clients and organisations.",
+            cta: "Open messages",
+          },
+          {
             href: "/admin/incidents",
             title: "Complaints and incidents",
             description: "Record concerns, track investigations and close them with an outcome.",

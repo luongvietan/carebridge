@@ -1093,6 +1093,69 @@ export type Database = {
           },
         ]
       }
+      message_threads: {
+        Row: {
+          booking_id: string | null
+          closed_at: string | null
+          created_at: string
+          created_by: string
+          id: string
+          last_message_at: string
+          professional_id: string | null
+          subject: string
+        }
+        Insert: {
+          booking_id?: string | null
+          closed_at?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          last_message_at?: string
+          professional_id?: string | null
+          subject: string
+        }
+        Update: {
+          booking_id?: string | null
+          closed_at?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          last_message_at?: string
+          professional_id?: string | null
+          subject?: string
+        }
+        Relationships: []
+      }
+      thread_participants: {
+        Row: { added_at: string; thread_id: string; user_id: string }
+        Insert: { added_at?: string; thread_id: string; user_id: string }
+        Update: { added_at?: string; thread_id?: string; user_id?: string }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          sender_user_id: string
+          thread_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          sender_user_id: string
+          thread_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          sender_user_id?: string
+          thread_id?: string
+        }
+        Relationships: []
+      }
       notification_templates: {
         Row: {
           body: string
@@ -2243,6 +2306,17 @@ export type Database = {
           resolved_at: string | null
           severity: string | null
           status: string | null
+          subject: string | null
+        }
+        Relationships: []
+      }
+      v_export_messages: {
+        Row: {
+          body: string | null
+          booking_id: string | null
+          created_at: string | null
+          id: string | null
+          sender: string | null
           subject: string | null
         }
         Relationships: []

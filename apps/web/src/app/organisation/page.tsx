@@ -26,7 +26,9 @@ export default async function OrganisationHome() {
   } = await supabase.auth.getUser();
 
   const finance = user
-    ? await loadBookingFinance(createServiceClient(), { requesterUserId: user.id })
+    ? await loadBookingFinance(createServiceClient(), {
+        requesterUserId: user.id,
+      })
     : null;
 
   const rows = finance?.rows ?? [];
@@ -38,13 +40,17 @@ export default async function OrganisationHome() {
     .filter((r) => r.scheduledStart.slice(0, 7) === thisMonth)
     .reduce((sum, r) => sum + r.clientCharge, 0);
   const professionals = new Set(
-    rows.map((r) => r.professionalName).filter((name): name is string => Boolean(name)),
+    rows
+      .map((r) => r.professionalName)
+      .filter((name): name is string => Boolean(name)),
   );
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-10">
       <h1 className="mt-1 text-3xl font-bold">Dashboard</h1>
-      {user?.email && <p className="mt-2 text-sm text-[#4a4a4a]">Signed in as {user.email}</p>}
+      {user?.email && (
+        <p className="mt-2 text-sm text-[#4a4a4a]">Signed in as {user.email}</p>
+      )}
 
       <section className="mt-8 grid grid-cols-2 gap-3 md:grid-cols-4">
         <Tile label="Active bookings" value={String(active.length)} />
@@ -55,15 +61,18 @@ export default async function OrganisationHome() {
 
       {professionals.size > 0 && (
         <p className="mt-3 text-sm text-[#4a4a4a]">
-          {professionals.size} professional{professionals.size === 1 ? "" : "s"} have worked for you:{" "}
-          {[...professionals].join(", ")}.
+          {professionals.size} professional{professionals.size === 1 ? "" : "s"}{" "}
+          have worked for you: {[...professionals].join(", ")}.
         </p>
       )}
 
       <section className="mt-10">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-bold">Payment history</h2>
-          <ForwardLink href="/organisation/bookings" className="text-sm text-[#2e7d32] hover:underline">
+          <ForwardLink
+            href="/organisation/bookings"
+            className="text-sm text-[#2e7d32] hover:underline"
+          >
             All bookings
           </ForwardLink>
         </div>
@@ -85,7 +94,9 @@ export default async function OrganisationHome() {
               <tbody className="divide-y divide-[#dbe7e0]">
                 {rows.slice(0, 20).map((row) => (
                   <tr key={row.bookingId}>
-                    <td className="p-3 whitespace-nowrap">{formatLondon(row.scheduledStart)}</td>
+                    <td className="p-3 whitespace-nowrap">
+                      {formatLondon(row.scheduledStart)}
+                    </td>
                     <td className="p-3">{row.roleName ?? "—"}</td>
                     <td className="p-3">{row.professionalName ?? "—"}</td>
                     <td className="p-3">{formatGbpMoney(row.clientCharge)}</td>
@@ -114,15 +125,24 @@ export default async function OrganisationHome() {
         <DashboardGrid
           cards={[
             {
+              href: "/organisation/messages",
+              title: "Messages",
+              description:
+                "Message the CareBridge Connect team and read their replies.",
+              cta: "Open messages",
+            },
+            {
               href: "/organisation/register",
               title: "Your profile",
-              description: "Set up organisation details, contacts and billing information.",
+              description:
+                "Set up organisation details, contacts and billing information.",
               cta: "Manage profile",
             },
             {
               href: "/organisation/bookings",
               title: "Bookings",
-              description: "Request staff cover and manage bookings across your sites.",
+              description:
+                "Request staff cover and manage bookings across your sites.",
               cta: "View bookings",
             },
           ]}

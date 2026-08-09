@@ -11,6 +11,7 @@ describe("DATASETS", () => {
         "clients",
         "compliance",
         "incidents",
+        "messages",
         "organisations",
         "payments",
         "payouts",
