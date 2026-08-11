@@ -57,18 +57,21 @@ export function normaliseReference(value: string): string {
   return value.replace(/\s/g, "").toUpperCase();
 }
 
-/** The reference an administrator checks for a given register. */
-export function referenceLabel(register: RegulatorRegister): string {
-  return register === "nmc"
-    ? "NMC PIN"
-    : register === "ofsted"
-      ? "Ofsted URN"
-      : "HCPC registration number";
-}
-
+/**
+ * Whether a reference looks like the register's own format.
+ *
+ * The UK formats are pinned because they are published and stable. The
+ * Portuguese ones are deliberately permissive: a cédula profissional and an ISS
+ * authorisation are checked by an administrator against the register itself, and
+ * inventing a strict pattern would reject valid numbers — a false rejection here
+ * blocks a real professional, which is worse than accepting a typo that the
+ * register check will catch anyway.
+ */
 export function isValidReference(register: RegulatorRegister, value: string): boolean {
-  if (register === "nmc") return isValidNmcPin(value);
-  if (register === "ofsted") return isValidOfstedUrn(value);
+  const trimmed = value.replace(/\s/g, "");
+  if (register === "nmc") return isValidNmcPin(trimmed);
+  if (register === "ofsted") return isValidOfstedUrn(trimmed);
   // HCPC numbers are two letters followed by six digits, e.g. PH123456.
-  return /^[A-Za-z]{2}\d{6}$/.test(value.replace(/\s/g, ""));
+  if (register === "hcpc") return /^[A-Za-z]{2}\d{6}$/.test(trimmed);
+  return /^[A-Za-z0-9./-]{4,20}$/.test(trimmed);
 }

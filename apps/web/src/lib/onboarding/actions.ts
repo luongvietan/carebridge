@@ -5,8 +5,12 @@ import { requireAuth } from "@/lib/auth/require-auth";
 import { ensureProfessional } from "@/lib/onboarding/professional-session";
 import { eligibilitySchema, profileSchema, mandatoryTrainingItems } from "@/lib/validation/onboarding";
 import { eligibilityOutcome, type EligibilityOutcome } from "@/lib/compliance/requirements";
-import { registerForRole, requiresOfstedRegistration } from "@/lib/compliance/regulated-roles";
-import { isValidReference, referenceLabel } from "@/lib/compliance/registration-verification";
+import {
+  referenceFieldFor,
+  registerForRole,
+  REFERENCE_LABEL,
+} from "@/lib/compliance/regulated-roles";
+import { isValidReference } from "@/lib/compliance/registration-verification";
 import { verifyUpload } from "@/lib/onboarding/upload-rules";
 import { validateDocumentExpiry, validateDocumentIssueDate } from "@/lib/onboarding/document-expiry";
 import { guidanceFor } from "@/lib/onboarding/document-guidance";
@@ -23,16 +27,11 @@ const PROFILE_FIELD_LABELS: Record<string, string> = {
   nationalInsuranceNo: "National Insurance number",
   professionalRoleId: "Professional role",
   ofstedRegistrationNumber: "Ofsted registration number",
+  issAuthorisationNumber: "ISS authorisation number",
   rightToWorkBasis: "Right to work",
   rightToWorkShareCode: "Share code",
   travelDistanceKm: "Travel distance",
 };
-
-// CareBridge Connect accepts Ofsted-registered nannies and childminders only, so
-// the number is a condition of completing their profile. The DB carries an
-// independent guard (0063, widened in 0067) preventing activation without it.
-const OFSTED_REQUIRED_ERROR =
-  "An Ofsted registration number is required for this role. CareBridge Connect accepts Ofsted-registered nannies and childminders only.";
 
 const RIGHT_TO_WORK_REQUIRED_ERROR =
   "Tell us how you evidence your right to work in the UK.";
@@ -53,6 +52,7 @@ export type ProfileFormValues = {
   registrationBody: string;
   registrationNumber: string;
   ofstedRegistrationNumber: string;
+  issAuthorisationNumber: string;
   rightToWorkBasis: string;
   rightToWorkShareCode: string;
   travelDistanceKm: string;
@@ -76,6 +76,7 @@ function parseProfileFormValues(formData: FormData): ProfileFormValues {
     registrationBody: String(formData.get("registrationBody") ?? ""),
     registrationNumber: String(formData.get("registrationNumber") ?? ""),
     ofstedRegistrationNumber: String(formData.get("ofstedRegistrationNumber") ?? ""),
+    issAuthorisationNumber: String(formData.get("issAuthorisationNumber") ?? ""),
     rightToWorkBasis: String(formData.get("rightToWorkBasis") ?? ""),
     rightToWorkShareCode: String(formData.get("rightToWorkShareCode") ?? ""),
     travelDistanceKm: String(formData.get("travelDistanceKm") ?? ""),
@@ -169,6 +170,7 @@ export async function saveProfile(_prev: ProfileResult, formData: FormData): Pro
     registrationBody: (formData.get("registrationBody") as string) || undefined,
     registrationNumber: (formData.get("registrationNumber") as string) || undefined,
     ofstedRegistrationNumber: (formData.get("ofstedRegistrationNumber") as string) || undefined,
+    issAuthorisationNumber: (formData.get("issAuthorisationNumber") as string) || undefined,
     rightToWorkBasis: (formData.get("rightToWorkBasis") as string) || undefined,
     rightToWorkShareCode: (formData.get("rightToWorkShareCode") as string) || undefined,
     travelDistanceKm: (formData.get("travelDistanceKm") as string) || undefined,
@@ -194,25 +196,30 @@ export async function saveProfile(_prev: ProfileResult, formData: FormData): Pro
   // Ofsted requirement is enforced here against the selected role.
   const { data: selectedRole } = await gateAdmin
     .from("professional_roles")
-    .select("code")
+    .select("code, registration_register")
     .eq("id", parsed.data.professionalRoleId)
     .maybeSingle();
-  const ofstedNumber = parsed.data.ofstedRegistrationNumber?.replace(/\s/g, "").toUpperCase();
-  if (requiresOfstedRegistration(selectedRole?.code) && !ofstedNumber) {
-    return profileError(OFSTED_REQUIRED_ERROR, formData);
-  }
 
-  // A clinical register number is required for the roles that answer to one, and
-  // is format-checked so an administrator is not sent hunting the NMC register
-  // for a PIN that was mistyped.
-  const clinicalRegister = registerForRole(selectedRole?.code);
-  if (clinicalRegister === "nmc" || clinicalRegister === "hcpc") {
-    const number = parsed.data.registrationNumber?.replace(/\s/g, "").toUpperCase() ?? "";
-    if (!number) {
-      return profileError(`Your ${referenceLabel(clinicalRegister)} is required for this role.`, formData);
+  // Whichever reference the role's regulator asks for is the one required, and
+  // it is checked against that register's own format. The role says which; this
+  // code names no role.
+  const register = registerForRole(selectedRole);
+  const ofstedNumber = parsed.data.ofstedRegistrationNumber?.replace(/\s/g, "").toUpperCase();
+  const issNumber = parsed.data.issAuthorisationNumber?.replace(/\s/g, "").toUpperCase();
+  if (register) {
+    const referenceField = referenceFieldFor(register);
+    const supplied =
+      referenceField === "ofsted_urn"
+        ? ofstedNumber
+        : referenceField === "iss_authorisation"
+          ? issNumber
+          : parsed.data.registrationNumber?.replace(/\s/g, "").toUpperCase();
+
+    if (!supplied) {
+      return profileError(`Your ${REFERENCE_LABEL[register]} is required for this role.`, formData);
     }
-    if (!isValidReference(clinicalRegister, number)) {
-      return profileError(`Enter a valid ${referenceLabel(clinicalRegister)}.`, formData);
+    if (!isValidReference(register, supplied)) {
+      return profileError(`Enter a valid ${REFERENCE_LABEL[register]}.`, formData);
     }
   }
 
@@ -260,6 +267,7 @@ export async function saveProfile(_prev: ProfileResult, formData: FormData): Pro
       registration_body: parsed.data.registrationBody ?? null,
       registration_number: parsed.data.registrationNumber ?? null,
       ofsted_registration_number: ofstedNumber || null,
+      iss_authorisation_number: issNumber || null,
       right_to_work_basis: parsed.data.rightToWorkBasis,
       right_to_work_share_code:
         parsed.data.rightToWorkBasis === "share_code" ? (shareCode ?? null) : null,

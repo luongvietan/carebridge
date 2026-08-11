@@ -12,7 +12,12 @@ import {
   mandatoryTrainingItems,
 } from "@/lib/validation/onboarding";
 import { DAYS_OF_WEEK } from "@/lib/onboarding/profile-children";
-import { requiresOfstedRegistration } from "@/lib/compliance/regulated-roles";
+import {
+  referenceFieldFor,
+  registerForRole,
+  REFERENCE_LABEL,
+  REGISTER_LABEL,
+} from "@/lib/compliance/regulated-roles";
 import { loadVerificationSummary } from "@/lib/compliance/load-verification";
 import { VerifiedBadge } from "@/components/verified-badge";
 
@@ -185,7 +190,7 @@ export default async function AdminUserDetailPage({
   const { data: professional } = await admin
     .from("professionals")
     .select(
-      "id, full_name, professional_status, compliance_status, professional_role_id, user_id, profile_photo_path, registration_body, registration_number, ofsted_registration_number, right_to_work_basis, right_to_work_share_code, professional_roles(name, code)",
+      "id, full_name, professional_status, compliance_status, professional_role_id, user_id, profile_photo_path, registration_body, registration_number, ofsted_registration_number, iss_authorisation_number, right_to_work_basis, right_to_work_share_code, professional_roles(name, code, registration_register)",
     )
     .eq("id", id)
     .maybeSingle();
@@ -322,20 +327,30 @@ export default async function AdminUserDetailPage({
               {(professional.professional_roles as { name: string } | null)?.name ?? "—"}
             </dd>
           </div>
-          {requiresOfstedRegistration(
-            (professional.professional_roles as { code: string } | null)?.code,
-          ) && (
-            <div>
-              <dt className="text-[#7a8a81]">Ofsted registration (URN)</dt>
-              <dd>
-                {professional.ofsted_registration_number ?? "—"}
-                <span className="mt-0.5 block text-xs text-[#7a8a81]">
-                  Check this number on the Ofsted register before approving the Ofsted
-                  registration certificate.
-                </span>
-              </dd>
-            </div>
-          )}
+          {(() => {
+            const register = registerForRole(
+              professional.professional_roles as { registration_register: string | null } | null,
+            );
+            if (!register) return null;
+            const field = referenceFieldFor(register);
+            const value =
+              field === "ofsted_urn"
+                ? professional.ofsted_registration_number
+                : field === "iss_authorisation"
+                  ? professional.iss_authorisation_number
+                  : professional.registration_number;
+            return (
+              <div>
+                <dt className="text-[#7a8a81]">{REFERENCE_LABEL[register]}</dt>
+                <dd>
+                  {value ?? "—"}
+                  <span className="mt-0.5 block text-xs text-[#7a8a81]">
+                    Check this against the {REGISTER_LABEL[register]} before approving.
+                  </span>
+                </dd>
+              </div>
+            );
+          })()}
           <div>
             <dt className="text-[#7a8a81]">Right to work</dt>
             <dd>

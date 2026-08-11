@@ -7,8 +7,13 @@ import { Select } from "@/components/ui/select";
 import { DatePicker } from "@/components/ui/date-picker";
 import { FilePreviewInput } from "@/components/ui/file-input";
 import { DAYS_OF_WEEK } from "@/lib/onboarding/profile-children";
-import { registerForRole, requiresOfstedRegistration } from "@/lib/compliance/regulated-roles";
-import { referenceLabel } from "@/lib/compliance/registration-verification";
+import {
+  registerForRole,
+  referenceFieldFor,
+  REFERENCE_LABEL,
+  REFERENCE_PLACEHOLDER,
+  REGISTER_LABEL,
+} from "@/lib/compliance/regulated-roles";
 
 const field =
   "mt-1 w-full rounded-xl border border-[#dbe7e0] bg-white px-3.5 py-2.5 text-sm text-[#1e5a33] placeholder:text-[#9aa8a0] focus:border-[#2e7d32] focus:outline-none focus:ring-2 focus:ring-[#2e7d32]/15";
@@ -17,12 +22,21 @@ const field =
 const NO_SKILL_IDS: string[] = [];
 const NO_AVAILABILITY_DAYS: number[] = [];
 
-type Role = { id: string; name: string; code: string; category: string; categoryOrder: number };
+type Role = {
+  id: string;
+  name: string;
+  code: string;
+  category: string;
+  categoryOrder: number;
+  /** Which register this role answers to, or null. Drives the reference field. */
+  registrationRegister: string | null;
+};
 type Skill = { id: string; name: string };
 type Current = {
   full_name: string | null;
   professional_role_id: string | null;
   ofsted_registration_number: string | null;
+  iss_authorisation_number: string | null;
   date_of_birth: string | null;
   address_line1: string | null;
   address_line2: string | null;
@@ -61,13 +75,13 @@ export function ProfileForm({
   );
   // Ofsted registration is a condition of listing as a nanny or childminder, so
   // the field only appears — and is only required — for those roles.
-  const selectedRoleCode = roles.find((r) => r.id === roleId)?.code;
-  const requiresOfsted = requiresOfstedRegistration(selectedRoleCode);
-  // Nurses register with the NMC and physiotherapists with the HCPC; naming the
-  // field after the regulator (and checking the format) is what the client asked
-  // for, and it is what the administrator later checks against the register.
-  const register = registerForRole(selectedRoleCode);
-  const clinicalRegister = register === "nmc" || register === "hcpc" ? register : null;
+  // Which regulator the chosen role answers to, read from the role itself. The
+  // field, its label and which column it lands in all follow from that, so a
+  // Portuguese Ama asks for an ISS authorisation and a nurse for a PIN without
+  // this component knowing either role exists.
+  const selectedRole = roles.find((r) => r.id === roleId);
+  const register = registerForRole({ registration_register: selectedRole?.registrationRegister });
+  const referenceField = register ? referenceFieldFor(register) : null;
   const formKey = draft ? `draft-${JSON.stringify(draft)}` : "initial";
   const skillSet = new Set(draft?.skillIds ?? currentSkillIds);
   const daySet = new Set(draft?.availabilityDays ?? currentAvailabilityDays);
@@ -84,6 +98,7 @@ export function ProfileForm({
     professionalSummary: current?.professional_summary ?? "",
     registrationBody: current?.registration_body ?? "",
     registrationNumber: current?.registration_number ?? "",
+    issAuthorisationNumber: current?.iss_authorisation_number ?? "",
     rightToWorkBasis: current?.right_to_work_basis ?? "",
     rightToWorkShareCode: current?.right_to_work_share_code ?? "",
     ofstedRegistrationNumber: current?.ofsted_registration_number ?? "",
@@ -133,21 +148,38 @@ export function ProfileForm({
             options={roles.map((r) => ({ value: r.id, label: r.name, group: r.category }))}
           />
         </div>
-        {requiresOfsted && (
+        {register && referenceField === "ofsted_urn" && (
           <label className="block text-sm font-medium">
-            Ofsted Unique Reference Number (URN)
+            {REFERENCE_LABEL[register]}
             <input
               name="ofstedRegistrationNumber"
               required
-              placeholder="e.g. EY123456"
+              placeholder={REFERENCE_PLACEHOLDER[register]}
               defaultValue={v.ofstedRegistrationNumber}
               className={field}
             />
             <span className="mt-1 block text-xs font-normal text-[#7a8a81]">
               CareBridge Connect accepts Ofsted-registered nannies and childminders only. Upload
               your Ofsted registration certificate at the next step — an administrator checks this
-              number against the Ofsted register, and confirms the registration is active, before
-              you can accept any bookings.
+              number against the {REGISTER_LABEL[register]}, and confirms the registration is
+              active, before you can accept any bookings.
+            </span>
+          </label>
+        )}
+        {register && referenceField === "iss_authorisation" && (
+          <label className="block text-sm font-medium">
+            {REFERENCE_LABEL[register]}
+            <input
+              name="issAuthorisationNumber"
+              required
+              placeholder={REFERENCE_PLACEHOLDER[register]}
+              defaultValue={v.issAuthorisationNumber}
+              className={field}
+            />
+            <span className="mt-1 block text-xs font-normal text-[#7a8a81]">
+              Only an authorised Ama may be listed as one. Upload your ISS authorisation at the next
+              step — an administrator confirms it with the {REGISTER_LABEL[register]} before you can
+              accept any bookings.
             </span>
           </label>
         )}
@@ -220,28 +252,20 @@ export function ProfileForm({
             </p>
           )}
         </div>
-        {clinicalRegister ? (
+        {register && referenceField === "registration_number" ? (
           <label className="block text-sm font-medium">
-            {referenceLabel(clinicalRegister)}
-            <input
-              type="hidden"
-              name="registrationBody"
-              value={clinicalRegister.toUpperCase()}
-            />
+            {REFERENCE_LABEL[register]}
+            <input type="hidden" name="registrationBody" value={REGISTER_LABEL[register]} />
             <input
               name="registrationNumber"
               required
-              placeholder={clinicalRegister === "nmc" ? "e.g. 12A3456E" : "e.g. PH123456"}
+              placeholder={REFERENCE_PLACEHOLDER[register]}
               defaultValue={v.registrationNumber}
               className={field}
             />
             <span className="mt-1 block text-xs font-normal text-[#7a8a81]">
-              Upload your{" "}
-              {clinicalRegister === "nmc"
-                ? "NMC Confirmation of Registration (or CCPS where appropriate)"
-                : "HCPC registration confirmation"}{" "}
-              at the next step. An administrator checks this number against the{" "}
-              {clinicalRegister.toUpperCase()} register and confirms the registration is active
+              Upload your registration confirmation at the next step. An administrator checks this
+              number against the {REGISTER_LABEL[register]} and confirms the registration is active
               before you can accept bookings.
             </span>
           </label>

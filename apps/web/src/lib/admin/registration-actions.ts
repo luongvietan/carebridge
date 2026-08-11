@@ -4,11 +4,14 @@ import { requireAdmin } from "@/lib/auth/admin";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { evaluateActivation } from "@/lib/compliance/activation";
 import { sendNotification } from "@/lib/notifications/send";
-import { registerForRole, REGISTER_LABEL } from "@/lib/compliance/regulated-roles";
+import {
+  registerForRole,
+  REGISTER_LABEL,
+  REFERENCE_LABEL,
+} from "@/lib/compliance/regulated-roles";
 import {
   isValidReference,
   normaliseReference,
-  referenceLabel,
   verificationValidUntil,
   type VerificationOutcome,
 } from "@/lib/compliance/registration-verification";
@@ -47,18 +50,19 @@ export async function recordRegistrationVerification(
   const admin = createServiceClient();
   const { data: professional } = await admin
     .from("professionals")
-    .select("id, user_id, professional_status, professional_roles(code)")
+    .select("id, user_id, professional_status, professional_roles(code, registration_register)")
     .eq("id", professionalId)
     .maybeSingle();
   if (!professional) return { error: "Professional not found." };
 
-  const roleCode = (professional.professional_roles as { code: string } | null)?.code;
-  const register = registerForRole(roleCode);
+  const register = registerForRole(
+    professional.professional_roles as { registration_register: string | null } | null,
+  );
   if (!register) return { error: "This role does not require a register check." };
 
-  if (!reference) return { error: `Enter the ${referenceLabel(register)} you checked.` };
+  if (!reference) return { error: `Enter the ${REFERENCE_LABEL[register]} you checked.` };
   if (!isValidReference(register, reference)) {
-    return { error: `That does not look like a valid ${referenceLabel(register)}.` };
+    return { error: `That does not look like a valid ${REFERENCE_LABEL[register]}.` };
   }
 
   // Both confirmations are required to record a pass: an active registration

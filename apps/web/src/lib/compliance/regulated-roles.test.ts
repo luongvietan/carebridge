@@ -1,45 +1,60 @@
 import { describe, it, expect } from "vitest";
 import {
+  referenceFieldFor,
   registerForRole,
-  requiresNmcRegistration,
+  requiresIssAuthorisation,
   requiresOfstedRegistration,
+  REFERENCE_LABEL,
+  REGISTER_LABEL,
+  REGULATOR_REGISTERS,
 } from "./regulated-roles";
 
-describe("requiresOfstedRegistration", () => {
-  it("covers nannies and childminders", () => {
-    expect(requiresOfstedRegistration("nanny")).toBe(true);
-    expect(requiresOfstedRegistration("childminder")).toBe(true);
-  });
-  it("excludes the childcare roles Ofsted does not register", () => {
-    expect(requiresOfstedRegistration("babysitter")).toBe(false);
-    expect(requiresOfstedRegistration("mothers_helper")).toBe(false);
-  });
-  it("treats a missing role as not requiring registration", () => {
-    expect(requiresOfstedRegistration(null)).toBe(false);
-    expect(requiresOfstedRegistration(undefined)).toBe(false);
-  });
-});
-
-describe("requiresNmcRegistration", () => {
-  it("covers all three nursing roles from the split", () => {
-    expect(requiresNmcRegistration("adult_nurse")).toBe(true);
-    expect(requiresNmcRegistration("paediatric_nurse")).toBe(true);
-    expect(requiresNmcRegistration("mental_health_nurse")).toBe(true);
-  });
-  it("does not cover physiotherapists, who are HCPC-registered", () => {
-    expect(requiresNmcRegistration("physiotherapist")).toBe(false);
-  });
-});
-
 describe("registerForRole", () => {
-  it("maps each regulated role to its register", () => {
-    expect(registerForRole("childminder")).toBe("ofsted");
-    expect(registerForRole("mental_health_nurse")).toBe("nmc");
-    expect(registerForRole("physiotherapist")).toBe("hcpc");
+  it("reads the register from the role row", () => {
+    expect(registerForRole({ registration_register: "nmc" })).toBe("nmc");
+    expect(registerForRole({ registration_register: "ordem_enfermeiros" })).toBe(
+      "ordem_enfermeiros",
+    );
+    expect(registerForRole({ registration_register: "iss" })).toBe("iss");
   });
-  it("returns null for roles governed by documents alone", () => {
-    expect(registerForRole("healthcare_assistant")).toBeNull();
-    expect(registerForRole("support_worker")).toBeNull();
-    expect(registerForRole("babysitter")).toBeNull();
+
+  it("returns null for a role governed by its documents alone", () => {
+    expect(registerForRole({ registration_register: null })).toBeNull();
+    expect(registerForRole(null)).toBeNull();
+    expect(registerForRole(undefined)).toBeNull();
+  });
+
+  it("refuses a value that is not a register we know", () => {
+    // A typo in the database must not silently become a register.
+    expect(registerForRole({ registration_register: "ofstd" })).toBeNull();
+  });
+});
+
+describe("referenceFieldFor", () => {
+  it("sends each register to the column its reference lives in", () => {
+    expect(referenceFieldFor("ofsted")).toBe("ofsted_urn");
+    expect(referenceFieldFor("iss")).toBe("iss_authorisation");
+    expect(referenceFieldFor("nmc")).toBe("registration_number");
+    expect(referenceFieldFor("ordem_enfermeiros")).toBe("registration_number");
+    expect(referenceFieldFor("ordem_fisioterapeutas")).toBe("registration_number");
+    expect(referenceFieldFor("hcpc")).toBe("registration_number");
+  });
+});
+
+describe("role predicates", () => {
+  it("asks a childcare role for an Ofsted URN and an Ama for an ISS authorisation", () => {
+    expect(requiresOfstedRegistration({ registration_register: "ofsted" })).toBe(true);
+    expect(requiresOfstedRegistration({ registration_register: "iss" })).toBe(false);
+    expect(requiresIssAuthorisation({ registration_register: "iss" })).toBe(true);
+    expect(requiresIssAuthorisation({ registration_register: "ofsted" })).toBe(false);
+  });
+});
+
+describe("register metadata", () => {
+  it("names and labels every register, so no country is half-configured", () => {
+    for (const register of REGULATOR_REGISTERS) {
+      expect(REGISTER_LABEL[register]).toBeTruthy();
+      expect(REFERENCE_LABEL[register]).toBeTruthy();
+    }
   });
 });

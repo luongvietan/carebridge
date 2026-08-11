@@ -71,7 +71,7 @@ export default async function AdminCompliancePage() {
   const regulatedQuery = admin
     .from("professionals")
     .select(
-      "id, full_name, ofsted_registration_number, registration_number, professional_status, professional_roles(name, code)",
+      "id, full_name, ofsted_registration_number, registration_number, iss_authorisation_number, professional_status, professional_roles(name, code, registration_register)",
     )
     .not("professional_role_id", "is", null)
     .neq("professional_status", "removed")
@@ -130,8 +130,10 @@ export default async function AdminCompliancePage() {
   );
 
   const registrationChecks: RegistrationCheckItem[] = (regulated ?? []).flatMap((p) => {
-    const role = p.professional_roles as { name: string; code: string } | null;
-    const register = registerForRole(role?.code);
+    const role = p.professional_roles as
+      | { name: string; code: string; registration_register: string | null }
+      | null;
+    const register = registerForRole(role);
     if (!register) return [];
     const current = verificationByProfessional.get(`${p.id}-${register}`) ?? null;
     if (isVerificationCurrent(current)) return [];
@@ -141,7 +143,12 @@ export default async function AdminCompliancePage() {
         professionalName: p.full_name,
         roleName: role?.name ?? "",
         register,
-        reference: register === "ofsted" ? p.ofsted_registration_number : p.registration_number,
+        reference:
+          register === "ofsted"
+            ? p.ofsted_registration_number
+            : register === "iss"
+              ? p.iss_authorisation_number
+              : p.registration_number,
         lastOutcome: current?.outcome ?? null,
         lastCheckedAt: current?.checked_at ?? null,
         validUntil: current?.valid_until ?? null,

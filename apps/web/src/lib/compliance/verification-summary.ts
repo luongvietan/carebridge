@@ -1,4 +1,4 @@
-import { registerForRole, REGISTER_LABEL } from "./regulated-roles";
+import { REGISTER_LABEL, type RegulatorRegister } from "./regulated-roles";
 
 /**
  * The six checks behind the "Fully Verified" badge (client request, 7 Aug).
@@ -43,7 +43,8 @@ const DOCUMENT_CHECKS: { key: string; label: string; codes: string[] }[] = [
 ];
 
 export function summariseVerification(args: {
-  roleCode: string | null | undefined;
+  /** The register the role answers to, or null when documents alone govern it. */
+  register: RegulatorRegister | null;
   /** Codes of documents that are approved and in date. */
   approvedDocumentCodes: string[];
   /** Codes the professional's role actually requires. */
@@ -65,7 +66,7 @@ export function summariseVerification(args: {
 
   // Professional registration is the one check that is not a document: it is the
   // administrator's own check against the regulator's register.
-  const register = registerForRole(args.roleCode);
+  const register = args.register;
   checks.splice(1, 0, {
     key: "registration",
     label: "Professional registration verified",

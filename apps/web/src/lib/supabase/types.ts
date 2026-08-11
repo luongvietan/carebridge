@@ -796,6 +796,7 @@ export type Database = {
       }
       document_types: {
         Row: {
+          country_code: string | null
           category: string
           code: string
           has_expiry: boolean
@@ -821,6 +822,36 @@ export type Database = {
           is_active?: boolean
           is_compliance_critical?: boolean
           name?: string
+        }
+        Relationships: []
+      }
+      countries: {
+        Row: {
+          code: string
+          created_at: string
+          currency: string
+          is_live: boolean
+          locale: string
+          name: string
+          sort_order: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          currency: string
+          is_live?: boolean
+          locale: string
+          name: string
+          sort_order?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          currency?: string
+          is_live?: boolean
+          locale?: string
+          name?: string
+          sort_order?: number
         }
         Relationships: []
       }
@@ -1593,6 +1624,7 @@ export type Database = {
       }
       professional_roles: {
         Row: {
+          country_code: string
           registration_register: string | null
           category_id: string
           code: string
@@ -1866,6 +1898,8 @@ export type Database = {
           professional_status: Database["public"]["Enums"]["professional_status"]
           professional_summary: string | null
           profile_photo_path: string | null
+          country_code: string | null
+          iss_authorisation_number: string | null
           registration_body: string | null
           registration_number: string | null
           right_to_work_basis: string | null
@@ -1897,6 +1931,8 @@ export type Database = {
           professional_status?: Database["public"]["Enums"]["professional_status"]
           professional_summary?: string | null
           profile_photo_path?: string | null
+          country_code?: string | null
+          iss_authorisation_number?: string | null
           registration_body?: string | null
           registration_number?: string | null
           right_to_work_basis?: string | null
@@ -1928,6 +1964,8 @@ export type Database = {
           professional_status?: Database["public"]["Enums"]["professional_status"]
           professional_summary?: string | null
           profile_photo_path?: string | null
+          country_code?: string | null
+          iss_authorisation_number?: string | null
           registration_body?: string | null
           registration_number?: string | null
           right_to_work_basis?: string | null

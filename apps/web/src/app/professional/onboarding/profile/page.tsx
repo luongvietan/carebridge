@@ -8,7 +8,7 @@ export default async function ProfilePage() {
   const [{ data: roles }, { data: skills }, { data: { user } }] = await Promise.all([
     supabase
       .from("professional_roles")
-      .select("id, name, code, role_categories(name, sort_order)")
+      .select("id, name, code, registration_register, role_categories(name, sort_order)")
       .eq("is_active", true)
       .order("name"),
     supabase.from("skills").select("id, name").eq("is_active", true).order("name"),
@@ -19,7 +19,7 @@ export default async function ProfilePage() {
     ? await supabase
         .from("professionals")
         .select(
-          "id, full_name, professional_role_id, date_of_birth, address_line1, address_line2, city, postcode, national_insurance_no, professional_summary, registration_body, registration_number, ofsted_registration_number, right_to_work_basis, right_to_work_share_code, travel_distance_km, has_driving_licence, has_vehicle, profile_photo_path",
+          "id, full_name, professional_role_id, date_of_birth, address_line1, address_line2, city, postcode, national_insurance_no, professional_summary, registration_body, registration_number, ofsted_registration_number, iss_authorisation_number, right_to_work_basis, right_to_work_share_code, travel_distance_km, has_driving_licence, has_vehicle, profile_photo_path",
         )
         .eq("user_id", user.id)
         .maybeSingle()
@@ -52,6 +52,7 @@ export default async function ProfilePage() {
           id: r.id,
           name: r.name,
           code: r.code,
+          registrationRegister: r.registration_register,
           category: r.role_categories?.name ?? "",
           categoryOrder: r.role_categories?.sort_order ?? 0,
         }))

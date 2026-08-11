@@ -3,11 +3,14 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Select } from "@/components/ui/select";
 import { recordRegistrationVerification } from "@/lib/admin/registration-actions";
+import { VERIFICATION_OUTCOMES } from "@/lib/compliance/registration-verification";
 import {
-  VERIFICATION_OUTCOMES,
-  referenceLabel,
-} from "@/lib/compliance/registration-verification";
-import { REGISTER_LABEL, REGISTER_LOOKUP_URL, type RegulatorRegister } from "@/lib/compliance/regulated-roles";
+  REFERENCE_LABEL,
+  REFERENCE_PLACEHOLDER,
+  REGISTER_LABEL,
+  REGISTER_LOOKUP_URL,
+  type RegulatorRegister,
+} from "@/lib/compliance/regulated-roles";
 
 export type RegistrationCheckItem = {
   professionalId: string;
@@ -70,12 +73,12 @@ function VerificationForm({ item }: { item: RegistrationCheckItem }) {
 
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         <label className="block text-sm font-medium">
-          {referenceLabel(item.register)} checked
+          {REFERENCE_LABEL[item.register]} checked
           <input
             name="reference"
             required
             defaultValue={item.reference ?? ""}
-            placeholder={item.register === "nmc" ? "e.g. 12A3456E" : "e.g. EY123456"}
+            placeholder={REFERENCE_PLACEHOLDER[item.register]}
             className={field}
           />
         </label>

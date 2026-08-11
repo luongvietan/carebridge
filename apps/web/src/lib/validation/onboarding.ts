@@ -115,6 +115,17 @@ export const profileSchema = z.object({
       (v) => !v || /^[A-Za-z0-9]{9}$/.test(v.replace(/\s/g, "")),
       "Enter a valid 9-character share code, e.g. W12 A34 B56",
     ),
+  // Portuguese Social Security authorisation for an Ama. Format is confirmed by
+  // an administrator against the ISS itself, so this only checks it is a
+  // plausible reference rather than inventing a pattern that could reject a
+  // valid authorisation.
+  issAuthorisationNumber: z
+    .string()
+    .optional()
+    .refine(
+      (v) => !v || /^[A-Za-z0-9./-]{4,20}$/.test(v.replace(/\s/g, "")),
+      "Enter the authorisation number exactly as it appears on your ISS authorisation.",
+    ),
   travelDistanceKm: z.coerce.number().int().min(0).max(1000).optional(),
   hasDrivingLicence: z.boolean().optional(),
   hasVehicle: z.boolean().optional(),

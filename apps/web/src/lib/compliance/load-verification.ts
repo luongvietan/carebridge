@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
 import { summariseVerification, type VerificationSummary } from "./verification-summary";
+import { registerForRole } from "./regulated-roles";
 
 /**
  * Load the evidence behind the Fully Verified badge for one professional:
@@ -13,7 +14,7 @@ export async function loadVerificationSummary(
 ): Promise<VerificationSummary | null> {
   const { data: professional } = await admin
     .from("professionals")
-    .select("id, professional_role_id, professional_roles(code)")
+    .select("id, professional_role_id, professional_roles(code, registration_register)")
     .eq("id", professionalId)
     .maybeSingle();
   if (!professional?.professional_role_id) return null;
@@ -44,7 +45,9 @@ export async function loadVerificationSummary(
     .filter((code): code is string => Boolean(code));
 
   return summariseVerification({
-    roleCode: (professional.professional_roles as { code: string } | null)?.code,
+    register: registerForRole(
+      professional.professional_roles as { registration_register: string | null } | null,
+    ),
     approvedDocumentCodes,
     requiredDocumentCodes,
     registrationVerified: verified === true,
