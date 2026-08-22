@@ -56,6 +56,13 @@ export default async function ProfessionalHome() {
             cta: "Continue onboarding",
           },
           {
+            href: "/professional/roles",
+            title: "Your roles",
+            description:
+              "See every role you work in, what each one is still waiting for, and apply for another.",
+            cta: "Manage roles",
+          },
+          {
             href: "/professional/bookings",
             title: "Bookings",
             description:

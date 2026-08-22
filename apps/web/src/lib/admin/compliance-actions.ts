@@ -3,6 +3,7 @@ import { createServiceClient } from "@/lib/supabase/service";
 import { requireAdmin } from "@/lib/auth/admin";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { evaluateActivation } from "@/lib/compliance/activation";
+import { recomputeRoleAssignments } from "@/lib/roles/assignments";
 import { sendNotification } from "@/lib/notifications/send";
 import { sendDueComplianceReminders } from "@/lib/compliance/reminders";
 import type { ProfessionalStatus } from "./status-machine";
@@ -139,6 +140,11 @@ async function recomputeCompliance(
   // Gate on live documents, the competency assessment (spec item 2), and the
   // training attestation (spec item 1) — see evaluateActivation. Shared with the
   // admin reinstate flow so both apply the same activation rules.
+  // Roles first: a document decision can clear (or break) one role without
+  // touching another, and the profile-level state below is read from what is
+  // left standing.
+  await recomputeRoleAssignments(admin, professionalId);
+
   const { documentsCompliant, activate } = await evaluateActivation(admin, professionalId);
 
   if (activate) {

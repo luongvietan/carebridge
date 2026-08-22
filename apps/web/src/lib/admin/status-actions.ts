@@ -6,6 +6,7 @@ import { applyStatusAction, type ProfessionalStatus, type StatusActionType } fro
 import { PUNITIVE, REASON_CODES, type ReasonCode } from "./status-constants";
 import { reinstateOutcome, type ComplianceStatus } from "./reinstate-compliance";
 import { evaluateActivation } from "@/lib/compliance/activation";
+import { recomputeRoleAssignments } from "@/lib/roles/assignments";
 import type { AccountStatus } from "./account-status";
 import { sendNotification, type NotificationType } from "@/lib/notifications/send";
 
@@ -70,6 +71,7 @@ export async function applyProfessionalStatusAction(
     professional_status: t.to,
   };
   if (action === "reinstate") {
+    await recomputeRoleAssignments(admin, professionalId);
     const { activate, documentsCompliant } = await evaluateActivation(admin, professionalId);
     const outcome = reinstateOutcome({ activatable: activate, documentsCompliant });
     finalStatus = outcome.professionalStatus;

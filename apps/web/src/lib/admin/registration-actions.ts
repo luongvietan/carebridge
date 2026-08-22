@@ -3,6 +3,7 @@ import { createServiceClient } from "@/lib/supabase/service";
 import { requireAdmin } from "@/lib/auth/admin";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { evaluateActivation } from "@/lib/compliance/activation";
+import { recomputeRoleAssignments } from "@/lib/roles/assignments";
 import { sendNotification } from "@/lib/notifications/send";
 import {
   registerForRole,
@@ -99,6 +100,7 @@ export async function recordRegistrationVerification(
   // The check may have been the last outstanding item. Mirror the document
   // review: activate only from a compliance-blocked status, never from a
   // punitive one (suspended, under investigation, rejected, removed).
+  await recomputeRoleAssignments(admin, professionalId);
   const { activate } = await evaluateActivation(admin, professionalId);
   const blocked = ["pending_verification", "booking_restricted", "compliance_hold"];
   if (activate && blocked.includes(professional.professional_status)) {

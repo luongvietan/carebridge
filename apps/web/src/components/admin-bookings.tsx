@@ -24,6 +24,8 @@ type Professional = {
   id: string;
   full_name: string;
   professional_role_id: string | null;
+  /** Every role this professional is currently cleared for. */
+  activeRoleIds: string[];
   can_accept_bookings: boolean | null;
 };
 
@@ -49,7 +51,7 @@ function AssignControl({
   onDone: () => void;
 }) {
   const eligible = professionals.filter(
-    (p) => p.professional_role_id === roleId && !!p.can_accept_bookings,
+    (p) => p.activeRoleIds.includes(roleId) && !!p.can_accept_bookings,
   );
   const [selected, setSelected] = useState(eligible[0]?.id ?? "");
   const [busy, setBusy] = useState(false);

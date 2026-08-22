@@ -12,6 +12,7 @@ import {
 import type { RateCard } from "@/lib/rates/snapshot";
 import { applyTransition, type Actor } from "./transitions";
 import { canAccept } from "./eligibility";
+import { activeRoleIds } from "@/lib/roles/assignments";
 import { sendNotification } from "@/lib/notifications/send";
 import { createBookingSchema } from "@/lib/validation/bookings";
 import { REQUESTER_ACCOUNT } from "./constants";
@@ -169,14 +170,16 @@ export async function createBooking(form: unknown): Promise<BookingActionResult>
   // currently eligible to accept — spec item 7: professionals receive booking
   // notifications when matching work becomes available.
   const { data: matches } = await admin
-    .from("professionals")
-    .select("user_id")
+    .from("professional_role_assignments")
+    .select("professionals(user_id, can_accept_bookings)")
     .eq("professional_role_id", formData.professionalRoleId)
-    .eq("can_accept_bookings", true);
+    .eq("status", "active");
   await Promise.all([
     sendNotification("booking_request", user.id, { booking_id: result.id }),
     ...(matches ?? [])
-      .map((m) => m.user_id)
+      .map((m) => m.professionals as { user_id: string | null; can_accept_bookings: boolean | null } | null)
+      .filter((p) => p?.can_accept_bookings)
+      .map((p) => p?.user_id)
       .filter((id): id is string => Boolean(id))
       .map((id) => sendNotification("booking_available", id, { booking_id: result.id })),
   ]);
@@ -205,7 +208,10 @@ export async function acceptBooking(bookingId: string): Promise<BookingActionRes
   if (!t.ok) return { error: t.error };
 
   const eligible = canAccept(
-    { canAcceptBookings: !!prof.can_accept_bookings, professionalRoleId: prof.professional_role_id },
+    {
+      canAcceptBookings: !!prof.can_accept_bookings,
+      activeRoleIds: await activeRoleIds(admin, prof.id),
+    },
     booking.professional_role_id,
   );
   if (!eligible.ok) return { error: eligible.reason };
@@ -239,7 +245,7 @@ export async function declineBooking(bookingId: string, reason?: string): Promis
 
   const t = applyTransition(booking.status, "decline", "professional");
   if (!t.ok) return { error: t.error };
-  if (prof.professional_role_id !== booking.professional_role_id) {
+  if (!(await activeRoleIds(admin, prof.id)).includes(booking.professional_role_id)) {
     return { error: "This booking is for a different professional role." };
   }
 
@@ -281,7 +287,10 @@ export async function assignBooking(bookingId: string, professionalId: string): 
     .maybeSingle();
   if (!prof) return { error: "Professional not found." };
   const eligible = canAccept(
-    { canAcceptBookings: !!prof.can_accept_bookings, professionalRoleId: prof.professional_role_id },
+    {
+      canAcceptBookings: !!prof.can_accept_bookings,
+      activeRoleIds: await activeRoleIds(admin, prof.id),
+    },
     booking.professional_role_id,
   );
   if (!eligible.ok) return { error: eligible.reason };

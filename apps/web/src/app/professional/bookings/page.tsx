@@ -1,4 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/service";
+import { activeRoleIds } from "@/lib/roles/assignments";
 import { ProfessionalBookings } from "@/components/professional-bookings";
 import { SubmitHoursForm, type ShiftAwaitingHours } from "@/components/timesheet-forms";
 
@@ -29,14 +31,17 @@ export default async function ProfessionalBookingsPage() {
     )
     .order("scheduled_start", { ascending: true });
 
-  const roleId = prof?.professional_role_id ?? null;
+  // Every role the professional is currently cleared for, not just their main
+  // one: a nurse who also childminds sees both kinds of open shift.
+  const myRoles = prof ? new Set(await activeRoleIds(createServiceClient(), prof.id)) : new Set<string>();
+
   // Only future, role-matching open bookings are acceptable — a past-start
   // booking can never be accepted (the server + DB trigger reject it).
   const now = Date.now();
   const forMyRole = (rows ?? []).filter(
     (b) =>
       b.status === "open" &&
-      b.professional_role_id === roleId &&
+      myRoles.has(b.professional_role_id) &&
       new Date(b.scheduled_start).getTime() > now,
   );
   const open = forMyRole.filter((b) => !declined.has(b.id));

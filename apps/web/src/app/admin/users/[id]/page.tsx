@@ -7,6 +7,8 @@ import { requireAdmin } from "@/lib/auth/admin";
 import type { AccountStatus } from "@/lib/admin/account-status";
 import type { ProfessionalStatus } from "@/lib/admin/status-machine";
 import { createServiceClient } from "@/lib/supabase/service";
+import { loadRoleAssignments } from "@/lib/roles/assignments";
+import { ROLE_STATUS_LABEL, roleOutstanding } from "@/lib/roles/outstanding";
 import {
   employmentStatusLabels,
   mandatoryTrainingItems,
@@ -197,6 +199,13 @@ export default async function AdminUserDetailPage({
 
   if (!professional) notFound();
 
+  // Every role this professional holds, each with its own outstanding items —
+  // the same view the professional sees, so a query about "why am I not active
+  // for X" can be answered from the same page.
+  const roleAssignments = (await loadRoleAssignments(admin, professional.id)).filter(
+    (a) => a.status !== "withdrawn",
+  );
+
   // The profile photo lives in the private documents bucket; sign a short-lived
   // URL so the admin can view it during identity verification.
   const photoUrl = professional.profile_photo_path
@@ -322,9 +331,24 @@ export default async function AdminUserDetailPage({
             <dd>{user?.email ?? "—"}</dd>
           </div>
           <div>
-            <dt className="text-[#7a8a81]">Role</dt>
+            <dt className="text-[#7a8a81]">Roles</dt>
             <dd>
-              {(professional.professional_roles as { name: string } | null)?.name ?? "—"}
+              {roleAssignments.length === 0
+                ? ((professional.professional_roles as { name: string } | null)?.name ?? "—")
+                : roleAssignments.map((a) => (
+                    <span key={a.roleId} className="mt-0.5 block">
+                      {a.roleName}
+                      {a.isPrimary && <span className="text-[#7a8a81]"> — main</span>}
+                      <span className="ml-1.5 rounded-full bg-[#eef5f0] px-2 py-0.5 text-xs text-[#1e5a33]">
+                        {ROLE_STATUS_LABEL[a.status]}
+                      </span>
+                      {roleOutstanding(a.gaps).length > 0 && (
+                        <span className="mt-0.5 block text-xs text-[#7a8a81]">
+                          Outstanding: {roleOutstanding(a.gaps).join("; ")}
+                        </span>
+                      )}
+                    </span>
+                  ))}
             </dd>
           </div>
           {(() => {

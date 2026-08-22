@@ -41,11 +41,26 @@ export default async function DocumentsPage() {
     );
   }
 
-  const [{ data: required }, { data: existing }] = await Promise.all([
+  // Every role the professional holds, not only the main one: a nurse who also
+  // childminds uploads one set of documents covering both, and a certificate
+  // that satisfies two roles is still asked for once.
+  const { data: heldRoles } = await supabase
+    .from("professional_role_assignments")
+    .select("professional_role_id")
+    .eq("professional_id", prof.id)
+    .neq("status", "withdrawn");
+  const roleIds = Array.from(
+    new Set([
+      prof.professional_role_id,
+      ...(heldRoles ?? []).map((r) => r.professional_role_id),
+    ]),
+  );
+
+  const [{ data: requiredRows }, { data: existing }] = await Promise.all([
     supabase
       .from("compliance_requirements")
       .select("document_type_id, document_types(id, code, name, is_compliance_critical, has_expiry)")
-      .eq("professional_role_id", prof.professional_role_id),
+      .in("professional_role_id", roleIds),
     supabase
       .from("documents")
       .select("document_type_id, verification_status, rejection_reason, storage_path, original_filename")
@@ -82,7 +97,12 @@ export default async function DocumentsPage() {
     }),
   );
 
-  const items: DocItem[] = (required ?? []).map((r) => {
+  // Two roles requiring the same document type must not produce two upload slots.
+  const required = [
+    ...new Map((requiredRows ?? []).map((r) => [r.document_type_id, r])).values(),
+  ];
+
+  const items: DocItem[] = required.map((r) => {
     const dt = r.document_types as {
       id: string;
       code: string;

@@ -12,6 +12,8 @@ type Phase = "intro" | "questions" | "result" | "locked";
 
 type State = {
   phase: Phase;
+  /** The role this attempt is for — a professional may hold several. */
+  roleName: string | null;
   questions: AssessmentQuestion[];
   answers: Record<string, string>;
   result: { score: number; passed: boolean; canRetry: boolean } | null;
@@ -24,13 +26,14 @@ type Action =
   | { type: "clear-error" }
   | { type: "error"; error: string }
   | { type: "locked" }
-  | { type: "start"; questions: AssessmentQuestion[] }
+  | { type: "start"; questions: AssessmentQuestion[]; roleName: string | null }
   | { type: "answer"; questionId: string; key: string }
   | { type: "result"; result: { score: number; passed: boolean; canRetry: boolean } }
   | { type: "reset-intro" };
 
 const initialState: State = {
   phase: "intro",
+  roleName: null,
   questions: [],
   answers: {},
   result: null,
@@ -52,6 +55,7 @@ function reducer(state: State, action: Action): State {
       return {
         ...state,
         phase: "questions",
+        roleName: action.roleName,
         questions: action.questions,
         answers: {},
         busy: false,
@@ -71,17 +75,17 @@ function reducer(state: State, action: Action): State {
   }
 }
 
-export function AssessmentRunner() {
+export function AssessmentRunner({ roleId }: { roleId?: string }) {
   const [state, dispatch] = useReducer(reducer, initialState);
   const attemptIdRef = useRef("");
 
   async function begin() {
     dispatch({ type: "busy" });
-    const r = await startAttempt();
+    const r = await startAttempt(roleId);
     if ("error" in r) return dispatch({ type: "error", error: r.error });
     if ("locked" in r) return dispatch({ type: "locked" });
     attemptIdRef.current = r.attemptId;
-    dispatch({ type: "start", questions: r.questions });
+    dispatch({ type: "start", questions: r.questions, roleName: r.roleName });
   }
 
   async function submit() {
@@ -115,6 +119,12 @@ export function AssessmentRunner() {
               {state.busy ? "Loading…" : "Begin assessment"}
             </button>
           </div>
+        )}
+
+        {state.phase === "questions" && state.roleName && (
+          <p className="mb-4 text-sm text-[#4a4a4a]">
+            Assessment for the <strong>{state.roleName}</strong> role.
+          </p>
         )}
 
         {state.phase === "questions" && (

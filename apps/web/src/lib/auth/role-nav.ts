@@ -13,6 +13,7 @@ export const ROLE_NAV: Record<AccountType, RoleNavItem[]> = {
   professional: [
     { href: "/professional", label: "Dashboard" },
     { href: "/professional/onboarding/eligibility", label: "Onboarding" },
+    { href: "/professional/roles", label: "Roles" },
     { href: "/professional/bookings", label: "Bookings" },
     { href: "/professional/earnings", label: "Earnings" },
   ],

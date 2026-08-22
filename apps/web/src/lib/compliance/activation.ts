@@ -3,6 +3,7 @@ import type { Database } from "@/lib/supabase/types";
 import { isCompliant, canActivateProfessional } from "./requirements";
 
 export type ActivationState = {
+  /** The primary role — what the profile-level messaging talks about. */
   roleId: string | null;
   documentsCompliant: boolean;
   /** False when the role answers to a register and no current check is on file. */
@@ -80,12 +81,38 @@ export async function evaluateActivation(
   });
   const registrationVerified = verified !== false;
 
-  const activate = canActivateProfessional({
+  const primaryActivatable = canActivateProfessional({
     documentsCompliant,
     assessmentPassed,
     trainingAttestedCurrent,
     hasApprovedTrainingCertificate,
     registrationVerified,
   });
+
+  // A professional may hold several roles and is activatable as soon as ONE of
+  // them is clear — a nurse whose childminder application is still missing a DBS
+  // should be nursing. fn_role_assignment_eligible is the same rule as above,
+  // asked of a named role, so a single-role professional gets an identical
+  // answer by either route.
+  let activate = primaryActivatable;
+  if (!activate) {
+    const { data: assignments } = await admin
+      .from("professional_role_assignments")
+      .select("professional_role_id")
+      .eq("professional_id", professionalId)
+      .neq("status", "withdrawn");
+    for (const a of assignments ?? []) {
+      if (a.professional_role_id === roleId) continue;
+      const { data: eligible } = await admin.rpc("fn_role_assignment_eligible", {
+        p_professional_id: professionalId,
+        p_role_id: a.professional_role_id,
+      });
+      if (eligible === true) {
+        activate = true;
+        break;
+      }
+    }
+  }
+
   return { roleId, documentsCompliant, registrationVerified, activate };
 }
