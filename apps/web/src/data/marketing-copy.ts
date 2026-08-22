@@ -6,13 +6,10 @@ export const siteTagline =
 export const heroHeadline =
   "Connecting Families and Organisations with Verified Healthcare and Childcare Professionals.";
 
-/** The markets CareBridge Connect operates in. `live: false` renders as
- *  "launching soon" — claiming a country where no professional can yet
- *  register would mislead the families and professionals who read it. */
-export const markets = [
-  { code: "GB", flag: "\u{1F1EC}\u{1F1E7}", name: "United Kingdom", live: true },
-  { code: "PT", flag: "\u{1F1F5}\u{1F1F9}", name: "Portugal", live: false },
-] as const;
+/** The markets CareBridge Connect operates in live in the `countries` table
+ *  (migration 0076) and are read by the homepage — `is_live: false` renders as
+ *  "launching soon" — claiming a country where no professional can yet register
+ *  would mislead the families and professionals who read it. */
 
 export const marketsLine =
   "Serving the United Kingdom, with Portugal launching next — each country with its own professional roles, regulators and compliance requirements.";

@@ -10,14 +10,20 @@ import { SiteNav } from "@/components/site-nav";
 import { SiteFooter } from "@/components/site-footer";
 import { StatsBand } from "@/components/stats-band";
 import { onboardingSteps } from "@/data/marketing-copy";
+import { getSelectedCountry, listMarkets } from "@/lib/marketing/market-server";
 import { marketingHeading, marketingSection, marketingSubheading } from "@/lib/marketing-ui";
 
-export default function HomePage() {
+export default async function HomePage() {
+  // The markets and the visitor's choice both come from server state: the
+  // `countries` table owns what exists and what is live, the cookie owns which
+  // one was picked.
+  const [markets, selectedCountry] = await Promise.all([listMarkets(), getSelectedCountry()]);
+
   return (
     <HomePageMotion>
       <SiteNav />
 
-      <HeroSection />
+      <HeroSection markets={markets} selected={selectedCountry} />
 
       <StatsBand />
 

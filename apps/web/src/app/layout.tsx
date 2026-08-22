@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Sans } from "next/font/google";
 import { siteTagline } from "@/data/marketing-copy";
+import { localeForCountry } from "@/lib/marketing/market";
+import { getSelectedCountry } from "@/lib/marketing/market-server";
 import "./globals.css";
 
 const plex = IBM_Plex_Sans({
@@ -38,9 +40,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // The document language follows the visitor's market, so the Portuguese
+  // layer (Phase 2) inherits correct announcing the moment it lands.
+  const country = await getSelectedCountry();
   return (
-    <html lang="en">
+    <html lang={localeForCountry(country)}>
       <body className={`${plex.className} min-h-screen bg-white text-[#14301e] antialiased`}>
         {children}
       </body>
