@@ -1,7 +1,9 @@
+-- 0081 gave notification_templates a locale dimension; seed assertions count
+-- the English row specifically.
 begin;
 select plan(2);
 select ok(
-  (select count(*) from notification_templates where type='booking_cancellation') = 1,
+  (select count(*) from notification_templates where type='booking_cancellation' and locale='en-GB') = 1,
   'booking_cancellation template seeded');
 select ok(
   (select count(*) from rate_cards where effective_to is null) >=

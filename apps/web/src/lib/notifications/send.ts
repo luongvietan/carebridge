@@ -45,6 +45,28 @@ function defaultSender(): ChannelSender {
  * Render the template for `type`, insert a notifications row, attempt delivery,
  * and mark the row sent/failed. Best-effort: never throws to the caller.
  */
+/** Pure: a professional's country maps to the locale their mail is written in. */
+export function localeForCountry(countryCode: string | null | undefined): string {
+  return countryCode === "PT" ? "pt-PT" : "en-GB";
+}
+
+/**
+ * The template locale for a recipient. Professionals carry a country (0076) —
+ * a Portuguese nurse reads Portuguese; clients and organisations default to
+ * English until their own markets go live.
+ */
+async function localeForRecipient(
+  admin: ReturnType<typeof createServiceClient>,
+  recipientUserId: string,
+): Promise<string> {
+  const { data } = await admin
+    .from("professionals")
+    .select("country_code")
+    .eq("user_id", recipientUserId)
+    .maybeSingle();
+  return localeForCountry(data?.country_code);
+}
+
 export async function sendNotification(
   type: NotificationType,
   recipientUserId: string,
@@ -53,12 +75,24 @@ export async function sendNotification(
 ): Promise<void> {
   const admin = createServiceClient();
   try {
-    const [{ data: tpl }, { data: u }] = await Promise.all([
-      admin
+    // The recipient's language first, then that variant — falling back to the
+    // English row wherever a translation has not landed yet.
+    const locale = await localeForRecipient(admin, recipientUserId);
+    let { data: tpl } = await admin
+      .from("notification_templates")
+      .select("subject, body")
+      .eq("type", type)
+      .eq("locale", locale)
+      .maybeSingle();
+    if (!tpl && locale !== "en-GB") {
+      ({ data: tpl } = await admin
         .from("notification_templates")
         .select("subject, body")
         .eq("type", type)
-        .single(),
+        .eq("locale", "en-GB")
+        .single());
+    }
+    const [{ data: u }] = await Promise.all([
       admin.from("users").select("email").eq("id", recipientUserId).maybeSingle(),
     ]);
     if (!tpl) return;

@@ -40,15 +40,17 @@ select is(
 );
 
 -- Templates the app sends by name: a missing row means a silent no-send.
+-- Counted per locale (0081): every listed type needs its en-GB row; pt-PT
+-- parity is asserted in 0081_notification_template_locales_test.sql.
 select is(
   (select count(*)::int from notification_templates
-    where type in ('registration_confirmation','assessment_result','compliance_approval',
+    where locale = 'en-GB'
+      and type in ('registration_confirmation','assessment_result','compliance_approval',
                    'compliance_expiry_reminder','compliance_rejected','further_info_required',
                    'booking_request','booking_available','booking_confirmation',
                    'booking_cancellation','payment_receipt','payout_recorded')),
   12,
-  'the notification templates the app sends are all seeded'
-);
+  'the notification templates the app sends are all seeded');
 
 select * from finish();
 rollback;

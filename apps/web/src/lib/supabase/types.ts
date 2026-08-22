@@ -1191,18 +1191,21 @@ export type Database = {
         Row: {
           body: string
           id: string
+          locale: string
           subject: string
           type: string
         }
         Insert: {
           body: string
           id?: string
+          locale?: string
           subject: string
           type: string
         }
         Update: {
           body?: string
           id?: string
+          locale?: string
           subject?: string
           type?: string
         }
