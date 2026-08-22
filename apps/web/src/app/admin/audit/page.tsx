@@ -68,7 +68,8 @@ export default async function AdminAuditPage({
       <h1 className="mt-1 text-3xl font-bold">Audit log</h1>
       <p className="mt-2 text-sm text-[#4a4a4a]">
         Append-only record of registrations, document uploads, assessment completions, approvals,
-        payments and administrator actions (spec §16). Showing the most recent {MAX_ROWS} entries.
+        payments, administrator actions and sign-ins, including failed attempts (spec §16).
+        Showing the most recent {MAX_ROWS} entries.
       </p>
 
       <form method="GET" className="mt-6 flex flex-wrap items-end gap-4 text-sm">

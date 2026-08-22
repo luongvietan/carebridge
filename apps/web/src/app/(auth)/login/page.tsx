@@ -3,11 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { recordSignIn } from "@/lib/auth/actions";
+import { attemptSignIn } from "@/lib/auth/actions";
+import { SIGN_IN_ERROR } from "@/lib/auth/sign-in-messages";
 import { AuthShell } from "@/components/auth-shell";
 import { BackLink } from "@/components/back-link";
-import { createClient } from "@/lib/supabase/browser";
-import { roleHome, type AccountType } from "@/lib/auth/rbac";
 import { marketingButtonPrimary, marketingInput } from "@/lib/marketing-ui";
 
 export default function LoginPage() {
@@ -20,32 +19,20 @@ export default function LoginPage() {
     setPending(true);
     setError(null);
     const form = new FormData(e.currentTarget);
-    const supabase = createClient();
-    const { data, error: signInError } = await supabase.auth.signInWithPassword({
-      email: String(form.get("email")),
-      password: String(form.get("password")),
-    });
-    if (signInError || !data.user) {
-      setError("Invalid email or password, or email not yet confirmed.");
+    // The credential check runs server-side so failed attempts can be audited.
+    try {
+      const result = await attemptSignIn(String(form.get("email")), String(form.get("password")));
+      if (!result.ok) {
+        setError(result.error);
+        setPending(false);
+        return;
+      }
+      router.push(result.redirectTo);
+      router.refresh();
+    } catch {
+      setError(SIGN_IN_ERROR);
       setPending(false);
-      return;
     }
-    const { data: row } = await supabase
-      .from("users")
-      .select("account_type, account_status")
-      .eq("id", data.user.id)
-      .single();
-    if (row && row.account_status !== "active") {
-      await supabase.auth.signOut();
-      setError("Your account is suspended. Please contact CareBridge Connect.");
-      setPending(false);
-      return;
-    }
-    // Audit the sign-in before navigating (client request, 7 Aug). Best-effort:
-    // a failure to record must never stop somebody logging in.
-    await recordSignIn().catch(() => {});
-    router.push(roleHome((row?.account_type ?? "private_client") as AccountType));
-    router.refresh();
   }
 
   return (

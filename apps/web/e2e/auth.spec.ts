@@ -93,6 +93,15 @@ test("unauthenticated visit to a role area redirects to login", async ({ page })
   await expect(page).toHaveURL(/\/login/);
 });
 
+test("a wrong password shows the generic error and stays on the login page", async ({ page }) => {
+  await page.goto("/login");
+  await page.locator('input[name="email"]').fill(`noone_${Date.now()}@test.dev`);
+  await page.locator('input[name="password"]').fill("definitely-not-the-password");
+  await page.getByRole("button", { name: /sign in/i }).click();
+  await expect(page.getByText(/invalid email or password/i)).toBeVisible();
+  await expect(page).toHaveURL(/\/login/);
+});
+
 test("signed-in professional is redirected away from admin area", async ({ page }) => {
   const email = `pro_guard_${Date.now()}@test.dev`;
   const api = await request.newContext();
