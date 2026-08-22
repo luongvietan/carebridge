@@ -11,6 +11,7 @@ import { SiteNav } from "@/components/site-nav";
 import { StatsBand } from "@/components/stats-band";
 import { aboutContent } from "@/data/legal-copy";
 import { marketingImages } from "@/data/marketing-images";
+import { getDictionaryForVisitor } from "@/lib/i18n/server";
 import {
   marketingCardShadow,
   marketingHeading,
@@ -25,7 +26,8 @@ export const metadata: Metadata = { title: "About — CareBridge Connect" };
 const imageShell =
   "relative overflow-hidden rounded-[28px] shadow-[0_16px_40px_-16px_rgba(15,38,28,0.28)] sm:rounded-[32px]";
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const t = await getDictionaryForVisitor();
   const { about } = marketingImages;
   const { welcome, mission, vision, commitment, verification, importantInfo, founder } =
     aboutContent;
@@ -41,7 +43,7 @@ export default function AboutPage() {
         image={marketingImages.pageHero.about}
       />
 
-      <StatsBand />
+      <StatsBand labels={t.statsBandLabels} />
 
       <main>
         <section className={marketingSection}>

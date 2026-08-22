@@ -1,7 +1,12 @@
 import { stats } from "@/data/marketing-copy";
+
+type Props = {
+  /** Translated labels, in the same order as `stats`. */
+  labels: readonly [string, string, string, string];
+};
 import { marketingCard, marketingSectionShell } from "@/lib/marketing-ui";
 
-export function StatsBand() {
+export function StatsBand({ labels }: Props) {
   return (
     <section className={marketingSectionShell}>
       <div className={`relative mx-auto max-w-7xl overflow-hidden ${marketingCard}`}>
@@ -22,9 +27,9 @@ export function StatsBand() {
             data-reveal-stagger
             className="grid grid-cols-2 divide-x divide-y divide-white/15 sm:grid-cols-4 sm:divide-y-0"
           >
-            {stats.map((stat) => (
+            {stats.map((stat, i) => (
               <div
-                key={stat.label}
+                key={labels[i] ?? stat.label}
                 data-reveal-child
                 className="flex flex-col items-center justify-center px-4 py-6 text-center sm:py-2"
               >

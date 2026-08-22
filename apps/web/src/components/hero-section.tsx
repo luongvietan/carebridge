@@ -5,13 +5,7 @@ import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { CtaPillLink } from "@/components/cta-pill-link";
-import {
-  ctaLabels,
-  heroHeadline,
-  heroSubheadline,
-  registerLinks,
-  regulatoryDisclaimer,
-} from "@/data/marketing-copy";
+import { registerLinks, regulatoryDisclaimer } from "@/data/marketing-copy";
 import { marketingImages } from "@/data/marketing-images";
 import { MarketSwitch } from "@/components/market-switch";
 import type { Market } from "@/lib/marketing/market-server";
@@ -24,9 +18,16 @@ type Props = {
   /** Markets straight from the `countries` table — never a hard-coded list. */
   markets: Market[];
   selected: string;
+  /** Translated hero copy, from the visitor's dictionary. */
+  badge: string;
+  headline: string;
+  subheadline: string;
+  /** Translated call-to-action labels. */
+  joinLabel: string;
+  requestLabel: string;
 };
 
-export function HeroSection({ markets, selected }: Props) {
+export function HeroSection({ markets, selected, badge, headline, subheadline, joinLabel, requestLabel }: Props) {
   const { hero, heroAvatars } = marketingImages;
   const sectionRef = useRef<HTMLElement>(null);
 
@@ -105,7 +106,7 @@ export function HeroSection({ markets, selected }: Props) {
             className="inline-flex w-fit items-center gap-2 rounded-full border border-white/20 bg-black/25 px-4 py-2 text-sm text-white backdrop-blur-sm"
           >
             <Icon icon={StarIcon} size={16} color="#6cc24a" strokeWidth={1.75} />
-            <span>Verified healthcare &amp; childcare staffing</span>
+            <span>{badge}</span>
           </div>
 
           <div className="mt-auto max-w-2xl pb-2 pt-10 sm:pb-4 lg:max-w-3xl">
@@ -113,13 +114,13 @@ export function HeroSection({ markets, selected }: Props) {
               data-hero-title
               className="text-[2rem] font-bold leading-[1.08] tracking-tight text-white sm:text-4xl lg:text-[2.75rem]"
             >
-              {heroHeadline}
+              {headline}
             </h1>
             <p
               data-hero-desc
               className="mt-5 max-w-xl text-base leading-relaxed text-white/80 sm:text-lg"
             >
-              {heroSubheadline}
+              {subheadline}
             </p>
 
             <MarketSwitch markets={markets} selected={selected} />
@@ -130,10 +131,10 @@ export function HeroSection({ markets, selected }: Props) {
 
             <div data-hero-cta className="mt-7 flex flex-wrap gap-3 sm:gap-4">
               <CtaPillLink href={registerLinks.professional} shadow="lg">
-                {ctaLabels.joinProfessional}
+                {joinLabel}
               </CtaPillLink>
               <CtaPillLink href={registerLinks.client} variant="secondary" shadow="lg">
-                {ctaLabels.createBookingRequest}
+                {requestLabel}
               </CtaPillLink>
             </div>
           </div>

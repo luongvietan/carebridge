@@ -1,11 +1,13 @@
 import Image from "next/image";
 import { CtaPillLink } from "@/components/cta-pill-link";
-import { ctaLabels, registerLinks } from "@/data/marketing-copy";
+import { registerLinks } from "@/data/marketing-copy";
+import { getDictionaryForVisitor } from "@/lib/i18n/server";
 import { marketingImages } from "@/data/marketing-images";
 import { marketingCard, marketingSection } from "@/lib/marketing-ui";
 
-export function CtaBanner() {
+export async function CtaBanner() {
   const { ctaBanner } = marketingImages;
+  const t = await getDictionaryForVisitor();
 
   return (
     <section className={`${marketingSection} pb-4 pt-0`}>
@@ -26,24 +28,23 @@ export function CtaBanner() {
         <div className="relative flex min-h-[320px] flex-col justify-center px-8 py-12 sm:min-h-[360px] sm:px-12 sm:py-14 lg:min-h-[380px] lg:max-w-2xl lg:px-14">
           <p className="inline-flex items-center gap-2 text-sm text-white/85">
             <span className="h-1.5 w-1.5 rounded-full bg-[#6cc24a]" aria-hidden />
-            Join the marketplace
+            {t.ctaKicker}
           </p>
 
           <h2 className="mt-4 text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-[2.75rem]">
-            Compliant staffing, ready when you need it
+            {t.ctaHeading}
           </h2>
 
           <p className="mt-4 max-w-lg text-sm leading-relaxed text-white/75 sm:text-base">
-            Register as a verified professional, or create a booking request as a private client
-            or organisation — with compliance, payments and audit trails built in.
+            {t.ctaBody}
           </p>
 
           <div className="mt-8 flex flex-wrap gap-3">
             <CtaPillLink href={registerLinks.professional} shadow="lg">
-              {ctaLabels.joinProfessional}
+              {t.joinProfessional}
             </CtaPillLink>
             <CtaPillLink href={registerLinks.client} variant="secondary" shadow="lg">
-              {ctaLabels.createBookingRequest}
+              {t.createBookingRequest}
             </CtaPillLink>
           </div>
         </div>

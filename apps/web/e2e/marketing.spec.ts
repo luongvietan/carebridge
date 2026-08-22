@@ -38,6 +38,18 @@ test("market switch: launching soon until live, then selectable", async ({ page 
   await expect(pt).toHaveAttribute("aria-pressed", "true");
   await expect(uk).not.toHaveAttribute("aria-pressed", "true");
 
+  // The dictionary follows the market: the hero and the journey speak Portuguese.
+  await expect(page.getByRole("heading", { level: 1 })).toContainText(
+    "A ligar Famílias e Organizações",
+  );
+  // The journey section sits below the fold where the scroll-reveal keeps it
+  // out of the a11y tree until scrolled — assert on the DOM, not visibility.
+  await expect(page.locator("h2", { hasText: "Como funciona" })).toHaveCount(1);
+  await expect(
+    page.locator("p", { hasText: "Da verificação ao pagamento" }),
+  ).toHaveCount(1);  await expect(page.getByRole("link", { name: /Criar um pedido de marcação/ })).toBeVisible();
+  await expect(page.locator("html")).toHaveAttribute("lang", "pt-PT");
+
   // Restore: Portugal goes back behind its regulatory gate.
   await admin.from("countries").update({ is_live: false }).eq("code", "PT");
   await page.goto("/");
