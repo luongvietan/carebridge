@@ -31,6 +31,10 @@ insert into assessment_question_bank (id, professional_role_id, topic, question_
   ('00000000-0000-0000-0000-0000000a0020', null, 'health_safety', 'The correct order for putting on PPE generally starts with:', '[{"key":"a","text":"Gloves"},{"key":"b","text":"Apron/gown"},{"key":"c","text":"Eye protection"},{"key":"d","text":"Mask last"}]', 'b')
 on conflict (id) do nothing;
 
+-- The placeholder bank is English UK content; 0082 gave questions a country
+-- dimension and this tags the seed rows explicitly (seed runs after migrations,
+-- so it must carry its own tag rather than rely on the migration backfill).
+update assessment_question_bank set country_code = 'GB' where country_code is null;
 
 -- One active, effective-dated rate card per role so booking creation can resolve a snapshot.
 insert into rate_cards (professional_role_id, client_charge_rate, professional_payout_rate, platform_fee_type, currency)

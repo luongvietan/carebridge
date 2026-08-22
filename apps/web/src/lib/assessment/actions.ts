@@ -38,7 +38,7 @@ export async function startAttempt(): Promise<StartResult> {
 
   const { data: prof } = await admin
     .from("professionals")
-    .select("professional_role_id, assessment_locked_until")
+    .select("professional_role_id, assessment_locked_until, country_code")
     .eq("id", professionalId)
     .single();
 
@@ -101,19 +101,25 @@ export async function startAttempt(): Promise<StartResult> {
       .eq("id", professionalId);
   }
 
-  // Two pools: common questions (no role) and role-specific questions. The MVP
-  // format draws 15 from common + 5 from role-specific, each shuffled separately.
+  // Two pools: common questions (no role) and role-specific questions. Both are
+  // scoped to the professional's country — a Portuguese applicant sits a
+  // Portuguese assessment, never the English bank (0082). The MVP format draws
+  // 15 from common + 5 from role-specific, each shuffled separately; a
+  // role-specific shortfall tops up from common.
+  const country = prof?.country_code ?? "GB";
   const { data: commonPool } = await admin
     .from("assessment_question_bank")
     .select(cols)
     .eq("is_active", true)
-    .is("professional_role_id", null);
+    .is("professional_role_id", null)
+    .eq("country_code", country);
   const { data: rolePool } = roleId
     ? await admin
         .from("assessment_question_bank")
         .select(cols)
         .eq("is_active", true)
         .eq("professional_role_id", roleId)
+        .eq("country_code", country)
     : { data: [] };
 
   const picked = pickStratified(

@@ -114,6 +114,7 @@ export type Database = {
       assessment_question_bank: {
         Row: {
           correct_option: string
+          country_code: string | null
           created_at: string
           id: string
           is_active: boolean
@@ -125,6 +126,7 @@ export type Database = {
         }
         Insert: {
           correct_option: string
+          country_code?: string | null
           created_at?: string
           id?: string
           is_active?: boolean
@@ -136,6 +138,7 @@ export type Database = {
         }
         Update: {
           correct_option?: string
+          country_code?: string | null
           created_at?: string
           id?: string
           is_active?: boolean
