@@ -8,10 +8,10 @@ export type NewRate = {
   currency: string;
 };
 
-// The MVP is a UK-only platform (multi-country support is an explicit Phase 2
-// item) and all money is displayed/charged in GBP, so reject any other currency
-// rather than silently mislabelling amounts as "£".
-export const SUPPORTED_CURRENCIES = ["GBP"] as const;
+// The UK charges in sterling; Portugal (Phase 2) charges in euro, and each
+// role's card carries its own currency. Anything else is rejected rather than
+// silently mislabelled as one of the two.
+export const SUPPORTED_CURRENCIES = ["GBP", "EUR"] as const;
 
 export function validateRateAmendment(r: NewRate): { ok: true; rate: NewRate } | { ok: false; error: string } {
   if (r.clientChargeRate < 0 || r.professionalPayoutRate < 0) return { ok: false, error: "Rates cannot be negative." };

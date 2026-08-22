@@ -17,10 +17,11 @@ describe("validateRateAmendment", () => {
   it("rejects negative rates", () => {
     expect(validateRateAmendment({ ...base, professionalPayoutRate: -1, clientChargeRate: -1 }).ok).toBe(false);
   });
-  it("rejects unsupported currencies (UK-only MVP)", () => {
-    expect(validateRateAmendment({ ...base, currency: "EUR" }).ok).toBe(false);
-    expect(validateRateAmendment({ ...base, currency: "gbp" }).ok).toBe(false);
+  it("accepts the two supported currencies and rejects everything else", () => {
     expect(validateRateAmendment({ ...base, currency: "GBP" }).ok).toBe(true);
+    expect(validateRateAmendment({ ...base, currency: "EUR" }).ok).toBe(true); // Portugal, Phase 2
+    expect(validateRateAmendment({ ...base, currency: "gbp" }).ok).toBe(false);
+    expect(validateRateAmendment({ ...base, currency: "USD" }).ok).toBe(false);
   });
 });
 

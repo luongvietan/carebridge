@@ -26,15 +26,21 @@ function formatLabel(value: string) {
   return value.replace(/_/g, " ");
 }
 
-function formatFeeType(type: string, value: number | null, charge: number, payout: number) {
+function formatFeeType(
+  type: string,
+  value: number | null,
+  charge: number,
+  payout: number,
+  currency: string,
+) {
   if (type === "derived") {
-    return `Derived (${formatRate(charge - payout, "GBP")})`;
+    return `Derived (${formatRate(charge - payout, currency)})`;
   }
   if (type === "percentage" && value != null) {
     return `${value}%`;
   }
   if (type === "fixed" && value != null) {
-    return `${formatRate(value, "GBP")}/hr`;
+    return `${formatRate(value, currency)}/hr`;
   }
   return formatLabel(type);
 }
@@ -45,7 +51,7 @@ export default async function AdminRatesPage() {
   const admin = createServiceClient();
 
   const [{ data: roles }, { data: allCards }] = await Promise.all([
-    admin.from("professional_roles").select("id, name").eq("is_active", true).order("name"),
+    admin.from("professional_roles").select("id, name, country_code").eq("is_active", true).order("name"),
     admin
       .from("rate_cards")
       .select(
@@ -103,6 +109,7 @@ export default async function AdminRatesPage() {
                         active.platform_fee_value,
                         active.client_charge_rate,
                         active.professional_payout_rate,
+                        active.currency,
                       )}
                     </p>
                   </div>
@@ -147,6 +154,7 @@ export default async function AdminRatesPage() {
                               card.platform_fee_value,
                               card.client_charge_rate,
                               card.professional_payout_rate,
+                              card.currency,
                             )}
                           </td>
                           <td className="p-3">
@@ -162,7 +170,11 @@ export default async function AdminRatesPage() {
               )}
 
               <div className="mt-6 border-t border-[#dbe7e0] pt-6">
-                <AmendRateForm roleId={role.id} roleName={role.name} />
+                <AmendRateForm
+                  roleId={role.id}
+                  roleName={role.name}
+                  defaultCurrency={role.country_code === "PT" ? "EUR" : "GBP"}
+                />
               </div>
             </section>
           );

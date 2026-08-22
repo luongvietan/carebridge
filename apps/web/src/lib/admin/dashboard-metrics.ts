@@ -92,14 +92,16 @@ export async function loadDashboardMetrics(
       if (lt) query = query.lt("created_at", lt);
       return query;
     })(),
-    admin.from("v_platform_revenue").select("booking_id, platform_revenue"),
+    admin.from("v_platform_revenue").select("booking_id, platform_revenue, snap_currency"),
   ]);
 
   const paidBookingIds = new Set(
     (monthPayments ?? []).filter((p) => p.status === "succeeded").map((p) => p.booking_id),
   );
+  // Sterling revenue only: summing across currencies would add euro to pounds.
+  // When Portugal goes live the tile splits per currency rather than mixing.
   const monthlyRevenue = (revenueRows ?? [])
-    .filter((r) => r.booking_id && paidBookingIds.has(r.booking_id))
+    .filter((r) => r.booking_id && r.snap_currency === "GBP" && paidBookingIds.has(r.booking_id))
     .reduce((sum, r) => sum + Number(r.platform_revenue ?? 0), 0);
 
   return {

@@ -116,14 +116,34 @@ describe("bookingAnalytics", () => {
     expect(a.cancellationRate).toBe(20);
   });
 
-  it("averages the value of completed bookings", () => {
-    expect(bookingAnalytics(bookings, 6, now).averageBookingValue).toBe(240);
+  it("averages the value of completed bookings, per currency", () => {
+    const a = bookingAnalytics(bookings, 6, now);
+    expect(a.averageBookingValueByCurrency).toEqual({ GBP: 240 });
+    expect(
+      bookingAnalytics(
+        [...bookings, { status: "completed", scheduledStart: "2026-08-07T09:00:00Z", clientCharge: 100, currency: "EUR" }],
+        6,
+        now,
+      ).averageBookingValueByCurrency,
+    ).toEqual({ GBP: 240, EUR: 100 });
+  });
+
+  it("never sums euro into pounds in a monthly point", () => {
+    const mixed = bookingAnalytics(
+      [
+        { status: "completed", scheduledStart: "2026-08-01T09:00:00Z", clientCharge: 320 },
+        { status: "completed", scheduledStart: "2026-08-02T09:00:00Z", clientCharge: 200, currency: "EUR" },
+      ],
+      3,
+      now,
+    );
+    expect(mixed.monthly.at(-1)?.revenueByCurrency).toEqual({ GBP: 320, EUR: 200 });
   });
 
   it("reports a month per point, most recent last", () => {
     const a = bookingAnalytics(bookings, 3, now);
     expect(a.monthly.map((m) => m.month)).toEqual(["2026-06", "2026-07", "2026-08"]);
-    expect(a.monthly.at(-1)).toMatchObject({ bookings: 3, revenue: 480 });
+    expect(a.monthly.at(-1)).toMatchObject({ bookings: 3, revenueByCurrency: { GBP: 480 } });
   });
 
   it("computes month-on-month growth, and returns null with no prior month", () => {
@@ -134,6 +154,6 @@ describe("bookingAnalytics", () => {
   it("handles an empty platform without dividing by zero", () => {
     const a = bookingAnalytics([], 6, now);
     expect(a.completionRate).toBe(0);
-    expect(a.averageBookingValue).toBe(0);
+    expect(a.averageBookingValueByCurrency).toEqual({});
   });
 });

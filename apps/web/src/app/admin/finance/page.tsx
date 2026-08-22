@@ -3,7 +3,7 @@ import Link from "next/link";
 import { createServiceClient } from "@/lib/supabase/service";
 import { requireAdmin } from "@/lib/auth/admin";
 import { DatePicker } from "@/components/ui/date-picker";
-import { formatGbpMoney } from "@/lib/format/money";
+import { formatAmountsByCurrency, formatMoney } from "@/lib/format/money";
 import { londonDateRangeToUtc } from "@/lib/format/datetime";
 import { Select } from "@/components/ui/select";
 import { loadBookingFinance } from "@/lib/finance/load-bookings";
@@ -13,10 +13,6 @@ export const dynamic = "force-dynamic";
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" });
-}
-
-function formatMoney(amount: number | null | undefined) {
-  return formatGbpMoney(amount);
 }
 
 export default async function AdminFinancePage({
@@ -57,37 +53,55 @@ export default async function AdminFinancePage({
     await Promise.all([
       paymentsQuery,
       payoutsQuery,
-      admin.from("v_platform_revenue").select("booking_id, platform_revenue"),
+      admin.from("v_platform_revenue").select("booking_id, platform_revenue, snap_currency"),
       loadBookingFinance(admin, { gte, lt, bookingStatus, professionalId, requesterUserId }),
     ]);
-  const { rows: bookingRows, analytics, totals } = bookingFinanceData;
+  const { rows: bookingRows, analytics, totalsByCurrency } = bookingFinanceData;
   const reportQuery = new URLSearchParams(
     Object.entries({ from, to, bookingStatus, professionalId, requesterUserId }).filter(
       (entry): entry is [string, string] => Boolean(entry[1]),
     ),
   ).toString();
 
-  // Headline figures. "Total collected" is NET of refunds — a partial refund
-  // keeps the payment `succeeded` but reduces the cash actually held.
+  // Headline figures, one group per currency — euro is never summed into
+  // pounds. "Total collected" is NET of refunds — a partial refund keeps the
+  // payment `succeeded` but reduces the cash actually held.
   const succeededPayments = (payments ?? []).filter((p) => p.status === "succeeded");
-  const totalRefunded = (payments ?? []).reduce((sum, p) => sum + Number(p.refunded_amount ?? 0), 0);
-  const totalCollected = succeededPayments.reduce(
-    (sum, p) => sum + Number(p.amount) - Number(p.refunded_amount ?? 0),
-    0,
-  );
+  const addTo = (byCurrency: Record<string, number>, currency: string | null, value: number) => {
+    byCurrency[currency ?? "GBP"] = (byCurrency[currency ?? "GBP"] ?? 0) + value;
+  };
 
-  const totalPaidOut = (payouts ?? [])
-    .filter((p) => p.status === "paid")
-    .reduce((sum, p) => sum + Number(p.amount), 0);
+  const netCollectedByCurrency: Record<string, number> = {};
+  for (const p of succeededPayments) {
+    addTo(netCollectedByCurrency, p.currency, Number(p.amount) - Number(p.refunded_amount ?? 0));
+  }
 
-  // Platform revenue — sum v_platform_revenue for bookings that have a succeeded payment.
+  const totalRefundedByCurrency: Record<string, number> = {};
+  for (const p of payments ?? []) addTo(totalRefundedByCurrency, p.currency, Number(p.refunded_amount ?? 0));
+
+  const totalPaidOutByCurrency: Record<string, number> = {};
+  for (const p of (payouts ?? []).filter((x) => x.status === "paid")) {
+    addTo(totalPaidOutByCurrency, p.currency, Number(p.amount));
+  }
+
+  // Platform revenue — v_platform_revenue rows for bookings with a succeeded payment.
   const succeededBookingIds = new Set<string>();
   for (const p of payments ?? []) {
     if (p.status === "succeeded") succeededBookingIds.add(p.booking_id);
   }
-  const platformRevenue = (revenueRows ?? [])
-    .filter((r) => r.booking_id && succeededBookingIds.has(r.booking_id))
-    .reduce((sum, r) => sum + Number(r.platform_revenue ?? 0), 0);
+  const platformRevenueByCurrency: Record<string, number> = {};
+  for (const r of revenueRows ?? []) {
+    if (r.booking_id && succeededBookingIds.has(r.booking_id)) {
+      addTo(platformRevenueByCurrency, r.snap_currency as string, Number(r.platform_revenue ?? 0));
+    }
+  }
+
+  const totalsAsAmounts = (
+    pick: (group: { charged: number; payout: number; fee: number; refunded: number }) => number,
+  ): Record<string, number> =>
+    Object.fromEntries(
+      Object.entries(totalsByCurrency).map(([currency, group]) => [currency, pick(group)]),
+    );
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-10">
@@ -169,19 +183,19 @@ export default async function AdminFinancePage({
       <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">
         <div className="rounded-2xl border border-[#dbe7e0] bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
           <p className="text-xs tracking-wide text-[#4a4a4a] uppercase">Net collected</p>
-          <p className="mt-2 text-2xl font-bold">{formatMoney(totalCollected)}</p>
+          <p className="mt-2 text-2xl font-bold">{formatAmountsByCurrency(netCollectedByCurrency)}</p>
         </div>
         <div className="rounded-2xl border border-[#dbe7e0] bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
           <p className="text-xs tracking-wide text-[#4a4a4a] uppercase">Total refunded</p>
-          <p className="mt-2 text-2xl font-bold">{formatMoney(totalRefunded)}</p>
+          <p className="mt-2 text-2xl font-bold">{formatAmountsByCurrency(totalRefundedByCurrency)}</p>
         </div>
         <div className="rounded-2xl border border-[#dbe7e0] bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
           <p className="text-xs tracking-wide text-[#4a4a4a] uppercase">Total paid out</p>
-          <p className="mt-2 text-2xl font-bold">{formatMoney(totalPaidOut)}</p>
+          <p className="mt-2 text-2xl font-bold">{formatAmountsByCurrency(totalPaidOutByCurrency)}</p>
         </div>
         <div className="rounded-2xl border border-[#dbe7e0] bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
           <p className="text-xs tracking-wide text-[#4a4a4a] uppercase">Platform revenue</p>
-          <p className="mt-2 text-2xl font-bold">{formatMoney(platformRevenue)}</p>
+          <p className="mt-2 text-2xl font-bold">{formatAmountsByCurrency(platformRevenueByCurrency)}</p>
         </div>
       </div>
 
@@ -212,7 +226,7 @@ export default async function AdminFinancePage({
           </div>
           <div className="rounded-2xl border border-[#dbe7e0] bg-white p-4">
             <p className="text-xs uppercase tracking-wide text-[#4a4a4a]">Average booking</p>
-            <p className="mt-2 text-2xl font-bold">{formatMoney(analytics.averageBookingValue)}</p>
+            <p className="mt-2 text-2xl font-bold">{formatAmountsByCurrency(analytics.averageBookingValueByCurrency)}</p>
           </div>
           <div className="rounded-2xl border border-[#dbe7e0] bg-white p-4">
             <p className="text-xs uppercase tracking-wide text-[#4a4a4a]">Bookings this month</p>
@@ -246,9 +260,9 @@ export default async function AdminFinancePage({
                   <td className="p-3">{row.roleName ?? "—"}</td>
                   <td className="p-3">{row.professionalName ?? "—"}</td>
                   <td className="p-3">{row.requesterName ?? "—"}</td>
-                  <td className="p-3">{formatMoney(row.clientCharge)}</td>
-                  <td className="p-3">{formatMoney(row.professionalPayout)}</td>
-                  <td className="p-3">{formatMoney(row.platformFee)}</td>
+                  <td className="p-3">{formatMoney(row.clientCharge, row.currency)}</td>
+                  <td className="p-3">{formatMoney(row.professionalPayout, row.currency)}</td>
+                  <td className="p-3">{formatMoney(row.platformFee, row.currency)}</td>
                   <td className="p-3">
                     <span
                       title={MONEY_STATE_HINT[row.state]}
@@ -266,9 +280,9 @@ export default async function AdminFinancePage({
                   <td className="p-3" colSpan={4}>
                     {bookingRows.length} booking{bookingRows.length === 1 ? "" : "s"}
                   </td>
-                  <td className="p-3">{formatMoney(totals.charged)}</td>
-                  <td className="p-3">{formatMoney(totals.payout)}</td>
-                  <td className="p-3">{formatMoney(totals.fee)}</td>
+                  <td className="p-3">{formatAmountsByCurrency(totalsAsAmounts((t) => t.charged))}</td>
+                  <td className="p-3">{formatAmountsByCurrency(totalsAsAmounts((t) => t.payout))}</td>
+                  <td className="p-3">{formatAmountsByCurrency(totalsAsAmounts((t) => t.fee))}</td>
                   <td className="p-3" />
                 </tr>
               </tfoot>
@@ -292,7 +306,7 @@ export default async function AdminFinancePage({
                 />
                 <span className="text-xs text-[#7a8a81]">
                   {point.bookings} booking{point.bookings === 1 ? "" : "s"} ·{" "}
-                  {formatMoney(point.revenue)}
+                  {formatAmountsByCurrency(point.revenueByCurrency)}
                 </span>
               </li>
             ))}
@@ -325,8 +339,8 @@ export default async function AdminFinancePage({
                       <td className="p-3">
                         {booking?.scheduled_start ? formatDate(booking.scheduled_start) : "—"}
                       </td>
-                      <td className="p-3">{formatMoney(p.amount)}</td>
-                      <td className="p-3">{refunded > 0 ? formatMoney(refunded) : "—"}</td>
+                      <td className="p-3">{formatMoney(p.amount, p.currency)}</td>
+                      <td className="p-3">{refunded > 0 ? formatMoney(refunded, p.currency) : "—"}</td>
                       <td className="p-3">
                         <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#4a4a4a]">
                           {p.status.replace(/_/g, " ")}
@@ -373,7 +387,7 @@ export default async function AdminFinancePage({
                     <tr key={p.id}>
                       <td className="p-3">{formatDate(p.created_at)}</td>
                       <td className="p-3">{prof?.full_name ?? "—"}</td>
-                      <td className="p-3">{formatMoney(p.amount)}</td>
+                      <td className="p-3">{formatMoney(p.amount, p.currency)}</td>
                       <td className="p-3">
                         <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#4a4a4a]">
                           {p.status.replace(/_/g, " ")}

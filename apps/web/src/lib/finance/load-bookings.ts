@@ -10,6 +10,8 @@ export type BookingFinanceRow = BookingFinance & {
   professionalName: string | null;
   requesterName: string | null;
   requesterType: "client" | "organisation" | null;
+  /** The currency this booking was charged in — never summed across currencies. */
+  currency: string;
 };
 
 export type FinanceFilters = {
@@ -23,7 +25,8 @@ export type FinanceFilters = {
 export type BookingFinanceData = {
   rows: BookingFinanceRow[];
   analytics: BookingAnalytics;
-  totals: { charged: number; payout: number; fee: number; refunded: number };
+  /** One totals group per currency present — never a cross-currency sum. */
+  totalsByCurrency: Record<string, { charged: number; payout: number; fee: number; refunded: number }>;
   /** For the filter selects. */
   professionals: { id: string; name: string }[];
   requesters: { userId: string; name: string; type: "client" | "organisation" }[];
@@ -41,7 +44,7 @@ export async function loadBookingFinance(
   let bookingsQuery = admin
     .from("bookings")
     .select(
-      "id, status, scheduled_start, total_client_charge, total_payout, assigned_professional_id, requester_user_id, professional_roles(name), professionals(full_name)",
+      "id, status, scheduled_start, total_client_charge, total_payout, snap_currency, assigned_professional_id, requester_user_id, professional_roles(name), professionals(full_name)",
     )
     .order("scheduled_start", { ascending: false });
 
@@ -107,8 +110,23 @@ export async function loadBookingFinance(
       professionalName: (b.professionals as { full_name: string } | null)?.full_name ?? null,
       requesterName: clientName ?? orgName ?? null,
       requesterType: clientName ? "client" : orgName ? "organisation" : null,
+      currency: b.snap_currency ?? "GBP",
     };
   });
+
+  const totalsByCurrency: BookingFinanceData["totalsByCurrency"] = {};
+  for (const row of rows) {
+    const group = (totalsByCurrency[row.currency] ??= {
+      charged: 0,
+      payout: 0,
+      fee: 0,
+      refunded: 0,
+    });
+    group.charged += row.clientCharge;
+    group.payout += row.professionalPayout;
+    group.fee += row.platformFee;
+    group.refunded += row.refunded;
+  }
 
   return {
     rows,
@@ -117,14 +135,10 @@ export async function loadBookingFinance(
         status: b.status,
         scheduledStart: b.scheduled_start,
         clientCharge: b.total_client_charge,
+        currency: b.snap_currency ?? "GBP",
       })),
     ),
-    totals: {
-      charged: rows.reduce((sum, r) => sum + r.clientCharge, 0),
-      payout: rows.reduce((sum, r) => sum + r.professionalPayout, 0),
-      fee: rows.reduce((sum, r) => sum + r.platformFee, 0),
-      refunded: rows.reduce((sum, r) => sum + r.refunded, 0),
-    },
+    totalsByCurrency,
     professionals: (professionals ?? []).map((p) => ({ id: p.id, name: p.full_name })),
     requesters: [
       ...(clients ?? []).map((c) => ({
