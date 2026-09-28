@@ -3,21 +3,19 @@ import { createServiceClient } from "@/lib/supabase/service";
 import { requireAdmin } from "@/lib/auth/admin";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { nextPayoutStatus, netPayoutAmount, type PayoutStatus } from "./record";
-import { validateBankDetails } from "./bank";
+import { validatePayoutAccount, type PayoutAccount } from "./bank";
 import { payoutGate } from "@/lib/timesheets/rules";
 import { sendNotification } from "@/lib/notifications/send";
 
 export type PayoutResult = { ok: true } | { error: string };
 
 /** Professional saves their (encrypted) bank details. */
-export async function savePayoutDetails(form: {
-  accountName: string; sortCode: string; accountNumber: string;
-}): Promise<PayoutResult> {
+export async function savePayoutDetails(form: PayoutAccount): Promise<PayoutResult> {
   const user = await requireAuth();
   const key = process.env.PAYOUT_ENC_KEY;
   if (!key) return { error: "Payout encryption is not configured." };
 
-  const valid = validateBankDetails(form);
+  const valid = validatePayoutAccount(form);
   if (!valid.ok) return { error: valid.error };
 
   const admin = createServiceClient();
@@ -99,7 +97,7 @@ export async function markPayoutPaid(payoutId: string, method: string, reference
   await requireAuth();
   const adminId = await requireAdmin();
   if (!adminId) return { error: "Administrator access required." };
-  const ALLOWED_METHODS = ["bank_transfer", "bacs", "faster_payments", "cheque"];
+  const ALLOWED_METHODS = ["bank_transfer", "bacs", "faster_payments", "sepa_transfer", "cheque"];
   if (!ALLOWED_METHODS.includes(method)) return { error: "Invalid payout method." };
   const admin = createServiceClient();
   const { data: payout } = await admin.from("payouts").select("id, status, booking_id, amount").eq("id", payoutId).single();

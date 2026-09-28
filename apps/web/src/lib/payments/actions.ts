@@ -1,4 +1,5 @@
 "use server";
+import { getAppUrl } from "@/lib/app-url";
 import { createServiceClient } from "@/lib/supabase/service";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { stripe } from "@/lib/stripe/client";
@@ -58,9 +59,13 @@ export async function startCheckout(bookingId: string): Promise<PaymentActionRes
   }
 
   const roleName = (booking.professional_roles as { name: string } | null)?.name ?? "professional";
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://127.0.0.1:3000";
+  const appUrl = getAppUrl();
   const session = await stripe().checkout.sessions.create({
     mode: "payment",
+    // A euro booking is a Portuguese one: Checkout speaks Portuguese, and the
+    // payment methods on offer (cards, and MB Way / Multibanco once enabled in
+    // the Stripe dashboard) follow the currency without any list here.
+    locale: booking.snap_currency.trim().toUpperCase() === "EUR" ? "pt" : "auto",
     line_items: buildCheckoutLineItems({ total_client_charge: Number(booking.total_client_charge), snap_currency: booking.snap_currency, role_name: roleName }),
     success_url: `${appUrl}/client/bookings?paid=1`,
     cancel_url: `${appUrl}/client/bookings?paid=0`,

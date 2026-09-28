@@ -67,6 +67,7 @@ export function MarkPayoutPaidForm({ payoutId }: { payoutId: string }) {
             { value: "bank_transfer", label: "Bank transfer" },
             { value: "bacs", label: "BACS" },
             { value: "faster_payments", label: "Faster Payments" },
+            { value: "sepa_transfer", label: "SEPA transfer" },
             { value: "cheque", label: "Cheque" },
           ]}
         />
