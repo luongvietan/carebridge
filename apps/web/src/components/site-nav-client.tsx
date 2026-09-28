@@ -7,12 +7,26 @@ import { useState } from "react";
 import { CtaPillLink } from "@/components/cta-pill-link";
 import { Cancel01Icon, Icon, Menu01Icon } from "@/components/ui/icon";
 
-const links = [
-  { href: "/", label: "Home" },
-  { href: "/about", label: "About Us" },
-  { href: "/services", label: "Professional roles" },
-  { href: "/faq", label: "FAQ" },
-];
+type NavLabels = {
+  home: string;
+  about: string;
+  roles: string;
+  faq: string;
+  contactUs: string;
+  signIn: string;
+  dashboard: string;
+  openMenu: string;
+  closeMenu: string;
+};
+
+function navLinks(l: NavLabels) {
+  return [
+    { href: "/", label: l.home },
+    { href: "/about", label: l.about },
+    { href: "/services", label: l.roles },
+    { href: "/faq", label: l.faq },
+  ];
+}
 
 const LOGO_WIDTH = 1402;
 const LOGO_HEIGHT = 769;
@@ -41,8 +55,9 @@ function BrandLogo({ className = "" }: { className?: string }) {
   );
 }
 
-function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
+function NavLinks({ onNavigate, labels }: { onNavigate?: () => void; labels: NavLabels }) {
   const pathname = usePathname();
+  const links = navLinks(labels);
 
   return (
     <>
@@ -72,9 +87,10 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
 
 type SiteNavClientProps = {
   dashboardHref: string | null;
+  labels: NavLabels;
 };
 
-export function SiteNavClient({ dashboardHref }: SiteNavClientProps) {
+export function SiteNavClient({ dashboardHref, labels }: SiteNavClientProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const accountLink = dashboardHref ? (
@@ -82,14 +98,14 @@ export function SiteNavClient({ dashboardHref }: SiteNavClientProps) {
       href={dashboardHref}
       className="rounded-full px-4 py-2 text-sm font-medium text-[#4a4a4a] transition-colors hover:text-[#2e7d32]"
     >
-      Dashboard
+      {labels.dashboard}
     </Link>
   ) : (
     <Link
       href="/login"
       className="rounded-full px-4 py-2 text-sm font-medium text-[#4a4a4a] transition-colors hover:text-[#2e7d32]"
     >
-      Sign in
+      {labels.signIn}
     </Link>
   );
 
@@ -98,7 +114,7 @@ export function SiteNavClient({ dashboardHref }: SiteNavClientProps) {
       <nav className="relative mx-auto flex max-w-7xl items-center justify-between px-5 py-4 lg:grid lg:grid-cols-[1fr_auto_1fr] lg:px-8 lg:py-5">
         <div className="hidden lg:flex lg:justify-start">
           <div className="inline-flex items-center rounded-full border border-[#e3ece6] bg-[#f7faf8] px-1.5 py-1">
-            <NavLinks />
+            <NavLinks labels={labels} />
           </div>
         </div>
 
@@ -106,7 +122,7 @@ export function SiteNavClient({ dashboardHref }: SiteNavClientProps) {
           type="button"
           className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#e3ece6] text-[#4a4a4a] lg:hidden"
           aria-expanded={menuOpen}
-          aria-label={menuOpen ? "Close menu" : "Open menu"}
+          aria-label={menuOpen ? labels.closeMenu : labels.openMenu}
           onClick={() => setMenuOpen((open) => !open)}
         >
           <Icon icon={menuOpen ? Cancel01Icon : Menu01Icon} size={20} strokeWidth={2} />
@@ -116,14 +132,14 @@ export function SiteNavClient({ dashboardHref }: SiteNavClientProps) {
 
         <div className="flex items-center justify-end gap-2">
           <div className="hidden sm:block">{accountLink}</div>
-          <CtaPillLink href="/contact">Contact Us</CtaPillLink>
+          <CtaPillLink href="/contact">{labels.contactUs}</CtaPillLink>
         </div>
       </nav>
 
       {menuOpen && (
         <div className="border-t border-[#e7efe9] bg-white px-5 py-4 lg:hidden">
           <div className="flex flex-col gap-1 rounded-2xl border border-[#e3ece6] bg-[#f7faf8] p-2">
-            <NavLinks onNavigate={() => setMenuOpen(false)} />
+            <NavLinks labels={labels} onNavigate={() => setMenuOpen(false)} />
             <div className="mt-1 border-t border-[#e3ece6] pt-1 sm:hidden">
               {dashboardHref ? (
                 <Link
@@ -131,7 +147,7 @@ export function SiteNavClient({ dashboardHref }: SiteNavClientProps) {
                   onClick={() => setMenuOpen(false)}
                   className="rounded-full px-4 py-2 text-sm font-medium text-[#4a4a4a] transition-colors hover:text-[#2e7d32]"
                 >
-                  Dashboard
+                  {labels.dashboard}
                 </Link>
               ) : (
                 <Link
@@ -139,7 +155,7 @@ export function SiteNavClient({ dashboardHref }: SiteNavClientProps) {
                   onClick={() => setMenuOpen(false)}
                   className="rounded-full px-4 py-2 text-sm font-medium text-[#4a4a4a] transition-colors hover:text-[#2e7d32]"
                 >
-                  Sign in
+                  {labels.signIn}
                 </Link>
               )}
             </div>

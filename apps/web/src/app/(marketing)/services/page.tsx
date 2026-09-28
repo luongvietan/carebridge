@@ -7,14 +7,9 @@ import { MarketingPageMotion } from "@/components/motion/marketing-page-motion";
 import { RoleCard } from "@/components/role-card";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteNav } from "@/components/site-nav";
-import {
-  childcareCareTypes,
-  childcareRoles,
-  onboardingSteps,
-  professionalRoles,
-  supportedServices,
-} from "@/data/marketing-copy";
 import { marketingImages } from "@/data/marketing-images";
+import { roleImage } from "@/lib/i18n/content";
+import { getContentForVisitor, getDictionaryForVisitor } from "@/lib/i18n/server";
 import {
   marketingCardShadow,
   marketingDecorativeNumber,
@@ -26,31 +21,33 @@ import {
 
 export const metadata: Metadata = { title: "Professional roles — CareBridge Connect" };
 
-export default function ServicesPage() {
+export default async function ServicesPage() {
+  const [content, t] = await Promise.all([getContentForVisitor(), getDictionaryForVisitor()]);
+  const { ui, healthRoles, childcareRoles, childcareCareTypes, supportedServices } = content;
+  const s = ui.servicesPage;
   return (
     <MarketingPageMotion>
       <SiteNav />
 
       <MarketingPageHero
-        badge="Professional roles"
-        title="Professional roles we cover"
-        description="Compliance-checked healthcare and childcare staffing for families and organisations — verified professionals across ten roles, matched via booking requests."
+        badge={s.badge}
+        title={s.title}
+        description={s.description}
         image={marketingImages.pageHero.services}
       />
 
       <main>
         <section className={marketingSection}>
           <div data-reveal className="text-center">
-            <h2 className={marketingHeading}>Healthcare professionals</h2>
+            <h2 className={marketingHeading}>{s.healthHeading}</h2>
             <p className={`${marketingSubheading} max-w-lg`}>
-              Registered nurses, healthcare assistants, support workers and physiotherapists —
-              each verified before their first booking.
+              {s.healthSub}
             </p>
           </div>
 
           <div data-reveal-stagger className="mt-12 grid gap-6 sm:grid-cols-2">
-            {professionalRoles.map((role, i) => {
-              const img = marketingImages.roleCards[i];
+            {healthRoles.map((role) => {
+              const img = roleImage(role.image);
               return (
                 <RoleCard
                   key={role.title}
@@ -66,17 +63,15 @@ export default function ServicesPage() {
 
         <section className={`${marketingSection} pt-0`}>
           <div data-reveal className="text-center">
-            <h2 className={marketingHeading}>Childcare professionals</h2>
+            <h2 className={marketingHeading}>{s.childHeading}</h2>
             <p className={`${marketingSubheading} max-w-2xl`}>
-              CareBridge Connect accepts Ofsted-registered nannies only. Every nanny&apos;s Ofsted
-              registration number is checked against the Ofsted register, and no nanny can accept a
-              booking until that registration has been verified.
+              {s.childSub}
             </p>
           </div>
 
           <div data-reveal-stagger className="mt-12 grid gap-6 sm:grid-cols-2">
-            {childcareRoles.map((role, i) => {
-              const img = marketingImages.childcareRoleCards[i];
+            {childcareRoles.map((role) => {
+              const img = roleImage(role.image);
               return (
                 <RoleCard
                   key={role.title}
@@ -90,9 +85,9 @@ export default function ServicesPage() {
           </div>
 
           <div data-reveal className="mx-auto mt-10 max-w-3xl text-center">
-            <h3 className="text-lg font-bold text-[#1e5a33]">Childcare booking options</h3>
+            <h3 className="text-lg font-bold text-[#1e5a33]">{s.careTypesHeading}</h3>
             <p className="mt-2 text-sm text-[#4a4a4a]">
-              Choose the arrangement that fits your family when you make a booking request.
+              {s.careTypesSub}
             </p>
             <div className="mt-5 flex flex-wrap justify-center gap-2">
               {childcareCareTypes.map((type) => (
@@ -109,10 +104,9 @@ export default function ServicesPage() {
 
         <section className={`${marketingSection} pt-0`}>
           <div data-reveal className="text-center">
-            <h2 className={marketingHeading}>Services we support</h2>
+            <h2 className={marketingHeading}>{s.servicesHeading}</h2>
             <p className={`${marketingSubheading} max-w-2xl`}>
-              Engagements are limited to companionship and other non-regulated activities.
-              CareBridge Connect does not provide regulated personal care services.
+              {s.servicesSub}
             </p>
           </div>
 
@@ -128,21 +122,20 @@ export default function ServicesPage() {
             ))}
           </div>
           <p className="mx-auto mt-6 max-w-2xl text-center text-sm text-[#4a4a4a]">
-            …and other non-regulated activities.
+            {s.andOthers}
           </p>
         </section>
 
         <section className={`${marketingSection} pt-0`}>
           <div data-reveal className="text-center">
-            <h2 className={marketingHeading}>How it works</h2>
+            <h2 className={marketingHeading}>{s.howHeading}</h2>
             <p className={marketingSubheading}>
-              From onboarding to booking — a clear path for professionals, private clients and
-              organisations.
+              {s.howSub}
             </p>
           </div>
 
           <div data-reveal-stagger className="mt-12 grid gap-6 md:grid-cols-3">
-            {onboardingSteps.map((step, i) => (
+            {t.onboardingSteps.map((step, i) => (
               <div
                 key={step.title}
                 data-reveal-child
@@ -164,17 +157,17 @@ export default function ServicesPage() {
             className={`rounded-[28px] ${marketingSurface} p-8 text-center sm:rounded-[32px] sm:p-12`}
           >
             <h2 className="text-2xl font-bold tracking-tight text-[#1e5a33] sm:text-3xl">
-              Ready to create a booking request?
+              {s.readyHeading}
             </h2>
             <p className="mx-auto mt-3 max-w-lg text-sm leading-relaxed text-[#4a4a4a] sm:text-base">
-              Register as a private client or organisation — or join as a verified professional.
+              {s.readyBody}
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <CtaPillLink href="/register?as=client" shadow="lg">
-                Create a booking request
+                {t.createBookingRequest}
               </CtaPillLink>
               <CtaPillLink href="/register?as=professional" variant="secondary" shadow="lg">
-                Join as a professional
+                {t.joinProfessional}
               </CtaPillLink>
             </div>
           </div>

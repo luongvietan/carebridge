@@ -1,5 +1,6 @@
-import { cookies } from "next/headers";
-import { LOCALE_BY_COUNTRY, MARKET_COOKIE, parseSelectedMarket } from "@/lib/marketing/market";
+import { LOCALE_BY_COUNTRY } from "@/lib/marketing/market";
+import { getSelectedCountry } from "@/lib/marketing/market-server";
+import { contentForLocale, type MarketingContent } from "@/lib/i18n/content";
 import { dictionaryForLocale, type Dictionary } from "@/lib/i18n/dictionary";
 
 /**
@@ -8,7 +9,15 @@ import { dictionaryForLocale, type Dictionary } from "@/lib/i18n/dictionary";
  * client components receive strings as props from them.
  */
 export async function getDictionaryForVisitor(): Promise<Dictionary> {
-  const store = await cookies();
-  const country = parseSelectedMarket(store.get(MARKET_COOKIE)?.value);
+  const country = await getSelectedCountry();
   return dictionaryForLocale(LOCALE_BY_COUNTRY[country]);
+}
+
+/**
+ * The visitor's marketing content — roles, compliance copy, headings — for the
+ * market they chose. Same rule as the dictionary: unknown market, English.
+ */
+export async function getContentForVisitor(): Promise<MarketingContent> {
+  const country = await getSelectedCountry();
+  return contentForLocale(LOCALE_BY_COUNTRY[country]);
 }

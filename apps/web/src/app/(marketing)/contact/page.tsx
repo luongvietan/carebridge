@@ -3,28 +3,32 @@ import { PageHero } from "@/components/page-hero";
 import { SiteNav } from "@/components/site-nav";
 import { SiteFooter } from "@/components/site-footer";
 import { ContactForm } from "@/components/contact-form";
+import { getContentForVisitor } from "@/lib/i18n/server";
 import { CONTACT_EMAIL } from "@/lib/site";
 
 export const metadata: Metadata = { title: "Contact — CareBridge Connect" };
 
-const details = [
-  ["Email", CONTACT_EMAIL, "M4 6h16v12H4zM4 7l8 6 8-6"],
-  ["Phone", "+44 (0)161 000 0000", "M4 5c0 8 7 15 15 15l2-3-4-2-2 2c-3-1.5-6-4.5-7.5-7.5l2-2-2-4-3 2Z"],
-  ["Address", "Manchester, United Kingdom", "M12 22s7-6 7-12a7 7 0 1 0-14 0c0 6 7 12 7 12Zm0-9a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"],
+const detailRows = [
+  ["email", CONTACT_EMAIL, "M4 6h16v12H4zM4 7l8 6 8-6"],
+  ["phone", "+44 (0)161 000 0000", "M4 5c0 8 7 15 15 15l2-3-4-2-2 2c-3-1.5-6-4.5-7.5-7.5l2-2-2-4-3 2Z"],
+  ["address", "Manchester, United Kingdom", "M12 22s7-6 7-12a7 7 0 1 0-14 0c0 6 7 12 7 12Zm0-9a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"],
 ];
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const { ui } = await getContentForVisitor();
+  const c = ui.contact;
+  const details = detailRows.map(([key, value, icon]) => [c[key as "email" | "phone" | "address"], value, icon] as const);
   return (
     <>
       <SiteNav />
       <PageHero
-        title="We'd love to hear from you"
-        description="Questions about joining as a professional, creating a booking request, or how compliance works? Send us a message and we'll get back to you."
+        title={c.title}
+        description={c.description}
       />
 
       <main className="mx-auto max-w-5xl px-5 py-16">
         <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr]">
-          <ContactForm />
+          <ContactForm labels={ui.contactForm} />
 
           <div className="space-y-4">
             {details.map(([label, value, icon]) => (
@@ -39,10 +43,9 @@ export default function ContactPage() {
               </div>
             ))}
             <div className="rounded-2xl bg-gradient-to-br from-[#11512f] to-[#17492c] p-6 text-white">
-              <p className="font-semibold">Looking to join?</p>
+              <p className="font-semibold">{c.joinTitle}</p>
               <p className="mt-1.5 text-sm text-[#bcd8c7]">
-                Professionals complete onboarding online. Clients and organisations can register
-                and create booking requests directly — no need to contact us first.
+                {c.joinBody}
               </p>
             </div>
           </div>

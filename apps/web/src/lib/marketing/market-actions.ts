@@ -1,6 +1,7 @@
 "use server";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
+import { isGateEnabled } from "@/lib/auth/gate";
 import { createClient } from "@/lib/supabase/server";
 import { MARKET_COOKIE, type MarketCountry } from "@/lib/marketing/market";
 
@@ -24,7 +25,10 @@ export async function selectMarket(code: string): Promise<{ ok: boolean }> {
     .select("code, is_live")
     .eq("code", code)
     .maybeSingle();
-  if (!country?.is_live) return { ok: false };
+  if (!country) return { ok: false };
+  // Private preview: behind the access gate a not-yet-live market can be
+  // chosen, so the client can review it before launch. Public: live only.
+  if (!country.is_live && !isGateEnabled()) return { ok: false };
 
   const store = await cookies();
   store.set(MARKET_COOKIE, code as MarketCountry, {

@@ -10,8 +10,8 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteNav } from "@/components/site-nav";
 import { StatsBand } from "@/components/stats-band";
 import { aboutContent } from "@/data/legal-copy";
+import { getContentForVisitor } from "@/lib/i18n/server";
 import { marketingImages } from "@/data/marketing-images";
-import { getDictionaryForVisitor } from "@/lib/i18n/server";
 import {
   marketingCardShadow,
   marketingHeading,
@@ -27,23 +27,24 @@ const imageShell =
   "relative overflow-hidden rounded-[28px] shadow-[0_16px_40px_-16px_rgba(15,38,28,0.28)] sm:rounded-[32px]";
 
 export default async function AboutPage() {
-  const t = await getDictionaryForVisitor();
+  const content = await getContentForVisitor();
   const { about } = marketingImages;
-  const { welcome, mission, vision, commitment, verification, importantInfo, founder } =
-    aboutContent;
+  const { welcome, mission, vision, commitment, verification, importantInfo } = content.about;
+  const { ui } = content;
+  const { founder } = aboutContent;
 
   return (
     <MarketingPageMotion>
       <SiteNav />
 
       <MarketingPageHero
-        badge="About CareBridge Connect"
-        title="Welcome to CareBridge Connect"
-        description="A healthcare marketplace connecting community clients, families and organisations with trusted healthcare professionals across the United Kingdom."
+        badge={ui.aboutPage.badge}
+        title={ui.aboutPage.title}
+        description={ui.aboutPage.description}
         image={marketingImages.pageHero.about}
       />
 
-      <StatsBand labels={t.statsBandLabels} />
+      <StatsBand />
 
       <main>
         <section className={marketingSection}>
@@ -101,7 +102,7 @@ export default async function AboutPage() {
 
               <div className="mt-8">
                 <CtaPillLink href="/register" shadow="lg">
-                  Get started
+                  {ui.getStarted}
                 </CtaPillLink>
               </div>
             </div>
@@ -172,11 +173,12 @@ export default async function AboutPage() {
               href="/disclaimer"
               className="mt-6 text-sm font-semibold text-[#2e7d32] hover:underline"
             >
-              Read the full disclaimer
+              {ui.aboutPage.readDisclaimer}
             </ForwardLink>
           </div>
         </section>
 
+        {content.showFounder && (
         <section className={marketingSection}>
           <div
             data-reveal
@@ -201,6 +203,7 @@ export default async function AboutPage() {
             </div>
           </div>
         </section>
+        )}
 
         <ImportantInfoCallout />
 

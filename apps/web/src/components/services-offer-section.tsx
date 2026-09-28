@@ -1,8 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ForwardLink } from "@/components/forward-link";
-import { professionalRoles } from "@/data/marketing-copy";
-import { marketingImages } from "@/data/marketing-images";
+import { roleImage } from "@/lib/i18n/content";
+import { getContentForVisitor } from "@/lib/i18n/server";
 import { ArrowUpRight01Icon, Icon } from "@/components/ui/icon";
 import { marketingHeading, marketingSection, marketingSubheading } from "@/lib/marketing-ui";
 
@@ -43,42 +43,37 @@ function ServiceCard({
   );
 }
 
-export function ServicesOfferSection() {
+export async function ServicesOfferSection() {
+  const { healthRoles, childcareRoles, ui } = await getContentForVisitor();
+  const featured = [...healthRoles, ...childcareRoles].filter((r) => r.featuredOnHome);
   return (
     <section className={marketingSection}>
       <div data-reveal className="text-center">
-        <h2 className={marketingHeading}>Professional roles we cover</h2>
+        <h2 className={marketingHeading}>{ui.servicesOffer.heading}</h2>
         <p className={`${marketingSubheading} max-w-lg`}>
-          Healthcare and childcare professionals — from registered nurses and support workers to
-          Ofsted-registered nannies — available for booking requests from families and
-          organisations.
+          {ui.servicesOffer.sub}
         </p>
       </div>
 
       <div data-reveal-stagger className="mt-10 grid gap-6 sm:mt-12 lg:grid-cols-3">
-        {professionalRoles
-          // Keep the original index so each card keeps its own image.
-          .map((service, i) => ({ service, i }))
-          .filter(({ service }) => "featuredOnHome" in service && service.featuredOnHome)
-          .map(({ service, i }) => {
-            const img = marketingImages.roleCards[i];
-            return (
-              <ServiceCard
-                key={service.title}
-                title={service.title}
-                description={service.description}
-                image={img.src}
-                alt={img.alt}
-              />
-            );
-          })}
+        {featured.map((service) => {
+          const img = roleImage(service.image);
+          return (
+            <ServiceCard
+              key={service.title}
+              title={service.title}
+              description={service.description}
+              image={img.src}
+              alt={img.alt}
+            />
+          );
+        })}
       </div>
 
       <p className="mx-auto mt-8 max-w-2xl text-center text-sm text-[#4a4a4a]">
-        Children&apos;s and mental health nurses, physiotherapists, nannies, childminders,
-        babysitters and mother&apos;s helpers are also available.{" "}
+        {ui.servicesOffer.more}{" "}
         <ForwardLink href="/services" className="text-sm text-[#2e7d32] hover:underline">
-          View all ten roles
+          {ui.servicesOffer.viewAll}
         </ForwardLink>
       </p>
     </section>

@@ -5,7 +5,7 @@ import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { CtaPillLink } from "@/components/cta-pill-link";
-import { registerLinks, regulatoryDisclaimer } from "@/data/marketing-copy";
+import { registerLinks } from "@/data/marketing-copy";
 import { marketingImages } from "@/data/marketing-images";
 import { MarketSwitch } from "@/components/market-switch";
 import type { Market } from "@/lib/marketing/market-server";
@@ -25,9 +25,24 @@ type Props = {
   /** Translated call-to-action labels. */
   joinLabel: string;
   requestLabel: string;
+  /** Market-specific copy: the regulatory notice and the floating card. */
+  regulatoryDisclaimer: string;
+  complianceLabel: string;
+  rolesLabel: string;
 };
 
-export function HeroSection({ markets, selected, badge, headline, subheadline, joinLabel, requestLabel }: Props) {
+export function HeroSection({
+  markets,
+  selected,
+  badge,
+  headline,
+  subheadline,
+  joinLabel,
+  requestLabel,
+  regulatoryDisclaimer,
+  complianceLabel,
+  rolesLabel,
+}: Props) {
   const { hero, heroAvatars } = marketingImages;
   const sectionRef = useRef<HTMLElement>(null);
 
@@ -143,7 +158,7 @@ export function HeroSection({ markets, selected, badge, headline, subheadline, j
             data-hero-float
             className="absolute bottom-6 right-6 hidden rounded-2xl bg-white px-5 py-4 shadow-xl sm:block lg:bottom-10 lg:right-10"
           >
-            <p className="text-[15px] font-bold text-[#1e5a33]">Compliance built in</p>
+            <p className="text-[15px] font-bold text-[#1e5a33]">{complianceLabel}</p>
             <div className="mt-3 flex items-center gap-3">
               <div className="flex -space-x-2.5">
                 {heroAvatars.map((src, i) => (
@@ -158,7 +173,7 @@ export function HeroSection({ markets, selected, badge, headline, subheadline, j
                   />
                 ))}
               </div>
-              <p className="text-sm font-medium text-[#4a4a4a]">10 verified role types</p>
+              <p className="text-sm font-medium text-[#4a4a4a]">{rolesLabel}</p>
             </div>
           </div>
         </div>

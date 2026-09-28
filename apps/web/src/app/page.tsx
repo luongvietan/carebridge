@@ -12,17 +12,18 @@ import { StatsBand } from "@/components/stats-band";
 import { faqsForLocale } from "@/data/faqs-locale";
 import { localeForCountry } from "@/lib/marketing/market";
 import { getSelectedCountry, listMarkets } from "@/lib/marketing/market-server";
-import { getDictionaryForVisitor } from "@/lib/i18n/server";
+import { getContentForVisitor, getDictionaryForVisitor } from "@/lib/i18n/server";
 import { marketingHeading, marketingSection, marketingSubheading } from "@/lib/marketing-ui";
 
 export default async function HomePage() {
   // The markets, the visitor's choice and their language all come from server
   // state: the `countries` table owns what exists and what is live, the cookie
   // owns which one was picked.
-  const [markets, selectedCountry, t] = await Promise.all([
+  const [markets, selectedCountry, t, content] = await Promise.all([
     listMarkets(),
     getSelectedCountry(),
     getDictionaryForVisitor(),
+    getContentForVisitor(),
   ]);
 
   const locale = localeForCountry(selectedCountry);
@@ -39,16 +40,25 @@ export default async function HomePage() {
         subheadline={t.heroSubheadline}
         joinLabel={t.joinProfessional}
         requestLabel={t.createBookingRequest}
+        regulatoryDisclaimer={content.regulatoryDisclaimer}
+        complianceLabel={content.ui.hero.complianceBuiltIn}
+        rolesLabel={content.ui.hero.verifiedRoles}
       />
 
-      <StatsBand labels={t.statsBandLabels} />
+      <StatsBand />
 
       <AboutIntroSection />
 
       <main>
         <ServicesOfferSection />
 
-        <ComplianceShowcase />
+        <ComplianceShowcase
+          heading={content.ui.compliance.heading}
+          body={content.ui.compliance.body}
+          getStarted={content.ui.getStarted}
+          features={content.complianceFeatures}
+          checklist={content.verificationChecklist}
+        />
 
         <section className={marketingSection}>
           <div data-reveal className="text-center">

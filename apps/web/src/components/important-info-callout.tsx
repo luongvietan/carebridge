@@ -1,9 +1,10 @@
 import { ForwardLink } from "@/components/forward-link";
-import { emergencyDisclaimer, importantInformation } from "@/data/marketing-copy";
+import { getContentForVisitor } from "@/lib/i18n/server";
 import { marketingSection, marketingSurface } from "@/lib/marketing-ui";
 
 /** Compact non-CQC / non-regulated notice, linking to the full /disclaimer page. */
-export function ImportantInfoCallout() {
+export async function ImportantInfoCallout() {
+  const { importantInformation, emergencyDisclaimer, ui } = await getContentForVisitor();
   return (
     <section className={`${marketingSection} pt-0`}>
       <div
@@ -23,7 +24,7 @@ export function ImportantInfoCallout() {
           href="/disclaimer"
           className="mt-4 text-sm font-semibold text-[#007a73] hover:underline"
         >
-          Read the full important information &amp; disclaimer
+          {ui.callout.readFull}
         </ForwardLink>
       </div>
     </section>

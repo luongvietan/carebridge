@@ -1,12 +1,9 @@
-import { stats } from "@/data/marketing-copy";
-
-type Props = {
-  /** Translated labels, in the same order as `stats`. */
-  labels: readonly [string, string, string, string];
-};
+import { getContentForVisitor } from "@/lib/i18n/server";
 import { marketingCard, marketingSectionShell } from "@/lib/marketing-ui";
 
-export function StatsBand({ labels }: Props) {
+/** The figures band, in the visitor's market: Portugal lists its own eight roles. */
+export async function StatsBand() {
+  const { stats, ui } = await getContentForVisitor();
   return (
     <section className={marketingSectionShell}>
       <div className={`relative mx-auto max-w-7xl overflow-hidden ${marketingCard}`}>
@@ -27,9 +24,9 @@ export function StatsBand({ labels }: Props) {
             data-reveal-stagger
             className="grid grid-cols-2 divide-x divide-y divide-white/15 sm:grid-cols-4 sm:divide-y-0"
           >
-            {stats.map((stat, i) => (
+            {stats.map((stat) => (
               <div
-                key={labels[i] ?? stat.label}
+                key={stat.label}
                 data-reveal-child
                 className="flex flex-col items-center justify-center px-4 py-6 text-center sm:py-2"
               >
@@ -44,8 +41,7 @@ export function StatsBand({ labels }: Props) {
           </div>
 
           <p className="mt-8 text-center text-xs leading-relaxed text-white/60 sm:text-sm">
-            Built for operational control — full audit trails, automatic compliance alerts and
-            data export for CareBridge Connect Ltd at any time.
+            {ui.statsFootnote}
           </p>
         </div>
       </div>

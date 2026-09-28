@@ -3,7 +3,6 @@
 import Image from "next/image";
 import { useState } from "react";
 import { CtaPillLink } from "@/components/cta-pill-link";
-import { complianceFeatures, verificationChecklist } from "@/data/marketing-copy";
 import { marketingImages } from "@/data/marketing-images";
 import { ChevronDownIcon, Icon } from "@/components/ui/icon";
 import { marketingHeading, marketingSection, marketingSurface } from "@/lib/marketing-ui";
@@ -46,7 +45,15 @@ function ComplianceStatusCard({
   );
 }
 
-export function ComplianceShowcase() {
+type ComplianceShowcaseProps = {
+  heading: string;
+  body: string;
+  getStarted: string;
+  features: readonly { title: string; bullets: readonly string[] }[];
+  checklist: readonly string[];
+};
+
+export function ComplianceShowcase({ heading, body, getStarted, features, checklist }: ComplianceShowcaseProps) {
   const [openIndex, setOpenIndex] = useState(0);
   const { compliance } = marketingImages;
 
@@ -58,15 +65,14 @@ export function ComplianceShowcase() {
       >
         <div>
           <h2 className={`leading-tight ${marketingHeading}`}>
-            Verified professionals, continuous compliance
+            {heading}
           </h2>
           <p className="mt-4 max-w-md text-sm leading-relaxed text-[#4a4a4a] sm:text-base">
-            No professional — healthcare or childcare — can accept a booking until every one of
-            these has been checked and approved, and each one is monitored for expiry afterwards.
+            {body}
           </p>
 
           <ul className="mt-6 grid gap-x-6 gap-y-2 text-sm text-[#1e5a33] sm:grid-cols-2">
-            {verificationChecklist.map((item) => (
+            {checklist.map((item) => (
               <li key={item} className="flex items-start gap-2">
                 <span aria-hidden className="font-semibold text-[#2e7d32]">
                   &#10003;
@@ -77,7 +83,7 @@ export function ComplianceShowcase() {
           </ul>
 
           <div className="mt-8 space-y-3">
-            {complianceFeatures.map((item, index) => {
+            {features.map((item, index) => {
               const isOpen = openIndex === index;
 
               return (
@@ -122,7 +128,7 @@ export function ComplianceShowcase() {
 
           <div className="mt-8">
             <CtaPillLink href="/register" shadow="lg">
-              Get started
+              {getStarted}
             </CtaPillLink>
           </div>
         </div>

@@ -20,8 +20,8 @@ export function MarketSwitch({ markets, selected }: Props) {
   const [pending, startTransition] = useTransition();
   const [optimistic, setOptimistic] = useState(selected);
 
-  async function choose(code: string, live: boolean) {
-    if (!live || code === optimistic) return;
+  async function choose(code: string, open: boolean) {
+    if (!open || code === optimistic) return;
     setOptimistic(code);
     const result = await selectMarket(code);
     if (!result.ok) {
@@ -42,12 +42,12 @@ export function MarketSwitch({ markets, selected }: Props) {
             {!market.live && (
               <span className="text-xs text-white/70">
                 {" "}
-                launching soon
+                {market.preview ? "preview" : "launching soon"}
               </span>
             )}
           </>
         );
-        if (!market.live) {
+        if (!market.live && !market.preview) {
           return (
             <li
               key={market.code}
@@ -62,7 +62,7 @@ export function MarketSwitch({ markets, selected }: Props) {
           <li key={market.code}>
             <button
               type="button"
-              onClick={() => choose(market.code, market.live)}
+              onClick={() => choose(market.code, market.live || market.preview)}
               disabled={pending}
               aria-pressed={isActive}
               className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-sm backdrop-blur-sm transition-colors disabled:opacity-70 ${

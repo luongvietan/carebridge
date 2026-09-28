@@ -1,28 +1,28 @@
 import Image from "next/image";
 import { CtaPillLink } from "@/components/cta-pill-link";
-import { aboutFeatures } from "@/data/marketing-copy";
 import { marketingImages } from "@/data/marketing-images";
 import { CheckmarkCircle01Icon, Icon, StarIcon } from "@/components/ui/icon";
+import { getContentForVisitor } from "@/lib/i18n/server";
 import { marketingHeading, marketingSection } from "@/lib/marketing-ui";
 
 const imageShell =
   "relative overflow-hidden rounded-[28px] shadow-[0_16px_40px_-16px_rgba(15,38,28,0.28)] sm:rounded-[32px]";
 
-export function AboutIntroSection() {
+export async function AboutIntroSection() {
   const { about, aboutAvatars } = marketingImages;
+  const { aboutFeatures, ui } = await getContentForVisitor();
 
   return (
     <section className={marketingSection}>
       <div data-reveal className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between lg:gap-12">
         <h2 className={`max-w-3xl leading-tight ${marketingHeading}`}>
-          A secure healthcare and childcare marketplace — only suitable, verified professionals
-          join our platform
+          {ui.aboutIntro.heading}
         </h2>
 
         <div className="flex shrink-0 items-center gap-4">
           <div className="flex items-center gap-2">
             <Icon icon={StarIcon} size={20} color="#f5a623" strokeWidth={1.75} />
-            <span className="text-lg font-bold text-[#1e5a33]">Compliance-first</span>
+            <span className="text-lg font-bold text-[#1e5a33]">{ui.aboutIntro.badge}</span>
           </div>
           <div className="flex -space-x-2.5">
             {aboutAvatars.map((src) => (
@@ -74,10 +74,7 @@ export function AboutIntroSection() {
         {/* Text */}
         <div data-reveal-child className="col-span-12 flex flex-col justify-center pt-2 lg:col-span-5 lg:pt-0">
           <p className="text-[15px] leading-[1.7] text-[#33433a] sm:text-base sm:leading-relaxed">
-            CareBridge Connect provides a secure, compliant onboarding journey for healthcare
-            professionals and a straightforward booking process for private clients and
-            organisations — with eligibility screening, competency assessment, document
-            verification and continuous compliance tracking built in.
+            {ui.aboutIntro.body}
           </p>
 
           <ul className="mt-7 space-y-3.5 sm:mt-8">
@@ -99,7 +96,7 @@ export function AboutIntroSection() {
 
           <div className="mt-8 sm:mt-9">
             <CtaPillLink href="/register" shadow="lg">
-              Get started
+              {ui.getStarted}
             </CtaPillLink>
           </div>
         </div>

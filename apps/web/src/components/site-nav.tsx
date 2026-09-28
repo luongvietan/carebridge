@@ -1,10 +1,12 @@
 import { roleHome, type AccountType } from "@/lib/auth/rbac";
 import { createClient } from "@/lib/supabase/server";
 import { SiteNavClient } from "@/components/site-nav-client";
+import { getContentForVisitor } from "@/lib/i18n/server";
 
 export { BrandMark } from "@/components/site-nav-client";
 
 export async function SiteNav() {
+  const { ui } = await getContentForVisitor();
   const supabase = await createClient();
   const {
     data: { user },
@@ -22,5 +24,5 @@ export async function SiteNav() {
     }
   }
 
-  return <SiteNavClient dashboardHref={dashboardHref} />;
+  return <SiteNavClient dashboardHref={dashboardHref} labels={ui.nav} />;
 }
