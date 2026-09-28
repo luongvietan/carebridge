@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Sans } from "next/font/google";
 import { siteTagline } from "@/data/marketing-copy";
+import { getSiteOrigin } from "@/lib/site";
 import { localeForCountry } from "@/lib/marketing/market";
+import { AssistantWidget } from "@/components/assistant-widget";
 import { getSelectedCountry } from "@/lib/marketing/market-server";
 import "./globals.css";
 
@@ -11,7 +13,7 @@ const plex = IBM_Plex_Sans({
   variable: "--font-plex",
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://carebridgeconnect.co.uk";
+const siteUrl = getSiteOrigin();
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -48,6 +50,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang={localeForCountry(country)}>
       <body className={`${plex.className} min-h-screen bg-white text-[#14301e] antialiased`}>
         {children}
+        <AssistantWidget locale={localeForCountry(country) as "en-GB" | "pt-PT"} />
       </body>
     </html>
   );

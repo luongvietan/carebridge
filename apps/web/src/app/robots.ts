@@ -1,7 +1,8 @@
 import type { MetadataRoute } from "next";
 import { isGateEnabled } from "@/lib/auth/gate";
+import { getSiteOrigin } from "@/lib/site";
 
-const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://carebridgeconnect.co.uk";
+const siteUrl = getSiteOrigin();
 
 /**
  * While the "Private Preview" gate is enabled (PRODUCTION_GATE_ENABLED=true) we

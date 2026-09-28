@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { BackLink } from "@/components/back-link";
 import { PrintButton } from "@/components/print-button";
+import { CONTACT_EMAIL } from "@/lib/site";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { formatGbpMoney } from "@/lib/format/money";
@@ -104,7 +105,7 @@ export default async function OrganisationInvoicePage({
           <p className="text-xs uppercase tracking-wide text-[#7a8a81]">From</p>
           <p className="mt-1 font-semibold text-[#1e5a33]">CareBridge Connect Ltd</p>
           <p className="text-sm text-[#4a4a4a]">Manchester, United Kingdom</p>
-          <p className="text-sm text-[#4a4a4a]">info@carebridgeconnect.co.uk</p>
+          <p className="text-sm text-[#4a4a4a]">{CONTACT_EMAIL}</p>
         </div>
         <div>
           <p className="text-xs uppercase tracking-wide text-[#7a8a81]">To</p>

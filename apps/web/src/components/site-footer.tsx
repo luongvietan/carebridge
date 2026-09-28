@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { CONTACT_EMAIL } from "@/lib/site";
 import { marketingImages } from "@/data/marketing-images";
 import { emergencyDisclaimer, regulatoryDisclaimer } from "@/data/marketing-copy";
 import {
@@ -22,7 +23,7 @@ const FOOTER_IMAGE = marketingImages.footer;
 const contactItems = [
   { label: "Manchester, United Kingdom", icon: Location01Icon },
   { label: "+44 (0)161 000 0000", icon: Call02Icon },
-  { label: "info@carebridgeconnect.co.uk", icon: Mail01Icon },
+  { label: CONTACT_EMAIL, icon: Mail01Icon },
 ];
 
 const navPills = [

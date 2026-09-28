@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
+import { getSiteOrigin } from "@/lib/site";
 
-const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://carebridgeconnect.co.uk";
+const siteUrl = getSiteOrigin();
 
 /** Public, indexable routes — marketing, legal and the registration/login entry points (spec §12). */
 const PUBLIC_ROUTES = [

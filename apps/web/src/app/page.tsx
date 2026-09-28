@@ -9,6 +9,8 @@ import { ServicesOfferSection } from "@/components/services-offer-section";
 import { SiteNav } from "@/components/site-nav";
 import { SiteFooter } from "@/components/site-footer";
 import { StatsBand } from "@/components/stats-band";
+import { faqsForLocale } from "@/data/faqs-locale";
+import { localeForCountry } from "@/lib/marketing/market";
 import { getSelectedCountry, listMarkets } from "@/lib/marketing/market-server";
 import { getDictionaryForVisitor } from "@/lib/i18n/server";
 import { marketingHeading, marketingSection, marketingSubheading } from "@/lib/marketing-ui";
@@ -22,6 +24,8 @@ export default async function HomePage() {
     getSelectedCountry(),
     getDictionaryForVisitor(),
   ]);
+
+  const locale = localeForCountry(selectedCountry);
 
   return (
     <HomePageMotion>
@@ -76,7 +80,7 @@ export default async function HomePage() {
 
         <CtaBanner />
 
-        <HomeFaqSection />
+        <HomeFaqSection faqs={faqsForLocale(locale).slice(0, 5)} locale={locale} />
       </main>
 
       <SiteFooter />

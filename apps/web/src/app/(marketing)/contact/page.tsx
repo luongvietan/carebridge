@@ -3,11 +3,12 @@ import { PageHero } from "@/components/page-hero";
 import { SiteNav } from "@/components/site-nav";
 import { SiteFooter } from "@/components/site-footer";
 import { ContactForm } from "@/components/contact-form";
+import { CONTACT_EMAIL } from "@/lib/site";
 
 export const metadata: Metadata = { title: "Contact — CareBridge Connect" };
 
 const details = [
-  ["Email", "info@carebridgeconnect.co.uk", "M4 6h16v12H4zM4 7l8 6 8-6"],
+  ["Email", CONTACT_EMAIL, "M4 6h16v12H4zM4 7l8 6 8-6"],
   ["Phone", "+44 (0)161 000 0000", "M4 5c0 8 7 15 15 15l2-3-4-2-2 2c-3-1.5-6-4.5-7.5-7.5l2-2-2-4-3 2Z"],
   ["Address", "Manchester, United Kingdom", "M12 22s7-6 7-12a7 7 0 1 0-14 0c0 6 7 12 7 12Zm0-9a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"],
 ];
