@@ -2,6 +2,7 @@
 import { createServiceClient } from "@/lib/supabase/service";
 import { requireAdmin } from "@/lib/auth/admin";
 import { requireAuth } from "@/lib/auth/require-auth";
+import { isGateEnabled } from "@/lib/auth/gate";
 import {
   buildBookingInsert,
   careTypeError,
@@ -101,10 +102,21 @@ export async function createBooking(form: unknown): Promise<BookingActionResult>
 
   const { data: role } = await admin
     .from("professional_roles")
-    .select("category_id")
+    .select("category_id, country_code")
     .eq("id", formData.professionalRoleId)
     .maybeSingle();
   if (!role) return { error: "That professional role is no longer available." };
+
+  // A country that is not live yet cannot be booked into, whatever the form
+  // was sent — except behind the private-preview gate, where it is being reviewed.
+  const { data: roleCountry } = await admin
+    .from("countries")
+    .select("is_live")
+    .eq("code", role.country_code)
+    .maybeSingle();
+  if (!roleCountry?.is_live && !isGateEnabled()) {
+    return { error: "That professional role is not available yet." };
+  }
 
   const [{ count: careTypesInCategory }, { data: chosenCareType }] = await Promise.all([
     admin

@@ -2,12 +2,16 @@ import { createClient } from "@/lib/supabase/server";
 import { BookingRequestForm } from "@/components/booking-request-form";
 import { BackLink } from "@/components/back-link";
 import { fetchBookingReference } from "@/lib/bookings/reference";
+import { getSelectedCountry } from "@/lib/marketing/market-server";
 
 export const dynamic = "force-dynamic";
 
 export default async function OrganisationNewBookingPage() {
   const supabase = await createClient();
-  const { roles, careTypes } = await fetchBookingReference(supabase);
+  const { roles, careTypes } = await fetchBookingReference(
+    supabase,
+    await getSelectedCountry(),
+  );
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-10">

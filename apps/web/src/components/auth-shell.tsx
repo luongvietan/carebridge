@@ -1,7 +1,6 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
 import { BackLink } from "@/components/back-link";
-import { SiteFooter } from "@/components/site-footer";
 import { marketingImages } from "@/data/marketing-images";
 import { marketingCard } from "@/lib/marketing-ui";
 
@@ -48,7 +47,6 @@ export function AuthShell({ children, wide = false }: AuthShellProps) {
           </div>
         </div>
       </div>
-      <SiteFooter />
     </>
   );
 }
