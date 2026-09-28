@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { requesterCopy, type RequesterLocale } from "@/lib/requester-copy";
 import { useRouter } from "next/navigation";
 import { createBooking } from "@/lib/bookings/actions";
 import { Select } from "@/components/ui/select";
@@ -17,20 +18,23 @@ type CareType = { id: string; name: string; description: string | null; category
 const NO_CARE_TYPES: CareType[] = [];
 
 // Selectable shift lengths (whole hours), up to the server-side maximum.
-const DURATIONS = Array.from({ length: MAX_SHIFT_HOURS }, (_, i) => {
-  const h = i + 1;
-  return { value: String(h), label: `${h} hour${h === 1 ? "" : "s"}` };
-});
 
 export function BookingRequestForm({
   roles,
   careTypes = NO_CARE_TYPES,
   requesterType,
+  locale = "en-GB",
 }: {
   roles: Role[];
   careTypes?: CareType[];
   requesterType: "client" | "organisation";
+  locale?: RequesterLocale;
 }) {
+  const t = requesterCopy[locale].booking;
+  const durations = Array.from({ length: MAX_SHIFT_HOURS }, (_, i) => {
+    const h = i + 1;
+    return { value: String(h), label: `${h} ${h === 1 ? t.hour : t.hours}` };
+  });
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -63,16 +67,16 @@ export function BookingRequestForm({
     e.preventDefault();
     setError(null);
     if (!start || !duration) {
-      setError("Please choose a start time and shift duration.");
+      setError(t.needStartAndDuration);
       return;
     }
     const startIso = londonWallClockToUtc(start);
     if (!startIso) {
-      setError("Please choose a valid start time.");
+      setError(t.invalidStart);
       return;
     }
     if (startIso.getTime() <= Date.now()) {
-      setError("Please choose a start time in the future.");
+      setError(t.futureStart);
       return;
     }
     const endIso = new Date(startIso.getTime() + Number(duration) * 3_600_000);
@@ -96,31 +100,31 @@ export function BookingRequestForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="block text-sm font-medium">
-        Professional role
+        {t.role}
         <Select
           name="professionalRoleId"
-          aria-label="Professional role"
+          aria-label={t.role}
           required
           defaultValue=""
           onValueChange={(v) => {
             setRoleId(v);
             setCareTypeId("");
           }}
-          placeholder="Select a role…"
+          placeholder={t.selectRole}
           className="mt-1"
           options={roles.map((r) => ({ value: r.id, label: r.name, group: r.category }))}
         />
       </div>
       {availableCareTypes.length > 0 && (
         <div className="block text-sm font-medium">
-          Type of care
+          {t.careType}
           <Select
             name="careTypeId"
-            aria-label="Type of care"
+            aria-label={t.careType}
             required
             value={careTypeId}
             onValueChange={setCareTypeId}
-            placeholder="Select the type of care…"
+            placeholder={t.selectCareType}
             className="mt-1"
             options={availableCareTypes.map((c) => ({ value: c.id, label: c.name }))}
           />
@@ -133,9 +137,9 @@ export function BookingRequestForm({
       )}
       <div className="grid grid-cols-2 gap-4">
         <div className="block text-sm font-medium">
-          Start
+          {t.start}
           <DateTimePicker
-            aria-label="Start"
+            aria-label={t.start}
             className="mt-1"
             value={start}
             onValueChange={setStart}
@@ -143,21 +147,21 @@ export function BookingRequestForm({
           />
         </div>
         <div className="block text-sm font-medium">
-          Shift duration
+          {t.duration}
           <Select
-            aria-label="Shift duration"
-            placeholder="Select duration…"
+            aria-label={t.duration}
+            placeholder={t.selectDuration}
             className="mt-1"
             value={duration}
             onValueChange={setDuration}
-            options={DURATIONS}
+            options={durations}
           />
         </div>
       </div>
       {endPreview && (
         <p className="text-sm text-[#4a4a4a]">
-          Ends at{" "}
-          {endPreview.toLocaleString("en-GB", {
+          {t.endsAt}{" "}
+          {endPreview.toLocaleString(t.dateLocale, {
             day: "2-digit",
             month: "short",
             year: "numeric",
@@ -168,15 +172,15 @@ export function BookingRequestForm({
         </p>
       )}
       <label className="block text-sm font-medium">
-        Location address
+        {t.location}
         <input name="locationAddress" required className={field} />
       </label>
       <label className="block text-sm font-medium">
-        Postcode
+        {t.postcode}
         <input name="locationPostcode" className={field} />
       </label>
       <label className="block text-sm font-medium">
-        Notes
+        {t.notes}
         <textarea name="notes" rows={3} className={field} />
       </label>
 
@@ -186,7 +190,7 @@ export function BookingRequestForm({
         disabled={pending}
         className="rounded-full bg-[#2e7d32] px-4 py-3 text-sm text-white hover:bg-[#246627] disabled:opacity-50"
       >
-        {pending ? "Creating…" : "Create booking"}
+        {pending ? t.creating : t.create}
       </button>
     </form>
   );

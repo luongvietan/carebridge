@@ -6,10 +6,13 @@ import { useRouter } from "next/navigation";
 import { attemptSignIn } from "@/lib/auth/actions";
 import { SIGN_IN_ERROR } from "@/lib/auth/sign-in-messages";
 import { AuthShell } from "@/components/auth-shell";
+import { useAuthCopy } from "@/components/auth-locale";
 import { BackLink } from "@/components/back-link";
 import { marketingButtonPrimary, marketingInput } from "@/lib/marketing-ui";
 
 export default function LoginPage() {
+  const t = useAuthCopy().login;
+  const back = useAuthCopy().backHome;
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -39,22 +42,22 @@ export default function LoginPage() {
     <AuthShell>
       <div className="lg:hidden">
         <BackLink href="/" className="text-[#4a4a4a] hover:text-[#2e7d32]">
-          Back to home
+          {back}
         </BackLink>
       </div>
 
-      <h1 className="mt-4 text-2xl font-bold text-[#1e5a33] sm:text-3xl lg:mt-0">Sign in</h1>
+      <h1 className="mt-4 text-2xl font-bold text-[#1e5a33] sm:text-3xl lg:mt-0">{t.title}</h1>
       <p className="mt-2 text-sm leading-relaxed text-[#4a4a4a]">
-        Access your CareBridge Connect account — professionals, clients and organisations.
+        {t.intro}
       </p>
 
       <form method="post" onSubmit={onSubmit} className="mt-8 space-y-5">
         <label className="block text-sm font-medium text-[#33433a]">
-          Email
+          {t.email}
           <input type="email" name="email" required className={marketingInput} />
         </label>
         <label className="block text-sm font-medium text-[#33433a]">
-          Password
+          {t.password}
           <input type="password" name="password" required className={marketingInput} />
         </label>
         {error && <p className="text-sm text-red-600">{error}</p>}
@@ -63,19 +66,19 @@ export default function LoginPage() {
           disabled={pending}
           className={`w-full ${marketingButtonPrimary}`}
         >
-          {pending ? "Signing in…" : "Sign in"}
+          {pending ? t.submitting : t.submit}
         </button>
       </form>
 
       <p className="mt-6 text-sm text-[#4a4a4a]">
         <Link href="/reset" className="font-semibold text-[#2e7d32] hover:underline">
-          Forgot password?
+          {t.forgot}
         </Link>
       </p>
       <p className="mt-3 text-sm text-[#4a4a4a]">
-        No account yet?{" "}
+        {t.noAccount}{" "}
         <Link href="/register" className="font-semibold text-[#2e7d32] hover:underline">
-          Create an account
+          {t.create}
         </Link>
       </p>
     </AuthShell>

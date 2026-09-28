@@ -6,12 +6,8 @@ import { useSearchParams } from "next/navigation";
 import { AuthShell } from "@/components/auth-shell";
 import { BackLink } from "@/components/back-link";
 import { ArrowRight01Icon, Icon } from "@/components/ui/icon";
-import {
-  ctaLabels,
-  registerLinks,
-  registrationPaths,
-  siteTagline,
-} from "@/data/marketing-copy";
+import { registerLinks, registrationPaths } from "@/data/marketing-copy";
+import { useAuthCopy } from "@/components/auth-locale";
 import { signUp, type SignUpResult } from "@/lib/auth/actions";
 import { marketingButtonPrimary, marketingCardShadow, marketingInput } from "@/lib/marketing-ui";
 
@@ -23,20 +19,22 @@ function parseMode(value: string | null): RegisterMode | null {
 }
 
 function RegisterChoice() {
+  const all = useAuthCopy();
+  const t = all.register;
   return (
     <AuthShell wide>
       <div className="lg:hidden">
         <BackLink href="/" className="text-[#4a4a4a] hover:text-[#2e7d32]">
-          Back to home
+          {all.backHome}
         </BackLink>
       </div>
 
       <div className="mt-4 text-center lg:mt-0">
         <h1 className="text-2xl font-bold tracking-tight text-[#1e5a33] sm:text-3xl">
-          Get started with CareBridge Connect
+          {t.choiceTitle}
         </h1>
         <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-[#4a4a4a] sm:text-base">
-          {siteTagline}
+          {t.tagline}
         </p>
       </div>
 
@@ -48,12 +46,16 @@ function RegisterChoice() {
             className={`group flex flex-col rounded-[28px] border border-[#e7efe9] bg-white p-7 ${marketingCardShadow} transition hover:border-[#2e7d32] hover:shadow-[0_16px_40px_-12px_rgba(25,128,56,0.2)] sm:p-8`}
           >
             <span className="inline-flex w-fit rounded-full bg-[#e6f4ea] px-3 py-1 text-xs font-semibold uppercase tracking-wide text-[#2e7d32]">
-              {path.id === "professional" ? "For professionals" : "For clients"}
+              {path.id === "professional" ? t.forProfessionals : t.forClients}
             </span>
-            <h2 className="mt-4 text-xl font-bold text-[#1e5a33]">{path.title}</h2>
-            <p className="mt-3 flex-1 text-sm leading-relaxed text-[#4a4a4a]">{path.description}</p>
+            <h2 className="mt-4 text-xl font-bold text-[#1e5a33]">
+              {(path.id === "professional" ? t.professionalCard : t.clientCard).title}
+            </h2>
+            <p className="mt-3 flex-1 text-sm leading-relaxed text-[#4a4a4a]">
+              {(path.id === "professional" ? t.professionalCard : t.clientCard).description}
+            </p>
             <span className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[#2e7d32] group-hover:underline">
-              Continue
+              {t.continue}
               <Icon icon={ArrowRight01Icon} size={16} strokeWidth={2} aria-hidden />
             </span>
           </Link>
@@ -61,9 +63,9 @@ function RegisterChoice() {
       </div>
 
       <p className="mt-8 text-center text-sm text-[#4a4a4a]">
-        Already registered?{" "}
+        {t.alreadyRegistered}{" "}
         <Link href="/login" className="font-semibold text-[#2e7d32] hover:underline">
-          Sign in
+          {t.signIn}
         </Link>
       </p>
     </AuthShell>
@@ -71,6 +73,8 @@ function RegisterChoice() {
 }
 
 function RegisterForm({ mode }: { mode: RegisterMode }) {
+  const all = useAuthCopy();
+  const t = all.register;
   const [state, action, pending] = useActionState<SignUpResult, FormData>(signUp, null);
   const isProfessional = mode === "professional";
 
@@ -79,15 +83,15 @@ function RegisterForm({ mode }: { mode: RegisterMode }) {
       <AuthShell>
         <div className="lg:hidden">
           <BackLink href="/" className="text-[#4a4a4a] hover:text-[#2e7d32]">
-            Back to home
+            {all.backHome}
           </BackLink>
         </div>
 
-        <h1 className="mt-4 text-2xl font-bold text-[#1e5a33] lg:mt-0">Check your email</h1>
+        <h1 className="mt-4 text-2xl font-bold text-[#1e5a33] lg:mt-0">{t.checkEmail}</h1>
         <p className="mt-3 text-sm leading-relaxed text-[#4a4a4a]">
-          We&apos;ve sent a confirmation link. Confirm your email, then{" "}
+          {t.sentBefore}
           <Link href="/login" className="font-semibold text-[#2e7d32] hover:underline">
-            sign in
+            {t.sentLink}
           </Link>
           .
         </p>
@@ -99,7 +103,7 @@ function RegisterForm({ mode }: { mode: RegisterMode }) {
     <AuthShell>
       <div className="lg:hidden">
         <BackLink href="/" className="text-[#4a4a4a] hover:text-[#2e7d32]">
-          Back to home
+          {all.backHome}
         </BackLink>
       </div>
 
@@ -107,16 +111,14 @@ function RegisterForm({ mode }: { mode: RegisterMode }) {
         href="/register"
         className="mt-4 text-[#4a4a4a] hover:text-[#2e7d32] lg:mt-0"
       >
-        All registration options
+        {t.allOptions}
       </BackLink>
 
       <h1 className="mt-6 text-2xl font-bold text-[#1e5a33] sm:text-3xl">
-        {isProfessional ? ctaLabels.joinProfessional : ctaLabels.createBookingRequest}
+        {isProfessional ? t.professionalCard.title : t.clientCard.title}
       </h1>
       <p className="mt-2 text-sm leading-relaxed text-[#4a4a4a]">
-        {isProfessional
-          ? "Create your account to begin eligibility screening, competency assessment and document verification."
-          : "Create your account to request verified healthcare professionals by role, date and location."}
+        {isProfessional ? t.professionalIntro : t.clientIntro}
       </p>
 
       <form action={action} className="mt-8 space-y-5">
@@ -124,7 +126,7 @@ function RegisterForm({ mode }: { mode: RegisterMode }) {
           <input type="hidden" name="accountType" value="professional" />
         ) : (
           <fieldset>
-            <legend className="text-sm font-medium text-[#1e5a33]">I am registering as…</legend>
+            <legend className="text-sm font-medium text-[#1e5a33]">{t.registeringAs}</legend>
             <div className="mt-3 space-y-2 text-sm">
               <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-[#e7efe9] bg-white px-4 py-3 has-[:checked]:border-[#2e7d32] has-[:checked]:bg-[#f3f9f5]">
                 <input
@@ -135,8 +137,8 @@ function RegisterForm({ mode }: { mode: RegisterMode }) {
                   className="accent-[#2e7d32]"
                 />
                 <span>
-                  <span className="block font-medium text-[#1e5a33]">Private client</span>
-                  <span className="text-[#4a4a4a]">Individual or family arranging care</span>
+                  <span className="block font-medium text-[#1e5a33]">{t.privateClient}</span>
+                  <span className="text-[#4a4a4a]">{t.privateClientHint}</span>
                 </span>
               </label>
               <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-[#e7efe9] bg-white px-4 py-3 has-[:checked]:border-[#2e7d32] has-[:checked]:bg-[#f3f9f5]">
@@ -147,8 +149,8 @@ function RegisterForm({ mode }: { mode: RegisterMode }) {
                   className="accent-[#2e7d32]"
                 />
                 <span>
-                  <span className="block font-medium text-[#1e5a33]">Organisation</span>
-                  <span className="text-[#4a4a4a]">Care home, provider or healthcare organisation</span>
+                  <span className="block font-medium text-[#1e5a33]">{t.organisation}</span>
+                  <span className="text-[#4a4a4a]">{t.organisationHint}</span>
                 </span>
               </label>
             </div>
@@ -156,64 +158,64 @@ function RegisterForm({ mode }: { mode: RegisterMode }) {
         )}
 
         <label className="block text-sm font-medium text-[#33433a]">
-          Full name
+          {t.fullName}
           <input name="fullName" required className={marketingInput} />
         </label>
         <label className="block text-sm font-medium text-[#33433a]">
-          Email
+          {t.email}
           <input type="email" name="email" required className={marketingInput} />
         </label>
         <label className="block text-sm font-medium text-[#33433a]">
-          Password
+          {t.password}
           <input type="password" name="password" required minLength={8} className={marketingInput} />
         </label>
         <label className="flex items-start gap-2.5 text-sm text-[#4a4a4a]">
           <input type="checkbox" name="acceptedTerms" required className="mt-1 accent-[#2e7d32]" />{" "}
           <span>
-            I accept the{" "}
+            {t.accept}{" "}
             <Link
               href={isProfessional ? "/terms/professionals" : "/terms/clients"}
               className="font-medium text-[#2e7d32] hover:underline"
             >
-              Terms
+              {t.terms}
             </Link>{" "}
-            and{" "}
+            {t.and}{" "}
             <Link href="/privacy" className="font-medium text-[#2e7d32] hover:underline">
-              Privacy Policy
+              {t.privacy}
             </Link>
           </span>
         </label>
         {state && "error" in state && <p className="text-sm text-red-600">{state.error}</p>}
         <button type="submit" disabled={pending} className={`w-full ${marketingButtonPrimary}`}>
-          {pending ? "Creating…" : "Create account"}
+          {pending ? t.creating : t.create}
         </button>
       </form>
 
       <p className="mt-6 text-sm text-[#4a4a4a]">
         {isProfessional ? (
           <>
-            Need to request care instead?{" "}
+            {t.needCare}{" "}
             <Link href={registerLinks.client} className="font-semibold text-[#2e7d32] hover:underline">
-              {ctaLabels.createBookingRequest}
+              {t.createBooking}
             </Link>
           </>
         ) : (
           <>
-            Are you a healthcare professional?{" "}
+            {t.areProfessional}{" "}
             <Link
               href={registerLinks.professional}
               className="font-semibold text-[#2e7d32] hover:underline"
             >
-              {ctaLabels.joinProfessional}
+              {t.joinProfessional}
             </Link>
           </>
         )}
       </p>
 
       <p className="mt-3 text-sm text-[#4a4a4a]">
-        Already registered?{" "}
+        {t.alreadyRegistered}{" "}
         <Link href="/login" className="font-semibold text-[#2e7d32] hover:underline">
-          Sign in
+          {t.signIn}
         </Link>
       </p>
     </AuthShell>

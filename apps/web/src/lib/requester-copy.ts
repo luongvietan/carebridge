@@ -1,0 +1,93 @@
+/**
+ * Words for the client / organisation side of the app in each market: the
+ * profile form and the booking form, which is where a Portuguese family or
+ * organisation spends its first minutes. The rest of the requester dashboard is
+ * still English.
+ */
+
+export type RequesterLocale = "en-GB" | "pt-PT";
+
+export const requesterCopy = {
+  "en-GB": {
+    profile: {
+      saved: "Profile saved — you can now create bookings",
+      goToBookings: "Go to bookings",
+      fullName: "Full name",
+      phone: "Phone",
+      contactEmail: "Contact email",
+      address1: "Address line 1",
+      address2: "Address line 2",
+      city: "City",
+      postcode: "Postcode",
+      organisationName: "Organisation name",
+      contactPerson: "Contact person",
+      cqc: "CQC registration number",
+      billingEmail: "Billing email",
+      billingAddress: "Billing address",
+      save: "Save profile",
+      saving: "Saving…",
+    },
+    booking: {
+      role: "Professional role",
+      selectRole: "Select a role…",
+      careType: "Type of care",
+      selectCareType: "Select the type of care…",
+      start: "Start",
+      duration: "Shift duration",
+      selectDuration: "Select duration…",
+      hour: "hour",
+      hours: "hours",
+      endsAt: "Ends at",
+      location: "Location address",
+      postcode: "Postcode",
+      notes: "Notes",
+      create: "Create booking",
+      creating: "Creating…",
+      needStartAndDuration: "Please choose a start time and shift duration.",
+      invalidStart: "Please choose a valid start time.",
+      futureStart: "Please choose a start time in the future.",
+      dateLocale: "en-GB",
+    },
+  },
+  "pt-PT": {
+    profile: {
+      saved: "Perfil guardado — já pode criar marcações",
+      goToBookings: "Ir para as marcações",
+      fullName: "Nome completo",
+      phone: "Telefone",
+      contactEmail: "Email de contacto",
+      address1: "Morada (linha 1)",
+      address2: "Morada (linha 2)",
+      city: "Localidade",
+      postcode: "Código postal",
+      organisationName: "Nome da organização",
+      contactPerson: "Pessoa de contacto",
+      cqc: "",
+      billingEmail: "Email de faturação",
+      billingAddress: "Morada de faturação",
+      save: "Guardar perfil",
+      saving: "A guardar…",
+    },
+    booking: {
+      role: "Função profissional",
+      selectRole: "Selecione uma função…",
+      careType: "Tipo de cuidados",
+      selectCareType: "Selecione o tipo de cuidados…",
+      start: "Início",
+      duration: "Duração do serviço",
+      selectDuration: "Selecione a duração…",
+      hour: "hora",
+      hours: "horas",
+      endsAt: "Termina às",
+      location: "Morada do serviço",
+      postcode: "Código postal",
+      notes: "Notas",
+      create: "Criar marcação",
+      creating: "A criar…",
+      needStartAndDuration: "Escolha uma hora de início e a duração do serviço.",
+      invalidStart: "Escolha uma hora de início válida.",
+      futureStart: "Escolha uma hora de início no futuro.",
+      dateLocale: "pt-PT",
+    },
+  },
+} as const;

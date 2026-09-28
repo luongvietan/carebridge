@@ -8,10 +8,8 @@ export const dynamic = "force-dynamic";
 
 export default async function ClientNewBookingPage() {
   const supabase = await createClient();
-  const { roles, careTypes } = await fetchBookingReference(
-    supabase,
-    await getSelectedCountry(),
-  );
+  const country = await getSelectedCountry();
+  const { roles, careTypes } = await fetchBookingReference(supabase, country);
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-10">
@@ -22,7 +20,7 @@ export default async function ClientNewBookingPage() {
         </BackLink>
       </p>
       <div className="mt-8">
-        <BookingRequestForm roles={roles} careTypes={careTypes} requesterType="client" />
+        <BookingRequestForm roles={roles} careTypes={careTypes} requesterType="client" locale={country === "PT" ? "pt-PT" : "en-GB"} />
       </div>
     </main>
   );

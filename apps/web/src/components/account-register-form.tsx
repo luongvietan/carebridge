@@ -8,13 +8,23 @@ import {
   type ClientFormValues,
   type OrganisationFormValues,
 } from "@/lib/accounts/actions";
+import { requesterCopy, type RequesterLocale } from "@/lib/requester-copy";
 
 const field =
   "mt-1 w-full rounded-xl border border-[#dbe7e0] bg-white px-3 py-2 text-sm focus:border-[#2e7d32] focus:outline-none";
 
 type Variant = "client" | "organisation";
 
-export function AccountRegisterForm({ variant }: { variant: Variant }) {
+export function AccountRegisterForm({
+  variant,
+  locale = "en-GB",
+}: {
+  variant: Variant;
+  locale?: RequesterLocale;
+}) {
+  const t = requesterCopy[locale].profile;
+  // The CQC is a UK regulator: a Portuguese organisation has no such number.
+  const showCqc = locale === "en-GB";
   const action = variant === "client" ? saveClientProfile : saveOrganisationProfile;
   const bookingsHref = variant === "client" ? "/client/bookings" : "/organisation/bookings";
   const [state, formAction, pending] = useActionState<AccountResult, FormData>(action, null);
@@ -26,12 +36,12 @@ export function AccountRegisterForm({ variant }: { variant: Variant }) {
   if (state && "ok" in state) {
     return (
       <div className="rounded-2xl border border-[#dbe7e0] bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
-        <h2 className="text-xl font-bold">Profile saved — you can now create bookings</h2>
+        <h2 className="text-xl font-bold">{t.saved}</h2>
         <ForwardLink
           href={bookingsHref}
           className="mt-6 rounded-full bg-[#2e7d32] px-4 py-3 text-sm text-white hover:bg-[#246627]"
         >
-          Go to bookings
+          {t.goToBookings}
         </ForwardLink>
       </div>
     );
@@ -42,32 +52,32 @@ export function AccountRegisterForm({ variant }: { variant: Variant }) {
       {variant === "client" ? (
         <>
           <label className="block text-sm font-medium">
-            Full name
+            {t.fullName}
             <input name="fullName" required defaultValue={clientValues?.fullName ?? ""} className={field} />
           </label>
           <label className="block text-sm font-medium">
-            Phone
+            {t.phone}
             <input name="phone" type="tel" defaultValue={clientValues?.phone ?? ""} className={field} />
           </label>
           <label className="block text-sm font-medium">
-            Contact email
+            {t.contactEmail}
             <input name="emailContact" type="email" defaultValue={clientValues?.emailContact ?? ""} className={field} />
           </label>
           <label className="block text-sm font-medium">
-            Address line 1
+            {t.address1}
             <input name="addressLine1" required defaultValue={clientValues?.addressLine1 ?? ""} className={field} />
           </label>
           <label className="block text-sm font-medium">
-            Address line 2
+            {t.address2}
             <input name="addressLine2" defaultValue={clientValues?.addressLine2 ?? ""} className={field} />
           </label>
           <div className="grid grid-cols-2 gap-4">
             <label className="block text-sm font-medium">
-              City
+              {t.city}
               <input name="city" required defaultValue={clientValues?.city ?? ""} className={field} />
             </label>
             <label className="block text-sm font-medium">
-              Postcode
+              {t.postcode}
               <input name="postcode" required defaultValue={clientValues?.postcode ?? ""} className={field} />
             </label>
           </div>
@@ -75,49 +85,51 @@ export function AccountRegisterForm({ variant }: { variant: Variant }) {
       ) : (
         <>
           <label className="block text-sm font-medium">
-            Organisation name
+            {t.organisationName}
             <input name="organisationName" required defaultValue={orgValues?.organisationName ?? ""} className={field} />
           </label>
           <label className="block text-sm font-medium">
-            Contact person
+            {t.contactPerson}
             <input name="contactPerson" required defaultValue={orgValues?.contactPerson ?? ""} className={field} />
           </label>
           <label className="block text-sm font-medium">
-            Phone
+            {t.phone}
             <input name="phone" type="tel" defaultValue={orgValues?.phone ?? ""} className={field} />
           </label>
           <label className="block text-sm font-medium">
-            Contact email
+            {t.contactEmail}
             <input name="emailContact" type="email" defaultValue={orgValues?.emailContact ?? ""} className={field} />
           </label>
+          {showCqc && (
+            <label className="block text-sm font-medium">
+              {t.cqc}
+              <input name="cqcRegistrationNumber" defaultValue={orgValues?.cqcRegistrationNumber ?? ""} className={field} />
+            </label>
+          )}
           <label className="block text-sm font-medium">
-            CQC registration number
-            <input name="cqcRegistrationNumber" defaultValue={orgValues?.cqcRegistrationNumber ?? ""} className={field} />
-          </label>
-          <label className="block text-sm font-medium">
-            Billing email
+            {t.billingEmail}
             <input name="billingEmail" type="email" required defaultValue={orgValues?.billingEmail ?? ""} className={field} />
           </label>
           <label className="block text-sm font-medium">
-            Address line 1
+            {t.address1}
             <input name="addressLine1" required defaultValue={orgValues?.addressLine1 ?? ""} className={field} />
           </label>
           <label className="block text-sm font-medium">
-            Address line 2
+            {t.address2}
             <input name="addressLine2" defaultValue={orgValues?.addressLine2 ?? ""} className={field} />
           </label>
           <div className="grid grid-cols-2 gap-4">
             <label className="block text-sm font-medium">
-              City
+              {t.city}
               <input name="city" required defaultValue={orgValues?.city ?? ""} className={field} />
             </label>
             <label className="block text-sm font-medium">
-              Postcode
+              {t.postcode}
               <input name="postcode" required defaultValue={orgValues?.postcode ?? ""} className={field} />
             </label>
           </div>
           <label className="block text-sm font-medium">
-            Billing address
+            {t.billingAddress}
             <input name="billingAddress" defaultValue={orgValues?.billingAddress ?? ""} className={field} />
           </label>
         </>
@@ -129,7 +141,7 @@ export function AccountRegisterForm({ variant }: { variant: Variant }) {
         disabled={pending}
         className="rounded-full bg-[#2e7d32] px-4 py-3 text-sm text-white hover:bg-[#246627] disabled:opacity-50"
       >
-        {pending ? "Saving…" : "Save profile"}
+        {pending ? t.saving : t.save}
       </button>
     </form>
   );

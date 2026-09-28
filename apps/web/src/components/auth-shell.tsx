@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import type { ReactNode } from "react";
+import { useAuthCopy } from "@/components/auth-locale";
 import { BackLink } from "@/components/back-link";
 import { marketingImages } from "@/data/marketing-images";
 import { marketingCard } from "@/lib/marketing-ui";
@@ -11,6 +14,7 @@ type AuthShellProps = {
 
 export function AuthShell({ children, wide = false }: AuthShellProps) {
   const { auth } = marketingImages.pageHero;
+  const t = useAuthCopy();
 
   return (
     <>
@@ -30,14 +34,13 @@ export function AuthShell({ children, wide = false }: AuthShellProps) {
             <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/35 to-black/10" />
             <div className="absolute inset-0 flex flex-col justify-end p-10">
               <BackLink href="/" className="text-white/70 hover:text-white">
-                Back to home
+                {t.backHome}
               </BackLink>
               <p className="mt-6 text-2xl font-bold leading-tight text-white">
-                Verified healthcare staffing, built on trust
+                {t.shellTitle}
               </p>
               <p className="mt-3 max-w-sm text-sm leading-relaxed text-white/75">
-                Join as a verified professional or create booking requests as a private client or
-                organisation.
+                {t.shellBody}
               </p>
             </div>
           </div>
