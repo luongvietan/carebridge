@@ -7,6 +7,7 @@ import { Select } from "@/components/ui/select";
 import { DatePicker } from "@/components/ui/date-picker";
 import { FilePreviewInput } from "@/components/ui/file-input";
 import { DAYS_OF_WEEK } from "@/lib/onboarding/profile-children";
+import { onboardingCopy } from "@/lib/onboarding/copy";
 import {
   registerForRole,
   referenceFieldFor,
@@ -60,6 +61,7 @@ export function ProfileForm({
   currentSkillIds = NO_SKILL_IDS,
   currentAvailabilityDays = NO_AVAILABILITY_DAYS,
   currentPhotoUrl = null,
+  country = "GB",
 }: {
   roles: Role[];
   skills: Skill[];
@@ -67,7 +69,12 @@ export function ProfileForm({
   currentSkillIds?: string[];
   currentAvailabilityDays?: number[];
   currentPhotoUrl?: string | null;
+  /** The professional's country: it decides the language and the country-specific fields. */
+  country?: "GB" | "PT";
 }) {
+  const isPortugal = country === "PT";
+  const locale = isPortugal ? "pt-PT" : "en-GB";
+  const p = onboardingCopy[locale].profile;
   const [state, action, pending] = useActionState<ProfileResult, FormData>(saveProfile, null);
   const draft = state && "values" in state ? state.values : undefined;
   const [roleId, setRoleId] = useState(
@@ -113,14 +120,14 @@ export function ProfileForm({
   if (state && "ok" in state) {
     return (
       <div>
-        <OnboardingSteps current={3} />
+        <OnboardingSteps current={3} locale={locale} />
         <div className="mt-8 rounded-2xl border border-[#dbe7e0] bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
-          <h2 className="text-xl font-bold">Profile saved</h2>
+          <h2 className="text-xl font-bold">{p.saved}</h2>
           <ForwardLink
             href="/professional/onboarding/documents"
             className="mt-6 rounded-full bg-[#2e7d32] px-4 py-3 text-sm text-white hover:bg-[#246627]"
           >
-            Continue to documents
+            {p.toDocuments}
           </ForwardLink>
         </div>
       </div>
@@ -129,21 +136,21 @@ export function ProfileForm({
 
   return (
     <div>
-      <OnboardingSteps current={3} />
+      <OnboardingSteps current={3} locale={locale} />
       <form key={formKey} action={action} className="mt-8 space-y-4">
         <label className="block text-sm font-medium">
-          Full name
+          {p.fullName}
           <input name="fullName" required defaultValue={v.fullName} className={field} />
         </label>
         <div className="block text-sm font-medium">
-          Professional role
+          {p.role}
           <Select
             name="professionalRoleId"
-            aria-label="Professional role"
+            aria-label={p.role}
             required
             defaultValue={v.professionalRoleId}
             onValueChange={setRoleId}
-            placeholder="Select a role…"
+            placeholder={p.selectRole}
             className="mt-1"
             options={roles.map((r) => ({ value: r.id, label: r.name, group: r.category }))}
           />
@@ -172,48 +179,57 @@ export function ProfileForm({
             <input
               name="issAuthorisationNumber"
               required
-              placeholder={REFERENCE_PLACEHOLDER[register]}
+              placeholder={isPortugal ? "Conforme consta na autorização do ISS" : REFERENCE_PLACEHOLDER[register]}
               defaultValue={v.issAuthorisationNumber}
               className={field}
             />
             <span className="mt-1 block text-xs font-normal text-[#7a8a81]">
-              Only an authorised Ama may be listed as one. Upload your ISS authorisation at the next
-              step — an administrator confirms it with the {REGISTER_LABEL[register]} before you can
-              accept any bookings.
+              {isPortugal
+                ? `Só uma ama autorizada pode ser listada como tal. Envie a sua autorização do ISS no passo seguinte — um administrador confirma-a junto da ${REGISTER_LABEL[register]} antes de poder aceitar marcações.`
+                : `Only an authorised Ama may be listed as one. Upload your ISS authorisation at the next step — an administrator confirms it with the ${REGISTER_LABEL[register]} before you can accept any bookings.`}
             </span>
           </label>
         )}
         <div className="block text-sm font-medium">
-          Date of birth
+          {p.dob}
           <DatePicker
             name="dateOfBirth"
-            aria-label="Date of birth"
+            aria-label={p.dob}
             defaultValue={v.dateOfBirth}
             className="mt-1"
           />
         </div>
         <label className="block text-sm font-medium">
-          Address line 1
+          {p.address1}
           <input name="addressLine1" required defaultValue={v.addressLine1} className={field} />
         </label>
         <label className="block text-sm font-medium">
-          Address line 2
+          {p.address2}
           <input name="addressLine2" defaultValue={v.addressLine2} className={field} />
         </label>
         <div className="grid grid-cols-2 gap-4">
           <label className="block text-sm font-medium">
-            City
+            {p.city}
             <input name="city" required defaultValue={v.city} className={field} />
           </label>
           <label className="block text-sm font-medium">
-            Postcode
+            {p.postcode}
             <input name="postcode" required defaultValue={v.postcode} className={field} />
           </label>
         </div>
         <label className="block text-sm font-medium">
-          National Insurance number
-          <input name="nationalInsuranceNo" defaultValue={v.nationalInsuranceNo} className={field} />
+          {p.taxId}
+          <input
+            name="nationalInsuranceNo"
+            required={isPortugal}
+            inputMode={isPortugal ? "numeric" : undefined}
+            maxLength={isPortugal ? 9 : undefined}
+            placeholder={p.taxIdPlaceholder}
+            defaultValue={v.nationalInsuranceNo}
+            className={field}
+          />
         </label>
+        {!isPortugal && (
         <div className="rounded-xl border border-[#dbe7e0] bg-[#f9fbfa] p-4">
           <div className="block text-sm font-medium">
             Right to work in the UK
@@ -252,6 +268,7 @@ export function ProfileForm({
             </p>
           )}
         </div>
+        )}
         {register && referenceField === "registration_number" ? (
           <label className="block text-sm font-medium">
             {REFERENCE_LABEL[register]}
@@ -272,16 +289,16 @@ export function ProfileForm({
         ) : (
           <div className="grid grid-cols-2 gap-4">
             <label className="block text-sm font-medium">
-              Registration body
+              {p.registrationBody}
               <input
                 name="registrationBody"
-                placeholder="e.g. NMC, HCPC"
+                placeholder={p.registrationBodyPlaceholder}
                 defaultValue={v.registrationBody}
                 className={field}
               />
             </label>
             <label className="block text-sm font-medium">
-              Registration number
+              {p.registrationNumber}
               <input
                 name="registrationNumber"
                 defaultValue={v.registrationNumber}
@@ -291,12 +308,12 @@ export function ProfileForm({
           </div>
         )}
         <label className="block text-sm font-medium">
-          Professional summary
+          {p.summary}
           <textarea name="professionalSummary" rows={3} defaultValue={v.professionalSummary} className={field} />
         </label>
 
         <fieldset className="block text-sm font-medium">
-          <legend>Skills &amp; specialities</legend>
+          <legend>{p.skills}</legend>
           <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
             {skills.map((s) => (
               <label key={s.id} className="flex items-center gap-2 font-normal">
@@ -314,9 +331,9 @@ export function ProfileForm({
         </fieldset>
 
         <fieldset className="block text-sm font-medium">
-          <legend>Availability preferences</legend>
+          <legend>{p.availability}</legend>
           <p className="mt-1 text-xs font-normal text-[#7a8a81]">
-            Select the days you are generally available for bookings.
+            {p.availabilityHelp}
           </p>
           <div className="mt-2 flex flex-wrap gap-3">
             {DAYS_OF_WEEK.map((d) => (
@@ -328,35 +345,33 @@ export function ProfileForm({
                   defaultChecked={daySet.has(d.value)}
                   className="accent-[#2e7d32]"
                 />
-                {d.label}
+                {p.days[d.value]}
               </label>
             ))}
           </div>
         </fieldset>
 
         <label className="block text-sm font-medium">
-          Willing to travel (km)
+          {p.travel}
           <input type="number" name="travelDistanceKm" min={0} defaultValue={v.travelDistanceKm} className={field} />
         </label>
         <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" name="hasDrivingLicence" defaultChecked={v.hasDrivingLicence} /> I hold a
-          valid driving licence
+          <input type="checkbox" name="hasDrivingLicence" defaultChecked={v.hasDrivingLicence} /> {p.licence}
         </label>
         <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" name="hasVehicle" defaultChecked={v.hasVehicle} /> I have access to a
-          vehicle
+          <input type="checkbox" name="hasVehicle" defaultChecked={v.hasVehicle} /> {p.vehicle}
         </label>
         <div className="block text-sm font-medium">
-          Profile photo
+          {p.photo}
           <div className="mt-1 font-normal">
             <FilePreviewInput
               name="photo"
               variant="avatar"
               accept="image/png,image/jpeg"
-              aria-label="Profile photo"
-              emptyLabel="No photo"
+              aria-label={p.photo}
+              emptyLabel={p.noPhoto}
               existing={
-                currentPhotoUrl ? { url: currentPhotoUrl, kind: "image", filename: "Current photo" } : null
+                currentPhotoUrl ? { url: currentPhotoUrl, kind: "image", filename: p.currentPhoto } : null
               }
             />
           </div>
@@ -368,7 +383,7 @@ export function ProfileForm({
           disabled={pending}
           className="rounded-full bg-[#2e7d32] px-4 py-3 text-sm text-white hover:bg-[#246627] disabled:opacity-50"
         >
-          {pending ? "Saving…" : "Save profile"}
+          {pending ? onboardingCopy[locale].saving : p.save}
         </button>
       </form>
     </div>

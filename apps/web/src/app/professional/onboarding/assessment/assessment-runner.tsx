@@ -7,6 +7,7 @@ import {
   type AssessmentQuestion,
 } from "@/lib/assessment/actions";
 import { OnboardingSteps } from "@/components/onboarding-steps";
+import { onboardingCopy, type OnboardingLocale } from "@/lib/onboarding/copy";
 
 type Phase = "intro" | "questions" | "result" | "locked";
 
@@ -75,7 +76,14 @@ function reducer(state: State, action: Action): State {
   }
 }
 
-export function AssessmentRunner({ roleId }: { roleId?: string }) {
+export function AssessmentRunner({
+  roleId,
+  locale = "en-GB",
+}: {
+  roleId?: string;
+  locale?: OnboardingLocale;
+}) {
+  const a = onboardingCopy[locale].assessment;
   const [state, dispatch] = useReducer(reducer, initialState);
   const attemptIdRef = useRef("");
 
@@ -100,15 +108,15 @@ export function AssessmentRunner({ roleId }: { roleId?: string }) {
 
   return (
     <div>
-      <OnboardingSteps current={2} />
+      <OnboardingSteps current={2} locale={locale} />
       <div className="mt-8">
         {state.error && <p className="mb-4 text-sm text-[#da1e28]">{state.error}</p>}
 
         {state.phase === "intro" && (
           <div className="rounded-2xl border border-[#dbe7e0] bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
-            <h2 className="text-xl font-bold">Competency assessment</h2>
+            <h2 className="text-xl font-bold">{a.title}</h2>
             <p className="mt-2 text-sm text-[#4a4a4a]">
-              {QUESTIONS_NOTE}
+              {a.note}
             </p>
             <button
               type="button"
@@ -116,14 +124,16 @@ export function AssessmentRunner({ roleId }: { roleId?: string }) {
               disabled={state.busy}
               className="mt-6 rounded-full bg-[#2e7d32] px-4 py-3 text-sm text-white hover:bg-[#246627] disabled:opacity-50"
             >
-              {state.busy ? "Loading…" : "Begin assessment"}
+              {state.busy ? a.loading : a.begin}
             </button>
           </div>
         )}
 
         {state.phase === "questions" && state.roleName && (
           <p className="mb-4 text-sm text-[#4a4a4a]">
-            Assessment for the <strong>{state.roleName}</strong> role.
+            {a.forRoleA}
+            <strong>{state.roleName}</strong>
+            {a.forRoleB}
           </p>
         )}
 
@@ -159,49 +169,49 @@ export function AssessmentRunner({ roleId }: { roleId?: string }) {
               disabled={state.busy || !allAnswered}
               className="rounded-full bg-[#2e7d32] px-4 py-3 text-sm text-white hover:bg-[#246627] disabled:opacity-50"
             >
-              {state.busy ? "Submitting…" : "Submit answers"}
+              {state.busy ? a.submitting : a.submit}
             </button>
-            {!allAnswered && <p className="text-sm text-[#7a8a81]">Answer every question to submit.</p>}
+            {!allAnswered && <p className="text-sm text-[#7a8a81]">{a.answerAll}</p>}
           </div>
         )}
 
         {state.phase === "result" && state.result && (
           <div className="rounded-2xl border border-[#dbe7e0] bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
             <h2 className="text-xl font-bold">
-              Score: <span className="tabular-nums">{state.result.score}%</span>
+              {a.score} <span className="tabular-nums">{state.result.score}%</span>
             </h2>
             {state.result.passed ? (
               <>
-                <p className="mt-2 text-sm text-[#2e7d32]">Passed — the minimum is 80%.</p>
+                <p className="mt-2 text-sm text-[#2e7d32]">{a.passed}</p>
                 <div className="mt-6 flex flex-wrap gap-3">
                   <ForwardLink
                     href="/professional/onboarding/profile"
                     className="rounded-full bg-[#2e7d32] px-4 py-3 text-sm text-white hover:bg-[#246627]"
                   >
-                    Continue to profile
+                    {a.toProfile}
                   </ForwardLink>
                   <ForwardLink
                     href="/professional/onboarding/assessment/certificate"
                     className="rounded-full border border-[#2e7d32] px-4 py-3 text-sm text-[#2e7d32] hover:bg-[#eef5f0]"
                   >
-                    View your certificate
+                    {a.certificate}
                   </ForwardLink>
                 </div>
               </>
             ) : state.result.canRetry ? (
               <>
-                <p className="mt-2 text-sm text-[#da1e28]">Below the 80% pass mark. You may try again.</p>
+                <p className="mt-2 text-sm text-[#da1e28]">{a.below}</p>
                 <button
                   type="button"
                   onClick={() => dispatch({ type: "reset-intro" })}
                   className="mt-6 rounded-full bg-[#2e7d32] px-4 py-3 text-sm text-white hover:bg-[#246627]"
                 >
-                  Try again
+                  {a.tryAgain}
                 </button>
               </>
             ) : (
               <p className="mt-2 text-sm text-[#da1e28]">
-                You have used all three attempts. You may reapply after the lock period.
+                {a.usedAll}
               </p>
             )}
           </div>
@@ -209,9 +219,9 @@ export function AssessmentRunner({ roleId }: { roleId?: string }) {
 
         {state.phase === "locked" && (
           <div className="rounded-2xl border border-[#dbe7e0] bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
-            <h2 className="text-xl font-bold">Assessment locked</h2>
+            <h2 className="text-xl font-bold">{a.lockedTitle}</h2>
             <p className="mt-2 text-sm text-[#4a4a4a]">
-              You have used all attempts for now. Please reapply after the lock period has passed.
+              {a.lockedBody}
             </p>
           </div>
         )}
@@ -220,5 +230,3 @@ export function AssessmentRunner({ roleId }: { roleId?: string }) {
   );
 }
 
-const QUESTIONS_NOTE =
-  "You will be asked 20 questions — 15 covering core healthcare topics and 5 specific to your professional role — drawn at random and auto-scored. You need 80% to pass and have up to three attempts. Topics include safeguarding, infection prevention & control, GDPR, professional boundaries, documentation, medication awareness and health & safety.";

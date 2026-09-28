@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { uploadDocument } from "@/lib/onboarding/actions";
 import { OnboardingSteps } from "@/components/onboarding-steps";
+import { onboardingCopy, type OnboardingLocale } from "@/lib/onboarding/copy";
 import { DatePicker } from "@/components/ui/date-picker";
 import { FilePreviewInput, type ExistingFile } from "@/components/ui/file-input";
 import { guidanceFor } from "@/lib/onboarding/document-guidance";
@@ -26,8 +27,8 @@ const STATUS_STYLE: Record<string, string> = {
   expired: "bg-[#fff1f1] text-[#a2191f]",
 };
 
-function Badge({ status }: { status: string | null }) {
-  if (!status) return <span className="bg-[#f5f7f6] px-2 py-1 text-xs text-[#7a8a81]">Not uploaded</span>;
+function Badge({ status, notUploaded }: { status: string | null; notUploaded: string }) {
+  if (!status) return <span className="bg-[#f5f7f6] px-2 py-1 text-xs text-[#7a8a81]">{notUploaded}</span>;
   return (
     <span className={`px-2 py-1 text-xs ${STATUS_STYLE[status] ?? "bg-[#f5f7f6] text-[#4a4a4a]"}`}>
       {status.replace(/_/g, " ")}
@@ -37,7 +38,14 @@ function Badge({ status }: { status: string | null }) {
 
 const field = "rounded-xl border border-[#dbe7e0] bg-white px-2 py-1.5 text-sm focus:border-[#2e7d32] focus:outline-none";
 
-export function DocumentUploader({ items }: { items: DocItem[] }) {
+export function DocumentUploader({
+  items,
+  locale = "en-GB",
+}: {
+  items: DocItem[];
+  locale?: OnboardingLocale;
+}) {
+  const d = onboardingCopy[locale].documents;
   const router = useRouter();
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -47,7 +55,7 @@ export function DocumentUploader({ items }: { items: DocItem[] }) {
     const fd = new FormData(e.currentTarget);
     fd.set("documentTypeId", item.typeId);
     if (item.hasExpiry && !String(fd.get("expiryDate") ?? "").trim()) {
-      setError(`${item.name}: an expiry date is required for this document.`);
+      setError(`${item.name}: ${d.expiryRequired}`);
       return;
     }
     setBusy(item.typeId);
@@ -62,10 +70,9 @@ export function DocumentUploader({ items }: { items: DocItem[] }) {
 
   return (
     <div>
-      <OnboardingSteps current={4} />
+      <OnboardingSteps current={4} locale={locale} />
       <p className="mt-8 text-sm text-[#4a4a4a]">
-        Upload each required document. Critical documents are checked by an administrator before
-        you can accept bookings.
+        {d.intro}
       </p>
       {error && <p className="mt-3 text-sm text-[#da1e28]">{error}</p>}
 
@@ -77,19 +84,19 @@ export function DocumentUploader({ items }: { items: DocItem[] }) {
             <div className="flex items-center justify-between">
               <div>
                 <span className="font-semibold">{item.name}</span>
-                {item.critical && <span className="ml-2 text-xs text-[#2e7d32]">critical</span>}
+                {item.critical && <span className="ml-2 text-xs text-[#2e7d32]">{d.critical}</span>}
               </div>
-              <Badge status={item.status} />
+              <Badge status={item.status} notUploaded={d.notUploaded} />
             </div>
             {guidance && (
               <p className="mt-2 text-xs leading-relaxed text-[#4a4a4a]">
-                <span className="font-semibold text-[#1e5a33]">We accept:</span> {guidance.accepted}
+                <span className="font-semibold text-[#1e5a33]">{d.accepted}</span> {guidance.accepted}
               </p>
             )}
             {(item.status === "rejected" || item.status === "further_info_required") &&
               item.rejectionReason && (
                 <p className="mt-2 rounded-lg bg-[#fff1f1] px-3 py-2 text-xs text-[#a2191f]">
-                  <span className="font-semibold">Administrator note:</span> {item.rejectionReason}
+                  <span className="font-semibold">{d.adminNote}</span> {item.rejectionReason}
                 </p>
               )}
             <form onSubmit={(e) => onUpload(e, item)} className="mt-3 flex flex-wrap items-end gap-3">
@@ -102,10 +109,10 @@ export function DocumentUploader({ items }: { items: DocItem[] }) {
                   existing={item.existing ?? null}
                 />
               </div>
-              <input name="referenceNumber" placeholder="Reference no. (optional)" aria-label="Reference number" className={field} />
-              <input name="issuingBody" placeholder="Issuing body (e.g. NMC, optional)" aria-label="Issuing body" className={field} />
+              <input name="referenceNumber" placeholder={d.referencePlaceholder} aria-label={d.referenceLabel} className={field} />
+              <input name="issuingBody" placeholder={d.issuingPlaceholder} aria-label={d.issuingLabel} className={field} />
               <div className="text-xs text-[#4a4a4a]">
-                Issued{guidance?.maxAgeMonths && <span className="text-[#da1e28]"> *</span>}
+                {d.issued}{guidance?.maxAgeMonths && <span className="text-[#da1e28]"> *</span>}
                 <DatePicker
                   name="issuedDate"
                   required={Boolean(guidance?.maxAgeMonths)}
@@ -116,7 +123,7 @@ export function DocumentUploader({ items }: { items: DocItem[] }) {
                 />
               </div>
               <div className="text-xs text-[#4a4a4a]">
-                Expiry{item.hasExpiry && <span className="text-[#da1e28]"> *</span>}
+                {d.expiry}{item.hasExpiry && <span className="text-[#da1e28]"> *</span>}
                 <DatePicker
                   name="expiryDate"
                   required={item.hasExpiry}
@@ -129,7 +136,7 @@ export function DocumentUploader({ items }: { items: DocItem[] }) {
                 disabled={busy === item.typeId}
                 className="bg-[#14301e] px-3 py-2 text-sm text-white hover:bg-[#33433a] disabled:opacity-50"
               >
-                {busy === item.typeId ? "Uploading…" : item.status ? "Replace" : "Upload"}
+                {busy === item.typeId ? d.uploading : item.status ? d.replace : d.upload}
               </button>
             </form>
           </div>
@@ -139,7 +146,7 @@ export function DocumentUploader({ items }: { items: DocItem[] }) {
 
       {allUploaded && (
         <div className="mt-6 border border-[#2e7d32] bg-[#defbe6] p-4 text-sm text-[#0e6027]">
-          All documents uploaded. Your application is now with our administrators for verification.
+          {d.allDone}
         </div>
       )}
     </div>

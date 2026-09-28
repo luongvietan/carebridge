@@ -3,11 +3,15 @@ import { createClient } from "@/lib/supabase/server";
 import { DocumentUploader, type DocItem } from "@/components/document-uploader";
 import { OnboardingSteps } from "@/components/onboarding-steps";
 import { guardOnboardingStep } from "@/lib/onboarding/guard";
+import { onboardingCopy } from "@/lib/onboarding/copy";
+import { getOnboardingLocale } from "@/lib/onboarding/locale";
 import { isImageStoragePath } from "@/lib/onboarding/upload-rules";
 import type { ExistingFile } from "@/components/ui/file-input";
 
 export default async function DocumentsPage() {
   await guardOnboardingStep("documents");
+  const locale = await getOnboardingLocale();
+  const d = onboardingCopy[locale].documents;
   const supabase = await createClient();
   const {
     data: { user },
@@ -24,17 +28,17 @@ export default async function DocumentsPage() {
   if (!prof?.professional_role_id) {
     return (
       <div>
-        <OnboardingSteps current={4} />
+        <OnboardingSteps current={4} locale={locale} />
         <div className="mt-8 rounded-2xl border border-[#dbe7e0] bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
-          <h2 className="text-xl font-bold">Complete your profile first</h2>
+          <h2 className="text-xl font-bold">{d.profileFirst}</h2>
           <p className="mt-2 text-sm text-[#4a4a4a]">
-            We need your professional role to know which documents are required.
+            {d.profileFirstBody}
           </p>
           <ForwardLink
             href="/professional/onboarding/profile"
             className="mt-6 rounded-full bg-[#2e7d32] px-4 py-3 text-sm text-white hover:bg-[#246627]"
           >
-            Go to profile
+            {d.toProfile}
           </ForwardLink>
         </div>
       </div>
@@ -122,5 +126,5 @@ export default async function DocumentsPage() {
     };
   });
 
-  return <DocumentUploader items={items} />;
+  return <DocumentUploader items={items} locale={locale} />;
 }

@@ -17,6 +17,7 @@ import { guidanceFor } from "@/lib/onboarding/document-guidance";
 import { parseSkillIds, parseAvailabilityDays } from "@/lib/onboarding/profile-children";
 import { eligibilityCompleted, assessmentPassed } from "@/lib/onboarding/progress";
 import { validationMessage } from "@/lib/validation/form-messages";
+import { isValidNif } from "@/lib/validation/nif";
 
 const PROFILE_FIELD_LABELS: Record<string, string> = {
   fullName: "Full name",
@@ -157,6 +158,21 @@ export type ProfileResult = { ok: true } | { error: string; values?: ProfileForm
 
 export async function saveProfile(_prev: ProfileResult, formData: FormData): Promise<ProfileResult> {
   const user = await requireAuth();
+
+  // A Portuguese professional gives a NIF where a UK one gives a National
+  // Insurance number, and evidences the right to reside and work with a document
+  // rather than a Home Office share code. Country is read from their own row.
+  const { data: ownRow } = await createServiceClient()
+    .from("professionals")
+    .select("country_code")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  const isPortugal = ownRow?.country_code === "PT";
+  const rawTaxId = ((formData.get("nationalInsuranceNo") as string) || "").replace(/\s+/g, "");
+  if (isPortugal && !isValidNif(rawTaxId)) {
+    return profileError("Introduza um NIF válido (9 dígitos).", formData);
+  }
+
   const parsed = profileSchema.safeParse({
     fullName: formData.get("fullName"),
     dateOfBirth: (formData.get("dateOfBirth") as string) || undefined,
@@ -164,7 +180,8 @@ export async function saveProfile(_prev: ProfileResult, formData: FormData): Pro
     addressLine2: (formData.get("addressLine2") as string) || undefined,
     city: formData.get("city"),
     postcode: formData.get("postcode"),
-    nationalInsuranceNo: (formData.get("nationalInsuranceNo") as string) || undefined,
+    // The UK format rule is for UK numbers only; a NIF was checked above.
+    nationalInsuranceNo: isPortugal ? undefined : (formData.get("nationalInsuranceNo") as string) || undefined,
     professionalRoleId: formData.get("professionalRoleId"),
     professionalSummary: (formData.get("professionalSummary") as string) || undefined,
     registrationBody: (formData.get("registrationBody") as string) || undefined,
@@ -196,9 +213,12 @@ export async function saveProfile(_prev: ProfileResult, formData: FormData): Pro
   // Ofsted requirement is enforced here against the selected role.
   const { data: selectedRole } = await gateAdmin
     .from("professional_roles")
-    .select("code, registration_register")
+    .select("code, registration_register, country_code")
     .eq("id", parsed.data.professionalRoleId)
     .maybeSingle();
+  if (selectedRole && selectedRole.country_code !== (ownRow?.country_code ?? "GB")) {
+    return profileError("That role belongs to another country.", formData);
+  }
 
   // Whichever reference the role's regulator asks for is the one required, and
   // it is checked against that register's own format. The role says which; this
@@ -227,10 +247,10 @@ export async function saveProfile(_prev: ProfileResult, formData: FormData): Pro
   // required from anyone who is not a British or Irish citizen. The code is only
   // kept for that basis — the DB rejects the other combination (0069).
   const shareCode = parsed.data.rightToWorkShareCode?.replace(/\s/g, "").toUpperCase();
-  if (!parsed.data.rightToWorkBasis) {
+  if (!isPortugal && !parsed.data.rightToWorkBasis) {
     return profileError(RIGHT_TO_WORK_REQUIRED_ERROR, formData);
   }
-  if (parsed.data.rightToWorkBasis === "share_code" && !shareCode) {
+  if (!isPortugal && parsed.data.rightToWorkBasis === "share_code" && !shareCode) {
     return profileError(SHARE_CODE_REQUIRED_ERROR, formData);
   }
 
@@ -259,18 +279,21 @@ export async function saveProfile(_prev: ProfileResult, formData: FormData): Pro
       address_line2: parsed.data.addressLine2 ?? null,
       city: parsed.data.city,
       postcode: parsed.data.postcode,
-      national_insurance_no: parsed.data.nationalInsuranceNo
-        ? parsed.data.nationalInsuranceNo.replace(/\s/g, "").toUpperCase()
-        : null,
+      // One column, two countries: a UK National Insurance number, or a NIF.
+      national_insurance_no: isPortugal
+        ? rawTaxId
+        : parsed.data.nationalInsuranceNo
+          ? parsed.data.nationalInsuranceNo.replace(/\s/g, "").toUpperCase()
+          : null,
       professional_role_id: parsed.data.professionalRoleId,
       professional_summary: parsed.data.professionalSummary ?? null,
       registration_body: parsed.data.registrationBody ?? null,
       registration_number: parsed.data.registrationNumber ?? null,
       ofsted_registration_number: ofstedNumber || null,
       iss_authorisation_number: issNumber || null,
-      right_to_work_basis: parsed.data.rightToWorkBasis,
+      right_to_work_basis: isPortugal ? null : parsed.data.rightToWorkBasis,
       right_to_work_share_code:
-        parsed.data.rightToWorkBasis === "share_code" ? (shareCode ?? null) : null,
+        !isPortugal && parsed.data.rightToWorkBasis === "share_code" ? (shareCode ?? null) : null,
       travel_distance_km: parsed.data.travelDistanceKm ?? null,
       has_driving_licence: parsed.data.hasDrivingLicence ?? null,
       has_vehicle: parsed.data.hasVehicle ?? null,

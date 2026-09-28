@@ -1,18 +1,34 @@
 import { createClient } from "@/lib/supabase/server";
 import { ProfileForm } from "@/components/profile-form";
 import { guardOnboardingStep } from "@/lib/onboarding/guard";
+import { createServiceClient } from "@/lib/supabase/service";
 
 export default async function ProfilePage() {
   await guardOnboardingStep("profile");
   const supabase = await createClient();
-  const [{ data: roles }, { data: skills }, { data: { user } }] = await Promise.all([
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // The guard above has made sure the professional row exists, with the country
+  // they registered from. Only that country's roles are offered.
+  const { data: own } = user
+    ? await createServiceClient()
+        .from("professionals")
+        .select("country_code")
+        .eq("user_id", user.id)
+        .maybeSingle()
+    : { data: null };
+  const country = own?.country_code === "PT" ? "PT" : "GB";
+
+  const [{ data: roles }, { data: skills }] = await Promise.all([
     supabase
       .from("professional_roles")
       .select("id, name, code, registration_register, role_categories(name, sort_order)")
       .eq("is_active", true)
+      .eq("country_code", country)
       .order("name"),
     supabase.from("skills").select("id, name").eq("is_active", true).order("name"),
-    supabase.auth.getUser(),
   ]);
 
   const { data: current } = user
@@ -64,6 +80,7 @@ export default async function ProfilePage() {
         .map((a) => a.day_of_week)
         .filter((d): d is number => d != null)}
       currentPhotoUrl={currentPhotoUrl}
+      country={country}
     />
   );
 }

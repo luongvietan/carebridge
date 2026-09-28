@@ -1,7 +1,14 @@
 // Carbon-style step indicator for the professional onboarding wizard.
-const STEPS = ["Eligibility", "Assessment", "Profile", "Documents"];
+import { onboardingCopy, type OnboardingLocale } from "@/lib/onboarding/copy";
 
-export function OnboardingSteps({ current }: { current: number }) {
+export function OnboardingSteps({
+  current,
+  locale = "en-GB",
+}: {
+  current: number;
+  locale?: OnboardingLocale;
+}) {
+  const STEPS = onboardingCopy[locale].steps;
   return (
     <ol className="flex flex-wrap gap-px border border-[#dbe7e0] bg-[#dbe7e0] text-sm">
       {STEPS.map((label, i) => {

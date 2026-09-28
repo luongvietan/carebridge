@@ -1,4 +1,5 @@
 import { guardOnboardingStep } from "@/lib/onboarding/guard";
+import { getOnboardingLocale } from "@/lib/onboarding/locale";
 import { AssessmentRunner } from "./assessment-runner";
 
 export default async function AssessmentPage({
@@ -11,5 +12,5 @@ export default async function AssessmentPage({
   // their roles to sit next. Omitted during first onboarding, where there is
   // only ever one.
   const { role } = await searchParams;
-  return <AssessmentRunner roleId={role} />;
+  return <AssessmentRunner roleId={role} locale={await getOnboardingLocale()} />;
 }
