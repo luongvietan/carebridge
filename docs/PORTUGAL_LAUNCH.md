@@ -31,7 +31,13 @@
 5. **Regulatory confirmation for Portugal** — Ana's decision. Going live is one statement (below) and lifting the gate.
 6. **Portuguese legal documents** — terms, privacy and the disclaimer page are still English. They need a lawyer's Portuguese, not a machine translation. The founder's message on the About page is hidden in Portuguese until Ana approves a translation of her own words.
 7. **Portuguese content still to come from Ana** — role-specific assessment questions and childcare rates are placeholders (see earlier notes); the Portuguese company address/phone in the footer (it still shows Manchester).
-8. **Still English in the signed-in app**: dashboards, booking lists, messages, timesheets, roles page, admin, and server-side validation messages. The public site, sign-in/registration, professional onboarding, payout form, client/organisation profile and first booking are Portuguese.
+8. **Still English**: the admin area (staff tooling), the sign-up/password-reset e-mails sent by Supabase Auth itself (hosted template, not locale-aware — needs a Portuguese template in the Supabase dashboard), and the legal pages. Everything else a Portuguese client, organisation or professional sees is Portuguese: public site, sign-in/registration, onboarding, dashboards, bookings, hours, earnings, roles, messages, invoices, server messages, notification e-mails. Money is shown in euros and dates in the pt-PT format.
+
+## 30 September review (Ana)
+
+- Wording changed to her list (Ligamos…, cuidados infantis, Registe-se como profissional, Solicitar um profissional, Categorias profissionais, Amas licenciadas, Profissionais de apoio domiciliário, qualificados, Reino Unido) across the site, FAQ, assistant, e-mails and the role names in the database (migrations 0085/0086).
+- Portugal contact: +351 926 562 988 (footer, contact page, WhatsApp link). The company address for Portugal is still a placeholder ("Portugal").
+- Independent-professional onboarding rebuilt to her list (migration 0085): ID and right to work, NIF, NISS (new field), Finanças activity proof, Portuguese criminal record (childcare: the certificate covering contact with minors), foreign record when applicable (optional), qualifications and registration (Ordens), liability and workplace-accident insurance, references and CV, bank details (IBAN, prompted at the end of the document step); expiry dates with automatic suspension. Training is no longer asked in Portugal; the 80% assessment stays.
 
 ## Go-live for Portugal (when Ana confirms)
 
