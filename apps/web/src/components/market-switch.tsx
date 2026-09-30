@@ -15,7 +15,11 @@ type Props = {
  * while it is live; one that is not renders its "launching soon" badge and
  * refuses the click server-side as well (market-actions re-checks is_live).
  */
+/** Country names and badges in the language of the market being viewed. */
+const PT_NAMES: Record<string, string> = { GB: "Reino Unido", PT: "Portugal" };
+
 export function MarketSwitch({ markets, selected }: Props) {
+  const pt = selected === "PT";
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [optimistic, setOptimistic] = useState(selected);
@@ -32,17 +36,23 @@ export function MarketSwitch({ markets, selected }: Props) {
   }
 
   return (
-    <ul className="mt-5 flex flex-wrap gap-2" aria-label="Countries we serve">
+    <ul className="mt-5 flex flex-wrap gap-2" aria-label={pt ? "Países onde operamos" : "Countries we serve"}>
       {markets.map((market) => {
         const isActive = market.code === optimistic;
         const chip = (
           <>
             <span aria-hidden>{market.flag}</span>
-            {market.name}
+            {pt ? (PT_NAMES[market.code] ?? market.name) : market.name}
             {!market.live && (
               <span className="text-xs text-white/70">
                 {" "}
-                {market.preview ? "preview" : "launching soon"}
+                {market.preview
+                  ? pt
+                    ? "pré-visualização"
+                    : "preview"
+                  : pt
+                    ? "em breve"
+                    : "launching soon"}
               </span>
             )}
           </>

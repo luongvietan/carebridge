@@ -56,6 +56,7 @@ export function EligibilityForm({ locale }: { locale: OnboardingLocale }) {
           </div>
         </fieldset>
 
+        {locale !== "pt-PT" && (
         <fieldset>
           <legend className="text-base font-semibold">{e.trainingLegend}</legend>
           <p className="mt-2 text-sm text-[#4a4a4a]">
@@ -72,6 +73,7 @@ export function EligibilityForm({ locale }: { locale: OnboardingLocale }) {
             ))}
           </div>
         </fieldset>
+        )}
 
         {state && "error" in state && <p className="text-sm text-[#da1e28]">{state.error}</p>}
         <button

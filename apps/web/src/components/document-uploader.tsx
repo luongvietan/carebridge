@@ -13,6 +13,7 @@ export type DocItem = {
   code: string; // document_types.code — keys the acceptable-documents guidance
   name: string;
   critical: boolean;
+  optional?: boolean; // "when applicable": asked for, but not owed by everyone
   hasExpiry: boolean; // type carries an expiry → an expiry date is required on upload
   status: string | null; // verification_status, or null if not uploaded
   rejectionReason?: string | null; // admin's note for rejected / further-info docs
@@ -66,7 +67,7 @@ export function DocumentUploader({
     else router.refresh();
   }
 
-  const allUploaded = items.every((i) => i.status);
+  const allUploaded = items.filter((i) => !i.optional).every((i) => i.status);
 
   return (
     <div>
@@ -85,6 +86,7 @@ export function DocumentUploader({
               <div>
                 <span className="font-semibold">{item.name}</span>
                 {item.critical && <span className="ml-2 text-xs text-[#2e7d32]">{d.critical}</span>}
+                {item.optional && <span className="ml-2 text-xs text-[#7a8a81]">{d.optional}</span>}
               </div>
               <Badge status={item.status} notUploaded={d.notUploaded} />
             </div>
@@ -143,6 +145,15 @@ export function DocumentUploader({
           );
         })}
       </div>
+
+      {locale === "pt-PT" && (
+        <p className="mt-6 text-sm text-[#4a4a4a]">
+          {d.bankDetails}{" "}
+          <a href="/professional/payout-details" className="font-semibold text-[#2e7d32] hover:underline">
+            {d.bankDetailsLink}
+          </a>
+        </p>
+      )}
 
       {allUploaded && (
         <div className="mt-6 border border-[#2e7d32] bg-[#defbe6] p-4 text-sm text-[#0e6027]">

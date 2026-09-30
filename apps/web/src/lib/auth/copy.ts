@@ -70,7 +70,7 @@ export const authCopy = {
     backHome: "Voltar ao início",
     shellTitle: "Profissionais de saúde verificados, com confiança",
     shellBody:
-      "Junte-se como profissional verificado ou crie pedidos de marcação como cliente particular ou organização.",
+      "Registe-se como profissional verificado ou crie pedidos de marcação como cliente particular ou organização.",
     login: {
       title: "Entrar",
       intro: "Aceda à sua conta CareBridge Connect — profissionais, clientes e organizações.",
@@ -87,12 +87,12 @@ export const authCopy = {
       tagline:
         "Um marketplace de confiança que liga famílias e organizações a profissionais de saúde e de cuidados infantis verificados, para encontrar apoio seguro, fiável e de qualidade quando mais é preciso.",
       professionalCard: {
-        title: "Junte-se como profissional",
+        title: "Registe-se como profissional",
         description:
           "Conclua a triagem de elegibilidade, a avaliação de competências e a verificação de documentos para se juntar ao nosso marketplace verificado.",
       },
       clientCard: {
-        title: "Criar um pedido de marcação",
+        title: "Solicitar um profissional",
         description:
           "Registe-se como cliente particular ou organização para pedir enfermeiros, auxiliares de saúde, cuidadores infantis ou fisioterapeutas verificados.",
       },
@@ -125,8 +125,8 @@ export const authCopy = {
       create: "Criar conta",
       needCare: "Precisa antes de pedir cuidados?",
       areProfessional: "É um profissional de saúde?",
-      joinProfessional: "Junte-se como profissional",
-      createBooking: "Criar um pedido de marcação",
+      joinProfessional: "Registe-se como profissional",
+      createBooking: "Solicitar um profissional",
     },
   },
 } as const;

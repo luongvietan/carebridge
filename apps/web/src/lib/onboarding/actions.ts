@@ -18,6 +18,7 @@ import { parseSkillIds, parseAvailabilityDays } from "@/lib/onboarding/profile-c
 import { eligibilityCompleted, assessmentPassed } from "@/lib/onboarding/progress";
 import { validationMessage } from "@/lib/validation/form-messages";
 import { isValidNif } from "@/lib/validation/nif";
+import { getSelectedCountry } from "@/lib/marketing/market-server";
 
 const PROFILE_FIELD_LABELS: Record<string, string> = {
   fullName: "Full name",
@@ -48,6 +49,7 @@ export type ProfileFormValues = {
   city: string;
   postcode: string;
   nationalInsuranceNo: string;
+  niss: string;
   professionalRoleId: string;
   professionalSummary: string;
   registrationBody: string;
@@ -72,6 +74,7 @@ function parseProfileFormValues(formData: FormData): ProfileFormValues {
     city: String(formData.get("city") ?? ""),
     postcode: String(formData.get("postcode") ?? ""),
     nationalInsuranceNo: String(formData.get("nationalInsuranceNo") ?? ""),
+    niss: String(formData.get("niss") ?? ""),
     professionalRoleId: String(formData.get("professionalRoleId") ?? ""),
     professionalSummary: String(formData.get("professionalSummary") ?? ""),
     registrationBody: String(formData.get("registrationBody") ?? ""),
@@ -99,10 +102,21 @@ export async function submitEligibility(
   formData: FormData,
 ): Promise<EligibilityResult> {
   const user = await requireAuth();
+  // Training is not mandatory in Portugal as it is in the UK (client, 30 Sep):
+  // a Portuguese applicant is not asked to attest to it and is never held
+  // pending on it. The competency assessment still applies in full.
+  const { data: ownCountry } = await createServiceClient()
+    .from("professionals")
+    .select("country_code")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  const skipTraining =
+    ownCountry?.country_code === "PT" || (!ownCountry && (await getSelectedCountry()) === "PT");
+
   // Per-item attestation: an unchecked box means that training is not current.
   const trainingItems: Record<string, boolean> = {};
   for (const item of mandatoryTrainingItems) {
-    trainingItems[item.key] = formData.get(`training_${item.key}`) === "on";
+    trainingItems[item.key] = skipTraining || formData.get(`training_${item.key}`) === "on";
   }
   const parsed = eligibilitySchema.safeParse({
     employmentStatus: formData.get("employmentStatus"),
@@ -171,6 +185,10 @@ export async function saveProfile(_prev: ProfileResult, formData: FormData): Pro
   const rawTaxId = ((formData.get("nationalInsuranceNo") as string) || "").replace(/\s+/g, "");
   if (isPortugal && !isValidNif(rawTaxId)) {
     return profileError("Introduza um NIF válido (9 dígitos).", formData);
+  }
+  const rawNiss = ((formData.get("niss") as string) || "").replace(/\s+/g, "");
+  if (isPortugal && !/^[0-9]{11}$/.test(rawNiss)) {
+    return profileError("Introduza um NISS válido (11 dígitos).", formData);
   }
 
   const parsed = profileSchema.safeParse({
@@ -279,6 +297,7 @@ export async function saveProfile(_prev: ProfileResult, formData: FormData): Pro
       address_line2: parsed.data.addressLine2 ?? null,
       city: parsed.data.city,
       postcode: parsed.data.postcode,
+      niss: isPortugal ? rawNiss : null,
       // One column, two countries: a UK National Insurance number, or a NIF.
       national_insurance_no: isPortugal
         ? rawTaxId

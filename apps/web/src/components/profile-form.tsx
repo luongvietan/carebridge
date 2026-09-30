@@ -44,6 +44,7 @@ type Current = {
   city: string | null;
   postcode: string | null;
   national_insurance_no: string | null;
+  niss: string | null;
   professional_summary: string | null;
   registration_body: string | null;
   registration_number: string | null;
@@ -101,6 +102,7 @@ export function ProfileForm({
     city: current?.city ?? "",
     postcode: current?.postcode ?? "",
     nationalInsuranceNo: current?.national_insurance_no ?? "",
+    niss: current?.niss ?? "",
     professionalRoleId: current?.professional_role_id ?? "",
     professionalSummary: current?.professional_summary ?? "",
     registrationBody: current?.registration_body ?? "",
@@ -185,7 +187,7 @@ export function ProfileForm({
             />
             <span className="mt-1 block text-xs font-normal text-[#7a8a81]">
               {isPortugal
-                ? `Só uma ama autorizada pode ser listada como tal. Envie a sua autorização do ISS no passo seguinte — um administrador confirma-a junto da ${REGISTER_LABEL[register]} antes de poder aceitar marcações.`
+                ? `Só uma ama licenciada pode ser listada como tal. Envie a sua autorização do ISS no passo seguinte — um administrador confirma-a junto da ${REGISTER_LABEL[register]} antes de poder aceitar marcações.`
                 : `Only an authorised Ama may be listed as one. Upload your ISS authorisation at the next step — an administrator confirms it with the ${REGISTER_LABEL[register]} before you can accept any bookings.`}
             </span>
           </label>
@@ -229,6 +231,20 @@ export function ProfileForm({
             className={field}
           />
         </label>
+        {isPortugal && (
+          <label className="block text-sm font-medium">
+            {p.niss}
+            <input
+              name="niss"
+              required
+              inputMode="numeric"
+              maxLength={11}
+              placeholder={p.nissPlaceholder}
+              defaultValue={v.niss}
+              className={field}
+            />
+          </label>
+        )}
         {!isPortugal && (
         <div className="rounded-xl border border-[#dbe7e0] bg-[#f9fbfa] p-4">
           <div className="block text-sm font-medium">

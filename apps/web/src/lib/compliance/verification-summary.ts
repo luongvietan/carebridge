@@ -27,14 +27,14 @@ export type VerificationSummary = {
 
 /** Documents that evidence each check, in priority order. */
 const DOCUMENT_CHECKS: { key: string; label: string; codes: string[] }[] = [
-  { key: "identity", label: "Identity verified", codes: ["photo_id"] },
-  { key: "right_to_work", label: "Right to Work verified", codes: ["right_to_work"] },
+  { key: "identity", label: "Identity verified", codes: ["photo_id", "identificacao_direito_trabalho"] },
+  { key: "right_to_work", label: "Right to Work verified", codes: ["right_to_work", "identificacao_direito_trabalho"] },
   {
     key: "criminal_record",
     label: "DBS / criminal record verified",
-    codes: ["enhanced_dbs"],
+    codes: ["enhanced_dbs", "registo_criminal", "registo_criminal_menores"],
   },
-  { key: "references", label: "References checked", codes: ["professional_reference"] },
+  { key: "references", label: "References checked", codes: ["professional_reference", "referencias_pt"] },
   {
     key: "training",
     label: "Mandatory training up to date",

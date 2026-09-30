@@ -43,7 +43,7 @@ const guidePt: KnowledgeEntry[] = [
   },
   {
     title: "Como me registo como profissional?",
-    body: "Escolha 'Junte-se como profissional', crie uma conta, indique a sua função (alguns profissionais têm mais do que uma), conclua a triagem de elegibilidade, envie os documentos e passe na avaliação de competências online. A equipa CareBridge Connect analisa tudo antes de poder aceitar marcações.",
+    body: "Escolha 'Registe-se como profissional', crie uma conta, indique a sua função (alguns profissionais têm mais do que uma), conclua a triagem de elegibilidade, envie os documentos e passe na avaliação de competências online. A equipa CareBridge Connect analisa tudo antes de poder aceitar marcações.",
   },
   {
     title: "Como peço uma marcação como cliente ou organização?",

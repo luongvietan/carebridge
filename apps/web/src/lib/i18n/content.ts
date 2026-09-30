@@ -84,6 +84,8 @@ const uiEn = {
     support: "Support",
     backToTop: "Back to top",
     rights: "All rights reserved.",
+    address: "Manchester, United Kingdom",
+    phone: "+44 (0)161 000 0000",
   },
   hero: { complianceBuiltIn: "Compliance built in", verifiedRoles: "10 verified role types" },
   statsFootnote:
@@ -143,6 +145,10 @@ const uiEn = {
     email: "Email",
     phone: "Phone",
     address: "Address",
+    phoneValue: "+44 (0)161 000 0000",
+    addressValue: "Manchester, United Kingdom",
+    whatsapp: "",
+    whatsappValue: "",
     joinTitle: "Looking to join?",
     joinBody:
       "Professionals complete onboarding online. Clients and organisations can register and create booking requests directly — no need to contact us first.",

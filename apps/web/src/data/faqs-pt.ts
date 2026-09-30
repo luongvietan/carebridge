@@ -18,17 +18,17 @@ export const faqsPt = [
   {
     question: "Como são verificados os profissionais?",
     answer:
-      "Todos os profissionais passam por uma triagem de elegibilidade, uma avaliação de competências online e o envio de documentos. A equipa CareBridge Connect analisa a identidade, o NIF, o comprovativo de morada, o direito de residência e de trabalho, o registo criminal, a cédula profissional (quando aplicável), seguro, formação obrigatória e referências antes da aprovação. Ninguém pode aceitar uma marcação enquanto essa análise não estiver concluída.",
+      "Todos os profissionais passam por uma triagem de elegibilidade, uma avaliação de competências online e o envio de documentos. A equipa CareBridge Connect analisa a identificação e o direito de trabalho em Portugal, o NIF e o NISS, o comprovativo de atividade aberta nas Finanças como trabalhador independente, o registo criminal, as habilitações e a inscrição profissional (por exemplo, na Ordem dos Enfermeiros ou na Ordem dos Fisioterapeutas), os seguros de responsabilidade civil profissional e de acidentes de trabalho, as referências e o historial profissional antes da aprovação. Ninguém pode aceitar uma marcação enquanto essa análise não estiver concluída.",
   },
   {
     question: "Como são verificados os profissionais de cuidados infantis?",
     answer:
-      "Os profissionais de infância são verificados com o mesmo rigor dos de saúde, com requisitos adicionais: o registo criminal emitido para funções com menores, um certificado de primeiros socorros em vigor e, no caso das amas, a autorização da Segurança Social (ISS). Estes documentos são verificados antes de qualquer marcação poder ser aceite.",
+      "Os profissionais de cuidados infantis são verificados com o mesmo rigor dos de saúde, com requisitos adicionais: o registo criminal que abrange o contacto regular com menores, um certificado de primeiros socorros em vigor e, no caso das amas, a autorização da Segurança Social (ISS). Estes documentos são verificados antes de qualquer marcação poder ser aceite.",
   },
   {
     question: "O que acontece se um documento expirar?",
     answer:
-      "A plataforma impede automaticamente o profissional de aceitar novas marcações quando um documento crítico caduca — por exemplo o registo criminal, a cédula profissional, o seguro, a formação ou a autorização de residência. Só volta a poder aceitar marcações depois de enviar os documentos atualizados e de estes serem aprovados.",
+      "A plataforma impede automaticamente o profissional de aceitar novas marcações quando um documento crítico caduca — por exemplo o registo criminal, a cédula profissional, os seguros ou o documento de identificação. Só volta a poder aceitar marcações depois de enviar os documentos atualizados e de estes serem aprovados.",
   },
   {
     question: "Como funcionam os pedidos de marcação?",

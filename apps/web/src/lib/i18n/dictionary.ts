@@ -76,14 +76,14 @@ const en: Dictionary = {
 };
 
 const pt: Dictionary = {
-  heroBadge: "Cuidados de saúde e de infância verificados",
+  heroBadge: "Saúde e cuidados infantis verificados",
   heroHeadline:
-    "A ligar Famílias e Organizações a Profissionais de Saúde e de Infância Verificados.",
+    "Ligamos Famílias e Organizações a Profissionais de Saúde e de Cuidados Infantis Verificados.",
   heroSubheadline:
-    "Um marketplace de cuidados de confiança — enfermeiros, auxiliares de saúde, apoios domiciliários, fisioterapeutas, cuidadores infantis, babysitters e amas autorizadas, todos verificados, avaliados e sujeitos a monitorização contínua de conformidade.",
+    "Um marketplace de cuidados de confiança — enfermeiros, auxiliares de saúde, profissionais de apoio domiciliário, fisioterapeutas, cuidadores infantis, babysitters e amas licenciadas, todos verificados, avaliados e sujeitos a monitorização contínua de conformidade.",
   statsBandLabels: [
     "Verificado antes da primeira marcação",
-    "Funções profissionais",
+    "Categorias profissionais",
     "Nota mínima de competência",
     "Exportação completa de dados em qualquer altura",
   ],
@@ -99,7 +99,7 @@ const pt: Dictionary = {
     {
       title: "Pedir ou associar",
       description:
-        "Famílias, clientes particulares e organizações pedem profissionais de saúde ou de infância por função, data, hora e localização. Os profissionais verificados aceitam marcações abertas, ou um administrador atribui um diretamente.",
+        "Famílias, clientes particulares e organizações pedem profissionais de saúde ou de cuidados infantis por função, data, hora e localização. Os profissionais verificados aceitam marcações abertas, ou um administrador atribui um diretamente.",
     },
     {
       title: "Marcar com confiança",
@@ -112,12 +112,12 @@ const pt: Dictionary = {
         "O profissional regista as horas efetivamente trabalhadas, o cliente ou gestor confirma-as e o pagamento é libertado. Ambas as partes mantêm um histórico completo das marcações.",
     },
   ],
-  ctaKicker: "Junte-se ao marketplace",
+  ctaKicker: "Registe-se no marketplace",
   ctaHeading: "Pessoal conforme, pronto quando precisar",
   ctaBody:
     "Registe-se como profissional verificado, ou crie um pedido de marcação como cliente particular ou organização — com conformidade, pagamentos e trilhos de auditoria incluídos.",
-  joinProfessional: "Junte-se como profissional",
-  createBookingRequest: "Criar um pedido de marcação",
+  joinProfessional: "Registe-se como profissional",
+  createBookingRequest: "Solicitar um profissional",
 };
 
 export const dictionaries: Record<MarketLocale, Dictionary> = {

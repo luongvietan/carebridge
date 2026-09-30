@@ -86,6 +86,9 @@ export const profileSchema = z.object({
       (v) => !v || /^[A-Za-z]{2}\d{6}[A-Za-z]$/.test(v.replace(/\s/g, "")),
       "Enter a valid National Insurance number, e.g. QQ123456C",
     ),
+  // Portuguese Social Security number (NISS): 11 digits, checked in saveProfile
+  // for Portuguese applicants only.
+  niss: z.string().optional(),
   professionalRoleId: uuid,
   professionalSummary: z.string().optional(),
   // Professional registration details (spec §3): regulatory body + number, e.g. NMC/HCPC.

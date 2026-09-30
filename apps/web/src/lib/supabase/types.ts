@@ -2114,6 +2114,7 @@ export type Database = {
           id: string
           iss_authorisation_number: string | null
           national_insurance_no: string | null
+          niss: string | null
           ofsted_registration_number: string | null
           postcode: string | null
           professional_role_id: string | null
@@ -2147,6 +2148,7 @@ export type Database = {
           id?: string
           iss_authorisation_number?: string | null
           national_insurance_no?: string | null
+          niss?: string | null
           ofsted_registration_number?: string | null
           postcode?: string | null
           professional_role_id?: string | null
@@ -2180,6 +2182,7 @@ export type Database = {
           id?: string
           iss_authorisation_number?: string | null
           national_insurance_no?: string | null
+          niss?: string | null
           ofsted_registration_number?: string | null
           postcode?: string | null
           professional_role_id?: string | null

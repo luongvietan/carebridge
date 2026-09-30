@@ -69,8 +69,8 @@ export const requesterCopy = {
       saving: "A guardar…",
     },
     booking: {
-      role: "Função profissional",
-      selectRole: "Selecione uma função…",
+      role: "Categoria profissional",
+      selectRole: "Selecione uma categoria…",
       careType: "Tipo de cuidados",
       selectCareType: "Selecione o tipo de cuidados…",
       start: "Início",

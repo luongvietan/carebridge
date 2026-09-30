@@ -35,7 +35,7 @@ export const professionalRolesPt: RoleCopy[] = [
       "Fisioterapeutas com inscrição válida na Ordem dos Fisioterapeutas, para programas de reabilitação e mobilidade dentro do seu âmbito de prática.",
   },
   {
-    title: "Auxiliares de Saúde / Apoio Domiciliário",
+    title: "Profissionais de Apoio Domiciliário",
     featuredOnHome: true,
     image: { set: "health", index: 3 },
     description:
@@ -58,7 +58,7 @@ export const childcareRolesPt: RoleCopy[] = [
       "Babysitters com experiência para cuidados ao final do dia, ocasionais e de curto aviso, com registo criminal para funções com menores e formação em primeiros socorros.",
   },
   {
-    title: "Amas Autorizadas",
+    title: "Amas Licenciadas",
     image: { set: "child", index: 1 },
     description:
       "Amas que cuidam de crianças na sua própria casa, com a autorização da Segurança Social (ISS). O número de autorização é obrigatório e é verificado antes de qualquer marcação.",
@@ -96,28 +96,28 @@ export const complianceFeaturesPt = [
   {
     title: "Programas de apoio à medida",
     bullets: [
-      "Pedidos de marcação combinados entre oito funções — enfermeiros/as de adultos, de pediatria e de saúde mental, fisioterapeutas, auxiliares de saúde, cuidadores infantis ao domicílio, babysitters e amas autorizadas.",
+      "Pedidos de marcação combinados entre oito categorias — enfermeiros/as de adultos, de pediatria e de saúde mental, fisioterapeutas, auxiliares de saúde, cuidadores infantis ao domicílio, babysitters e amas licenciadas.",
       "Cobertura flexível para famílias, clientes particulares e organizações de saúde e de apoio social.",
     ],
   },
   {
     title: "Bloqueio automático por incumprimento",
     bullets: [
-      "Um registo criminal, cédula profissional, seguro, formação ou autorização de residência caducados restringem de imediato novas marcações.",
+      "Um registo criminal, cédula profissional, seguro ou documento de identificação caducados restringem de imediato novas marcações.",
       "Os profissionais voltam a ficar disponíveis apenas depois de os documentos atualizados serem enviados e aprovados.",
     ],
   },
 ] as const;
 
 export const verificationChecklistPt = [
-  "Cédula profissional ou inscrição na ordem competente",
-  "Direito de residência e de trabalho",
-  "Verificação de identidade",
-  "Comprovativo de morada e NIF",
-  "Certificado de registo criminal (com o específico para menores nas funções de infância)",
-  "Formação obrigatória",
-  "Referências",
-  "Monitorização contínua com alertas automáticos de caducidade",
+  "Identificação e direito de trabalho em Portugal",
+  "NIF e NISS",
+  "Atividade aberta nas Finanças como trabalhador independente",
+  "Certificado de registo criminal (e o que abrange o contacto com menores, nas funções de cuidados infantis)",
+  "Habilitações e inscrição profissional (Ordem dos Enfermeiros, Ordem dos Fisioterapeutas)",
+  "Seguros de responsabilidade civil profissional e de acidentes de trabalho",
+  "Referências e historial profissional",
+  "Monitorização contínua com suspensão automática quando um documento caduca",
 ] as const;
 
 export const aboutFeaturesPt = [
@@ -128,7 +128,7 @@ export const aboutFeaturesPt = [
 
 export const statsPt = [
   { value: "100%", label: "Verificados antes da primeira marcação" },
-  { value: "8", label: "Funções profissionais" },
+  { value: "8", label: "Categorias profissionais" },
   { value: "80%", label: "Nota mínima na avaliação de competências" },
   { value: "CSV / XLSX", label: "Exportação completa dos dados a qualquer momento" },
 ] as const;
@@ -188,13 +188,14 @@ export const aboutContentPt = {
     intro:
       "Para promover a segurança e a confiança, os profissionais que se juntam à plataforma passam por um processo de verificação que pode incluir:",
     bullets: [
-      "Verificação de identidade",
-      "Direito de residência e de trabalho",
-      "Certificado de registo criminal (e o específico para menores, nas funções de infância)",
-      "Cédula profissional ou inscrição na ordem competente, quando aplicável",
-      "Autorização da Segurança Social (ISS), no caso das amas",
-      "Verificação de qualificações e de referências",
-      "Formação obrigatória em dia",
+      "Identificação e direito de trabalho em Portugal",
+      "NIF e NISS",
+      "Comprovativo de atividade aberta nas Finanças como trabalhador independente",
+      "Certificado de registo criminal português (nas funções de cuidados infantis, o que abrange o contacto regular com menores) e, se aplicável, de outros países",
+      "Habilitações e inscrição profissional, quando aplicável (Ordem dos Enfermeiros, Ordem dos Fisioterapeutas)",
+      "Licença da Segurança Social (ISS), no caso das amas",
+      "Seguros de responsabilidade civil profissional e de acidentes de trabalho",
+      "Referências e historial profissional",
     ],
   },
 } as const;
@@ -204,7 +205,7 @@ export const uiPt = {
   nav: {
     home: "Início",
     about: "Sobre nós",
-    roles: "Funções profissionais",
+    roles: "Categorias profissionais",
     faq: "Perguntas frequentes",
     contactUs: "Contacte-nos",
     signIn: "Entrar",
@@ -221,27 +222,29 @@ export const uiPt = {
     importantInfo: "Informação importante",
     privacy: "Política de privacidade",
     home: "Início",
-    services: "Funções",
+    services: "Categorias",
     faq: "Perguntas frequentes",
     support: "Apoio",
     backToTop: "Voltar ao topo",
     rights: "Todos os direitos reservados.",
+    address: "Portugal",
+    phone: "+351 926 562 988",
   },
-  hero: { complianceBuiltIn: "Conformidade integrada", verifiedRoles: "8 tipos de funções verificadas" },
+  hero: { complianceBuiltIn: "Conformidade integrada", verifiedRoles: "8 categorias profissionais verificadas" },
   statsFootnote:
     "Pensada para o controlo operacional — registos de auditoria completos, alertas automáticos de conformidade e exportação de dados para a CareBridge Connect a qualquer momento.",
   getStarted: "Começar",
   aboutIntro: {
     heading:
-      "Um marketplace seguro de saúde e de cuidados infantis — só profissionais adequados e verificados se juntam à nossa plataforma",
+      "Um marketplace seguro de saúde e de cuidados infantis — só profissionais qualificados e verificados se juntam à nossa plataforma",
     badge: "Conformidade em primeiro lugar",
     body: "A CareBridge Connect oferece um percurso de integração seguro e conforme para os profissionais e um processo de marcação simples para clientes particulares e organizações — com triagem de elegibilidade, avaliação de competências, verificação de documentos e acompanhamento contínuo da conformidade.",
   },
   servicesOffer: {
-    heading: "Funções profissionais que cobrimos",
+    heading: "Categorias profissionais que cobrimos",
     sub: "Profissionais de saúde e de cuidados infantis — de enfermeiros e auxiliares de saúde a cuidadores infantis e amas — disponíveis para pedidos de marcação de famílias e organizações.",
-    more: "Os/as enfermeiros/as de pediatria e de saúde mental, fisioterapeutas, babysitters e amas autorizadas também estão disponíveis.",
-    viewAll: "Ver todas as oito funções",
+    more: "Os/as enfermeiros/as de pediatria e de saúde mental, fisioterapeutas, babysitters e amas licenciadas também estão disponíveis.",
+    viewAll: "Ver todas as oito categorias",
   },
   compliance: {
     heading: "Profissionais verificados, conformidade contínua",
@@ -249,10 +252,10 @@ export const uiPt = {
   },
   callout: { readFull: "Ler toda a informação importante e o aviso legal" },
   servicesPage: {
-    title: "Funções profissionais que cobrimos",
-    badge: "Funções profissionais",
+    title: "Categorias profissionais que cobrimos",
+    badge: "Categorias profissionais",
     description:
-      "Apoio de saúde e de cuidados infantis com conformidade verificada, para famílias e organizações — profissionais verificados em oito funções, combinados através de pedidos de marcação.",
+      "Apoio de saúde e de cuidados infantis com conformidade verificada, para famílias e organizações — profissionais verificados em oito categorias, combinados através de pedidos de marcação.",
     healthHeading: "Profissionais de saúde",
     healthSub:
       "Enfermeiros/as, fisioterapeutas e auxiliares de saúde — cada um verificado antes da primeira marcação.",
@@ -268,9 +271,9 @@ export const uiPt = {
     howHeading: "Como funciona",
     howSub:
       "Da integração à marcação — um caminho claro para profissionais, clientes particulares e organizações.",
-    readyHeading: "Pronto para criar um pedido de marcação?",
+    readyHeading: "Pronto para solicitar um profissional?",
     readyBody:
-      "Registe-se como cliente particular ou organização — ou junte-se como profissional verificado.",
+      "Registe-se como cliente particular ou organização — ou registe-se como profissional verificado.",
   },
   aboutPage: {
     badge: "Sobre a CareBridge Connect",
@@ -282,10 +285,14 @@ export const uiPt = {
   contact: {
     title: "Teremos todo o gosto em ouvi-lo",
     description:
-      "Dúvidas sobre como se juntar como profissional, criar um pedido de marcação ou sobre a conformidade? Envie-nos uma mensagem e responderemos.",
+      "Dúvidas sobre como se juntar como profissional, solicitar um profissional ou sobre a conformidade? Envie-nos uma mensagem e responderemos.",
     email: "Email",
     phone: "Telefone",
     address: "Morada",
+    phoneValue: "+351 926 562 988",
+    addressValue: "Portugal",
+    whatsapp: "WhatsApp",
+    whatsappValue: "+351 926 562 988",
     joinTitle: "Quer juntar-se?",
     joinBody:
       "Os profissionais concluem a integração online. Os clientes e as organizações podem registar-se e criar pedidos de marcação diretamente — sem precisar de nos contactar primeiro.",

@@ -15,6 +15,69 @@ export type DocumentGuidance = {
 };
 
 export const DOCUMENT_GUIDANCE: Record<string, DocumentGuidance> = {
+  // ---- Portugal
+  identificacao_direito_trabalho: {
+    accepted:
+      "Cartão de Cidadão (frente e verso), passaporte ou título de residência válido que lhe permita trabalhar em Portugal. O documento tem de estar em vigor e o nome tem de coincidir com o da candidatura.",
+  },
+  nif: {
+    accepted:
+      "Comprovativo do seu NIF: cartão do NIF, Cartão de Cidadão ou certidão emitida pelo Portal das Finanças.",
+  },
+  niss_comprovativo: {
+    accepted:
+      "Comprovativo do seu NISS: cartão de Segurança Social ou documento emitido pela Segurança Social Direta.",
+  },
+  atividade_financas: {
+    accepted:
+      "Comprovativo de atividade aberta como trabalhador independente, emitido pelo Portal das Finanças (declaração de início de atividade ou certidão de atividade aberta).",
+  },
+  registo_criminal: {
+    accepted:
+      "Certificado de registo criminal português emitido pelos serviços de identificação criminal (Justiça), para fins de emprego ou exercício de profissão.",
+    maxAgeMonths: 3,
+  },
+  registo_criminal_menores: {
+    accepted:
+      "Certificado de registo criminal português emitido para o exercício de funções que envolvam contacto regular com menores (Lei n.º 113/2009). O certificado geral não é suficiente.",
+    maxAgeMonths: 3,
+  },
+  registo_criminal_estrangeiro: {
+    accepted:
+      "Apenas se aplicável: certificado de registo criminal de cada país onde tenha residido recentemente, com tradução para português quando não estiver em português, inglês ou espanhol.",
+  },
+  cedula_profissional: {
+    accepted:
+      "Cédula profissional ou comprovativo de inscrição válida na Ordem dos Enfermeiros ou na Ordem dos Fisioterapeutas, com o número e a validade visíveis.",
+  },
+  qualificacoes_pt: {
+    accepted:
+      "Diploma ou certificado das suas habilitações académicas e profissionais (por exemplo, licenciatura, curso profissional ou certificado de formação na sua área).",
+  },
+  seguro_responsabilidade_civil: {
+    accepted:
+      "Apólice ou certificado do seu seguro de responsabilidade civil profissional em vigor, com o nome do segurado, o capital e o período de cobertura.",
+  },
+  seguro_acidentes_trabalho: {
+    accepted:
+      "Apólice ou certificado do seu seguro de acidentes de trabalho (trabalhador independente) em vigor, com o período de cobertura.",
+  },
+  referencias_pt: {
+    accepted:
+      "Uma referência escrita de alguém que tenha supervisionado o seu trabalho (empregador, cliente ou instituição) — não de um amigo ou familiar.",
+  },
+  historico_profissional: {
+    accepted:
+      "O seu currículo com o historial profissional: funções, entidades, datas e contactos de referência.",
+  },
+  primeiros_socorros: {
+    accepted:
+      "Certificado de primeiros socorros (idealmente com módulo pediátrico) emitido por uma entidade formadora reconhecida, em vigor.",
+  },
+  autorizacao_iss: {
+    accepted:
+      "A sua licença/autorização como ama emitida pela Segurança Social (ISS), com o número visível.",
+  },
   photo_id: {
     accepted:
       "Passport (preferred), UK or EEA photocard driving licence, national identity card, or a UK biometric residence permit. The document must be current, and the name must match your application.",

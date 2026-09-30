@@ -19,12 +19,6 @@ import type { IconSvgElement } from "@hugeicons/react";
 
 const FOOTER_IMAGE = marketingImages.footer;
 
-const contactItems = [
-  { label: "Manchester, United Kingdom", icon: Location01Icon },
-  { label: "+44 (0)161 000 0000", icon: Call02Icon },
-  { label: CONTACT_EMAIL, icon: Mail01Icon },
-];
-
 const socialLinks: { label: string; href: string; icon: IconSvgElement }[] = [
   { label: "X", href: "#", icon: NewTwitterIcon },
   { label: "LinkedIn", href: "#", icon: Linkedin01Icon },
@@ -45,6 +39,8 @@ export type FooterLabels = {
   support: string;
   backToTop: string;
   rights: string;
+  address: string;
+  phone: string;
 };
 
 export function SiteFooterView({
@@ -56,6 +52,11 @@ export function SiteFooterView({
   regulatoryDisclaimer: string;
   emergencyDisclaimer: string;
 }) {
+  const contactItems = [
+    { label: labels.address, icon: Location01Icon },
+    { label: labels.phone, icon: Call02Icon },
+    { label: CONTACT_EMAIL, icon: Mail01Icon },
+  ];
   const navPills = [
     { href: "/", label: labels.home },
     { href: "/services", label: labels.services },
