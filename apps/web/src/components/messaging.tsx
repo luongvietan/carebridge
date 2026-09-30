@@ -1,4 +1,6 @@
 "use client";
+
+import { usePortalLocale, usePortalT, Tr } from "@/components/portal-locale";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Select } from "@/components/ui/select";
@@ -22,6 +24,7 @@ export function StartThreadForm({
   /** Empty for non-admins: they can only message CareBridge Connect. */
   recipients: { userId: string; label: string }[];
 }) {
+  const t = usePortalT();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [withUserId, setWithUserId] = useState("");
@@ -37,7 +40,7 @@ export function StartThreadForm({
     const result = await startThread(fd);
     setBusy(false);
     if ("error" in result) {
-      setError(result.error);
+      setError(t(result.error));
       return;
     }
     setOpen(false);
@@ -51,7 +54,7 @@ export function StartThreadForm({
         onClick={() => setOpen(true)}
         className="rounded-full bg-[#2e7d32] px-4 py-2 text-sm text-white hover:bg-[#246627]"
       >
-        New message
+        {t("New message")}
       </button>
     );
   }
@@ -60,34 +63,34 @@ export function StartThreadForm({
     <form onSubmit={onSubmit} className="mt-4 rounded-2xl border border-[#dbe7e0] p-4">
       {recipients.length > 0 ? (
         <div className="text-sm font-medium">
-          To
+          {t("To")}
           <Select
             name="withUserId"
-            aria-label="Recipient"
+            aria-label={t("Recipient")}
             required
             value={withUserId}
             onValueChange={setWithUserId}
-            placeholder="Choose who to message…"
+            placeholder={t("Choose who to message…")}
             className="mt-1"
             options={recipients.map((r) => ({ value: r.userId, label: r.label }))}
           />
         </div>
       ) : (
         <p className="text-sm text-[#4a4a4a]">
-          Your message goes to the CareBridge Connect team.
+          {t("Your message goes to the CareBridge Connect team.")}
         </p>
       )}
 
       <label className="mt-3 block text-sm font-medium">
-        Subject
+        {t("Subject")}
         <input name="subject" required className={field} />
       </label>
       <label className="mt-3 block text-sm font-medium">
-        Message
+        {t("Message")}
         <textarea name="body" required rows={4} className={field} />
       </label>
 
-      {error && <p className="mt-2 text-sm text-[#da1e28]">{error}</p>}
+      {error && <p className="mt-2 text-sm text-[#da1e28]"><Tr>{error}</Tr></p>}
 
       <div className="mt-3 flex gap-2">
         <button
@@ -95,14 +98,14 @@ export function StartThreadForm({
           disabled={busy}
           className="rounded-full bg-[#2e7d32] px-4 py-2 text-sm text-white hover:bg-[#246627] disabled:opacity-50"
         >
-          {busy ? "Sending…" : "Send"}
+          {busy ? t("Sending…") : t("Send")}
         </button>
         <button
           type="button"
           onClick={() => setOpen(false)}
           className="rounded-full border border-[#dbe7e0] px-4 py-2 text-sm text-[#4a4a4a] hover:bg-[#f5f7f6]"
         >
-          Cancel
+          {t("Cancel")}
         </button>
       </div>
     </form>
@@ -110,8 +113,9 @@ export function StartThreadForm({
 }
 
 export function ThreadList({ threads }: { threads: ThreadSummary[] }) {
+  const t = usePortalT();
   if (threads.length === 0) {
-    return <p className="mt-4 text-sm text-[#4a4a4a]">No conversations yet.</p>;
+    return <p className="mt-4 text-sm text-[#4a4a4a]">{t("No conversations yet.")}</p>;
   }
   return (
     <ul className="mt-4 space-y-4">
@@ -123,6 +127,8 @@ export function ThreadList({ threads }: { threads: ThreadSummary[] }) {
 }
 
 function Thread({ thread }: { thread: ThreadSummary }) {
+  const t = usePortalT();
+  const locale = usePortalLocale();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -139,7 +145,7 @@ function Thread({ thread }: { thread: ThreadSummary }) {
     const result = await postMessage(fd);
     setBusy(false);
     if ("error" in result) {
-      setError(result.error);
+      setError(t(result.error));
       return;
     }
     form.reset();
@@ -159,8 +165,7 @@ function Thread({ thread }: { thread: ThreadSummary }) {
           <span className="ml-2 text-xs text-[#7a8a81]">{thread.participants.join(", ")}</span>
         </span>
         <span className="text-xs text-[#7a8a81]">
-          {formatLondon(thread.lastMessageAt)} · {thread.messages.length} message
-          {thread.messages.length === 1 ? "" : "s"}
+          {formatLondon(thread.lastMessageAt, locale)} · {thread.messages.length === 1 ? t("1 message") : t("{n} messages", { n: thread.messages.length })}
         </span>
       </button>
 
@@ -181,7 +186,7 @@ function Thread({ thread }: { thread: ThreadSummary }) {
                 }`}
               >
                 <p className="text-xs text-[#7a8a81]">
-                  {message.senderName} · {formatLondon(message.createdAt)}
+                  {message.senderName} · {formatLondon(message.createdAt, locale)}
                 </p>
                 <p className="mt-1 whitespace-pre-wrap text-[#1e5a33]">{message.body}</p>
               </li>
@@ -189,14 +194,14 @@ function Thread({ thread }: { thread: ThreadSummary }) {
           </ul>
 
           <form onSubmit={onReply} className="mt-3">
-            <textarea name="body" required rows={3} className={field} placeholder="Write a reply…" />
-            {error && <p className="mt-2 text-sm text-[#da1e28]">{error}</p>}
+            <textarea name="body" required rows={3} className={field} placeholder={t("Write a reply…")} />
+            {error && <p className="mt-2 text-sm text-[#da1e28]"><Tr>{error}</Tr></p>}
             <button
               type="submit"
               disabled={busy}
               className="mt-2 rounded-full bg-[#2e7d32] px-4 py-2 text-sm text-white hover:bg-[#246627] disabled:opacity-50"
             >
-              {busy ? "Sending…" : "Reply"}
+              {busy ? t("Sending…") : t("Reply")}
             </button>
           </form>
         </>

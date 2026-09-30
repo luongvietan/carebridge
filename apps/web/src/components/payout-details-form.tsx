@@ -1,4 +1,5 @@
 "use client";
+import { Tr } from "@/components/portal-locale";
 import { useActionState, useState } from "react";
 import { savePayoutDetails, type PayoutResult } from "@/lib/payouts/actions";
 
@@ -130,7 +131,7 @@ export function PayoutDetailsForm({
         </label>
       )}
 
-      {state && "error" in state && <p className="text-sm text-[#da1e28]">{state.error}</p>}
+      {state && "error" in state && <p className="text-sm text-[#da1e28]"><Tr>{state.error}</Tr></p>}
 
       <button
         type="submit"

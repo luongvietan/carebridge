@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useTransition } from "react";
+import { usePortalT } from "@/components/portal-locale";
 import { BrandMark } from "@/components/site-nav-client";
 import { signOut } from "@/lib/auth/actions";
 import type { RoleNavItem } from "@/lib/auth/role-nav";
@@ -22,6 +23,7 @@ type RoleNavProps = {
 };
 
 export function RoleNav({ areaLabel, items, email }: RoleNavProps) {
+  const t = usePortalT();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -76,7 +78,7 @@ export function RoleNav({ areaLabel, items, email }: RoleNavProps) {
             type="button"
             className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#e3ece6] text-[#4a4a4a] lg:hidden"
             aria-expanded={menuOpen}
-            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-label={menuOpen ? t("Close menu") : t("Open menu")}
             onClick={() => setMenuOpen((open) => !open)}
           >
             <Icon icon={menuOpen ? Cancel01Icon : Menu01Icon} size={20} strokeWidth={2} />
@@ -85,7 +87,7 @@ export function RoleNav({ areaLabel, items, email }: RoleNavProps) {
             <BrandMark height={36} />
           </Link>
           <span className="ml-1 hidden rounded-full bg-[#eef5f0] px-3 py-1 text-xs font-semibold text-[#2e7d32] sm:inline-block">
-            {areaLabel}
+            {t(areaLabel)}
           </span>
         </div>
 
@@ -101,7 +103,7 @@ export function RoleNav({ areaLabel, items, email }: RoleNavProps) {
             disabled={pending}
             className="rounded-full px-4 py-2 text-sm font-medium text-[#4a4a4a] transition-colors hover:text-[#2e7d32] disabled:opacity-50"
           >
-            {pending ? "Signing out…" : "Sign out"}
+            {pending ? t("Signing out…") : t("Sign out")}
           </button>
         </div>
       </div>
@@ -109,7 +111,7 @@ export function RoleNav({ areaLabel, items, email }: RoleNavProps) {
       <nav className="hidden border-t border-[#e7efe9] lg:block">
         <div className="mx-auto max-w-7xl px-5 py-2.5 lg:px-8">
           <div className="inline-flex items-center gap-1 rounded-full border border-[#e3ece6] bg-[#f7faf8] px-1.5 py-1">
-            {items.map((item) => desktopLink(item.href, item.label))}
+            {items.map((item) => desktopLink(item.href, t(item.label)))}
           </div>
         </div>
       </nav>
@@ -117,10 +119,10 @@ export function RoleNav({ areaLabel, items, email }: RoleNavProps) {
       {menuOpen && (
         <nav className="border-t border-[#e7efe9] bg-white px-5 py-4 lg:hidden">
           <span className="mb-2 inline-block rounded-full bg-[#eef5f0] px-3 py-1 text-xs font-semibold text-[#2e7d32]">
-            {areaLabel}
+            {t(areaLabel)}
           </span>
           <div className="flex flex-col gap-1 rounded-2xl border border-[#e3ece6] bg-[#f7faf8] p-2">
-            {items.map((item) => mobileLink(item.href, item.label))}
+            {items.map((item) => mobileLink(item.href, t(item.label)))}
           </div>
         </nav>
       )}

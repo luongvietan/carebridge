@@ -7,11 +7,11 @@ export const APP_TIME_ZONE = "Europe/London";
  * `toLocaleString` would show booking times an hour early during BST).
  * Returns "" for malformed input.
  */
-export function formatLondon(iso: string | null | undefined): string {
+export function formatLondon(iso: string | null | undefined, locale = "en-GB"): string {
   if (!iso) return "";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";
-  return d.toLocaleString("en-GB", {
+  return d.toLocaleString(locale, {
     dateStyle: "medium",
     timeStyle: "short",
     timeZone: APP_TIME_ZONE,

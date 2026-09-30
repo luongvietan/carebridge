@@ -1,4 +1,6 @@
 "use client";
+
+import { usePortalT } from "@/components/portal-locale";
 import { useState } from "react";
 import type { VerificationCheck } from "@/lib/compliance/verification-summary";
 
@@ -29,6 +31,7 @@ export function VerifiedBadge({
   fullyVerified: boolean;
   defaultOpen?: boolean;
 }) {
+  const t = usePortalT();
   const [open, setOpen] = useState(defaultOpen);
   const outstanding = checks.filter((c) => c.state === "outstanding").length;
 
@@ -45,7 +48,11 @@ export function VerifiedBadge({
         }`}
       >
         <span aria-hidden>{fullyVerified ? "✔" : "!"}</span>
-        {fullyVerified ? "Fully Verified" : `${outstanding} check${outstanding === 1 ? "" : "s"} outstanding`}
+        {fullyVerified
+          ? t("Fully Verified")
+          : outstanding === 1
+            ? t("1 check outstanding")
+            : t("{n} checks outstanding", { n: outstanding })}
         <span aria-hidden className="text-xs">
           {open ? "▲" : "▼"}
         </span>
@@ -60,13 +67,13 @@ export function VerifiedBadge({
               </span>
               <span>
                 <span className={check.state === "outstanding" ? "text-[#4a4a4a]" : ""}>
-                  {check.label}
+                  {t(check.label)}
                 </span>
                 {check.state === "outstanding" && (
-                  <span className="ml-1 text-xs text-[#a2191f]">— outstanding</span>
+                  <span className="ml-1 text-xs text-[#a2191f]">{t("— outstanding")}</span>
                 )}
                 {check.detail && check.state !== "outstanding" && (
-                  <span className="block text-xs text-[#7a8a81]">{check.detail}</span>
+                  <span className="block text-xs text-[#7a8a81]">{t(check.detail)}</span>
                 )}
               </span>
             </li>

@@ -1,3 +1,4 @@
+import { getPortalT } from "@/lib/i18n/portal-server";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { ensureProfessional } from "@/lib/onboarding/professional-session";
 import { createServiceClient } from "@/lib/supabase/service";
@@ -9,10 +10,11 @@ import { PrintButton } from "@/components/print-button";
 export const metadata = { title: "Competency Certificate — CareBridge Connect" };
 
 export default async function CertificatePage() {
+  const t = await getPortalT();
   const user = await requireAuth();
   const professionalId = await ensureProfessional(user);
   if (!professionalId) {
-    return <p className="text-sm text-[#4a4a4a]">You must be signed in as a professional.</p>;
+    return <p className="text-sm text-[#4a4a4a]">{t("You must be signed in as a professional.")}</p>;
   }
 
   const admin = createServiceClient();
@@ -40,15 +42,15 @@ export default async function CertificatePage() {
   if (!cert) {
     return (
       <div className="rounded-2xl border border-[#dbe7e0] bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
-        <h2 className="text-xl font-bold">Certificate not available yet</h2>
+        <h2 className="text-xl font-bold">{t("Certificate not available yet")}</h2>
         <p className="mt-2 text-sm text-[#4a4a4a]">
-          Your competency assessment certificate is generated once you pass the assessment (80% or above).
+          {t("Your competency assessment certificate is generated once you pass the assessment (80% or above).")}
         </p>
         <ForwardLink
           href="/professional/onboarding/assessment"
           className="mt-6 inline-block rounded-full bg-[#2e7d32] px-4 py-3 text-sm text-white hover:bg-[#246627]"
         >
-          Go to assessment
+          {t("Go to assessment")}
         </ForwardLink>
       </div>
     );
@@ -60,10 +62,10 @@ export default async function CertificatePage() {
 
       <div className="no-print mb-6 flex items-center justify-between">
         <BackLink href="/professional/onboarding/profile" className="text-sm text-[#2e7d32] underline">
-          Back
+          {t("Back")}
         </BackLink>
         <PrintButton
-          label="Download / Print certificate"
+          label={t("Download / Print certificate")}
           className="rounded-full bg-[#2e7d32] px-4 py-3 text-sm text-white hover:bg-[#246627]"
         />
       </div>
@@ -71,26 +73,26 @@ export default async function CertificatePage() {
       {/* Certificate */}
       <div className="mx-auto max-w-3xl rounded-2xl border-2 border-[#2e7d32] bg-white p-10 text-center shadow-[0_8px_30px_-12px_rgba(15,38,28,0.15)]">
         <div className="border-4 border-[#dbe7e0] p-10">
-          <p className="text-sm font-semibold tracking-[0.3em] text-[#2e7d32] uppercase">CareBridge Connect</p>
-          <h1 className="mt-6 text-3xl font-bold text-[#14301e]">Competency Assessment Certificate</h1>
-          <p className="mt-8 text-sm text-[#4a4a4a]">This is to certify that</p>
+          <p className="text-sm font-semibold tracking-[0.3em] text-[#2e7d32] uppercase">{t("CareBridge Connect")}</p>
+          <h1 className="mt-6 text-3xl font-bold text-[#14301e]">{t("Competency Assessment Certificate")}</h1>
+          <p className="mt-8 text-sm text-[#4a4a4a]">{t("This is to certify that")}</p>
           <p className="mt-2 text-2xl font-bold text-[#14301e]">{cert.fullName}</p>
           <p className="mt-6 text-sm text-[#4a4a4a]">
-            has successfully completed the CareBridge Connect competency assessment for the role of
+            {t("has successfully completed the CareBridge Connect competency assessment for the role of")}
           </p>
           <p className="mt-2 text-lg font-semibold text-[#2e7d32]">{cert.roleName}</p>
           <p className="mt-6 text-sm text-[#4a4a4a]">
-            achieving a score of <span className="font-bold text-[#14301e]">{cert.score}%</span> (pass mark 80%).
+            {t("achieving a score of")}{" "}<span className="font-bold text-[#14301e]">{cert.score}%</span>{" "}{t("(pass mark 80%).")}
           </p>
 
           <div className="mt-10 flex items-end justify-between text-xs text-[#4a4a4a]">
             <div className="text-left">
               <p className="font-semibold text-[#14301e]">{cert.dateCompleted}</p>
-              <p className="mt-1 border-t border-[#dbe7e0] pt-1">Date of completion</p>
+              <p className="mt-1 border-t border-[#dbe7e0] pt-1">{t("Date of completion")}</p>
             </div>
             <div className="text-right">
               <p className="font-semibold text-[#14301e]">{cert.certificateNumber}</p>
-              <p className="mt-1 border-t border-[#dbe7e0] pt-1">Certificate number</p>
+              <p className="mt-1 border-t border-[#dbe7e0] pt-1">{t("Certificate number")}</p>
             </div>
           </div>
         </div>

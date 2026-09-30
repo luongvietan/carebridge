@@ -1,4 +1,5 @@
 "use client";
+import { Tr } from "@/components/portal-locale";
 import { useReducer, useRef } from "react";
 import { ForwardLink } from "@/components/forward-link";
 import {
@@ -110,7 +111,7 @@ export function AssessmentRunner({
     <div>
       <OnboardingSteps current={2} locale={locale} />
       <div className="mt-8">
-        {state.error && <p className="mb-4 text-sm text-[#da1e28]">{state.error}</p>}
+        {state.error && <p className="mb-4 text-sm text-[#da1e28]"><Tr>{state.error}</Tr></p>}
 
         {state.phase === "intro" && (
           <div className="rounded-2xl border border-[#dbe7e0] bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">

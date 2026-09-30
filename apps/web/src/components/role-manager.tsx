@@ -1,5 +1,7 @@
 "use client";
 
+
+import { usePortalLocale, usePortalT, Tr } from "@/components/portal-locale";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Select } from "@/components/ui/select";
@@ -36,6 +38,7 @@ export function RoleManager({
   roles: RoleCard[];
   addable: AddableRole[];
 }) {
+  const t = usePortalT();
   return (
     <div className="mt-8 space-y-4">
       {roles.map((role) => (
@@ -43,8 +46,7 @@ export function RoleManager({
       ))}
       {roles.length === 0 && (
         <p className="rounded-2xl border border-[#dbe7e0] bg-white p-6 text-sm text-[#4a4a4a]">
-          You have not chosen a role yet. Complete your profile and we will set your main role up
-          for you.
+          {t("You have not chosen a role yet. Complete your profile and we will set your main role up for you.")}
         </p>
       )}
       <AddRoleForm addable={addable} />
@@ -53,6 +55,8 @@ export function RoleManager({
 }
 
 function RoleRow({ role }: { role: RoleCard }) {
+  const t = usePortalT();
+  const locale = usePortalLocale();
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -66,7 +70,7 @@ function RoleRow({ role }: { role: RoleCard }) {
     const result = await withdrawRole(null, fd);
     setBusy(false);
     if ("error" in result) {
-      setError(result.error);
+      setError(t(result.error));
       return;
     }
     router.refresh();
@@ -77,31 +81,31 @@ function RoleRow({ role }: { role: RoleCard }) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-bold text-[#14301e]">{role.roleName}</h2>
-          {role.isPrimary && <p className="mt-0.5 text-xs text-[#6b7280]">Your main role</p>}
+          {role.isPrimary && <p className="mt-0.5 text-xs text-[#6b7280]">{t("Your main role")}</p>}
         </div>
         <span
           className={`rounded-full px-3 py-1 text-xs font-semibold ${ROLE_STATUS_TONE[role.status]}`}
         >
-          {ROLE_STATUS_LABEL[role.status]}
+          {t(ROLE_STATUS_LABEL[role.status])}
         </span>
       </div>
 
       {role.status === "active" && outstanding.length === 0 && (
         <p className="mt-3 text-sm text-[#4a4a4a]">
-          You can accept bookings in this role.
+          {t("You can accept bookings in this role.")}
         </p>
       )}
 
       {outstanding.length > 0 && (
         <div className="mt-4">
-          <p className="text-sm font-semibold text-[#14301e]">Still to do</p>
+          <p className="text-sm font-semibold text-[#14301e]">{t("Still to do")}</p>
           <ul className="mt-2 space-y-1.5 text-sm text-[#4a4a4a]">
             {outstanding.map((item) => (
               <li key={item} className="flex gap-2">
                 <span aria-hidden className="text-[#8a5a00]">
                   •
                 </span>
-                <span>{item}</span>
+                <span>{t(item)}</span>
               </li>
             ))}
           </ul>
@@ -110,14 +114,14 @@ function RoleRow({ role }: { role: RoleCard }) {
               href={`/professional/onboarding/assessment?role=${role.roleId}`}
               className="mt-4 inline-flex text-sm text-[#2e7d32] hover:text-[#246627]"
             >
-              Sit the {role.roleName} assessment
+              {t("Sit the {role} assessment", { role: role.roleName })}
             </ForwardLink>
           )}
           {role.assessmentLockedUntil && (
             <p className="mt-3 text-sm text-[#a4262c]">
-              You can try this role&rsquo;s assessment again from{" "}
-              {new Date(role.assessmentLockedUntil).toLocaleDateString("en-GB")}. Your other roles
-              are unaffected.
+              {t("You can try this role’s assessment again from {date}. Your other roles are unaffected.", {
+                date: new Date(role.assessmentLockedUntil).toLocaleDateString(locale),
+              })}
             </p>
           )}
         </div>
@@ -131,9 +135,9 @@ function RoleRow({ role }: { role: RoleCard }) {
             disabled={busy}
             className="text-sm font-semibold text-[#a4262c] hover:underline disabled:opacity-50"
           >
-            {busy ? "Withdrawing…" : "Withdraw from this role"}
+            {busy ? t("Withdrawing…") : t("Withdraw from this role")}
           </button>
-          {error && <p className="mt-2 text-sm text-[#a4262c]">{error}</p>}
+          {error && <p className="mt-2 text-sm text-[#a4262c]"><Tr>{error}</Tr></p>}
         </div>
       )}
     </section>
@@ -141,6 +145,7 @@ function RoleRow({ role }: { role: RoleCard }) {
 }
 
 function AddRoleForm({ addable }: { addable: AddableRole[] }) {
+  const t = usePortalT();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [roleId, setRoleId] = useState("");
@@ -152,7 +157,7 @@ function AddRoleForm({ addable }: { addable: AddableRole[] }) {
   if (addable.length === 0) {
     return (
       <p className="text-sm text-[#6b7280]">
-        You already hold every role we currently offer in your country.
+        {t("You already hold every role we currently offer in your country.")}
       </p>
     );
   }
@@ -164,7 +169,7 @@ function AddRoleForm({ addable }: { addable: AddableRole[] }) {
         onClick={() => setOpen(true)}
         className="rounded-full bg-[#2e7d32] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#246627]"
       >
-        Add another role
+        {t("Add another role")}
       </button>
     );
   }
@@ -178,7 +183,7 @@ function AddRoleForm({ addable }: { addable: AddableRole[] }) {
     const result = await addRole(null, fd);
     setBusy(false);
     if ("error" in result) {
-      setError(result.error);
+      setError(t(result.error));
       return;
     }
     setOpen(false);
@@ -191,20 +196,19 @@ function AddRoleForm({ addable }: { addable: AddableRole[] }) {
       onSubmit={onSubmit}
       className="rounded-2xl border border-[#dbe7e0] bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]"
     >
-      <h2 className="text-lg font-bold text-[#14301e]">Add another role</h2>
+      <h2 className="text-lg font-bold text-[#14301e]">{t("Add another role")}</h2>
       <p className="mt-2 text-sm text-[#4a4a4a]">
-        You will sit the assessment for the new role and supply anything it needs that we do not
-        already hold. Your existing roles carry on as they are.
+        {t("You will sit the assessment for the new role and supply anything it needs that we do not already hold. Your existing roles carry on as they are.")}
       </p>
 
       <label className="mt-4 block text-sm font-medium text-[#14301e]">
-        Role
+        {t("Role")}
         <Select
           options={addable.map((r) => ({ value: r.id, label: r.name }))}
           value={roleId}
           onValueChange={setRoleId}
-          placeholder="Select a role…"
-          aria-label="Role"
+          placeholder={t("Select a role…")}
+          aria-label={t("Role")}
           className="mt-1"
         />
       </label>
@@ -221,7 +225,7 @@ function AddRoleForm({ addable }: { addable: AddableRole[] }) {
         </label>
       )}
 
-      {error && <p className="mt-4 text-sm text-[#a4262c]">{error}</p>}
+      {error && <p className="mt-4 text-sm text-[#a4262c]"><Tr>{error}</Tr></p>}
 
       <div className="mt-6 flex gap-3">
         <button
@@ -229,14 +233,14 @@ function AddRoleForm({ addable }: { addable: AddableRole[] }) {
           disabled={busy || !roleId}
           className="rounded-full bg-[#2e7d32] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#246627] disabled:opacity-50"
         >
-          {busy ? "Adding…" : "Add role"}
+          {busy ? t("Adding…") : t("Add role")}
         </button>
         <button
           type="button"
           onClick={() => setOpen(false)}
           className="rounded-full border border-[#dbe7e0] px-5 py-3 text-sm font-semibold text-[#14301e] transition hover:bg-[#f6faf7]"
         >
-          Cancel
+          {t("Cancel")}
         </button>
       </div>
     </form>

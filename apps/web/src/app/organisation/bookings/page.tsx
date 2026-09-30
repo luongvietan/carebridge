@@ -1,9 +1,10 @@
+import { getPortalLocale, getPortalT } from "@/lib/i18n/portal-server";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import Link from "next/link";
 import { BookingCancelButton } from "@/components/booking-cancel-button";
 import { PayNowButton } from "@/components/pay-now-button";
-import { formatGbpMoney } from "@/lib/format/money";
+import { formatMoney } from "@/lib/format/money";
 import { formatLondon } from "@/lib/format/datetime";
 import { ReviewHoursPanel, type HoursForReview } from "@/components/timesheet-forms";
 
@@ -12,15 +13,9 @@ export const dynamic = "force-dynamic";
 const CANCELLABLE = new Set(["open", "accepted", "assigned"]);
 const PAYABLE = new Set(["accepted", "assigned"]);
 
-function formatDate(iso: string) {
-  return formatLondon(iso);
-}
-
-function formatMoney(amount: number | null) {
-  return formatGbpMoney(amount);
-}
-
 export default async function OrganisationBookingsPage() {
+  const t = await getPortalT();
+  const locale = await getPortalLocale();
   const supabase = await createClient();
   const admin = createServiceClient();
 
@@ -28,7 +23,7 @@ export default async function OrganisationBookingsPage() {
     supabase
       .from("bookings")
       .select(
-        "id, status, scheduled_start, scheduled_end, duration_hours, location_address, professional_role_id, total_client_charge",
+        "id, status, scheduled_start, scheduled_end, duration_hours, location_address, professional_role_id, total_client_charge, snap_currency",
       )
       .order("scheduled_start", { ascending: false }),
     supabase.from("professional_roles").select("id, name"),
@@ -70,20 +65,20 @@ export default async function OrganisationBookingsPage() {
       ).data
     : [];
   const bookingById = new Map((bookings ?? []).map((b) => [b.id, b]));
-  const hoursForReview: HoursForReview[] = (submittedSheets ?? []).map((t) => {
-    const booking = bookingById.get(t.booking_id);
+  const hoursForReview: HoursForReview[] = (submittedSheets ?? []).map((sheet) => {
+    const booking = bookingById.get(sheet.booking_id);
     return {
-      timesheetId: t.id,
-      bookingId: t.booking_id,
+      timesheetId: sheet.id,
+      bookingId: sheet.booking_id,
       professionalName:
-        (t.professionals as { full_name: string } | null)?.full_name ?? "The professional",
-      scheduledStart: booking?.scheduled_start ?? t.actual_start,
+        (sheet.professionals as { full_name: string } | null)?.full_name ?? t("The professional"),
+      scheduledStart: booking?.scheduled_start ?? sheet.actual_start,
       bookedHours: Number(booking?.duration_hours ?? 0),
-      workedHours: Number(t.worked_hours ?? 0),
-      breakMinutes: t.break_minutes,
-      actualStart: t.actual_start,
-      actualEnd: t.actual_end,
-      note: t.professional_note,
+      workedHours: Number(sheet.worked_hours ?? 0),
+      breakMinutes: sheet.break_minutes,
+      actualStart: sheet.actual_start,
+      actualEnd: sheet.actual_end,
+      note: sheet.professional_note,
     };
   });
 
@@ -91,13 +86,12 @@ export default async function OrganisationBookingsPage() {
     <main className="mx-auto max-w-4xl px-4 py-10">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="mt-1 text-3xl font-bold">Bookings</h1>
+          <h1 className="mt-1 text-3xl font-bold">{t("Bookings")}</h1>
       {hoursForReview.length > 0 && (
         <section className="mt-10">
-          <h2 className="text-xl font-bold">Hours awaiting your confirmation</h2>
+          <h2 className="text-xl font-bold">{t("Hours awaiting your confirmation")}</h2>
           <p className="mt-2 text-sm text-[#4a4a4a]">
-            Confirm the hours worked so the professional can be paid. If you do not respond within
-            three working days they are confirmed automatically.
+            {t("Confirm the hours worked so the professional can be paid. If you do not respond within three working days they are confirmed automatically.")}
           </p>
           <ReviewHoursPanel items={hoursForReview} />
         </section>
@@ -108,7 +102,7 @@ export default async function OrganisationBookingsPage() {
           href="/organisation/bookings/new"
           className="rounded-full bg-[#2e7d32] px-4 py-3 text-sm text-white hover:bg-[#246627]"
         >
-          New booking
+          {t("New booking")}
         </Link>
       </div>
 
@@ -117,12 +111,12 @@ export default async function OrganisationBookingsPage() {
           <table className="w-full text-sm">
             <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#4a4a4a]">
               <tr>
-                <th className="p-3 font-medium">Date</th>
-                <th className="p-3 font-medium">Role</th>
-                <th className="p-3 font-medium">Status</th>
-                <th className="p-3 font-medium">Total</th>
-                <th className="p-3 font-medium">Payment</th>
-                <th scope="col" className="p-3 font-medium"><span className="sr-only">Actions</span></th>
+                <th className="p-3 font-medium">{t("Date")}</th>
+                <th className="p-3 font-medium">{t("Role")}</th>
+                <th className="p-3 font-medium">{t("Status")}</th>
+                <th className="p-3 font-medium">{t("Total")}</th>
+                <th className="p-3 font-medium">{t("Payment")}</th>
+                <th scope="col" className="p-3 font-medium"><span className="sr-only">{t("Actions")}</span></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#dbe7e0]">
@@ -131,18 +125,18 @@ export default async function OrganisationBookingsPage() {
                 const needsPay = PAYABLE.has(b.status) && payStatus !== "succeeded";
                 return (
                   <tr key={b.id}>
-                    <td className="p-3">{formatDate(b.scheduled_start)}</td>
+                    <td className="p-3">{formatLondon(b.scheduled_start, locale)}</td>
                     <td className="p-3">{roleNames.get(b.professional_role_id) ?? b.professional_role_id}</td>
                     <td className="p-3">
                       <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#4a4a4a]">
-                        {b.status.replace(/_/g, " ")}
+                        {t(b.status.replace(/_/g, " "))}
                       </span>
                     </td>
-                    <td className="p-3">{formatMoney(b.total_client_charge)}</td>
+                    <td className="p-3">{formatMoney(b.total_client_charge, b.snap_currency ?? "GBP")}</td>
                     <td className="p-3">
                       {payStatus ? (
                         <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#4a4a4a]">
-                          {payStatus.replace(/_/g, " ")}
+                          {t(payStatus.replace(/_/g, " "))}
                         </span>
                       ) : (
                         <span className="text-[#4a4a4a]">—</span>
@@ -161,7 +155,7 @@ export default async function OrganisationBookingsPage() {
           </table>
         </div>
       ) : (
-        <p className="mt-8 text-sm text-[#4a4a4a]">No bookings yet.</p>
+        <p className="mt-8 text-sm text-[#4a4a4a]">{t("No bookings yet.")}</p>
       )}
     </main>
   );

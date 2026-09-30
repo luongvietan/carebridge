@@ -1,3 +1,4 @@
+import { getPortalT } from "@/lib/i18n/portal-server";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { activeRoleIds } from "@/lib/roles/assignments";
@@ -7,6 +8,7 @@ import { SubmitHoursForm, type ShiftAwaitingHours } from "@/components/timesheet
 export const dynamic = "force-dynamic";
 
 export default async function ProfessionalBookingsPage() {
+  const t = await getPortalT();
   const supabase = await createClient();
   const {
     data: { user },
@@ -27,7 +29,7 @@ export default async function ProfessionalBookingsPage() {
   const { data: rows } = await supabase
     .from("bookings")
     .select(
-      "id, status, scheduled_start, scheduled_end, location_address, professional_role_id, assigned_professional_id, total_payout, requires_timesheet, care_types(name)",
+      "id, status, scheduled_start, scheduled_end, location_address, professional_role_id, assigned_professional_id, total_payout, snap_currency, requires_timesheet, care_types(name)",
     )
     .order("scheduled_start", { ascending: true });
 
@@ -73,13 +75,12 @@ export default async function ProfessionalBookingsPage() {
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-10">
-      <h1 className="mt-1 text-3xl font-bold">Bookings</h1>
+      <h1 className="mt-1 text-3xl font-bold">{t("Bookings")}</h1>
       {awaitingHours.length > 0 && (
         <section className="mt-10">
-          <h2 className="text-xl font-bold">Hours to submit</h2>
+          <h2 className="text-xl font-bold">{t("Hours to submit")}</h2>
           <p className="mt-2 text-sm text-[#4a4a4a]">
-            Log the hours you actually worked. Your payment is released once the client confirms
-            them, and automatically after three working days if they do not respond.
+            {t("Log the hours you actually worked. Your payment is released once the client confirms them, and automatically after three working days if they do not respond.")}
           </p>
           <div className="mt-4 divide-y divide-[#dbe7e0] border border-[#dbe7e0]">
             {awaitingHours.map((shift) => (

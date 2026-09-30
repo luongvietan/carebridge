@@ -1,4 +1,5 @@
 "use client";
+import { Tr } from "@/components/portal-locale";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { uploadDocument } from "@/lib/onboarding/actions";
@@ -75,7 +76,7 @@ export function DocumentUploader({
       <p className="mt-8 text-sm text-[#4a4a4a]">
         {d.intro}
       </p>
-      {error && <p className="mt-3 text-sm text-[#da1e28]">{error}</p>}
+      {error && <p className="mt-3 text-sm text-[#da1e28]"><Tr>{error}</Tr></p>}
 
       <div className="mt-6 divide-y divide-[#dbe7e0] border border-[#dbe7e0]">
         {items.map((item) => {

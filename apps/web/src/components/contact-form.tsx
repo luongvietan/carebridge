@@ -1,4 +1,5 @@
 "use client";
+import { Tr } from "@/components/portal-locale";
 import { useActionState } from "react";
 import { submitContactMessage, type ContactResult } from "@/lib/contact/actions";
 
@@ -53,7 +54,7 @@ export function ContactForm({ labels }: { labels: ContactFormLabels }) {
         {labels.message}
         <textarea name="message" rows={5} required placeholder={labels.messagePlaceholder} className={field} />
       </label>
-      {state && "error" in state && <p className="mt-4 text-sm text-[#da1e28]">{state.error}</p>}
+      {state && "error" in state && <p className="mt-4 text-sm text-[#da1e28]"><Tr>{state.error}</Tr></p>}
       <button
         type="submit"
         disabled={pending}

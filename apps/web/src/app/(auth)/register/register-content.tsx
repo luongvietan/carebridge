@@ -1,5 +1,6 @@
 "use client";
 
+import { Tr } from "@/components/portal-locale";
 import { useActionState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -185,7 +186,7 @@ function RegisterForm({ mode }: { mode: RegisterMode }) {
             </Link>
           </span>
         </label>
-        {state && "error" in state && <p className="text-sm text-red-600">{state.error}</p>}
+        {state && "error" in state && <p className="text-sm text-red-600"><Tr>{state.error}</Tr></p>}
         <button type="submit" disabled={pending} className={`w-full ${marketingButtonPrimary}`}>
           {pending ? t.creating : t.create}
         </button>

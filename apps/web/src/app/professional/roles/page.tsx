@@ -1,3 +1,4 @@
+import { getPortalT } from "@/lib/i18n/portal-server";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { loadRoleAssignments } from "@/lib/roles/assignments";
@@ -7,6 +8,7 @@ import { RoleManager, type AddableRole, type RoleCard } from "@/components/role-
 export const dynamic = "force-dynamic";
 
 export default async function ProfessionalRolesPage() {
+  const t = await getPortalT();
   const supabase = await createClient();
   const {
     data: { user },
@@ -23,8 +25,8 @@ export default async function ProfessionalRolesPage() {
   if (!prof) {
     return (
       <main className="mx-auto max-w-3xl px-4 py-10">
-        <h1 className="text-3xl font-bold">Your roles</h1>
-        <p className="mt-4 text-sm text-[#4a4a4a]">Sign in to manage the roles you work in.</p>
+        <h1 className="text-3xl font-bold">{t("Your roles")}</h1>
+        <p className="mt-4 text-sm text-[#4a4a4a]">{t("Sign in to manage the roles you work in.")}</p>
       </main>
     );
   }
@@ -61,11 +63,9 @@ export default async function ProfessionalRolesPage() {
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-10">
-      <h1 className="mt-1 text-3xl font-bold">Your roles</h1>
+      <h1 className="mt-1 text-3xl font-bold">{t("Your roles")}</h1>
       <p className="mt-2 text-sm text-[#4a4a4a]">
-        You can work in more than one role. Each is cleared separately — its own assessment, and
-        whichever documents and registrations that role requires — so one waiting on paperwork never
-        holds up another.
+        {t("You can work in more than one role. Each is cleared separately — its own assessment, and whichever documents and registrations that role requires — so one waiting on paperwork never holds up another.")}
       </p>
 
       <RoleManager roles={cards} addable={addable} />

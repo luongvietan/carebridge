@@ -1,4 +1,5 @@
 "use client";
+import { Tr } from "@/components/portal-locale";
 import { useActionState } from "react";
 import { ForwardLink } from "@/components/forward-link";
 import {
@@ -135,7 +136,7 @@ export function AccountRegisterForm({
         </>
       )}
 
-      {state && "error" in state && <p className="text-sm text-[#da1e28]">{state.error}</p>}
+      {state && "error" in state && <p className="text-sm text-[#da1e28]"><Tr>{state.error}</Tr></p>}
       <button
         type="submit"
         disabled={pending}

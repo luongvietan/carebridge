@@ -1,3 +1,4 @@
+import { getPortalT } from "@/lib/i18n/portal-server";
 import { redirect } from "next/navigation";
 import { GateForm } from "@/app/gate/gate-form";
 import { getGateSecret, isGateEnabled } from "@/lib/auth/gate";
@@ -7,6 +8,7 @@ type GatePageProps = {
 };
 
 export default async function GatePage({ searchParams }: GatePageProps) {
+  const t = await getPortalT();
   if (!isGateEnabled()) {
     redirect("/");
   }
@@ -18,18 +20,18 @@ export default async function GatePage({ searchParams }: GatePageProps) {
     <main className="flex min-h-screen flex-col justify-center bg-[#f5f7f6] px-5 py-12 sm:px-6">
       <div className="mx-auto w-full max-w-md rounded-[28px] bg-white px-6 py-10 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.12)] sm:px-10 sm:py-12">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#2e7d32]">
-          Private preview
+          {t("Private preview")}
         </p>
-        <h1 className="mt-3 text-2xl font-bold text-[#1e5a33] sm:text-3xl">Access required</h1>
+        <h1 className="mt-3 text-2xl font-bold text-[#1e5a33] sm:text-3xl">{t("Access required")}</h1>
         <p className="mt-2 text-sm leading-relaxed text-[#4a4a4a]">
-          CareBridge Connect is not open to the public yet. Enter the access code to continue.
+          {t("CareBridge Connect is not open to the public yet. Enter the access code to continue.")}
         </p>
         {configured ? (
           <GateForm next={next} />
         ) : (
           <p className="mt-8 text-sm text-red-600">
-            The access gate is enabled but no access code is configured. Set{" "}
-            <code className="text-xs">PRODUCTION_GATE_SECRET</code> in the deployment environment.
+            {t("The access gate is enabled but no access code is configured. Set")}{" "}
+            <code className="text-xs">{t("PRODUCTION_GATE_SECRET")}</code>{" "}{t("in the deployment environment.")}
           </p>
         )}
       </div>

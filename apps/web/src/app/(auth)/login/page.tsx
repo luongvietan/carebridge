@@ -1,5 +1,6 @@
 "use client";
 
+import { Tr } from "@/components/portal-locale";
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -60,7 +61,7 @@ export default function LoginPage() {
           {t.password}
           <input type="password" name="password" required className={marketingInput} />
         </label>
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="text-sm text-red-600"><Tr>{error}</Tr></p>}
         <button
           type="submit"
           disabled={pending}

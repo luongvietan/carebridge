@@ -1,4 +1,5 @@
 "use client";
+import { Tr } from "@/components/portal-locale";
 import { useEffect, useState } from "react";
 import { requesterCopy, type RequesterLocale } from "@/lib/requester-copy";
 import { useRouter } from "next/navigation";
@@ -184,7 +185,7 @@ export function BookingRequestForm({
         <textarea name="notes" rows={3} className={field} />
       </label>
 
-      {error && <p className="text-sm text-[#da1e28]">{error}</p>}
+      {error && <p className="text-sm text-[#da1e28]"><Tr>{error}</Tr></p>}
       <button
         type="submit"
         disabled={pending}

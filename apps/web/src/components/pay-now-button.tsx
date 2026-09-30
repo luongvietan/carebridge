@@ -1,8 +1,10 @@
 "use client";
 import { useState } from "react";
+import { usePortalT, Tr } from "@/components/portal-locale";
 import { startCheckout } from "@/lib/payments/actions";
 
 export function PayNowButton({ bookingId }: { bookingId: string }) {
+  const t = usePortalT();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -11,7 +13,7 @@ export function PayNowButton({ bookingId }: { bookingId: string }) {
     setError(null);
     const result = await startCheckout(bookingId);
     if ("error" in result) {
-      setError(result.error);
+      setError(t(result.error));
       setBusy(false);
     } else if (result.url) {
       window.location.href = result.url;
@@ -23,14 +25,14 @@ export function PayNowButton({ bookingId }: { bookingId: string }) {
 
   return (
     <span className="inline-flex flex-col items-end gap-1">
-      {error && <span className="text-xs text-[#da1e28]">{error}</span>}
+      {error && <span className="text-xs text-[#da1e28]"><Tr>{error}</Tr></span>}
       <button
         type="button"
         onClick={handlePay}
         disabled={busy}
         className="rounded-full bg-[#2e7d32] px-3 py-1.5 text-sm text-white hover:bg-[#246627] disabled:opacity-50"
       >
-        {busy ? "Redirecting…" : "Pay now"}
+        {busy ? t("Redirecting…") : t("Pay now")}
       </button>
     </span>
   );

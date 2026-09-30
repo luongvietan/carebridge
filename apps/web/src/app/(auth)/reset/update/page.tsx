@@ -1,4 +1,7 @@
 "use client";
+
+import { usePortalT } from "@/components/portal-locale";
+import { Tr } from "@/components/portal-locale";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/browser";
@@ -7,6 +10,7 @@ const inputClass =
   "mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none";
 
 export default function UpdatePasswordPage() {
+  const t = usePortalT();
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -48,25 +52,25 @@ export default function UpdatePasswordPage() {
   if (done) {
     return (
       <main className="mx-auto max-w-md p-8">
-        <h1 className="text-2xl font-bold">Password updated</h1>
-        <p className="mt-3 text-slate-600">Redirecting you to sign in…</p>
+        <h1 className="text-2xl font-bold">{t("Password updated")}</h1>
+        <p className="mt-3 text-slate-600">{t("Redirecting you to sign in…")}</p>
       </main>
     );
   }
 
   return (
     <main className="mx-auto max-w-md p-8">
-      <h1 className="text-2xl font-bold">Choose a new password</h1>
+      <h1 className="text-2xl font-bold">{t("Choose a new password")}</h1>
       <form onSubmit={onSubmit} className="mt-6 space-y-4">
         <label className="block text-sm font-medium">
-          New password
+          {t("New password")}
           <input type="password" name="password" required minLength={8} className={inputClass} />
         </label>
         <label className="block text-sm font-medium">
-          Confirm new password
+          {t("Confirm new password")}
           <input type="password" name="confirm" required minLength={8} className={inputClass} />
         </label>
-        {error && <p className="text-sm text-[#da1e28]">{error}</p>}
+        {error && <p className="text-sm text-[#da1e28]"><Tr>{error}</Tr></p>}
         <button
           type="submit"
           disabled={pending}

@@ -1,10 +1,11 @@
+import { getPortalLocale, getPortalT } from "@/lib/i18n/portal-server";
 import { DashboardGrid } from "@/components/dashboard-grid";
 import { ForwardLink } from "@/components/forward-link";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { loadBookingFinance } from "@/lib/finance/load-bookings";
 import { MONEY_STATE_LABEL } from "@/lib/finance/booking-finance";
-import { formatGbpMoney } from "@/lib/format/money";
+import { formatMoney } from "@/lib/format/money";
 import { formatLondon } from "@/lib/format/datetime";
 
 export const dynamic = "force-dynamic";
@@ -20,6 +21,8 @@ const ACTIVE = new Set(["open", "accepted", "assigned", "in_progress"]);
  * are always looking at the same numbers.
  */
 export default async function OrganisationHome() {
+  const t = await getPortalT();
+  const locale = await getPortalLocale();
   const supabase = await createClient();
   const {
     data: { user },
@@ -31,12 +34,17 @@ export default async function OrganisationHome() {
       })
     : null;
 
-  const rows = finance?.rows ?? [];
+  const allRows = finance?.rows ?? [];
+  // Totals are never summed across currencies: the figures are in the currency of
+  // the most recent booking, and a booking in another currency is left out of them.
+  const currency = allRows[0]?.currency ?? "GBP";
+  const rows = allRows;
   const active = rows.filter((r) => ACTIVE.has(r.status));
   const completed = rows.filter((r) => r.status === "completed");
-  const spendToDate = completed.reduce((sum, r) => sum + r.clientCharge, 0);
+  const completedInCurrency = completed.filter((r) => r.currency === currency);
+  const spendToDate = completedInCurrency.reduce((sum, r) => sum + r.clientCharge, 0);
   const thisMonth = new Date().toISOString().slice(0, 7);
-  const spendThisMonth = completed
+  const spendThisMonth = completedInCurrency
     .filter((r) => r.scheduledStart.slice(0, 7) === thisMonth)
     .reduce((sum, r) => sum + r.clientCharge, 0);
   const professionals = new Set(
@@ -47,62 +55,64 @@ export default async function OrganisationHome() {
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-10">
-      <h1 className="mt-1 text-3xl font-bold">Dashboard</h1>
+      <h1 className="mt-1 text-3xl font-bold">{t("Dashboard")}</h1>
       {user?.email && (
-        <p className="mt-2 text-sm text-[#4a4a4a]">Signed in as {user.email}</p>
+        <p className="mt-2 text-sm text-[#4a4a4a]">{t("Signed in as")}{" "}{user.email}</p>
       )}
 
       <section className="mt-8 grid grid-cols-2 gap-3 md:grid-cols-4">
-        <Tile label="Active bookings" value={String(active.length)} />
-        <Tile label="Completed" value={String(completed.length)} />
-        <Tile label="Spend this month" value={formatGbpMoney(spendThisMonth)} />
-        <Tile label="Spend to date" value={formatGbpMoney(spendToDate)} />
+        <Tile label={t("Active bookings")} value={String(active.length)} />
+        <Tile label={t("Completed")} value={String(completed.length)} />
+        <Tile label={t("Spend this month")} value={formatMoney(spendThisMonth, currency)} />
+        <Tile label={t("Spend to date")} value={formatMoney(spendToDate, currency)} />
       </section>
 
       {professionals.size > 0 && (
         <p className="mt-3 text-sm text-[#4a4a4a]">
-          {professionals.size} professional{professionals.size === 1 ? "" : "s"}{" "}
-          have worked for you: {[...professionals].join(", ")}.
+          {professionals.size === 1
+            ? t("1 professional has worked for you:")
+            : t("{n} professionals have worked for you:", { n: professionals.size })}{" "}
+          {[...professionals].join(", ")}.
         </p>
       )}
 
       <section className="mt-10">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold">Payment history</h2>
+          <h2 className="text-xl font-bold">{t("Payment history")}</h2>
           <ForwardLink
             href="/organisation/bookings"
             className="text-sm text-[#2e7d32] hover:underline"
           >
-            All bookings
+            {t("All bookings")}
           </ForwardLink>
         </div>
         {rows.length === 0 ? (
-          <p className="mt-3 text-sm text-[#4a4a4a]">No bookings yet.</p>
+          <p className="mt-3 text-sm text-[#4a4a4a]">{t("No bookings yet.")}</p>
         ) : (
           <div className="mt-4 overflow-x-auto rounded-2xl border border-[#dbe7e0]">
             <table className="w-full text-sm">
               <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#4a4a4a]">
                 <tr>
-                  <th className="p-3 font-medium">Shift</th>
-                  <th className="p-3 font-medium">Role</th>
-                  <th className="p-3 font-medium">Professional</th>
-                  <th className="p-3 font-medium">Charge</th>
-                  <th className="p-3 font-medium">Payment</th>
-                  <th className="p-3 font-medium">Invoice</th>
+                  <th className="p-3 font-medium">{t("Shift")}</th>
+                  <th className="p-3 font-medium">{t("Role")}</th>
+                  <th className="p-3 font-medium">{t("Professional")}</th>
+                  <th className="p-3 font-medium">{t("Charge")}</th>
+                  <th className="p-3 font-medium">{t("Payment")}</th>
+                  <th className="p-3 font-medium">{t("Invoice")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#dbe7e0]">
                 {rows.slice(0, 20).map((row) => (
                   <tr key={row.bookingId}>
                     <td className="p-3 whitespace-nowrap">
-                      {formatLondon(row.scheduledStart)}
+                      {formatLondon(row.scheduledStart, locale)}
                     </td>
                     <td className="p-3">{row.roleName ?? "—"}</td>
                     <td className="p-3">{row.professionalName ?? "—"}</td>
-                    <td className="p-3">{formatGbpMoney(row.clientCharge)}</td>
+                    <td className="p-3">{formatMoney(row.clientCharge, row.currency)}</td>
                     <td className="p-3">
                       <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#4a4a4a]">
-                        {MONEY_STATE_LABEL[row.state]}
+                        {t(MONEY_STATE_LABEL[row.state])}
                       </span>
                     </td>
                     <td className="p-3">
@@ -110,7 +120,7 @@ export default async function OrganisationHome() {
                         href={`/organisation/bookings/${row.bookingId}/invoice`}
                         className="text-[#2e7d32] hover:underline"
                       >
-                        View
+                        {t("View")}
                       </ForwardLink>
                     </td>
                   </tr>
@@ -126,24 +136,27 @@ export default async function OrganisationHome() {
           cards={[
             {
               href: "/organisation/messages",
-              title: "Messages",
-              description:
+              title: t("Messages"),
+              description: t(
                 "Message the CareBridge Connect team and read their replies.",
-              cta: "Open messages",
+              ),
+              cta: t("Open messages"),
             },
             {
               href: "/organisation/register",
-              title: "Your profile",
-              description:
+              title: t("Your profile"),
+              description: t(
                 "Set up organisation details, contacts and billing information.",
-              cta: "Manage profile",
+              ),
+              cta: t("Manage profile"),
             },
             {
               href: "/organisation/bookings",
-              title: "Bookings",
-              description:
+              title: t("Bookings"),
+              description: t(
                 "Request staff cover and manage bookings across your sites.",
-              cta: "View bookings",
+              ),
+              cta: t("View bookings"),
             },
           ]}
         />
