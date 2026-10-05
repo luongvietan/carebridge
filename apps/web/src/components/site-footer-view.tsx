@@ -16,6 +16,7 @@ import {
   NewTwitterIcon,
 } from "@/components/ui/icon";
 import type { IconSvgElement } from "@hugeicons/react";
+import type { ConsumerInfo } from "@/lib/marketing/consumer-info";
 
 const FOOTER_IMAGE = marketingImages.footer;
 
@@ -47,10 +48,13 @@ export function SiteFooterView({
   labels,
   regulatoryDisclaimer,
   emergencyDisclaimer,
+  consumerInfo = null,
 }: {
   labels: FooterLabels;
   regulatoryDisclaimer: string;
   emergencyDisclaimer: string;
+  /** Portugal's legally required complaints-book link and RAL notice; null elsewhere. */
+  consumerInfo?: ConsumerInfo | null;
 }) {
   const contactItems = [
     { label: labels.address, icon: Location01Icon },
@@ -148,6 +152,32 @@ export function SiteFooterView({
           <p className="max-w-3xl text-sm leading-relaxed text-white/80">{regulatoryDisclaimer}</p>
           <p className="max-w-3xl text-sm leading-relaxed text-white/70">{emergencyDisclaimer}</p>
         </div>
+        {consumerInfo && (
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5">
+            <a
+              href={consumerInfo.complaintsBook.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex shrink-0 items-center gap-2 self-start rounded-lg border border-white/35 bg-white px-3 py-2 text-sm font-semibold text-[#8b1d1d] transition hover:bg-[#f5f7f6]"
+            >
+              <span aria-hidden className="grid h-5 w-5 place-items-center rounded bg-[#8b1d1d] text-[11px] font-bold text-white">
+                LR
+              </span>
+              {consumerInfo.complaintsBook.label}
+            </a>
+            <p className="max-w-3xl text-xs leading-relaxed text-white/65">
+              {consumerInfo.disputeResolution.text}{" "}
+              <a
+                href={consumerInfo.disputeResolution.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-2 hover:text-white"
+              >
+                {consumerInfo.disputeResolution.linkLabel}
+              </a>
+            </p>
+          </div>
+        )}
         <p className="mt-3 text-xs text-white/40" suppressHydrationWarning>
           © {new Date().getFullYear()} CareBridge Connect Ltd. {labels.rights}
         </p>
