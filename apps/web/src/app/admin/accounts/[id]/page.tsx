@@ -1,4 +1,5 @@
 import { BackLink } from "@/components/back-link";
+import { organisationCategoryLabel } from "@/lib/accounts/organisation-categories";
 import { ForwardLink } from "@/components/forward-link";
 import { notFound, redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth/admin";
@@ -96,7 +97,16 @@ export default async function AdminAccountDetailPage({
               <Field label="Contact person" value={org.contact_person} />
               <Field label="Phone" value={org.phone} />
               <Field label="Contact email" value={org.email_contact} />
-              <Field label="CQC number" value={org.cqc_registration_number} />
+              <Field label="Market" value={org.country_code === "PT" ? "Portugal" : "United Kingdom"} />
+              {org.country_code === "PT" ? (
+                <>
+                  <Field label="Type of organisation" value={organisationCategoryLabel(org.organisation_category)} />
+                  <Field label="NIPC" value={org.tax_number} />
+                  <Field label="ERS / ISS licence" value={org.licence_number} />
+                </>
+              ) : (
+                <Field label="CQC number" value={org.cqc_registration_number} />
+              )}
               <Field label="Billing email" value={org.billing_email} />
               <Field label="Address" value={[org.address_line1, org.address_line2, org.city, org.postcode].filter(Boolean).join(", ")} />
             </>

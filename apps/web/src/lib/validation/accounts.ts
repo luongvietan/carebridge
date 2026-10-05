@@ -35,5 +35,9 @@ export const organisationSchema = z.object({
   // Organisations are invoiced for bookings, so a billing email is required (spec §5).
   billingEmail: email,
   billingAddress: z.string().optional(),
+  // Portugal only (the action decides which apply): category, NIPC, ERS / ISS licence.
+  organisationCategory: z.string().optional(),
+  taxNumber: z.string().optional(),
+  licenceNumber: z.string().optional(),
 });
 export type OrganisationInput = z.infer<typeof organisationSchema>;

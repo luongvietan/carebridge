@@ -1451,6 +1451,10 @@ export type Database = {
           city: string | null
           contact_person: string | null
           cqc_registration_number: string | null
+          country_code: string
+          licence_number: string | null
+          organisation_category: string | null
+          tax_number: string | null
           created_at: string
           email_contact: string | null
           id: string
@@ -1469,6 +1473,10 @@ export type Database = {
           city?: string | null
           contact_person?: string | null
           cqc_registration_number?: string | null
+          country_code?: string
+          licence_number?: string | null
+          organisation_category?: string | null
+          tax_number?: string | null
           created_at?: string
           email_contact?: string | null
           id?: string
@@ -1487,6 +1495,10 @@ export type Database = {
           city?: string | null
           contact_person?: string | null
           cqc_registration_number?: string | null
+          country_code?: string
+          licence_number?: string | null
+          organisation_category?: string | null
+          tax_number?: string | null
           created_at?: string
           email_contact?: string | null
           id?: string
@@ -2816,6 +2828,10 @@ export type Database = {
           city: string | null
           contact_person: string | null
           cqc_registration_number: string | null
+          country_code: string | null
+          licence_number: string | null
+          organisation_category: string | null
+          tax_number: string | null
           created_at: string | null
           email_contact: string | null
           id: string | null
@@ -2828,6 +2844,10 @@ export type Database = {
           city?: string | null
           contact_person?: string | null
           cqc_registration_number?: string | null
+          country_code?: string | null
+          licence_number?: string | null
+          organisation_category?: string | null
+          tax_number?: string | null
           created_at?: string | null
           email_contact?: string | null
           id?: string | null
@@ -2840,6 +2860,10 @@ export type Database = {
           city?: string | null
           contact_person?: string | null
           cqc_registration_number?: string | null
+          country_code?: string | null
+          licence_number?: string | null
+          organisation_category?: string | null
+          tax_number?: string | null
           created_at?: string | null
           email_contact?: string | null
           id?: string | null

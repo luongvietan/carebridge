@@ -1,6 +1,12 @@
 "use client";
 import { Tr } from "@/components/portal-locale";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
+import { Select } from "@/components/ui/select";
+import {
+  LICENCE_LABEL,
+  PT_ORGANISATION_CATEGORIES,
+  organisationCategory,
+} from "@/lib/accounts/organisation-categories";
 import { ForwardLink } from "@/components/forward-link";
 import {
   saveClientProfile,
@@ -33,6 +39,8 @@ export function AccountRegisterForm({
   const formKey = draft ? `draft-${JSON.stringify(draft)}` : "initial";
   const clientValues = (variant === "client" ? draft : undefined) as ClientFormValues | undefined;
   const orgValues = (variant === "organisation" ? draft : undefined) as OrganisationFormValues | undefined;
+  const [category, setCategory] = useState(orgValues?.organisationCategory ?? "");
+  const licence = organisationCategory(category)?.licence ?? null;
 
   if (state && "ok" in state) {
     return (
@@ -101,11 +109,50 @@ export function AccountRegisterForm({
             {t.contactEmail}
             <input name="emailContact" type="email" defaultValue={orgValues?.emailContact ?? ""} className={field} />
           </label>
-          {showCqc && (
+          {showCqc ? (
             <label className="block text-sm font-medium">
               {t.cqc}
               <input name="cqcRegistrationNumber" defaultValue={orgValues?.cqcRegistrationNumber ?? ""} className={field} />
             </label>
+          ) : (
+            <>
+              <div className="block text-sm font-medium">
+                <span>{t.category}</span>
+                <Select
+                  name="organisationCategory"
+                  required
+                  aria-label={t.category}
+                  placeholder={t.selectCategory}
+                  value={category}
+                  onValueChange={setCategory}
+                  className="mt-1"
+                  options={PT_ORGANISATION_CATEGORIES.map((c) => ({
+                    value: c.code,
+                    label: c.label,
+                    group: c.group,
+                  }))}
+                />
+              </div>
+              <label className="block text-sm font-medium">
+                {t.taxNumber}
+                <input
+                  name="taxNumber"
+                  required
+                  inputMode="numeric"
+                  maxLength={11}
+                  defaultValue={orgValues?.taxNumber ?? ""}
+                  className={field}
+                />
+                <span className="mt-1 block text-xs font-normal text-[#4a4a4a]">{t.taxNumberHint}</span>
+              </label>
+              {licence && (
+                <label className="block text-sm font-medium">
+                  {LICENCE_LABEL[licence]}
+                  <input name="licenceNumber" defaultValue={orgValues?.licenceNumber ?? ""} className={field} />
+                  <span className="mt-1 block text-xs font-normal text-[#4a4a4a]">{t.licenceHint}</span>
+                </label>
+              )}
+            </>
           )}
           <label className="block text-sm font-medium">
             {t.billingEmail}

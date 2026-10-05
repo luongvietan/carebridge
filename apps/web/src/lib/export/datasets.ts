@@ -40,7 +40,8 @@ export const DATASETS: Record<DatasetName, Dataset> = {
     view: "v_export_organisations",
     label: "Organisations",
     columns: ["id", "organisation_name", "contact_person", "phone", "email_contact",
-      "city", "postcode", "cqc_registration_number", "billing_email", "created_at"],
+      "city", "postcode", "cqc_registration_number", "billing_email", "created_at",
+      "country_code", "organisation_category", "tax_number", "licence_number"],
     orderBy: { column: "created_at" },
   },
   bookings: {

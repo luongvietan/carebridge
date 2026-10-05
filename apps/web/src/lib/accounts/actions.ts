@@ -4,6 +4,9 @@ import { createServiceClient } from "@/lib/supabase/service";
 import { clientSchema, organisationSchema } from "@/lib/validation/accounts";
 import { validationMessage } from "@/lib/validation/form-messages";
 import { createCustomer } from "@/lib/stripe/client";
+import { getSelectedCountry } from "@/lib/marketing/market-server";
+import { organisationCategory } from "@/lib/accounts/organisation-categories";
+import { isValidNif } from "@/lib/validation/nif";
 
 export type ClientFormValues = {
   fullName: string;
@@ -21,6 +24,9 @@ export type OrganisationFormValues = {
   phone: string;
   emailContact: string;
   cqcRegistrationNumber: string;
+  organisationCategory: string;
+  taxNumber: string;
+  licenceNumber: string;
   billingEmail: string;
   addressLine1: string;
   addressLine2: string;
@@ -71,6 +77,9 @@ function parseOrganisationFormValues(formData: FormData): OrganisationFormValues
     phone: String(formData.get("phone") ?? ""),
     emailContact: String(formData.get("emailContact") ?? ""),
     cqcRegistrationNumber: String(formData.get("cqcRegistrationNumber") ?? ""),
+    organisationCategory: String(formData.get("organisationCategory") ?? ""),
+    taxNumber: String(formData.get("taxNumber") ?? ""),
+    licenceNumber: String(formData.get("licenceNumber") ?? ""),
     billingEmail: String(formData.get("billingEmail") ?? ""),
     addressLine1: String(formData.get("addressLine1") ?? ""),
     addressLine2: String(formData.get("addressLine2") ?? ""),
@@ -172,6 +181,9 @@ export async function saveOrganisationProfile(_prev: AccountResult, formData: Fo
     cqcRegistrationNumber: (formData.get("cqcRegistrationNumber") as string) || undefined,
     billingEmail: (formData.get("billingEmail") as string) || undefined,
     billingAddress: (formData.get("billingAddress") as string) || undefined,
+    organisationCategory: (formData.get("organisationCategory") as string) || undefined,
+    taxNumber: (formData.get("taxNumber") as string) || undefined,
+    licenceNumber: (formData.get("licenceNumber") as string) || undefined,
   });
   if (!parsed.success) {
     return {
@@ -187,9 +199,24 @@ export async function saveOrganisationProfile(_prev: AccountResult, formData: Fo
   const admin = createServiceClient();
   const { data: existing } = await admin
     .from("organisations")
-    .select("stripe_customer_id")
+    .select("stripe_customer_id, country_code")
     .eq("user_id", user.id)
     .maybeSingle();
+
+  // An organisation keeps the market it registered in; a new one takes the
+  // market it is registering from.
+  const country = existing?.country_code ?? ((await getSelectedCountry()) === "PT" ? "PT" : "GB");
+  const pt = country === "PT";
+  const taxNumber = parsed.data.taxNumber?.replace(/\s+/g, "");
+  if (pt && !organisationCategory(parsed.data.organisationCategory)) {
+    return { error: "Choose the type of organisation.", values: parseOrganisationFormValues(formData) };
+  }
+  if (pt && !isValidNif(taxNumber)) {
+    return {
+      error: "Enter a valid NIPC (9 digits, as on the certidão permanente).",
+      values: parseOrganisationFormValues(formData),
+    };
+  }
 
   let stripeCustomerId = existing?.stripe_customer_id ?? null;
   if (!stripeCustomerId) {
@@ -210,7 +237,12 @@ export async function saveOrganisationProfile(_prev: AccountResult, formData: Fo
       address_line2: parsed.data.addressLine2 ?? null,
       city: parsed.data.city ?? null,
       postcode: parsed.data.postcode ?? null,
-      cqc_registration_number: parsed.data.cqcRegistrationNumber ?? null,
+      // The CQC is a UK regulator; the category, NIPC and licence are Portuguese.
+      cqc_registration_number: pt ? null : parsed.data.cqcRegistrationNumber ?? null,
+      country_code: country,
+      organisation_category: pt ? parsed.data.organisationCategory ?? null : null,
+      tax_number: pt ? taxNumber ?? null : null,
+      licence_number: pt ? parsed.data.licenceNumber?.trim() || null : null,
       billing_email: parsed.data.billingEmail ?? null,
       billing_address: parsed.data.billingAddress ?? null,
       stripe_customer_id: stripeCustomerId,
