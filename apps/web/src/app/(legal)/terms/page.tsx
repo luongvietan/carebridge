@@ -3,8 +3,14 @@ import Link from "next/link";
 import { ArrowRight01Icon, Icon } from "@/components/ui/icon";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteNav } from "@/components/site-nav";
+import { LegalDraftNotice } from "@/components/legal-draft-notice";
+import { termsIndexPt } from "@/data/legal-copy-pt";
+import { getSelectedCountry } from "@/lib/marketing/market-server";
 
-export const metadata: Metadata = { title: "Terms & Conditions — CareBridge Connect" };
+export async function generateMetadata(): Promise<Metadata> {
+  const pt = (await getSelectedCountry()) === "PT";
+  return { title: `${pt ? termsIndexPt.title : "Terms & Conditions"}` };
+}
 
 const termsLinks = [
   {
@@ -21,21 +27,25 @@ const termsLinks = [
   },
 ] as const;
 
-export default function TermsPage() {
+export default async function TermsPage() {
+  const pt = (await getSelectedCountry()) === "PT";
+  const links = pt ? termsIndexPt.links : termsLinks;
   return (
     <>
       <SiteNav />
       <main className="mx-auto max-w-3xl px-5 py-16">
+        {pt && <LegalDraftNotice />}
         <h1 className="text-3xl font-semibold tracking-tight text-[#14301e]">
-          Terms &amp; Conditions
+          {pt ? termsIndexPt.title : "Terms & Conditions"}
         </h1>
         <p className="mt-5 leading-relaxed text-[#4a4a4a]">
-          CareBridge Connect provides separate terms for clients and healthcare professionals.
-          Select the document that applies to you.
+          {pt
+            ? termsIndexPt.intro
+            : "CareBridge Connect provides separate terms for clients and healthcare professionals. Select the document that applies to you."}
         </p>
 
         <div className="mt-10 space-y-4">
-          {termsLinks.map((link) => (
+          {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
@@ -44,7 +54,7 @@ export default function TermsPage() {
               <h2 className="text-lg font-semibold text-[#1e5a33]">{link.title}</h2>
               <p className="mt-2 text-sm leading-relaxed text-[#4a4a4a]">{link.description}</p>
               <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-[#2e7d32]">
-                Read document
+                {pt ? termsIndexPt.readDocument : "Read document"}
                 <Icon icon={ArrowRight01Icon} size={16} strokeWidth={2} aria-hidden />
               </span>
             </Link>

@@ -4,12 +4,18 @@ import { LegalDocument } from "@/components/legal-document";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteNav } from "@/components/site-nav";
 import { clientTerms } from "@/data/legal-copy";
+import { clientTermsPt, termsIndexPt } from "@/data/legal-copy-pt";
+import { LegalDraftNotice } from "@/components/legal-draft-notice";
+import { getSelectedCountry } from "@/lib/marketing/market-server";
 
-export const metadata: Metadata = {
-  title: "Client Terms & Conditions — CareBridge Connect",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const pt = (await getSelectedCountry()) === "PT";
+  return { title: `${pt ? "Termos e Condições para Clientes" : "Client Terms & Conditions"}` };
+}
 
-export default function ClientTermsPage() {
+export default async function ClientTermsPage() {
+  const pt = (await getSelectedCountry()) === "PT";
+  const doc = pt ? clientTermsPt : clientTerms;
   return (
     <>
       <SiteNav />
@@ -18,10 +24,11 @@ export default function ClientTermsPage() {
           href="/terms"
           className="text-sm font-semibold text-[#2e7d32] hover:underline"
         >
-          All terms &amp; conditions
+          {pt ? termsIndexPt.allTerms : "All terms & conditions"}
         </BackLink>
         <div className="mt-6">
-          <LegalDocument title={clientTerms.title} sections={clientTerms.sections} />
+          {pt && <LegalDraftNotice />}
+          <LegalDocument title={doc.title} sections={doc.sections} />
         </div>
       </main>
       <SiteFooter />
