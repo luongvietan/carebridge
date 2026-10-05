@@ -288,6 +288,8 @@ export const PORTAL_PT: Record<string, string> = {
   "Travel distance": "Distância de deslocação",
   // ---- messages from the server
   "You must be signed in.": "Tem de ter sessão iniciada.",
+  Continue: "Continuar",
+  "Verifying…": "A verificar…",
   "Choose the type of organisation.": "Selecione o tipo de organização.",
   "Enter a valid NIPC (9 digits, as on the certidão permanente).":
     "Indique um NIPC válido (9 dígitos, como na certidão permanente).",

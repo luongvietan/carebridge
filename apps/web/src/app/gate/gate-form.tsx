@@ -33,7 +33,7 @@ export function GateForm({ next }: GateFormProps) {
       </label>
       {state?.error && <p className="text-sm text-red-600"><Tr>{state.error}</Tr></p>}
       <button type="submit" disabled={pending} className={`w-full ${marketingButtonPrimary}`}>
-        {pending ? "Verifying…" : "Continue"}
+        {pending ? t("Verifying…") : t("Continue")}
       </button>
     </form>
   );

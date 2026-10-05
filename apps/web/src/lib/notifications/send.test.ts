@@ -1,5 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { localeForCountry, renderTemplate, sendNotification, type ChannelSender } from "./send";
+import {
+  localeForCountry,
+  recipientCountry,
+  renderTemplate,
+  sendNotification,
+  type ChannelSender,
+} from "./send";
 
 describe("renderTemplate", () => {
   it("substitutes {{vars}} in subject and body", () => {
@@ -22,16 +28,37 @@ describe("localeForCountry", () => {
   });
 });
 
+describe("recipientCountry", () => {
+  it("prefers the professional's, then the organisation's recorded country", () => {
+    expect(recipientCountry({ professionalCountry: "PT", signupMarket: "GB" })).toBe("PT");
+    expect(recipientCountry({ organisationCountry: "PT" })).toBe("PT");
+  });
+
+  it("falls back to the market chosen at sign-up, and to the UK when unknown", () => {
+    expect(recipientCountry({ signupMarket: "PT" })).toBe("PT");
+    expect(recipientCountry({ signupMarket: "GB" })).toBe("GB");
+    expect(recipientCountry({ signupMarket: 42 })).toBe("GB");
+    expect(recipientCountry({})).toBe("GB");
+  });
+});
+
 /**
  * Chainable Supabase stub: each builder method returns itself, terminal calls
  * consume a queue of per-table results — so a test can script exactly what
  * each successive query answers.
  */
-function makeAdmin(resultsByTable: Record<string, unknown[]>) {
+function makeAdmin(resultsByTable: Record<string, unknown[]>, signupMarket?: string) {
   // One queue per table, shared across every from(table) call in a request —
   // successive queries against the same table consume it in order.
   const queues = new Map<string, unknown[]>();
   return {
+    auth: {
+      admin: {
+        getUserById: vi.fn(async () => ({
+          data: { user: { user_metadata: signupMarket ? { market: signupMarket } : {} } },
+        })),
+      },
+    },
     from: vi.fn((table: string) => {
       if (!queues.has(table)) queues.set(table, [...(resultsByTable[table] ?? [])]);
       const queue = queues.get(table)!;
@@ -108,6 +135,35 @@ describe("sendNotification", () => {
     expect(sender).toHaveBeenCalledWith(
       expect.objectContaining({ subject: "Olá Jo", body: "Marcação b1" }),
     );
+  });
+
+  it("sends a Portuguese organisation the Portuguese variant", async () => {
+    mockAdmin = makeAdmin({
+      professionals: [null],
+      organisations: [{ country_code: "PT" }],
+      notification_templates: [PT_TEMPLATE],
+      users: [{ email: "a@b.co" }],
+      notifications: [{ id: "n1" }],
+    });
+    const sender: ChannelSender = vi.fn().mockResolvedValue(undefined);
+    await run(sender);
+    expect(sender).toHaveBeenCalledWith(expect.objectContaining({ subject: "Olá Jo" }));
+  });
+
+  it("sends a private client who signed up in Portugal the Portuguese variant", async () => {
+    mockAdmin = makeAdmin(
+      {
+        professionals: [null],
+        organisations: [null],
+        notification_templates: [PT_TEMPLATE],
+        users: [{ email: "a@b.co" }],
+        notifications: [{ id: "n1" }],
+      },
+      "PT",
+    );
+    const sender: ChannelSender = vi.fn().mockResolvedValue(undefined);
+    await run(sender);
+    expect(sender).toHaveBeenCalledWith(expect.objectContaining({ subject: "Olá Jo" }));
   });
 
   it("falls back to the English row when no Portuguese variant exists yet", async () => {

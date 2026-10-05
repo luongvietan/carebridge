@@ -51,20 +51,44 @@ export function localeForCountry(countryCode: string | null | undefined): string
 }
 
 /**
- * The template locale for a recipient. Professionals carry a country (0076) —
- * a Portuguese nurse reads Portuguese; clients and organisations default to
- * English until their own markets go live.
+ * Pure: which market a recipient belongs to. A professional's and an
+ * organisation's country are recorded on their row (0076, 0087); a private
+ * client has none, so the market chosen at sign-up (auth user_metadata.market)
+ * decides. Anything unknown is the UK.
  */
+export function recipientCountry(args: {
+  professionalCountry?: string | null;
+  organisationCountry?: string | null;
+  signupMarket?: unknown;
+}): string {
+  return (
+    args.professionalCountry ??
+    args.organisationCountry ??
+    (args.signupMarket === "PT" ? "PT" : "GB")
+  );
+}
+
+/** The template locale for a recipient: Portuguese for anyone in the Portuguese market. */
 async function localeForRecipient(
   admin: ReturnType<typeof createServiceClient>,
   recipientUserId: string,
 ): Promise<string> {
-  const { data } = await admin
-    .from("professionals")
-    .select("country_code")
-    .eq("user_id", recipientUserId)
-    .maybeSingle();
-  return localeForCountry(data?.country_code);
+  const [{ data: pro }, { data: org }] = await Promise.all([
+    admin.from("professionals").select("country_code").eq("user_id", recipientUserId).maybeSingle(),
+    admin.from("organisations").select("country_code").eq("user_id", recipientUserId).maybeSingle(),
+  ]);
+  let signupMarket: unknown;
+  if (!pro?.country_code && !org?.country_code) {
+    const { data } = await admin.auth.admin.getUserById(recipientUserId);
+    signupMarket = data.user?.user_metadata?.market;
+  }
+  return localeForCountry(
+    recipientCountry({
+      professionalCountry: pro?.country_code,
+      organisationCountry: org?.country_code,
+      signupMarket,
+    }),
+  );
 }
 
 export async function sendNotification(
