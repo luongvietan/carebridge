@@ -1,5 +1,6 @@
 "use server";
 import { headers } from "next/headers";
+import { getSelectedCountry } from "@/lib/marketing/market-server";
 import { redirect } from "next/navigation";
 import { getAppUrl } from "@/lib/app-url";
 import { createClient } from "@/lib/supabase/server";
@@ -146,6 +147,9 @@ export async function signUp(_prev: SignUpResult, formData: FormData): Promise<S
         full_name: parsed.data.fullName,
         accepted_terms: parsed.data.acceptedTerms ? "true" : "false",
         consent_version: CONSENT_VERSION,
+        // Picks the language of Supabase's own sign-up and password-reset
+        // e-mails (see supabase/templates): "PT" → European Portuguese.
+        market: await getSelectedCountry(),
       },
     },
   });

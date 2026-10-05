@@ -7,6 +7,7 @@
  * need a lawyer's Portuguese, not ours.
  */
 import type { RoleCopy } from "@/lib/i18n/content";
+import { PT_COMPANY_ADDRESS } from "@/lib/site";
 
 export const professionalRolesPt: RoleCopy[] = [
   {
@@ -227,7 +228,7 @@ export const uiPt = {
     support: "Apoio",
     backToTop: "Voltar ao topo",
     rights: "Todos os direitos reservados.",
-    address: "Portugal",
+    address: PT_COMPANY_ADDRESS,
     phone: "+351 926 562 988",
   },
   hero: { complianceBuiltIn: "Conformidade integrada", verifiedRoles: "8 categorias profissionais verificadas" },
@@ -290,7 +291,7 @@ export const uiPt = {
     phone: "Telefone",
     address: "Morada",
     phoneValue: "+351 926 562 988",
-    addressValue: "Portugal",
+    addressValue: PT_COMPANY_ADDRESS,
     whatsapp: "WhatsApp",
     whatsappValue: "+351 926 562 988",
     joinTitle: "Quer juntar-se?",
