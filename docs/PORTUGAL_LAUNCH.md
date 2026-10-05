@@ -39,6 +39,13 @@
 - Portugal contact: +351 926 562 988 (footer, contact page, WhatsApp link). The company address for Portugal is still a placeholder ("Portugal").
 - Independent-professional onboarding rebuilt to her list (migration 0085): ID and right to work, NIF, NISS (new field), Finanças activity proof, Portuguese criminal record (childcare: the certificate covering contact with minors), foreign record when applicable (optional), qualifications and registration (Ordens), liability and workplace-accident insurance, references and CV, bank details (IBAN, prompted at the end of the document step); expiry dates with automatic suspension. Training is no longer asked in Portugal; the 80% assessment stays.
 
+## 5 October — gaps closed before the deadline
+
+- **Portuguese organisations** (migration 0087): an organisation records its market; a Portuguese one chooses a category (hospital/clínica, RNCCI, lar/ERPI, SAD, centro de dia, IPSS/Misericórdia, creche, escola/ATL, empresa, outra — `lib/accounts/organisation-categories.ts`), gives a mod-11-checked **NIPC** and, for licensed categories, the **ERS** registration or **ISS alvará** number. No CQC field in Portugal. Shown on the admin account page and in the organisations export.
+- **Portuguese legal pages as drafts** (`data/legal-copy-pt.ts`): client terms, professional terms and privacy policy written for Portugal (RGPD + Lei 58/2019, CNPD, Livro de Reclamações, RAL, DL 24/2014, trabalhador independente, registo criminal / Lei 113/2009, Ordens / ISS, Portuguese law and courts). Every Portuguese legal page carries a "versão provisória para revisão jurídica" notice. Placeholders in brackets — **[denominação social], [NIPC], [morada], [comarca], RAL entity, processor list, criminal-record retention** — need Ana's company details and her lawyer. The disclaimer page now reads in Portuguese too.
+- **Supabase Auth e-mails in Portuguese**: `supabase/templates/confirmation.html` and `recovery.html` switch to pt-PT when `user_metadata.market = "PT"` (set at sign-up from the market cookie; existing Portuguese professionals back-filled by 0087). Verified by rendering both with Go's template engine for PT, GB, missing and malformed data. **Manual step:** paste both files and their subjects (from `supabase/config.toml`) into Supabase → Authentication → Email Templates (Confirm signup, Reset password). `config push` is not used because it would overwrite the hosted site URL and redirects.
+- **Footer / contact address for Portugal**: set `NEXT_PUBLIC_PT_COMPANY_ADDRESS` in Vercel; until then it shows "Portugal".
+
 ## Go-live for Portugal (when Ana confirms)
 
 ```sql
