@@ -8,9 +8,7 @@ import { getPortalT } from "@/lib/i18n/portal-server";
 export const dynamic = "force-dynamic";
 
 export default async function OrganisationNewBookingPage() {
-  const t = await getPortalT();
-  const supabase = await createClient();
-  const country = await getSelectedCountry();
+  const [t, supabase, country] = await Promise.all([getPortalT(), createClient(), getSelectedCountry()]);
   const { roles, careTypes } = await fetchBookingReference(supabase, country);
 
   return (
