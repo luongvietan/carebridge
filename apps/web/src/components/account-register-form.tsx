@@ -25,9 +25,12 @@ type Variant = "client" | "organisation";
 export function AccountRegisterForm({
   variant,
   locale = "en-GB",
+  saved,
 }: {
   variant: Variant;
   locale?: RequesterLocale;
+  /** The profile already on record, so the form opens filled in. */
+  saved?: ClientFormValues | OrganisationFormValues;
 }) {
   const t = requesterCopy[locale].profile;
   // The CQC is a UK regulator: a Portuguese organisation has no such number.
@@ -37,8 +40,10 @@ export function AccountRegisterForm({
   const [state, formAction, pending] = useActionState<AccountResult, FormData>(action, null);
   const draft = state && "values" in state ? state.values : undefined;
   const formKey = draft ? `draft-${JSON.stringify(draft)}` : "initial";
-  const clientValues = (variant === "client" ? draft : undefined) as ClientFormValues | undefined;
-  const orgValues = (variant === "organisation" ? draft : undefined) as OrganisationFormValues | undefined;
+  // A rejected submission re-shows what was typed; otherwise the saved profile.
+  const values = draft ?? saved;
+  const clientValues = (variant === "client" ? values : undefined) as ClientFormValues | undefined;
+  const orgValues = (variant === "organisation" ? values : undefined) as OrganisationFormValues | undefined;
   const [category, setCategory] = useState(orgValues?.organisationCategory ?? "");
   const licence = organisationCategory(category)?.licence ?? null;
 
