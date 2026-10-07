@@ -298,9 +298,7 @@ export function ProfileForm({
               className={field}
             />
             <span className="mt-1 block text-xs font-normal text-[#7a8a81]">
-              Upload your registration confirmation at the next step. An administrator checks this
-              number against the {REGISTER_LABEL[register]} and confirms the registration is active
-              before you can accept bookings.
+              {p.registrationCheck(REGISTER_LABEL[register])}
             </span>
           </label>
         ) : (

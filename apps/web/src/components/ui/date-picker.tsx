@@ -9,18 +9,61 @@ import {
   Icon,
 } from "@/components/ui/icon";
 import { Select } from "@/components/ui/select";
+import { usePortalLocale } from "@/components/portal-locale";
+import type { PortalLocale } from "@/lib/i18n/portal";
 
 /* ---------- date helpers (local-time, no deps) ---------- */
 
-const WEEKDAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
-const MONTHS = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
-];
-const MONTHS_SHORT = [
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-];
+type CalendarWords = {
+  tag: string;
+  weekdays: string[];
+  months: string[];
+  monthsShort: string[];
+  today: string;
+  clear: string;
+  selectDate: string;
+  selectDateTime: string;
+  chooseDate: string;
+  chooseDateTime: string;
+};
+
+const WORDS: Record<PortalLocale, CalendarWords> = {
+  "en-GB": {
+    tag: "en-GB",
+    weekdays: ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],
+    months: [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December",
+    ],
+    monthsShort: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    today: "Today",
+    clear: "Clear",
+    selectDate: "Select date",
+    selectDateTime: "Select date & time",
+    chooseDate: "Choose date",
+    chooseDateTime: "Choose date and time",
+  },
+  "pt-PT": {
+    tag: "pt-PT",
+    weekdays: ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"],
+    months: [
+      "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+      "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
+    ],
+    monthsShort: ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"],
+    today: "Hoje",
+    clear: "Limpar",
+    selectDate: "Selecione a data",
+    selectDateTime: "Selecione a data e a hora",
+    chooseDate: "Escolha a data",
+    chooseDateTime: "Escolha a data e a hora",
+  },
+};
+
+/** The picker's words in the signed-in app's language (the market being used). */
+function useWords(): CalendarWords {
+  return WORDS[usePortalLocale()];
+}
 
 type CalendarPanel = "days" | "months" | "years";
 
@@ -65,8 +108,8 @@ function calendarDays(view: Date) {
   });
 }
 
-function formatLong(d: Date) {
-  return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+function formatLong(d: Date, tag = "en-GB") {
+  return d.toLocaleDateString(tag, { day: "2-digit", month: "short", year: "numeric" });
 }
 
 /* ---------- shared popover behaviour ---------- */
@@ -123,6 +166,7 @@ function Calendar({
   minDate?: Date;
 }) {
   const today = useToday();
+  const w = useWords();
   const [view, setView] = useState(() => selected ?? new Date());
   const [focused, setFocused] = useState(() => selected ?? new Date());
   const [panel, setPanel] = useState<CalendarPanel>("days");
@@ -222,11 +266,11 @@ function Calendar({
         {panel === "days" && (
           <button
             type="button"
-            aria-label={`${MONTHS[view.getMonth()]} ${view.getFullYear()}, choose month and year`}
+            aria-label={`${w.months[view.getMonth()]} ${view.getFullYear()}, ${w.tag === "pt-PT" ? "escolher mês e ano" : "choose month and year"}`}
             onClick={openMonths}
             className={headerBtnClass}
           >
-            {MONTHS[view.getMonth()]} {view.getFullYear()}
+            {w.months[view.getMonth()]} {view.getFullYear()}
           </button>
         )}
         {panel === "months" && (
@@ -298,7 +342,7 @@ function Calendar({
       {panel === "days" && (
         <>
           <div className="grid grid-cols-7 gap-0.5 px-1 pb-1 text-center text-xs font-medium text-[#7a8a81]">
-            {WEEKDAYS.map((w) => (
+            {w.weekdays.map((w) => (
               <span key={w} className="py-1">{w}</span>
             ))}
           </div>
@@ -319,7 +363,7 @@ function Calendar({
                   aria-selected={isSelected}
                   aria-disabled={disabled}
                   disabled={disabled}
-                  aria-label={formatLong(d)}
+                  aria-label={formatLong(d, w.tag)}
                   tabIndex={isFocusable ? 0 : -1}
                   onClick={() => !disabled && onSelect(d)}
                   className={`grid h-9 w-9 place-items-center rounded-full text-sm transition ${
@@ -344,7 +388,7 @@ function Calendar({
 
       {panel === "months" && (
         <div role="grid" className="grid grid-cols-3 gap-1 px-1">
-          {MONTHS_SHORT.map((label, month) => {
+          {w.monthsShort.map((label, month) => {
             const isCurrent = today
               ? today.getFullYear() === view.getFullYear() && today.getMonth() === month
               : false;
@@ -359,7 +403,7 @@ function Calendar({
                 aria-selected={isSelectedMonth}
                 aria-disabled={disabled}
                 disabled={disabled}
-                aria-label={MONTHS[month]}
+                aria-label={w.months[month]}
                 onClick={() => !disabled && pickMonth(month)}
                 className={`rounded-lg py-2.5 text-sm transition ${
                   disabled
@@ -443,10 +487,11 @@ export function DatePicker({
   disabled,
   id,
   className = "",
-  placeholder = "Select date",
+  placeholder,
   "aria-label": ariaLabel,
   minDate,
 }: BaseProps) {
+  const w = useWords();
   const isControlled = value !== undefined;
   const [internal, setInternal] = useState(defaultValue ?? "");
   const current = isControlled ? value : internal;
@@ -482,17 +527,17 @@ export function DatePicker({
         className={triggerClass}
       >
         <span className={selected ? "" : "text-[#9aa8a0]"}>
-          {selected ? formatLong(selected) : placeholder}
+          {selected ? formatLong(selected, w.tag) : placeholder ?? w.selectDate}
         </span>
         <Icon icon={Calendar03Icon} size={16} strokeWidth={2} aria-hidden className="shrink-0 text-[#4a4a4a]" />
       </button>
 
       {open && (
-        <dialog open aria-label={ariaLabel ?? "Choose date"} className={popoverClass}>
+        <dialog open aria-label={ariaLabel ?? w.chooseDate} className={popoverClass}>
           <Calendar selected={selected} onSelect={pick} minDate={minDate} />
           <div className="mt-2 flex items-center justify-between border-t border-[#eef5f0] px-1 pt-2 text-sm">
             <button type="button" onClick={pickToday} className="font-medium text-[#2e7d32] hover:underline">
-              Today
+              {w.today}
             </button>
             <button
               type="button"
@@ -502,7 +547,7 @@ export function DatePicker({
               }}
               className="font-medium text-[#4a4a4a] hover:text-[#14301e] hover:underline"
             >
-              Clear
+              {w.clear}
             </button>
           </div>
         </dialog>
@@ -531,10 +576,11 @@ export function DateTimePicker({
   disabled,
   id,
   className = "",
-  placeholder = "Select date & time",
+  placeholder,
   "aria-label": ariaLabel,
   minDate,
 }: BaseProps) {
+  const w = useWords();
   const isControlled = value !== undefined;
   const [internal, setInternal] = useState(defaultValue ?? "");
   const current = isControlled ? value : internal;
@@ -550,7 +596,7 @@ export function DateTimePicker({
   }
 
   const display =
-    selected && hour !== "" && minute !== "" ? `${formatLong(selected)} · ${hour}:${minute}` : null;
+    selected && hour !== "" && minute !== "" ? `${formatLong(selected, w.tag)} · ${hour}:${minute}` : null;
 
   return (
     <div ref={rootRef} className={`relative ${className}`}>
@@ -565,12 +611,12 @@ export function DateTimePicker({
         onClick={() => setOpen((o) => !o)}
         className={triggerClass}
       >
-        <span className={display ? "" : "text-[#9aa8a0]"}>{display ?? placeholder}</span>
+        <span className={display ? "" : "text-[#9aa8a0]"}>{display ?? placeholder ?? w.selectDateTime}</span>
         <Icon icon={Calendar03Icon} size={16} strokeWidth={2} aria-hidden className="shrink-0 text-[#4a4a4a]" />
       </button>
 
       {open && (
-        <dialog open aria-label={ariaLabel ?? "Choose date and time"} className={popoverClass}>
+        <dialog open aria-label={ariaLabel ?? w.chooseDateTime} className={popoverClass}>
           <Calendar selected={selected} minDate={minDate} onSelect={(d) => commit(toYMD(d), hour || "09", minute || "00")} />
           <div className="mt-2 flex items-center gap-2 border-t border-[#eef5f0] px-1 pt-3">
             <Icon icon={Clock01Icon} size={16} strokeWidth={2} aria-hidden className="text-[#4a4a4a]" />

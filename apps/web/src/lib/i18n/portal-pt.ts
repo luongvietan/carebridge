@@ -73,6 +73,7 @@ export const PORTAL_PT: Record<string, string> = {
   "Confirm the hours worked so the professional can be paid. If you do not respond within three working days they are confirmed automatically.":
     "Confirme as horas trabalhadas para que o profissional possa ser pago. Se não responder em três dias úteis, as horas são confirmadas automaticamente.",
   "New booking": "Nova marcação",
+  "Back to bookings": "Voltar às marcações",
   Date: "Data",
   Role: "Categoria",
   Status: "Estado",
@@ -117,7 +118,8 @@ export const PORTAL_PT: Record<string, string> = {
   on: "em",
   Refunded: "Reembolsado",
   "Payment status:": "Estado do pagamento:",
-  paid: "pago em",
+  paid: "pago",
+  "paid on": "pago em",
   "CareBridge Connect Ltd — a marketplace connecting families and organisations with verified healthcare and childcare professionals. This invoice covers the booking shown above.":
     "CareBridge Connect Ltd — um marketplace que liga famílias e organizações a profissionais de saúde e de cuidados infantis verificados. Esta fatura refere-se à marcação indicada acima.",
   // ---- professional
@@ -253,6 +255,21 @@ export const PORTAL_PT: Record<string, string> = {
   "faster payments": "Faster Payments",
   "sepa transfer": "transferência SEPA",
   cheque: "cheque",
+  // file upload control
+  "Current file on record": "Ficheiro atual",
+  "No photo": "Sem fotografia",
+  "No file": "Sem ficheiro",
+  Remove: "Remover",
+  "{name} on record": "{name} enviado",
+  "File on record": "Ficheiro enviado",
+  Download: "Descarregar",
+  "PDF, JPEG or PNG · up to 25MB": "PDF, JPEG ou PNG · até 25 MB",
+  // document verification (document-uploader badge)
+  Approved: "Aprovado",
+  "Pending review": "Em análise",
+  "Further information required": "Informação adicional necessária",
+  Rejected: "Rejeitado",
+  Expired: "Expirado",
   Pending: "Pendente",
   Held: "Retido",
   Released: "Libertado",

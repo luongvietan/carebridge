@@ -79,6 +79,8 @@ export const onboardingCopy = {
       niss: "",
       nissPlaceholder: "",
       registrationBody: "Registration body",
+      registrationCheck: (register: string) =>
+        `Upload your registration confirmation at the next step. An administrator checks this number against the ${register} and confirms the registration is active before you can accept bookings.`,
       registrationBodyPlaceholder: "e.g. NMC, HCPC",
       registrationNumber: "Registration number",
       summary: "Professional summary",
@@ -192,6 +194,8 @@ export const onboardingCopy = {
       niss: "NISS (Número de Identificação da Segurança Social)",
       nissPlaceholder: "11 dígitos",
       registrationBody: "Entidade de registo",
+      registrationCheck: (register: string) =>
+        `Envie o comprovativo de inscrição no passo seguinte. Um administrador confirma este número junto da ${register} e verifica que a inscrição está ativa antes de poder aceitar marcações.`,
       registrationBodyPlaceholder: "ex.: Ordem dos Enfermeiros",
       registrationNumber: "Número de registo",
       summary: "Resumo profissional",

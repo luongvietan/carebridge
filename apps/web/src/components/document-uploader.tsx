@@ -1,5 +1,5 @@
 "use client";
-import { Tr } from "@/components/portal-locale";
+import { Tr, usePortalT } from "@/components/portal-locale";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { uploadDocument } from "@/lib/onboarding/actions";
@@ -29,11 +29,20 @@ const STATUS_STYLE: Record<string, string> = {
   expired: "bg-[#fff1f1] text-[#a2191f]",
 };
 
+const STATUS_LABEL: Record<string, string> = {
+  approved: "Approved",
+  pending_review: "Pending review",
+  further_info_required: "Further information required",
+  rejected: "Rejected",
+  expired: "Expired",
+};
+
 function Badge({ status, notUploaded }: { status: string | null; notUploaded: string }) {
+  const t = usePortalT();
   if (!status) return <span className="bg-[#f5f7f6] px-2 py-1 text-xs text-[#7a8a81]">{notUploaded}</span>;
   return (
     <span className={`px-2 py-1 text-xs ${STATUS_STYLE[status] ?? "bg-[#f5f7f6] text-[#4a4a4a]"}`}>
-      {status.replace(/_/g, " ")}
+      {t(STATUS_LABEL[status] ?? status.replace(/_/g, " "))}
     </span>
   );
 }

@@ -5,6 +5,7 @@ import {
   formatBytes,
   type SelectedUploadKind,
 } from "@/lib/onboarding/upload-rules";
+import { usePortalT } from "@/components/portal-locale";
 
 export type ExistingFile = {
   url: string;
@@ -64,6 +65,7 @@ export function FilePreviewInput({
   "aria-label"?: string;
   emptyLabel?: string;
 }) {
+  const t = usePortalT();
   const inputRef = useRef<HTMLInputElement>(null);
   const [selected, setSelected] = useState<SelectedState | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -142,7 +144,7 @@ export function FilePreviewInput({
           className={`block shrink-0 overflow-hidden border border-[#dbe7e0] bg-[#f5f7f6] ${panelClass}`}
           title="Open current file full size"
         >
-          <img src={existing.url} alt="Current file on record" className={`${isAvatar ? "object-cover" : "object-contain"} h-full w-full`} />
+          <img src={existing.url} alt={t("Current file on record")} className={`${isAvatar ? "object-cover" : "object-contain"} h-full w-full`} />
         </a>
       );
     } else {
@@ -161,7 +163,7 @@ export function FilePreviewInput({
   } else {
     panel = (
       <div className={`grid shrink-0 place-items-center border border-dashed border-[#dbe7e0] bg-[#f5f7f6] text-center text-[11px] leading-tight text-[#7a8a81] ${panelClass}`}>
-        {emptyLabel ?? (isAvatar ? "No photo" : "No file")}
+        {emptyLabel ?? (isAvatar ? t("No photo") : t("No file"))}
       </div>
     );
   }
@@ -189,23 +191,23 @@ export function FilePreviewInput({
               <span className="font-medium">{selected.name}</span>{" "}
               <span className="text-[#7a8a81]">· {formatBytes(selected.size)}</span>{" "}
               <button type="button" onClick={clear} className="text-[#2e7d32] underline">
-                Remove
+                {t("Remove")}
               </button>
             </span>
           ) : existing ? (
             <span className="text-[#7a8a81]">
-              {existing.filename ? `${existing.filename} on record` : "File on record"}
+              {existing.filename ? t("{name} on record", { name: existing.filename }) : t("File on record")}
               {existing.downloadUrl && (
                 <>
                   {" · "}
                   <a href={existing.downloadUrl} className="text-[#2e7d32] underline">
-                    Download
+                    {t("Download")}
                   </a>
                 </>
               )}
             </span>
           ) : (
-            <span className="text-[#7a8a81]">PDF, JPEG or PNG · up to 25MB</span>
+            <span className="text-[#7a8a81]">{t("PDF, JPEG or PNG · up to 25MB")}</span>
           )}
         </p>
       </div>

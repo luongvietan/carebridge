@@ -5,7 +5,7 @@ import { notFound, redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth/admin";
 import { createServiceClient } from "@/lib/supabase/service";
 import { formatLondon } from "@/lib/format/datetime";
-import { formatGbpMoney } from "@/lib/format/money";
+import { formatMoney } from "@/lib/format/money";
 
 export const dynamic = "force-dynamic";
 
@@ -52,7 +52,7 @@ export default async function AdminAccountDetailPage({
       : Promise.resolve({ data: null }),
     admin
       .from("bookings")
-      .select("id, status, scheduled_start, location_address, total_client_charge, professional_roles(name)")
+      .select("id, status, scheduled_start, location_address, total_client_charge, snap_currency, professional_roles(name)")
       .eq("requester_user_id", id)
       .order("scheduled_start", { ascending: false })
       .limit(50),
@@ -142,7 +142,7 @@ export default async function AdminAccountDetailPage({
                   <td className="p-3">{(b.professional_roles as { name: string } | null)?.name ?? "—"}</td>
                   <td className="p-3">{formatLabel(b.status)}</td>
                   <td className="p-3 text-[#4a4a4a]">{b.location_address ?? "—"}</td>
-                  <td className="p-3">{formatGbpMoney(Number(b.total_client_charge ?? 0))}</td>
+                  <td className="p-3">{formatMoney(Number(b.total_client_charge ?? 0), b.snap_currency ?? "GBP")}</td>
                 </tr>
               ))}
             </tbody>

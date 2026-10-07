@@ -186,7 +186,7 @@ export default async function OrganisationInvoicePage({
 
       <p className="mt-6 text-sm text-[#4a4a4a]">
         {t("Payment status:")}{" "}<span className="font-semibold">{t(MONEY_STATE_LABEL[state])}</span>
-        {payment?.paid_at && ` · ${t("paid")} ${formatLondon(payment.paid_at, locale)}`}
+        {payment?.paid_at && ` · ${t("paid on")} ${formatLondon(payment.paid_at, locale)}`}
       </p>
 
       <footer className="mt-10 border-t border-[#dbe7e0] pt-4 text-xs text-[#7a8a81]">
