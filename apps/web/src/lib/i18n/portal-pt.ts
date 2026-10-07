@@ -255,6 +255,15 @@ export const PORTAL_PT: Record<string, string> = {
   "faster payments": "Faster Payments",
   "sepa transfer": "transferência SEPA",
   cheque: "cheque",
+  // assessment topics
+  Safeguarding: "Proteção",
+  "Infection prevention and control": "Prevenção e controlo de infeção",
+  "GDPR and confidentiality": "RGPD e confidencialidade",
+  "Professional boundaries": "Limites profissionais",
+  "Documentation and record keeping": "Documentação e registos",
+  "Medication awareness": "Noções de medicação",
+  "Health and safety": "Segurança e saúde no trabalho",
+  "Role-specific practice": "Prática específica da função",
   // file upload control
   "Current file on record": "Ficheiro atual",
   "No photo": "Sem fotografia",

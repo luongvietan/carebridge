@@ -10,6 +10,17 @@ import {
 import { OnboardingSteps } from "@/components/onboarding-steps";
 import { onboardingCopy, type OnboardingLocale } from "@/lib/onboarding/copy";
 
+const TOPIC_LABEL: Record<string, string> = {
+  safeguarding: "Safeguarding",
+  infection_prevention_control: "Infection prevention and control",
+  gdpr_confidentiality: "GDPR and confidentiality",
+  professional_boundaries: "Professional boundaries",
+  documentation_record_keeping: "Documentation and record keeping",
+  medication_awareness: "Medication awareness",
+  health_safety: "Health and safety",
+  role_specific: "Role-specific practice",
+};
+
 type Phase = "intro" | "questions" | "result" | "locked";
 
 type State = {
@@ -143,7 +154,7 @@ export function AssessmentRunner({
             {state.questions.map((q, i) => (
               <fieldset key={q.id} className="rounded-2xl border border-[#dbe7e0] bg-white p-5 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
                 <legend className="px-1 text-xs tracking-wide text-[#4a4a4a] uppercase">
-                  {q.topic.replace(/_/g, " ")}
+                  <Tr>{TOPIC_LABEL[q.topic] ?? q.topic.replace(/_/g, " ")}</Tr>
                 </legend>
                 <p className="font-semibold">
                   {i + 1}. {q.question_text}
