@@ -1,4 +1,5 @@
 "use client";
+import { RequiredMark } from "@/components/required-mark";
 import { Tr } from "@/components/portal-locale";
 import { useActionState, useState } from "react";
 import { ForwardLink } from "@/components/forward-link";
@@ -18,7 +19,7 @@ import {
 } from "@/lib/compliance/regulated-roles";
 
 const field =
-  "mt-1 w-full rounded-xl border border-[#dbe7e0] bg-white px-3.5 py-2.5 text-sm text-[#1e5a33] placeholder:text-[#9aa8a0] focus:border-[#2e7d32] focus:outline-none focus:ring-2 focus:ring-[#2e7d32]/15";
+  "mt-1 w-full rounded-xl border border-line bg-white px-3.5 py-2.5 text-sm text-brand-ink placeholder:text-muted focus:border-brand-strong focus:outline-none focus:ring-2 focus:ring-brand-strong/15";
 
 // Stable empty defaults so passing no value doesn't create a new array each render.
 const NO_SKILL_IDS: string[] = [];
@@ -124,11 +125,11 @@ export function ProfileForm({
     return (
       <div>
         <OnboardingSteps current={3} locale={locale} />
-        <div className="mt-8 rounded-2xl border border-[#dbe7e0] bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
+        <div className="mt-8 rounded-2xl border border-line bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
           <h2 className="text-xl font-bold">{p.saved}</h2>
           <ForwardLink
             href="/professional/onboarding/documents"
-            className="mt-6 rounded-full bg-[#2e7d32] px-4 py-3 text-sm text-white hover:bg-[#246627]"
+            className="mt-6 rounded-full bg-brand-strong px-4 py-3 text-sm text-white hover:bg-brand-strong-hover"
           >
             {p.toDocuments}
           </ForwardLink>
@@ -140,10 +141,10 @@ export function ProfileForm({
   return (
     <div>
       <OnboardingSteps current={3} locale={locale} />
-      <form key={formKey} action={action} className="mt-8 space-y-4">
+      <form aria-busy={pending} key={formKey} action={action} className="mt-8 space-y-4">
         <label className="block text-sm font-medium">
           {p.fullName}
-          <input name="fullName" required defaultValue={v.fullName} className={field} />
+          <RequiredMark /><input name="fullName" required defaultValue={v.fullName} className={field} />
         </label>
         <div className="block text-sm font-medium">
           {p.role}
@@ -160,15 +161,16 @@ export function ProfileForm({
         </div>
         {register && referenceField === "ofsted_urn" && (
           <label className="block text-sm font-medium">
+            <legend>{REFERENCE_LABEL[register]}</legend>
             {REFERENCE_LABEL[register]}
-            <input
+            <RequiredMark /><input
               name="ofstedRegistrationNumber"
               required
               placeholder={REFERENCE_PLACEHOLDER[register]}
               defaultValue={v.ofstedRegistrationNumber}
               className={field}
             />
-            <span className="mt-1 block text-xs font-normal text-[#7a8a81]">
+            <span className="mt-1 block text-xs font-normal text-muted">
               CareBridge Connect accepts Ofsted-registered nannies and childminders only. Upload
               your Ofsted registration certificate at the next step — an administrator checks this
               number against the {REGISTER_LABEL[register]}, and confirms the registration is
@@ -179,14 +181,14 @@ export function ProfileForm({
         {register && referenceField === "iss_authorisation" && (
           <label className="block text-sm font-medium">
             {REFERENCE_LABEL[register]}
-            <input
+            <RequiredMark /><input
               name="issAuthorisationNumber"
               required
               placeholder={isPortugal ? "Conforme consta na autorização do ISS" : REFERENCE_PLACEHOLDER[register]}
               defaultValue={v.issAuthorisationNumber}
               className={field}
             />
-            <span className="mt-1 block text-xs font-normal text-[#7a8a81]">
+            <span className="mt-1 block text-xs font-normal text-muted">
               {isPortugal
                 ? `Só uma ama licenciada pode ser listada como tal. Envie a sua autorização do ISS no passo seguinte — um administrador confirma-a junto da ${REGISTER_LABEL[register]} antes de poder aceitar marcações.`
                 : `Only an authorised Ama may be listed as one. Upload your ISS authorisation at the next step — an administrator confirms it with the ${REGISTER_LABEL[register]} before you can accept any bookings.`}
@@ -204,7 +206,7 @@ export function ProfileForm({
         </div>
         <label className="block text-sm font-medium">
           {p.address1}
-          <input name="addressLine1" required defaultValue={v.addressLine1} className={field} />
+          <RequiredMark /><input name="addressLine1" required defaultValue={v.addressLine1} className={field} />
         </label>
         <label className="block text-sm font-medium">
           {p.address2}
@@ -213,16 +215,16 @@ export function ProfileForm({
         <div className="grid grid-cols-2 gap-4">
           <label className="block text-sm font-medium">
             {p.city}
-            <input name="city" required defaultValue={v.city} className={field} />
+            <RequiredMark /><input name="city" required defaultValue={v.city} className={field} />
           </label>
           <label className="block text-sm font-medium">
             {p.postcode}
-            <input name="postcode" required defaultValue={v.postcode} className={field} />
+            <RequiredMark /><input name="postcode" required defaultValue={v.postcode} className={field} />
           </label>
         </div>
         <label className="block text-sm font-medium">
           {p.taxId}
-          <input
+          <RequiredMark /><input
             name="nationalInsuranceNo"
             required={isPortugal}
             inputMode={isPortugal ? "numeric" : undefined}
@@ -235,7 +237,7 @@ export function ProfileForm({
         {isPortugal && (
           <label className="block text-sm font-medium">
             {p.niss}
-            <input
+            <RequiredMark /><input
               name="niss"
               required
               inputMode="numeric"
@@ -247,7 +249,7 @@ export function ProfileForm({
           </label>
         )}
         {!isPortugal && (
-        <div className="rounded-xl border border-[#dbe7e0] bg-[#f9fbfa] p-4">
+        <div className="rounded-xl border border-line bg-[#f9fbfa] p-4">
           <div className="block text-sm font-medium">
             Right to work in the UK
             <Select
@@ -267,28 +269,28 @@ export function ProfileForm({
           {rightToWorkBasis === "share_code" ? (
             <label className="mt-3 block text-sm font-medium">
               Share code
-              <input
+              <RequiredMark /><input
                 name="rightToWorkShareCode"
                 required
                 placeholder="e.g. W12 A34 B56"
                 defaultValue={v.rightToWorkShareCode}
                 className={field}
               />
-              <span className="mt-1 block text-xs font-normal text-[#7a8a81]">
+              <span className="mt-1 block text-xs font-normal text-muted">
                 Generate a share code at gov.uk/prove-right-to-work and enter it here. An
                 administrator checks it directly with the Home Office before approving you.
               </span>
             </label>
           ) : (
-            <p className="mt-3 text-xs text-[#7a8a81]">
+            <p className="mt-3 text-xs text-muted">
               Upload your passport as your Right to Work document at the next step.
             </p>
           )}
         </div>
         )}
         {register && referenceField === "registration_number" ? (
-          <label className="block text-sm font-medium">
-            {REFERENCE_LABEL[register]}
+          <fieldset className="block text-sm font-medium">
+            <legend>{REFERENCE_LABEL[register]}</legend>
             <input type="hidden" name="registrationBody" value={REGISTER_LABEL[register]} />
             <input
               name="registrationNumber"
@@ -297,10 +299,10 @@ export function ProfileForm({
               defaultValue={v.registrationNumber}
               className={field}
             />
-            <span className="mt-1 block text-xs font-normal text-[#7a8a81]">
-              {p.registrationCheck(REGISTER_LABEL[register])}
+            <span className="mt-1 block text-xs font-normal text-muted">
+            {p.registrationCheck(REGISTER_LABEL[register])}
             </span>
-          </label>
+          </fieldset>
         ) : (
           <div className="grid grid-cols-2 gap-4">
             <label className="block text-sm font-medium">
@@ -337,7 +339,7 @@ export function ProfileForm({
                   name="skillIds"
                   value={s.id}
                   defaultChecked={skillSet.has(s.id)}
-                  className="accent-[#2e7d32]"
+                  className="accent-brand-strong"
                 />
                 {s.name}
               </label>
@@ -347,7 +349,7 @@ export function ProfileForm({
 
         <fieldset className="block text-sm font-medium">
           <legend>{p.availability}</legend>
-          <p className="mt-1 text-xs font-normal text-[#7a8a81]">
+          <p className="mt-1 text-xs font-normal text-muted">
             {p.availabilityHelp}
           </p>
           <div className="mt-2 flex flex-wrap gap-3">
@@ -358,7 +360,7 @@ export function ProfileForm({
                   name="availabilityDays"
                   value={d.value}
                   defaultChecked={daySet.has(d.value)}
-                  className="accent-[#2e7d32]"
+                  className="accent-brand-strong"
                 />
                 {p.days[d.value]}
               </label>
@@ -392,11 +394,11 @@ export function ProfileForm({
           </div>
         </div>
 
-        {state && "error" in state && <p className="text-sm text-[#da1e28]"><Tr>{state.error}</Tr></p>}
+        {state && "error" in state && <p role="alert" className="text-sm text-danger"><Tr>{state.error}</Tr></p>}
         <button
           type="submit"
           disabled={pending}
-          className="rounded-full bg-[#2e7d32] px-4 py-3 text-sm text-white hover:bg-[#246627] disabled:opacity-50"
+          className="rounded-full bg-brand-strong px-4 py-3 text-sm text-white hover:bg-brand-strong-hover disabled:opacity-50"
         >
           {pending ? onboardingCopy[locale].saving : p.save}
         </button>

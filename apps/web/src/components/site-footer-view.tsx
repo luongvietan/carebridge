@@ -21,11 +21,11 @@ import type { ConsumerInfo } from "@/lib/marketing/consumer-info";
 const FOOTER_IMAGE = marketingImages.footer;
 
 const socialLinks: { label: string; href: string; icon: IconSvgElement }[] = [
-  { label: "X", href: "#", icon: NewTwitterIcon },
-  { label: "LinkedIn", href: "#", icon: Linkedin01Icon },
-  { label: "Instagram", href: "#", icon: InstagramIcon },
-  { label: "Facebook", href: "#", icon: Facebook01Icon },
-];
+  { label: "X", href: process.env.NEXT_PUBLIC_SOCIAL_X ?? "", icon: NewTwitterIcon },
+  { label: "LinkedIn", href: process.env.NEXT_PUBLIC_SOCIAL_LINKEDIN ?? "", icon: Linkedin01Icon },
+  { label: "Instagram", href: process.env.NEXT_PUBLIC_SOCIAL_INSTAGRAM ?? "", icon: InstagramIcon },
+  { label: "Facebook", href: process.env.NEXT_PUBLIC_SOCIAL_FACEBOOK ?? "", icon: Facebook01Icon },
+].filter(link => /^https:\/\//.test(link.href));
 
 export type FooterLabels = {
   contactTitle: string;
@@ -57,10 +57,10 @@ export function SiteFooterView({
   consumerInfo?: ConsumerInfo | null;
 }) {
   const contactItems = [
-    { label: labels.address, icon: Location01Icon },
-    { label: labels.phone, icon: Call02Icon },
-    { label: CONTACT_EMAIL, icon: Mail01Icon },
-  ];
+    { label: labels.address, icon: Location01Icon, href: null },
+    { label: labels.phone, icon: Call02Icon, href: `tel:${labels.phone.replace(/[^+\d]/g, "")}` },
+    { label: CONTACT_EMAIL, icon: Mail01Icon, href: `mailto:${CONTACT_EMAIL}` },
+  ].filter((item) => item.label.trim().length > 0);
   const navPills = [
     { href: "/", label: labels.home },
     { href: "/services", label: labels.services },
@@ -77,7 +77,7 @@ export function SiteFooterView({
               {contactItems.map((item) => (
                 <li key={item.label} className="flex items-center gap-3 text-sm sm:text-base">
                   <Icon icon={item.icon} size={20} color="#6cc24a" strokeWidth={1.75} />
-                  <span className="text-white/90">{item.label}</span>
+                  {item.href ? <a href={item.href} className="text-white/90 hover:underline">{item.label}</a> : <span className="text-white/90">{item.label}</span>}
                 </li>
               ))}
             </ul>
@@ -93,9 +93,9 @@ export function SiteFooterView({
           </div>
 
           <div>
-            <h2 className="text-3xl font-bold text-white sm:text-4xl">{labels.socialTitle}</h2>
+            <h2 className="text-3xl font-bold text-white sm:text-4xl">{socialLinks.length ? labels.socialTitle : labels.support}</h2>
             <p className="mt-4 max-w-md text-sm leading-relaxed text-white/70 sm:text-base">
-              {labels.socialBody}
+              {socialLinks.length ? labels.socialBody : <Link href="/contact" className="underline">{CONTACT_EMAIL}</Link>}
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               {socialLinks.map((social) => (
@@ -103,7 +103,7 @@ export function SiteFooterView({
                   key={social.label}
                   href={social.href}
                   aria-label={social.label}
-                  className="grid h-11 w-11 place-items-center rounded-xl bg-white transition hover:scale-105 hover:bg-[#f5f7f6]"
+                  className="grid h-11 w-11 place-items-center rounded-xl bg-white transition hover:scale-105 hover:bg-surface"
                 >
                   <Icon icon={social.icon} size={20} color="#2e7d32" strokeWidth={1.75} />
                 </a>
@@ -158,7 +158,7 @@ export function SiteFooterView({
               href={consumerInfo.complaintsBook.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex shrink-0 items-center gap-2 self-start rounded-lg border border-white/35 bg-white px-3 py-2 text-sm font-semibold text-[#8b1d1d] transition hover:bg-[#f5f7f6]"
+              className="inline-flex shrink-0 items-center gap-2 self-start rounded-lg border border-white/35 bg-white px-3 py-2 text-sm font-semibold text-[#8b1d1d] transition hover:bg-surface"
             >
               <span aria-hidden className="grid h-5 w-5 place-items-center rounded bg-[#8b1d1d] text-[11px] font-bold text-white">
                 LR

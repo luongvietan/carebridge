@@ -12,11 +12,13 @@ type FaqItem = {
 
 type FaqListProps = {
   faqs: readonly FaqItem[];
+  locale?: string;
   showSidebar?: boolean;
   defaultOpenIndex?: number;
 };
 
-export function FaqList({ faqs, showSidebar = true, defaultOpenIndex = 0 }: FaqListProps) {
+export function FaqList({ faqs, showSidebar = true, defaultOpenIndex = 0, locale = "en-GB" }: FaqListProps) {
+  const pt = locale === "pt-PT";
   const [openIndex, setOpenIndex] = useState(defaultOpenIndex);
 
   const accordion = (
@@ -36,7 +38,7 @@ export function FaqList({ faqs, showSidebar = true, defaultOpenIndex = 0 }: FaqL
               className="flex w-full items-center justify-between gap-4 px-5 py-5 text-left sm:px-6"
               aria-expanded={isOpen}
             >
-              <span className="font-semibold text-[#1e5a33] sm:text-[17px]">{faq.question}</span>
+              <span className="font-semibold text-brand-ink sm:text-[17px]">{faq.question}</span>
               <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white shadow-sm">
                 <Icon
                   icon={isOpen ? MinusSignIcon : Add01Icon}
@@ -47,7 +49,7 @@ export function FaqList({ faqs, showSidebar = true, defaultOpenIndex = 0 }: FaqL
               </span>
             </button>
             {isOpen && (
-              <p className="px-5 pb-5 text-sm leading-relaxed text-[#4a4a4a] sm:px-6 sm:pb-6">
+              <p className="px-5 pb-5 text-sm leading-relaxed text-ink sm:px-6 sm:pb-6">
                 {faq.answer}
               </p>
             )}
@@ -63,21 +65,20 @@ export function FaqList({ faqs, showSidebar = true, defaultOpenIndex = 0 }: FaqL
     <div className="grid gap-8 lg:grid-cols-[minmax(280px,340px)_1fr] lg:items-start">
       <div
         data-reveal-child
-        className="flex flex-col rounded-[28px] bg-[#2e7d32] px-8 py-10 text-white sm:rounded-[32px] sm:px-10 sm:py-12"
+        className="flex flex-col rounded-[28px] bg-brand-strong px-8 py-10 text-white sm:rounded-[32px] sm:px-10 sm:py-12"
       >
         <Icon icon={MessageQuestionIcon} size={48} color="#ffffff" strokeWidth={1.75} />
         <h3 className="mt-6 text-2xl font-bold leading-tight sm:text-[1.75rem]">
-          Do you have more questions?
+          {pt ? "Tem mais perguntas?" : "Do you have more questions?"}
         </h3>
         <p className="mt-4 text-sm leading-relaxed text-white/90 sm:text-[15px]">
-          We&apos;re here to help with answers, guidance and support for clients, organisations
-          and professionals.
+          {pt ? "Estamos aqui para esclarecer dúvidas e apoiar clientes, organizações e profissionais." : "We're here to help with answers, guidance and support for clients, organisations and professionals."}
         </p>
         <Link
           href="/contact"
-          className="mt-8 inline-flex w-fit rounded-full bg-white px-8 py-3.5 text-sm font-semibold text-[#1e5a33] transition hover:bg-[#f5f7f6]"
+          className="mt-8 inline-flex w-fit rounded-full bg-white px-8 py-3.5 text-sm font-semibold text-brand-ink transition hover:bg-surface"
         >
-          Contact us
+          {pt ? "Contacte-nos" : "Contact us"}
         </Link>
       </div>
 

@@ -10,7 +10,7 @@ import { londonWallClockToUtc, formatLondon } from "@/lib/format/datetime";
 import { workedHours } from "@/lib/timesheets/rules";
 
 const field =
-  "mt-1 w-full rounded-xl border border-[#dbe7e0] bg-white px-3 py-2 text-sm text-[#1e5a33] focus:border-[#2e7d32] focus:outline-none focus:ring-2 focus:ring-[#2e7d32]/15";
+  "mt-1 w-full rounded-xl border border-line bg-white px-3 py-2 text-sm text-brand-ink focus:border-brand-strong focus:outline-none focus:ring-2 focus:ring-brand-strong/15";
 
 export type ShiftAwaitingHours = {
   bookingId: string;
@@ -70,17 +70,22 @@ export function SubmitHoursForm({ shift }: { shift: ShiftAwaitingHours }) {
     fd.set("actualEnd", endUtc.toISOString());
     fd.set("breakMinutes", String(Number(breakMinutes) || 0));
     fd.set("note", (e.currentTarget.elements.namedItem("note") as HTMLInputElement)?.value ?? "");
-    const result = await submitTimesheet(fd);
-    setBusy(false);
-    if ("error" in result) setError(t(result.error));
-    else router.refresh();
+    try {
+      const result = await submitTimesheet(fd);
+      if ("error" in result) setError(t(result.error));
+      else router.refresh();
+    } catch {
+      setError(locale === "pt-PT" ? "Não foi possível concluir a operação. Tente novamente." : "Could not complete the operation. Please try again.");
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
-    <form onSubmit={onSubmit} className="p-4">
+    <form aria-busy={busy} onSubmit={onSubmit} className="p-4">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <span className="font-semibold">{formatLondon(shift.scheduledStart, locale)}</span>
-        <span className="text-sm text-[#7a8a81]">{shift.locationAddress}</span>
+        <span className="text-sm text-muted">{shift.locationAddress}</span>
       </div>
 
       {shift.disputeReason && (
@@ -124,16 +129,16 @@ export function SubmitHoursForm({ shift }: { shift: ShiftAwaitingHours }) {
       </label>
 
       {preview !== null && (
-        <p className="mt-2 text-sm text-[#4a4a4a]">
+        <p className="mt-2 text-sm text-ink">
           {t("Hours claimed:")}{" "}<span className="font-semibold">{preview}</span>
         </p>
       )}
-      {error && <p className="mt-2 text-sm text-[#da1e28]"><Tr>{error}</Tr></p>}
+      {error && <p role="alert" className="mt-2 text-sm text-danger"><Tr>{error}</Tr></p>}
 
       <button
         type="submit"
         disabled={busy}
-        className="mt-3 rounded-full bg-[#2e7d32] px-4 py-2 text-sm text-white hover:bg-[#246627] disabled:opacity-50"
+        className="mt-3 rounded-full bg-brand-strong px-4 py-2 text-sm text-white hover:bg-brand-strong-hover disabled:opacity-50"
       >
         {busy ? t("Submitting…") : t("Submit hours")}
       </button>
@@ -153,10 +158,15 @@ export function ReviewHoursPanel({ items }: { items: HoursForReview[] }) {
   async function onConfirm(id: string) {
     setBusy(id);
     setError(null);
-    const result = await confirmTimesheet(id);
-    setBusy(null);
-    if ("error" in result) setError(t(result.error));
-    else router.refresh();
+    try {
+      const result = await confirmTimesheet(id);
+      if ("error" in result) setError(t(result.error));
+      else router.refresh();
+    } catch {
+      setError(locale === "pt-PT" ? "Não foi possível concluir a operação. Tente novamente." : "Could not complete the operation. Please try again.");
+    } finally {
+      setBusy(null);
+    }
   }
 
   async function onQuery(id: string) {
@@ -166,39 +176,44 @@ export function ReviewHoursPanel({ items }: { items: HoursForReview[] }) {
     if (!reason) return;
     setBusy(id);
     setError(null);
-    const result = await disputeTimesheet(id, reason);
-    setBusy(null);
-    if ("error" in result) setError(t(result.error));
-    else router.refresh();
+    try {
+      const result = await disputeTimesheet(id, reason);
+      if ("error" in result) setError(t(result.error));
+      else router.refresh();
+    } catch {
+      setError(locale === "pt-PT" ? "Não foi possível concluir a operação. Tente novamente." : "Could not complete the operation. Please try again.");
+    } finally {
+      setBusy(null);
+    }
   }
 
   if (items.length === 0) {
-    return <p className="mt-3 text-sm text-[#4a4a4a]">{t("No hours are waiting for your confirmation.")}</p>;
+    return <p className="mt-3 text-sm text-ink">{t("No hours are waiting for your confirmation.")}</p>;
   }
 
   return (
     <>
-      {error && <p className="mt-3 text-sm text-[#da1e28]"><Tr>{error}</Tr></p>}
-      <ul className="mt-4 divide-y divide-[#dbe7e0] border border-[#dbe7e0] text-sm">
+      {error && <p role="alert" className="mt-3 text-sm text-danger"><Tr>{error}</Tr></p>}
+      <ul className="mt-4 divide-y divide-line border border-line text-sm">
         {items.map((item) => (
           <li key={item.timesheetId} className="p-4">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <span className="font-semibold">{item.professionalName}</span>
-              <span className="text-[#7a8a81]">{formatLondon(item.scheduledStart, locale)}</span>
+              <span className="text-muted">{formatLondon(item.scheduledStart, locale)}</span>
             </div>
-            <p className="mt-1 text-[#4a4a4a]">
+            <p className="mt-1 text-ink">
               {formatLondon(item.actualStart, locale)}{" "}{t("to")}{" "}{formatLondon(item.actualEnd, locale)}
               {item.breakMinutes > 0 && `, ${t("less a {n} minute break", { n: item.breakMinutes })}`} —{" "}
               <span className="font-semibold">{t("{n} hours worked", { n: item.workedHours })}</span>{" "}
               {t("against {n} booked.", { n: item.bookedHours })}
             </p>
-            {item.note && <p className="mt-1 text-xs text-[#7a8a81]">“{item.note}”</p>}
+            {item.note && <p className="mt-1 text-xs text-muted">“{item.note}”</p>}
             <div className="mt-3 flex gap-2">
               <button
                 type="button"
                 disabled={busy === item.timesheetId}
                 onClick={() => onConfirm(item.timesheetId)}
-                className="rounded-full bg-[#2e7d32] px-4 py-2 text-white hover:bg-[#246627] disabled:opacity-50"
+                className="rounded-full bg-brand-strong px-4 py-2 text-white hover:bg-brand-strong-hover disabled:opacity-50"
               >
                 {t("Confirm hours")}
               </button>
@@ -206,7 +221,7 @@ export function ReviewHoursPanel({ items }: { items: HoursForReview[] }) {
                 type="button"
                 disabled={busy === item.timesheetId}
                 onClick={() => onQuery(item.timesheetId)}
-                className="rounded-full border border-[#dbe7e0] px-4 py-2 text-[#4a4a4a] hover:bg-[#f5f7f6] disabled:opacity-50"
+                className="rounded-full border border-line px-4 py-2 text-ink hover:bg-surface disabled:opacity-50"
               >
                 {t("Query")}
               </button>

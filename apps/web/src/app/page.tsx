@@ -32,6 +32,7 @@ export default async function HomePage() {
     <HomePageMotion>
       <SiteNav />
 
+      <main id="main-content" tabIndex={-1} className="scroll-mt-24">
       <HeroSection
         markets={markets}
         selected={selectedCountry}
@@ -49,10 +50,10 @@ export default async function HomePage() {
 
       <AboutIntroSection />
 
-      <main>
         <ServicesOfferSection />
 
         <ComplianceShowcase
+          locale={locale}
           heading={content.ui.compliance.heading}
           body={content.ui.compliance.body}
           getStarted={content.ui.getStarted}
@@ -72,15 +73,15 @@ export default async function HomePage() {
             {t.onboardingSteps.map((step, i) => (
               <div key={step.title} data-reveal-child className="relative">
                 <div className="flex items-center gap-4">
-                  <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-[#2e7d32] text-base font-bold text-white">
+                  <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-brand-strong text-base font-bold text-white">
                     {String(i + 1).padStart(2, "0")}
                   </span>
                   {i < t.onboardingSteps.length - 1 && (
                     <span className="hidden h-px flex-1 bg-[#cfe3d6] md:block" aria-hidden />
                   )}
                 </div>
-                <h3 className="mt-5 text-lg font-bold text-[#1e5a33] sm:text-xl">{step.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-[#4a4a4a]">{step.description}</p>
+                <h3 className="mt-5 text-lg font-bold text-brand-ink sm:text-xl">{step.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-ink">{step.description}</p>
               </div>
             ))}
           </div>

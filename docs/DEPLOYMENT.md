@@ -1,5 +1,7 @@
 # CareBridge Connect — Production Deployment
 
+> Historical deployment record. For the current Portugal-first release, use [Release operations](RELEASE_OPERATIONS.md). The June inventory and environment assumptions below have not been reverified for the current deployment.
+
 > Runbook for deploying CareBridge Connect under CareBridge Connect Ltd.
 > Last updated: **2026-06-16** (partial execution — see [Execution log](#execution-log-2026-06-16)).
 

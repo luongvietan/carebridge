@@ -34,6 +34,14 @@ export const requesterCopy = {
       saving: "Saving…",
     },
     booking: {
+      review: "Review booking",
+      reviewHelp: "Check these details before confirming your request. Editing a field requires another review.",
+      edit: "Edit details",
+      saved: "Booking request created",
+      nextStep: "Track matching, confirmation and any payment required from your bookings page.",
+      viewBookings: "View bookings",
+      timezone: "All booking times use London time (Europe/London), including daylight saving time.",
+
       role: "Professional role",
       selectRole: "Select a role…",
       careType: "Type of care",
@@ -80,6 +88,14 @@ export const requesterCopy = {
       saving: "A guardar…",
     },
     booking: {
+      review: "Rever marcação",
+      reviewHelp: "Verifique estes dados antes de confirmar o pedido. Ao editar um campo, terá de rever o pedido novamente.",
+      edit: "Editar dados",
+      saved: "Pedido de marcação criado",
+      nextStep: "Acompanhe a atribuição, a confirmação e os pagamentos necessários na página de marcações.",
+      viewBookings: "Ver marcações",
+      timezone: "Todas as horas seguem a hora de Londres (Europe/London), incluindo a hora de verão.",
+
       role: "Categoria profissional",
       selectRole: "Selecione uma categoria…",
       careType: "Tipo de cuidados",

@@ -23,6 +23,14 @@ const OUT_ROOT = join(REPO_ROOT, "demo-kit", "userflow");
 const GATE_COOKIE_NAME = "cbc_site_access";
 const GATE_TOKEN_SALT = "cbc-site-access-v1";
 
+function safeUrl(value, base) {
+  try {
+    return new URL(value, base);
+  } catch {
+    return null;
+  }
+}
+
 /* ---------------------------------------------------------------- env ---- */
 
 async function loadEnv(path) {
@@ -72,7 +80,9 @@ async function magicTokenFor(env, email) {
 const slug = (s) => s.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "").toLowerCase();
 
 async function shoot(page, outDir, index, name, path, base, note) {
-  const target = new URL(path, base).toString();
+  const targetUrl = safeUrl(path, base);
+  if (!targetUrl) throw new Error(`Invalid capture route: ${path}`);
+  const target = targetUrl.toString();
   await page.goto(target, { waitUntil: "networkidle", timeout: 45_000 }).catch(() => {});
   // Settle GSAP/Lenis scroll reveals so nothing is captured mid-animation.
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight)).catch(() => {});
@@ -83,8 +93,10 @@ async function shoot(page, outDir, index, name, path, base, note) {
   const file = join(outDir, `${String(index).padStart(2, "0")}-${slug(name)}.png`);
   await page.screenshot({ path: file, fullPage: true });
 
-  const landed = new URL(page.url()).pathname;
-  const requested = new URL(target).pathname;
+  const landedUrl = safeUrl(page.url());
+  if (!landedUrl) throw new Error(`Browser returned an invalid URL: ${page.url()}`);
+  const landed = landedUrl.pathname;
+  const requested = targetUrl.pathname;
   const redirected = landed !== requested;
   console.log(
     `  ${String(index).padStart(2, "0")} ${name.padEnd(34)} ${requested}${redirected ? `  →  ${landed}` : ""}`,
@@ -213,7 +225,7 @@ if (env.PRODUCTION_GATE_SECRET) {
     {
       name: GATE_COOKIE_NAME,
       value: token,
-      domain: new URL(BASE).hostname,
+      domain: safeUrl(BASE).hostname,
       path: "/",
       httpOnly: true,
       secure: BASE.startsWith("https"),
@@ -258,7 +270,9 @@ for (const persona of PERSONAS) {
   confirm.searchParams.set("next", persona.home);
   await page.goto(confirm.toString(), { waitUntil: "networkidle", timeout: 45_000 });
 
-  const landedAfterAuth = new URL(page.url()).pathname;
+  const landedAfterAuthUrl = safeUrl(page.url());
+  if (!landedAfterAuthUrl) throw new Error(`Browser returned an invalid URL: ${page.url()}`);
+  const landedAfterAuth = landedAfterAuthUrl.pathname;
   if (landedAfterAuth.startsWith("/login")) {
     console.log(`  !! sign-in failed (landed on ${landedAfterAuth}) — skipping persona`);
     continue;
@@ -280,9 +294,11 @@ for (const persona of PERSONAS) {
   });
 
   await context.clearCookies({ name: "sb-access-token" }).catch(() => {});
-  await page.goto(new URL("/", BASE).toString()).catch(() => {});
+  const homeUrl = safeUrl("/", BASE);
+  if (homeUrl) await page.goto(homeUrl.toString()).catch(() => {});
   await page.evaluate(() => window.localStorage.clear()).catch(() => {});
-  await context.clearCookies({ domain: new URL(BASE).hostname }).catch(() => {});
+  const baseUrl = safeUrl(BASE);
+  if (baseUrl) await context.clearCookies({ domain: baseUrl.hostname }).catch(() => {});
   // Re-inject the gate cookie, which clearCookies just removed.
   if (env.PRODUCTION_GATE_SECRET) {
     const token2 = createHmac("sha256", env.PRODUCTION_GATE_SECRET)
@@ -292,7 +308,7 @@ for (const persona of PERSONAS) {
       {
         name: GATE_COOKIE_NAME,
         value: token2,
-        domain: new URL(BASE).hostname,
+        domain: baseUrl?.hostname,
         path: "/",
         httpOnly: true,
         secure: BASE.startsWith("https"),

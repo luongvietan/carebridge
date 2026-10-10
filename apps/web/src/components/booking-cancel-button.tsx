@@ -39,12 +39,12 @@ export function BookingCancelButton({ bookingId }: { bookingId: string }) {
   return (
     <span className="inline-flex flex-col items-end gap-1">
       {dialog}
-      {state.error && <span className="text-xs text-[#da1e28]"><Tr>{state.error}</Tr></span>}
+      {state.error && <span role="alert" className="text-xs text-danger"><Tr>{state.error}</Tr></span>}
       <button
         type="button"
         onClick={handleCancel}
         disabled={state.busy}
-        className="rounded-full border border-[#da1e28] px-3 py-1.5 text-sm text-[#da1e28] hover:bg-[#fff1f1] disabled:opacity-50"
+        className="rounded-full border border-danger px-3 py-1.5 text-sm text-danger hover:bg-[#fff1f1] disabled:opacity-50"
       >
         {state.busy ? t("Cancelling…") : t("Cancel")}
       </button>

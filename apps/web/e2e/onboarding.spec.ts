@@ -1,16 +1,14 @@
 import { test, expect, request, type APIRequestContext, type Page } from "@playwright/test";
-import { createClient } from "@supabase/supabase-js";
+
 import { chooseFrom } from "./select-helper";
+import { localService, openPortugalForSuite, restorePortugalAfterSuite } from "./local-market";
+let wasLive: boolean | undefined;
+test.beforeAll(async () => { wasLive = await openPortugalForSuite(); });
+test.afterAll(async () => { if (wasLive !== undefined) await restorePortugalAfterSuite(wasLive); });
 
 const MAILPIT = "http://127.0.0.1:54324";
 
-function service() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { persistSession: false } },
-  );
-}
+const service = localService;
 
 async function confirmationLink(api: APIRequestContext, email: string): Promise<string> {
   for (let i = 0; i < 30; i++) {
@@ -21,7 +19,11 @@ async function confirmationLink(api: APIRequestContext, email: string): Promise<
         const msg = await (await api.get(`${MAILPIT}/api/v1/message/${hit.ID}`)).json();
         const body: string = msg.HTML || msg.Text || "";
         const link = (body.match(/https?:\/\/[^"'\s<>]+/g) ?? []).find((u) => /verify|confirm|token/.test(u));
-        if (link) return link.replace(/&amp;/g, "&");
+        if (link) {
+          const url = new URL(link.replace(/&amp;/g, "&"));
+          if (!["127.0.0.1", "localhost"].includes(url.hostname)) throw new Error("Confirmation email must target the isolated local stack.");
+          return url.pathname === "/auth/confirm" ? url.pathname + url.search : url.href;
+        }
       }
     }
     await new Promise((r) => setTimeout(r, 1000));
@@ -31,45 +33,19 @@ async function confirmationLink(api: APIRequestContext, email: string): Promise<
 
 async function registerConfirmLogin(page: Page, api: APIRequestContext, email: string) {
   await page.goto("/register?as=professional");
-  await page.locator('input[name="fullName"]').fill("E2E Pro");
+  await page.locator('input[name="fullName"]').fill(`E2E ${email}`);
   await page.locator('input[name="email"]').fill(email);
   await page.locator('input[name="password"]').fill("password123");
   await page.locator('input[name="acceptedTerms"]').check();
-  await page.getByRole("button", { name: /create account/i }).click();
-  await expect(page.getByRole("heading", { name: /check your email/i })).toBeVisible();
+  await page.getByRole("button", { name: /criar conta/i }).click();
+  await expect(page.getByRole("heading", { name: /verifique o seu email/i })).toBeVisible();
   await page.goto(await confirmationLink(api, email));
   await page.goto("/login");
   await page.locator('input[name="email"]').fill(email);
   await page.locator('input[name="password"]').fill("password123");
-  await page.getByRole("button", { name: /sign in/i }).click();
+  await page.getByRole("button", { name: /^entrar$/i }).click();
   await expect(page).toHaveURL(/\/professional/);
 }
-
-// Correct option TEXT for each seeded common question. The applicant has not
-// chosen a role yet at this point in the wizard, so the 15+5 selection has no
-// role pool to draw from and serves the 20 common questions.
-const CORRECT = [
-  "Report it to the safeguarding lead promptly",
-  "Hand hygiene",
-  "Only on a lawful, need-to-know basis",
-  "A boundary concern to be declared/declined",
-  "Accurate, contemporaneous and legible",
-  "The right patient, drug, dose, route and time",
-  "Report and, if safe, mitigate it",
-  "Decline and escalate to an appropriate professional",
-  "Everyone working with them",
-  "Before and after every patient contact",
-  "Decline — there is no legitimate care reason",
-  "Politely decline to maintain professional boundaries",
-  "Score it out, initial and date the correction",
-  "Check with a qualified prescriber/pharmacist before administering",
-  "Carry out a risk assessment and use appropriate equipment",
-  "Raise the concern through the appropriate channel",
-  "Explain you may need to share it to keep them or others safe",
-  "A sealed sharps container",
-  "Access the personal data held about them",
-  "Apron/gown",
-];
 
 test("professional completes the onboarding wizard and writes persist", async ({ page }) => {
   const api = await request.newContext();
@@ -79,56 +55,66 @@ test("professional completes the onboarding wizard and writes persist", async ({
 
   // Eligibility
   await page.goto("/professional/onboarding/eligibility");
-  await page.getByRole("button", { name: /^continue$/i }).click();
-  await expect(page.getByText(/eligibility recorded/i)).toBeVisible();
+  await page.getByRole("button", { name: /^continuar$/i }).click();
+  await expect(page.getByText(/elegibilidade registada/i)).toBeVisible();
 
   // Assessment — answer every question correctly
   await page.goto("/professional/onboarding/assessment");
-  await page.getByRole("button", { name: /begin assessment/i }).click();
+  await page.getByRole("button", { name: /iniciar avaliação/i }).click();
   await expect(page.getByText(/^1\./)).toBeVisible();
-  for (const text of CORRECT) {
-    await page.locator("label", { hasText: text }).locator('input[type="radio"]').check();
+  const { data: answers, error: answersError } = await sb.from("assessment_question_bank").select("id, correct_option").eq("country_code", "PT").eq("is_active", true).is("professional_role_id", null);
+  expect(answersError).toBeNull();
+  expect(await page.locator("fieldset").count()).toBe(20);
+  for (const answer of answers ?? []) {
+    const option = page.locator(`input[name="${answer.id}"][value="${answer.correct_option}"]`);
+    if (await option.count()) await option.check();
   }
-  await page.getByRole("button", { name: /submit answers/i }).click();
-  await expect(page.getByText(/Passed/)).toBeVisible();
+  await page.getByRole("button", { name: /submeter respostas/i }).click();
+  await expect(page.getByText(/Aprovado\(a\)/)).toBeVisible();
 
   // Profile
   await page.goto("/professional/onboarding/profile");
-  await chooseFrom(page, page.getByRole("combobox", { name: "Professional role" }), "Adult Nurse");
-  await chooseFrom(
-    page,
-    page.getByRole("combobox", { name: "Right to work in the UK" }),
-    "I am a British or Irish citizen (passport)",
-  );
-  // Adult Nurse is an NMC role, so the PIN is required and format-checked.
-  await page.locator('input[name="registrationNumber"]').fill("12A3456E");
+  await chooseFrom(page, page.getByRole("combobox", { name: "Categoria profissional" }), "Enfermeiro/a — Adultos");
+  // Portuguese applicants provide a cédula, NIF and NISS, without a UK share code.
+  await page.locator('input[name="registrationNumber"]').fill("12345");
+  await page.locator('input[name="nationalInsuranceNo"]').fill("245076441");
+  await page.locator('input[name="niss"]').fill("12345678901");
   await page.locator('input[name="addressLine1"]').fill("1 Test Street");
-  await page.locator('input[name="city"]').fill("London");
-  await page.locator('input[name="postcode"]').fill("E1 6AN");
-  await page.getByRole("button", { name: /save profile/i }).click();
-  await expect(page.getByText(/profile saved/i)).toBeVisible();
+  await page.locator('input[name="city"]').fill("Lisboa");
+  await page.locator('input[name="postcode"]').fill("1000-001");
+  await page.getByRole("button", { name: /guardar perfil/i }).click();
+  await expect(page.getByText(/perfil guardado/i)).toBeVisible();
 
   // Documents — upload one required document. Use Qualification, a non-expiring
   // type, so no expiry date is required (the expiry field is a custom DatePicker).
   await page.goto("/professional/onboarding/documents");
-  const qualItem = page.locator("div.p-4", { hasText: "Qualification" });
+  // The PT reference data uses the Portuguese qualification label; keep this
+  // selector locale-aware instead of coupling the journey to the legacy GB name.
+  const qualItem = page
+    .locator("div.p-4")
+    .filter({ has: page.locator('input[type="file"]') })
+    .filter({ hasText: /qualifica|habilita|qualification/i })
+    .first();
   await qualItem.locator('input[type="file"]').setInputFiles({
     name: "cert.pdf",
     mimeType: "application/pdf",
     // Must start with the %PDF magic bytes — uploads are content-sniffed.
     buffer: Buffer.from("%PDF-1.4\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF"),
   });
-  await qualItem.getByRole("button", { name: /^upload$/i }).click();
-  await expect(qualItem.getByText(/pending review/i)).toBeVisible();
+  await qualItem.getByRole("button", { name: /^enviar$/i }).click();
+  await expect(qualItem.getByText(/em análise/i)).toBeVisible();
 
   // Assert the write paths persisted
   const { data: prof } = await sb
     .from("professionals")
-    .select("id, professional_role_id, address_line1")
-    .eq("full_name", "E2E Pro")
+    .select("id, professional_role_id, address_line1, country_code, niss, national_insurance_no")
+    .eq("full_name", `E2E ${email}`)
     .order("created_at", { ascending: false })
     .limit(1)
     .single();
+  expect(prof?.country_code).toBe("PT");
+  expect(prof?.niss).toBe("12345678901");
+  expect(prof?.national_insurance_no).toBe("245076441");
   expect(prof?.professional_role_id).toBeTruthy();
   expect(prof?.address_line1).toBe("1 Test Street");
 
@@ -151,9 +137,20 @@ test("professional completes the onboarding wizard and writes persist", async ({
     .select("id", { count: "exact", head: true })
     .eq("professional_id", prof!.id);
   expect(docs).toBeGreaterThan(0);
+
+  // A complete common bank does not substitute for absent specialist content.
+  const { count: specialist, error: poolError } = await sb.from("assessment_question_bank").select("id", { count: "exact", head: true }).eq("professional_role_id", prof!.professional_role_id).eq("country_code", "PT").eq("is_active", true);
+  expect(poolError).toBeNull();
+  expect(specialist).toBe(0);
+  const { count: attemptsBefore } = await sb.from("assessment_attempts").select("id", { count: "exact", head: true }).eq("professional_id", prof!.id);
+  await page.goto(`/professional/onboarding/assessment?role=${prof!.professional_role_id}`);
+  await page.getByRole("button", { name: /iniciar avaliação/i }).click();
+  await expect(page.getByText(/ainda está em preparação/i)).toBeVisible();
+  const { count: attemptsAfter } = await sb.from("assessment_attempts").select("id", { count: "exact", head: true }).eq("professional_id", prof!.id);
+  expect(attemptsAfter).toBe(attemptsBefore);
 });
 
-test("a regulated professional activates only once documents are approved AND the register is checked", async ({ page, browser }) => {
+test("a regulated professional activates only once documents are approved AND the register is checked", async ({ browser }) => {
   const sb = service();
   const stamp = Date.now();
   const proName = `FixturePro${stamp}`;
@@ -164,7 +161,7 @@ test("a regulated professional activates only once documents are approved AND th
     email: adminEmail,
     password: "password123",
     email_confirm: true,
-    user_metadata: { account_type: "admin", full_name: "E2E Admin" },
+    user_metadata: { account_type: "admin", full_name: "E2E Admin", market: "GB" },
   });
   expect(adminUser.user).toBeTruthy();
   // Signup metadata can't grant admin (0031 hardening); promote the test admin.
@@ -178,13 +175,13 @@ test("a regulated professional activates only once documents are approved AND th
     email: proEmail,
     password: "password123",
     email_confirm: true,
-    user_metadata: { account_type: "professional", full_name: proName },
+    user_metadata: { account_type: "professional", full_name: proName, market: "PT" },
   });
   expect(proUser?.user, JSON.stringify({ proUser, proErr })).toBeTruthy();
-  const { data: role } = await sb.from("professional_roles").select("id").eq("code", "adult_nurse").single();
+  const { data: role } = await sb.from("professional_roles").select("id").eq("code", "pt_enfermeiro_adulto").single();
   const { data: pro } = await sb
     .from("professionals")
-    .insert({ user_id: proUser.user!.id, full_name: proName, professional_role_id: role!.id })
+    .insert({ user_id: proUser.user!.id, full_name: proName, professional_role_id: role!.id, country_code: "PT" })
     .select("id")
     .single();
 
@@ -230,7 +227,7 @@ test("a regulated professional activates only once documents are approved AND th
   await adminPage.goto("/login");
   await adminPage.locator('input[name="email"]').fill(adminEmail);
   await adminPage.locator('input[name="password"]').fill("password123");
-  await adminPage.getByRole("button", { name: /sign in/i }).click();
+  await adminPage.getByRole("button", { name: /^entrar$/i }).click();
   await expect(adminPage).toHaveURL(/\/admin/);
 
   await adminPage.goto("/admin/compliance");
@@ -241,8 +238,11 @@ test("a regulated professional activates only once documents are approved AND th
   });
   const reviewRow = reviewSection.locator("div.flex.flex-wrap", { hasText: proName });
   await expect(reviewRow).toBeVisible();
+  const pendingReviewCount = await reviewRow.count();
   await reviewRow.getByRole("button", { name: /^approve$/i }).click();
-  await expect(reviewRow).toBeHidden({ timeout: 10000 });
+  // The fixture can have several critical documents; approving one removes one
+  // row rather than hiding the professional's remaining pending documents.
+  await expect.poll(() => reviewRow.count(), { timeout: 10000 }).toBeLessThan(pendingReviewCount);
 
   // Every document is approved, but this is a nursing role: until an
   // administrator has checked the NMC register, the professional must NOT be
@@ -261,7 +261,7 @@ test("a regulated professional activates only once documents are approved AND th
   });
   const checkForm = registrationSection.locator("form", { hasText: proName });
   await expect(checkForm).toBeVisible();
-  await checkForm.locator('input[name="reference"]').fill("12A3456E");
+  await checkForm.locator('input[name="reference"]').fill("12345");
   await chooseFrom(
     adminPage,
     checkForm.getByRole("combobox", { name: "What the register showed" }),
@@ -320,11 +320,11 @@ test("professional cannot download another professional's document from storage"
 
   const { data: ownerProf, error: ownerErr } = await sb
     .from("professionals")
-    .insert({ user_id: ownerUserId, full_name: "Doc Owner" })
+    .insert({ user_id: ownerUserId, full_name: "Doc Owner", country_code: "PT" })
     .select("id")
     .single();
   expect(ownerErr, JSON.stringify(ownerErr)).toBeNull();
-  await sb.from("professionals").insert({ user_id: otherUserId, full_name: "Doc Other" });
+  await sb.from("professionals").insert({ user_id: otherUserId, full_name: "Doc Other", country_code: "PT" });
 
   const { data: docType } = await sb.from("document_types").select("id").limit(1).single();
   const storagePath = `${ownerProf!.id}/dbs/test-${stamp}.pdf`;
@@ -336,6 +336,15 @@ test("professional cannot download another professional's document from storage"
     // Set an expiry unconditionally — harmless for non-expiring types, required for expiring ones.
     expiry_date: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
   });
+  const { error: uploadError } = await sb.storage.from("documents").upload(storagePath, Buffer.from("%PDF-1.4\n%%EOF"), { contentType: "application/pdf" });
+  expect(uploadError).toBeNull();
+
+  // Prove the file exists and its owner can read it before testing denial.
+  const ownerClient = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, { auth: { persistSession: false } });
+  expect((await ownerClient.auth.signInWithPassword({ email: ownerEmail, password: "password123" })).error).toBeNull();
+  const ownDownload = await ownerClient.storage.from("documents").download(storagePath);
+  expect(ownDownload.error).toBeNull();
+  expect(ownDownload.data).toBeTruthy();
 
   const anonClient = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -351,6 +360,7 @@ test("professional cannot download another professional's document from storage"
   expect(dlErr).toBeTruthy();
   expect(blob).toBeNull();
 
+  await sb.storage.from("documents").remove([storagePath]);
   await sb.from("documents").delete().eq("professional_id", ownerProf!.id);
   await sb.from("professionals").delete().in("user_id", [ownerUserId, otherUserId]);
   await sb.auth.admin.deleteUser(ownerUserId);

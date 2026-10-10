@@ -19,12 +19,12 @@ export async function AboutIntroSection() {
           {ui.aboutIntro.heading}
         </h2>
 
-        <div className="flex shrink-0 items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Icon icon={StarIcon} size={20} color="#f5a623" strokeWidth={1.75} />
-            <span className="text-lg font-bold text-[#1e5a33]">{ui.aboutIntro.badge}</span>
+        <div className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-3 lg:shrink-0">
+          <div className="flex min-w-0 items-center gap-2">
+            <Icon icon={StarIcon} size={20} color="#f5a623" strokeWidth={1.75} className="shrink-0" />
+            <span className="text-lg font-bold text-brand-ink">{ui.aboutIntro.badge}</span>
           </div>
-          <div className="flex -space-x-2.5">
+          <div className="flex shrink-0 -space-x-2.5">
             {aboutAvatars.map((src) => (
               <Image
                 key={src}
@@ -87,7 +87,7 @@ export async function AboutIntroSection() {
                   strokeWidth={1.75}
                   className="mt-0.5 shrink-0"
                 />
-                <span className="text-sm font-medium leading-snug text-[#1e5a33] sm:text-[15px]">
+                <span className="text-sm font-medium leading-snug text-brand-ink sm:text-[15px]">
                   {feature}
                 </span>
               </li>

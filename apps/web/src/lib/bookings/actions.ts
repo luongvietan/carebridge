@@ -3,6 +3,8 @@ import { createServiceClient } from "@/lib/supabase/service";
 import { requireAdmin } from "@/lib/auth/admin";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { isGateEnabled } from "@/lib/auth/gate";
+import { isMarketOpen } from "@/lib/marketing/market";
+import { getAccountCountry } from "@/lib/accounts/market-server";
 import {
   buildBookingInsert,
   careTypeError,
@@ -106,6 +108,9 @@ export async function createBooking(form: unknown): Promise<BookingActionResult>
     .eq("id", formData.professionalRoleId)
     .maybeSingle();
   if (!role) return { error: "That professional role is no longer available." };
+  if (role.country_code !== await getAccountCountry(user)) {
+    return { error: "Choose a professional role in your account's country." };
+  }
 
   // A country that is not live yet cannot be booked into, whatever the form
   // was sent — except behind the private-preview gate, where it is being reviewed.
@@ -114,7 +119,7 @@ export async function createBooking(form: unknown): Promise<BookingActionResult>
     .select("is_live")
     .eq("code", role.country_code)
     .maybeSingle();
-  if (!roleCountry?.is_live && !isGateEnabled()) {
+  if (!roleCountry || !isMarketOpen(role.country_code, roleCountry.is_live, isGateEnabled())) {
     return { error: "That professional role is not available yet." };
   }
 

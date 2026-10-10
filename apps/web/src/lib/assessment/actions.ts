@@ -3,6 +3,8 @@ import { createServiceClient } from "@/lib/supabase/service";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { ensureProfessional } from "@/lib/onboarding/professional-session";
 import { pickStratified } from "./selection";
+import { assessmentBankReady, roleAttemptReady } from "./readiness";
+import { getAccountCountry } from "@/lib/accounts/market-server";
 import { scorePercent, isPass, nextAttemptState, planNextCycle } from "./scoring";
 import { sendNotification } from "@/lib/notifications/send";
 import { recomputeRoleAssignments } from "@/lib/roles/assignments";
@@ -134,7 +136,7 @@ export async function startAttempt(requestedRoleId?: string): Promise<StartResul
   // so selection happens server-side and correct_option is never sent to the client.
   const admin = createServiceClient();
 
-  const { data: prof } = await admin
+  const profPromise = admin
     .from("professionals")
     .select("professional_role_id, assessment_locked_until, country_code")
     .eq("id", professionalId)
@@ -143,7 +145,10 @@ export async function startAttempt(requestedRoleId?: string): Promise<StartResul
   // Which role is being sat for. A professional may hold several, each with its
   // own assessment: the caller names one, or we take the first that still needs
   // passing, falling back to the primary role.
-  const target = await resolveAssessmentRole(admin, professionalId, requestedRoleId);
+  const [{ data: prof }, target] = await Promise.all([
+    profPromise,
+    resolveAssessmentRole(admin, professionalId, requestedRoleId),
+  ]);
   if ("error" in target) return { error: target.error };
   const { roleId, roleName, lockedUntil } = target;
 
@@ -154,7 +159,7 @@ export async function startAttempt(requestedRoleId?: string): Promise<StartResul
     return { locked: true, lockUntil: lockedUntil };
   }
 
-  const cols = "id, topic, question_text, options";
+  const cols = "id, topic, question_text, options, professional_role_id, country_code";
 
   // Resume an in-progress attempt (started but never submitted) instead of
   // creating a new row. Otherwise an abandoned attempt would still increment the
@@ -174,6 +179,11 @@ export async function startAttempt(requestedRoleId?: string): Promise<StartResul
   if (inProgress) {
     const servedIds = (inProgress.served_question_ids as string[]) ?? [];
     const { data: qs } = await admin.from("assessment_question_bank").select(cols).in("id", servedIds);
+    if (prof?.country_code === "PT" && roleId) {
+      if (servedIds.length !== 20 || !roleAttemptReady(qs ?? [], roleId)) {
+        return { error: "A avaliação desta função ainda está em preparação. Contacte a equipa CareBridge Connect." };
+      }
+    }
     const byId = new Map((qs ?? []).map((q) => [q.id, q]));
     const resumed = servedIds
       .map((qid) => byId.get(qid))
@@ -238,6 +248,9 @@ export async function startAttempt(requestedRoleId?: string): Promise<StartResul
         .eq("country_code", country)
     : { data: [] };
 
+  if (country === "PT" && !assessmentBankReady(commonPool?.length ?? 0, rolePool?.length ?? 0, !!roleId)) {
+    return { error: "A avaliação desta função ainda está em preparação. Contacte a equipa CareBridge Connect; esta tentativa não será contabilizada." };
+  }
   const picked = pickStratified(
     commonPool ?? [],
     rolePool ?? [],
@@ -290,8 +303,12 @@ export async function submitAttempt(
   const servedIds = (attempt.served_question_ids as string[]) ?? [];
   const { data: questions } = await admin
     .from("assessment_question_bank")
-    .select("id, correct_option")
+    .select("id, correct_option, country_code, professional_role_id")
     .in("id", servedIds);
+  if (attempt.professional_role_id && await getAccountCountry(user) === "PT" &&
+      (servedIds.length !== 20 || !roleAttemptReady(questions ?? [], attempt.professional_role_id))) {
+    return { error: "A avaliação desta função ainda está em preparação. Contacte a equipa CareBridge Connect." };
+  }
   const correctById = new Map((questions ?? []).map((q) => [q.id, q.correct_option]));
 
   // Treat a missing correct answer (question deleted mid-attempt, or a null

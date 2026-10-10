@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { PayoutDetailsForm } from "@/components/payout-details-form";
-import { getSelectedCountry } from "@/lib/marketing/market-server";
+import { getAccountCountry } from "@/lib/accounts/market-server";
 export const dynamic = "force-dynamic";
 
 export default async function PayoutDetailsPage() {
@@ -24,9 +24,9 @@ export default async function PayoutDetailsPage() {
       last4 = (data as string | null) ?? null;
     }
   }
-  const pt = (await getSelectedCountry()) === "PT";
+  const pt = (await getAccountCountry()) === "PT";
   return (
-    <main className="mx-auto max-w-2xl px-4 py-10">
+    <main id="main-content" tabIndex={-1} className="mx-auto max-w-2xl px-4 py-10">
       <h1 className="text-3xl font-bold">{pt ? "Dados de pagamento" : "Payout details"}</h1>
       <PayoutDetailsForm
         last4={last4}

@@ -1,6 +1,6 @@
 "use server";
 import { headers } from "next/headers";
-import { getSelectedCountry } from "@/lib/marketing/market-server";
+import { getSelectedCountry, isRegistrationOpen } from "@/lib/marketing/market-server";
 import { redirect } from "next/navigation";
 import { getAppUrl } from "@/lib/app-url";
 import { createClient } from "@/lib/supabase/server";
@@ -18,6 +18,7 @@ import {
   shouldRecordFailure,
   truncateUserAgent,
 } from "@/lib/auth/sign-in-rules";
+import { recordFailedSignIn, recordSuccessfulSignIn } from "@/lib/auth/sign-in-audit";
 
 const CONSENT_VERSION = "v1";
 
@@ -64,19 +65,10 @@ export async function attemptSignIn(email: string, password: string): Promise<Si
     parseClientIp(requestHeaders.get("x-real-ip"));
   const userAgent = truncateUserAgent(requestHeaders.get("user-agent"));
 
-  const recordFailure = async (reason: string) => {
-    if (!shouldRecordFailure(count ?? 0)) return;
-    await admin.from("audit_log").insert({
-      actor_type: "user",
-      actor_user_id: null,
-      action: FAILED_SIGN_IN_ACTION,
-      entity_type: "user",
-      entity_id: normalized,
-      summary: ip ? `${reason} · ${ip}` : reason,
-      ip_address: ip,
-      user_agent: userAgent,
-    });
-  };
+  const recordFailure = (reason: string) =>
+    shouldRecordFailure(count ?? 0)
+      ? recordFailedSignIn({ email: normalized, reason, ip, userAgent, count: count ?? 0 })
+      : Promise.resolve();
 
   const supabase = await createClient();
   // The trimmed original goes to the provider; only the audit key is normalised.
@@ -100,14 +92,7 @@ export async function attemptSignIn(email: string, password: string): Promise<Si
     return { ok: false, error: SUSPENDED_ERROR };
   }
 
-  await admin.from("audit_log").insert({
-    actor_user_id: data.user.id,
-    actor_type: "user",
-    action: "auth.signed_in",
-    entity_type: "user",
-    entity_id: data.user.id,
-    summary: data.user.email ?? normalized,
-  });
+  await recordSuccessfulSignIn(data.user.id, data.user.email ?? normalized);
 
   return { ok: true, redirectTo: roleHome((row?.account_type ?? "private_client") as AccountType) };
 }
@@ -134,6 +119,11 @@ export async function signUp(_prev: SignUpResult, formData: FormData): Promise<S
   });
   if (!parsed.success) return { error: "Please check the form and try again." };
 
+  const market = await getSelectedCountry();
+  if (!(await isRegistrationOpen(market))) {
+    return { error: "As inscrições em Portugal abrem em breve. Contacte-nos para manifestar interesse." };
+  }
+
   const { data, error } = await supabase.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,
@@ -149,7 +139,7 @@ export async function signUp(_prev: SignUpResult, formData: FormData): Promise<S
         consent_version: CONSENT_VERSION,
         // Picks the language of Supabase's own sign-up and password-reset
         // e-mails (see supabase/templates): "PT" → European Portuguese.
-        market: await getSelectedCountry(),
+        market,
       },
     },
   });

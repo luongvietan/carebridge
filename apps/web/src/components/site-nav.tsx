@@ -6,8 +6,10 @@ import { getContentForVisitor } from "@/lib/i18n/server";
 export { BrandMark } from "@/components/site-nav-client";
 
 export async function SiteNav() {
-  const { ui } = await getContentForVisitor();
-  const supabase = await createClient();
+  const [{ ui }, supabase] = await Promise.all([
+    getContentForVisitor(),
+    createClient(),
+  ]);
   const {
     data: { user },
   } = await supabase.auth.getUser();

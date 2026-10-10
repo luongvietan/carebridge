@@ -120,16 +120,18 @@ export async function postMessage(formData: FormData): Promise<MessageResult> {
   }
 
   // Tell the other participants there is something to read.
-  const { data: participants } = await admin
-    .from("thread_participants")
-    .select("user_id")
-    .eq("thread_id", threadId)
-    .neq("user_id", user.id);
-  const { data: thread } = await admin
-    .from("message_threads")
-    .select("subject")
-    .eq("id", threadId)
-    .maybeSingle();
+  const [{ data: participants }, { data: thread }] = await Promise.all([
+    admin
+      .from("thread_participants")
+      .select("user_id")
+      .eq("thread_id", threadId)
+      .neq("user_id", user.id),
+    admin
+      .from("message_threads")
+      .select("subject")
+      .eq("id", threadId)
+      .maybeSingle(),
+  ]);
 
   await Promise.all(
     (participants ?? []).map((p) =>

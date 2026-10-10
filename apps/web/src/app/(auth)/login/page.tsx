@@ -1,5 +1,6 @@
 "use client";
 
+import { RequiredMark } from "@/components/required-mark";
 import { Tr } from "@/components/portal-locale";
 import { useState } from "react";
 import Link from "next/link";
@@ -42,26 +43,26 @@ export default function LoginPage() {
   return (
     <AuthShell>
       <div className="lg:hidden">
-        <BackLink href="/" className="text-[#4a4a4a] hover:text-[#2e7d32]">
+        <BackLink href="/" className="text-ink hover:text-brand-strong">
           {back}
         </BackLink>
       </div>
 
-      <h1 className="mt-4 text-2xl font-bold text-[#1e5a33] sm:text-3xl lg:mt-0">{t.title}</h1>
-      <p className="mt-2 text-sm leading-relaxed text-[#4a4a4a]">
+      <h1 className="mt-4 text-2xl font-bold text-brand-ink sm:text-3xl lg:mt-0">{t.title}</h1>
+      <p className="mt-2 text-sm leading-relaxed text-ink">
         {t.intro}
       </p>
 
-      <form method="post" onSubmit={onSubmit} className="mt-8 space-y-5">
+      <form aria-busy={pending} method="post" onSubmit={onSubmit} className="mt-8 space-y-5">
         <label className="block text-sm font-medium text-[#33433a]">
           {t.email}
-          <input type="email" name="email" required className={marketingInput} />
+          <RequiredMark /><input type="email" name="email" required className={marketingInput} />
         </label>
         <label className="block text-sm font-medium text-[#33433a]">
           {t.password}
-          <input type="password" name="password" required className={marketingInput} />
+          <RequiredMark /><input type="password" name="password" required className={marketingInput} />
         </label>
-        {error && <p className="text-sm text-red-600"><Tr>{error}</Tr></p>}
+        {error && <p role="alert" className="text-sm text-red-600"><Tr>{error}</Tr></p>}
         <button
           type="submit"
           disabled={pending}
@@ -71,14 +72,14 @@ export default function LoginPage() {
         </button>
       </form>
 
-      <p className="mt-6 text-sm text-[#4a4a4a]">
-        <Link href="/reset" className="font-semibold text-[#2e7d32] hover:underline">
+      <p className="mt-6 text-sm text-ink">
+        <Link href="/reset" className="font-semibold text-brand-strong hover:underline">
           {t.forgot}
         </Link>
       </p>
-      <p className="mt-3 text-sm text-[#4a4a4a]">
+      <p className="mt-3 text-sm text-ink">
         {t.noAccount}{" "}
-        <Link href="/register" className="font-semibold text-[#2e7d32] hover:underline">
+        <Link href="/register" className="font-semibold text-brand-strong hover:underline">
           {t.create}
         </Link>
       </p>

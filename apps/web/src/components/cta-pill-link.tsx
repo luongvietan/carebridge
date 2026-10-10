@@ -9,8 +9,8 @@ import { ArrowUpRight01Icon, Icon } from "@/components/ui/icon";
 gsap.registerPlugin(useGSAP);
 
 const variantStyles = {
-  primary: "bg-[#2e7d32] text-white hover:bg-[#246627]",
-  secondary: "bg-white text-[#14301e] hover:bg-[#f5f7f6]",
+  primary: "bg-brand-strong text-white hover:bg-brand-strong-hover",
+  secondary: "bg-white text-heading hover:bg-surface",
 } as const;
 
 const iconStyles = {

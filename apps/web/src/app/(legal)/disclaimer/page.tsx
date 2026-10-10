@@ -36,13 +36,13 @@ export default async function DisclaimerPage() {
   return (
     <>
       <SiteNav />
-      <main className="mx-auto max-w-3xl px-5 py-16">
-        <h1 className="text-3xl font-semibold tracking-tight text-[#14301e]">
+      <main id="main-content" tabIndex={-1} className="mx-auto max-w-3xl px-5 py-16">
+        <h1 className="text-3xl font-semibold tracking-tight text-heading">
           {importantInformation.heading}
         </h1>
-        <p className="mt-5 leading-relaxed text-[#4a4a4a]">{importantInformation.intro}</p>
+        <p className="mt-5 leading-relaxed text-ink">{importantInformation.intro}</p>
         {importantInformation.paragraphs.map((paragraph) => (
-          <p key={paragraph} className="mt-4 leading-relaxed text-[#4a4a4a]">
+          <p key={paragraph} className="mt-4 leading-relaxed text-ink">
             {paragraph}
           </p>
         ))}
@@ -52,22 +52,22 @@ export default async function DisclaimerPage() {
           <p className="mt-2 leading-relaxed text-[#8b2e2e]">{emergencyDisclaimer}</p>
         </div>
 
-        <h2 className="mt-10 text-xl font-semibold text-[#14301e]">{t.services}</h2>
-        <p className="mt-3 leading-relaxed text-[#4a4a4a]">{t.servicesIntro}</p>
+        <h2 className="mt-10 text-xl font-semibold text-heading">{t.services}</h2>
+        <p className="mt-3 leading-relaxed text-ink">{t.servicesIntro}</p>
         <ul className="mt-4 grid gap-2 sm:grid-cols-2">
           {supportedServices.map((service) => (
-            <li key={service} className="flex items-start gap-2 text-[#4a4a4a]">
-              <span aria-hidden className="mt-1 text-[#2e7d32]">
+            <li key={service} className="flex items-start gap-2 text-ink">
+              <span aria-hidden className="mt-1 text-brand-strong">
                 •
               </span>
               <span>{service}</span>
             </li>
           ))}
         </ul>
-        <p className="mt-4 leading-relaxed text-[#4a4a4a]">{t.servicesMore}</p>
+        <p className="mt-4 leading-relaxed text-ink">{t.servicesMore}</p>
 
-        <h2 className="mt-10 text-xl font-semibold text-[#14301e]">{t.audience}</h2>
-        <p className="mt-3 leading-relaxed text-[#4a4a4a]">{importantInformation.audienceLabel}</p>
+        <h2 className="mt-10 text-xl font-semibold text-heading">{t.audience}</h2>
+        <p className="mt-3 leading-relaxed text-ink">{importantInformation.audienceLabel}</p>
       </main>
       <SiteFooter />
     </>

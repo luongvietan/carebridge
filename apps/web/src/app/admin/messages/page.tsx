@@ -1,3 +1,4 @@
+import { Tr } from "@/components/portal-locale";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth/admin";
 import { requireAuth } from "@/lib/auth/require-auth";
@@ -23,12 +24,9 @@ export default async function AdminMessagesPage() {
   ]);
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-10">
-      <h1 className="mt-1 text-3xl font-bold">Messages</h1>
-      <p className="mt-2 text-sm text-[#4a4a4a]">
-        Conversations with professionals, clients and organisations. Every message is stored and
-        visible here, and administrators can read and join any conversation.
-      </p>
+    <main id="main-content" tabIndex={-1} className="mx-auto max-w-4xl px-4 py-10">
+      <h1 className="mt-1 text-3xl font-bold"><Tr>{"Messages"}</Tr></h1>
+      <p className="mt-2 text-sm text-ink"><Tr>{"Conversations with professionals, clients and organisations. Every message is stored and visible here, and administrators can read and join any conversation."}</Tr></p>
 
       <div className="mt-6">
         <StartThreadForm

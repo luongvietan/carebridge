@@ -1,3 +1,7 @@
+import { getPortalT } from "@/lib/i18n/portal-server";
+import { Tr } from "@/components/portal-locale";
+import { TableScroll } from "@/components/table-scroll";
+import { AdminTableHeader } from "@/components/admin-table-header";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth/admin";
 import { createServiceClient } from "@/lib/supabase/service";
@@ -16,6 +20,8 @@ export default async function AdminReportsPage({
 }: {
   searchParams: Promise<{ from?: string; to?: string; entity_type?: string; actor_type?: string }>;
 }) {
+  const t = await getPortalT();
+
   if (!(await requireAdmin())) redirect("/login");
   const { from, to, entity_type, actor_type } = await searchParams;
   const admin = createServiceClient();
@@ -40,23 +46,23 @@ export default async function AdminReportsPage({
   const auditQsString = auditQs.toString() ? `&${auditQs.toString()}` : "";
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-10">
+    <main id="main-content" tabIndex={-1} className="mx-auto max-w-4xl px-4 py-10">
       <div>
-        <h1 className="mt-1 text-3xl font-bold">Reports &amp; exports</h1>
+        <h1 className="mt-1 text-3xl font-bold"><Tr>{"Reports & exports"}</Tr></h1>
       </div>
 
       <section className="mt-8">
-        <h2 className="text-xl font-bold">Data exports</h2>
-        <p className="mt-1 text-sm text-[#4a4a4a]">Download any dataset as CSV or Excel.</p>
-        <div className="mt-4 overflow-x-auto rounded-2xl border border-[#dbe7e0] shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
+        <h2 className="text-xl font-bold"><Tr>{"Data exports"}</Tr></h2>
+        <p className="mt-1 text-sm text-ink"><Tr>{"Download any dataset as CSV or Excel."}</Tr></p>
+        <TableScroll className="mt-4 rounded-2xl border border-line shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
           <table className="w-full text-sm">
-            <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#4a4a4a]">
+            <AdminTableHeader>
               <tr>
-                <th className="p-3 font-medium">Dataset</th>
-                <th className="p-3 font-medium">Download</th>
+                <th className="p-3 font-medium"><Tr>{"Dataset"}</Tr></th>
+                <th className="p-3 font-medium"><Tr>{"Download"}</Tr></th>
               </tr>
-            </thead>
-            <tbody className="divide-y divide-[#dbe7e0]">
+            </AdminTableHeader>
+            <tbody className="divide-y divide-line">
               {(Object.keys(DATASETS) as DatasetName[]).map((name) => {
                 const label = DATASETS[name].label;
                 return (
@@ -64,79 +70,71 @@ export default async function AdminReportsPage({
                     <td className="p-3">{label}</td>
                     <td className="p-3">
                       <a
-                        className="text-[#2e7d32] underline"
+                        className="text-brand-strong underline"
                         href={`/api/export/${name}?format=csv`}
                         aria-label={`Download ${label} as CSV`}
-                      >
-                        CSV
-                      </a>
-                      <span className="px-2 text-[#7a8a81]">·</span>
+                      ><Tr>{"CSV"}</Tr></a>
+                      <span className="px-2 text-muted">·</span>
                       <a
-                        className="text-[#2e7d32] underline"
+                        className="text-brand-strong underline"
                         href={`/api/export/${name}?format=xlsx`}
                         aria-label={`Download ${label} as Excel`}
-                      >
-                        Excel
-                      </a>
+                      ><Tr>{"Excel"}</Tr></a>
                     </td>
                   </tr>
                 );
               })}
             </tbody>
           </table>
-        </div>
+        </TableScroll>
       </section>
 
       <section className="mt-12">
-        <h2 className="text-xl font-bold">Audit report</h2>
+        <h2 className="text-xl font-bold"><Tr>{"Audit report"}</Tr></h2>
         <form method="GET" className="mt-4 flex flex-wrap items-center gap-3 text-sm">
-          <div className="flex items-center gap-2 text-[#4a4a4a]">
-            From
-            <DatePicker name="from" aria-label="From date" defaultValue={from ?? ""} className="w-40" />
+          <div className="flex items-center gap-2 text-ink"><Tr>{"From"}</Tr><DatePicker name="from" aria-label={t("From date")} defaultValue={from ?? ""} className="w-40" />
           </div>
-          <div className="flex items-center gap-2 text-[#4a4a4a]">
-            To
-            <DatePicker name="to" aria-label="To date" defaultValue={to ?? ""} className="w-40" />
+          <div className="flex items-center gap-2 text-ink"><Tr>{"To"}</Tr><DatePicker name="to" aria-label={t("To date")} defaultValue={to ?? ""} className="w-40" />
           </div>
-          <input type="text" name="entity_type" placeholder="Entity type" aria-label="Entity type" defaultValue={entity_type ?? ""}
-            className="rounded-lg border border-[#dbe7e0] bg-white px-1 py-0.5 focus:border-[#2e7d32] focus:outline-none" />
-          <input type="text" name="actor_type" placeholder="Actor type" aria-label="Actor type" defaultValue={actor_type ?? ""}
-            className="rounded-lg border border-[#dbe7e0] bg-white px-1 py-0.5 focus:border-[#2e7d32] focus:outline-none" />
-          <button type="submit" className="rounded-full bg-[#2e7d32] px-3 py-1.5 text-white hover:bg-[#246627]">Filter</button>
+          <input type="text" name="entity_type" placeholder={t("Entity type")} aria-label={t("Entity type")} defaultValue={entity_type ?? ""}
+            className="rounded-lg border border-line bg-white px-1 py-0.5 focus:border-brand-strong focus:outline-none" />
+          <input type="text" name="actor_type" placeholder={t("Actor type")} aria-label={t("Actor type")} defaultValue={actor_type ?? ""}
+            className="rounded-lg border border-line bg-white px-1 py-0.5 focus:border-brand-strong focus:outline-none" />
+          <button type="submit" className="rounded-full bg-brand-strong px-3 py-1.5 text-white hover:bg-brand-strong-hover"><Tr>{"Filter"}</Tr></button>
         </form>
 
         <div className="mt-4 flex gap-4 text-sm">
-          <a className="text-[#2e7d32] underline" href={`/api/export/audit?format=csv${auditQsString}`}>Download filtered audit (CSV)</a>
-          <a className="text-[#2e7d32] underline" href={`/api/export/audit?format=xlsx${auditQsString}`}>Download filtered audit (Excel)</a>
+          <a className="text-brand-strong underline" href={`/api/export/audit?format=csv${auditQsString}`}><Tr>{"Download filtered audit (CSV)"}</Tr></a>
+          <a className="text-brand-strong underline" href={`/api/export/audit?format=xlsx${auditQsString}`}><Tr>{"Download filtered audit (Excel)"}</Tr></a>
         </div>
 
         {auditRows && auditRows.length > 0 ? (
-          <div className="mt-4 overflow-x-auto rounded-2xl border border-[#dbe7e0] shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
+          <TableScroll className="mt-4 rounded-2xl border border-line shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
             <table className="w-full text-sm">
-              <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#4a4a4a]">
+              <AdminTableHeader>
                 <tr>
-                  <th className="p-3 font-medium">When</th>
-                  <th className="p-3 font-medium">Actor</th>
-                  <th className="p-3 font-medium">Action</th>
-                  <th className="p-3 font-medium">Entity</th>
-                  <th className="p-3 font-medium">Summary</th>
+                  <th className="p-3 font-medium"><Tr>{"When"}</Tr></th>
+                  <th className="p-3 font-medium"><Tr>{"Actor"}</Tr></th>
+                  <th className="p-3 font-medium"><Tr>{"Action"}</Tr></th>
+                  <th className="p-3 font-medium"><Tr>{"Entity"}</Tr></th>
+                  <th className="p-3 font-medium"><Tr>{"Summary"}</Tr></th>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-[#dbe7e0]">
+              </AdminTableHeader>
+              <tbody className="divide-y divide-line">
                 {auditRows.map((a) => (
                   <tr key={String(a.id)}>
                     <td className="p-3">{formatDate(a.occurred_at as string)}</td>
                     <td className="p-3">{a.actor_type as string}</td>
                     <td className="p-3">{a.action as string}</td>
-                    <td className="p-3 text-[#4a4a4a]">{a.entity_type as string}</td>
-                    <td className="p-3 text-[#4a4a4a]">{(a.summary as string) ?? "—"}</td>
+                    <td className="p-3 text-ink">{a.entity_type as string}</td>
+                    <td className="p-3 text-ink">{(a.summary as string) ?? "—"}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          </div>
+          </TableScroll>
         ) : (
-          <p className="mt-3 text-sm text-[#4a4a4a]">No audit entries match.</p>
+          <p className="mt-3 text-sm text-ink"><Tr>{"No audit entries match."}</Tr></p>
         )}
       </section>
     </main>

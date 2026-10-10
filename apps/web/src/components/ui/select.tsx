@@ -2,6 +2,7 @@
 
 import { useEffect, useReducer, useId, useRef, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
+import { usePortalLocale } from "@/components/portal-locale";
 import { ChevronDownIcon, Icon, Tick01Icon } from "@/components/ui/icon";
 
 export type SelectOption = {
@@ -30,7 +31,7 @@ type SelectProps = {
 };
 
 const controlClass =
-  "flex w-full items-center justify-between gap-2 rounded-xl border border-[#dbe7e0] bg-white px-3.5 py-2.5 text-left text-sm text-[#1e5a33] transition focus:border-[#2e7d32] focus:outline-none focus:ring-2 focus:ring-[#2e7d32]/15 disabled:cursor-not-allowed disabled:opacity-50";
+  "flex w-full items-center justify-between gap-2 rounded-xl border border-line bg-white px-3.5 py-2.5 text-left text-sm text-brand-ink transition focus:border-brand-strong focus:outline-none focus:ring-2 focus:ring-brand-strong/15 disabled:cursor-not-allowed disabled:opacity-50";
 
 type MenuRect = { top: number; left: number; width: number; placement: "below" | "above"; maxHeight: number };
 
@@ -84,12 +85,14 @@ export function Select({
   onValueChange,
   name,
   required,
-  placeholder = "Select…",
+  placeholder,
   disabled,
   id,
   className = "",
   "aria-label": ariaLabel,
 }: SelectProps) {
+  const locale = usePortalLocale();
+  const prompt = placeholder ?? (locale === "pt-PT" ? "Selecione…" : "Select…");
   const isControlled = value !== undefined;
   const [ui, dispatch] = useReducer(selectUiReducer, {
     internal: defaultValue ?? "",
@@ -153,12 +156,17 @@ export function Select({
     };
   }, [open]);
 
+  useEffect(() => {
+    if (!open || activeIndex < 0) return;
+    menuRef.current?.querySelector<HTMLElement>(`[data-option-index="${activeIndex}"]`)?.scrollIntoView?.({ block: "nearest" });
+  }, [open, activeIndex]);
+
   function openMenu() {
     if (disabled) return;
     const currentIdx = options.findIndex((o) => o.value === current);
     dispatch({
       type: "openMenu",
-      activeIndex: currentIdx >= 0 ? currentIdx : (selectableIndexes[0] ?? -1),
+      activeIndex: currentIdx >= 0 && !options[currentIdx].disabled ? currentIdx : (selectableIndexes[0] ?? -1),
       rect: (() => {
         const el = buttonRef.current;
         if (!el) return { top: 0, left: 0, width: 0, placement: "below" as const, maxHeight: 256 };
@@ -220,7 +228,12 @@ export function Select({
 
   return (
     <div className={`relative ${className}`}>
-      {name && <input type="hidden" name={name} value={current} required={required} />}
+      {name && <select aria-hidden="true" tabIndex={-1} name={name} value={current} required={required} disabled={disabled}
+        className="pointer-events-none absolute h-px w-px opacity-0" onChange={() => {}}
+        onInvalid={(event) => { event.preventDefault(); buttonRef.current?.focus(); openMenu(); }}>
+        <option value="">{prompt}</option>
+        {options.filter((option) => option.value !== "").map((option) => <option key={option.value} value={option.value} disabled={option.disabled}>{option.label}</option>)}
+      </select>}
       <button
         ref={buttonRef}
         type="button"
@@ -228,6 +241,8 @@ export function Select({
         role="combobox"
         aria-haspopup="listbox"
         aria-expanded={open}
+        aria-required={required}
+        aria-activedescendant={open && activeIndex >= 0 ? `${listId}-${activeIndex}` : undefined}
         aria-controls={open ? listId : undefined}
         aria-label={ariaLabel}
         disabled={disabled}
@@ -235,15 +250,15 @@ export function Select({
         onKeyDown={onKeyDown}
         className={controlClass}
       >
-        <span className={selected ? "truncate" : "truncate text-[#9aa8a0]"}>
-          {selected ? selected.label : placeholder}
+        <span className={selected ? "truncate" : "truncate text-muted"}>
+          {selected ? selected.label : prompt}
         </span>
         <Icon
           icon={ChevronDownIcon}
           size={16}
           strokeWidth={2}
           aria-hidden
-          className={`shrink-0 text-[#4a4a4a] transition-transform ${open ? "rotate-180" : ""}`}
+          className={`shrink-0 text-ink transition-transform ${open ? "rotate-180" : ""}`}
         />
       </button>
 
@@ -254,6 +269,7 @@ export function Select({
           <div
             ref={menuRef}
             id={listId}
+            role="listbox"
             aria-label={ariaLabel}
             style={{
               position: "fixed",
@@ -264,7 +280,7 @@ export function Select({
                 ? { bottom: window.innerHeight - rect.top }
                 : { top: rect.top }),
             }}
-            className="z-50 overflow-auto rounded-xl border border-[#dbe7e0] bg-white p-1 shadow-[0_12px_36px_-12px_rgba(15,38,28,0.22)]"
+            className="z-50 overflow-auto rounded-xl border border-line bg-white p-1 shadow-[0_12px_36px_-12px_rgba(15,38,28,0.22)]"
           >
             {options.map((opt, i) => {
               const isSelected = opt.value === current;
@@ -276,33 +292,38 @@ export function Select({
                   <div
                     key={`group-${opt.group}`}
                     role="presentation"
-                    className="px-3 pt-3 pb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#7a8a81]"
+                    className="px-3 pt-3 pb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-muted"
                   >
                     {opt.group}
                   </div>
                 ) : null;
               const option = (
                 <button
-                  key={opt.value || `opt-${i}`}
+                  key={opt.value}
                   type="button"
+                  id={`${listId}-${i}`}
+                  data-option-index={i}
+                  tabIndex={-1}
                   role="option"
+                  aria-disabled={opt.disabled || undefined}
+                  onPointerDown={(event) => event.preventDefault()}
                   aria-selected={isSelected}
                   disabled={opt.disabled}
                   onMouseEnter={() => !opt.disabled && dispatch({ type: "setActiveIndex", index: i })}
                   onClick={() => commit(i)}
                   className={`flex w-full cursor-pointer items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm ${
                     opt.disabled
-                      ? "cursor-not-allowed text-[#9aa8a0]"
+                      ? "cursor-not-allowed text-muted"
                       : isActive
-                        ? "bg-[#eef5f0] text-[#1e5a33]"
+                        ? "bg-surface-hover text-brand-ink"
                         : isSelected
-                          ? "text-[#1e5a33]"
-                          : "text-[#4a4a4a]"
+                          ? "text-brand-ink"
+                          : "text-ink"
                   } ${isSelected ? "font-medium" : ""}`}
                 >
                   <span className="truncate">{opt.label}</span>
                   {isSelected && (
-                    <Icon icon={Tick01Icon} size={16} strokeWidth={2} aria-hidden className="shrink-0 text-[#2e7d32]" />
+                    <Icon icon={Tick01Icon} size={16} strokeWidth={2} aria-hidden className="shrink-0 text-brand-strong" />
                   )}
                 </button>
               );
@@ -315,7 +336,7 @@ export function Select({
               );
             })}
           </div>,
-          document.body,
+          buttonRef.current?.closest("dialog") ?? document.body,
         )}
     </div>
   );

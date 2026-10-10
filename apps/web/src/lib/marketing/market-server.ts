@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { isGateEnabled } from "@/lib/auth/gate";
 import { createClient } from "@/lib/supabase/server";
-import { MARKET_COOKIE, parseSelectedMarket, type MarketCountry } from "@/lib/marketing/market";
+import { MARKET_COOKIE, parseSelectedMarket, isMarketOpen, type MarketCountry } from "@/lib/marketing/market";
 
 /** A market as shown on the homepage, straight from `countries` (0076). */
 export type Market = {
@@ -36,25 +36,25 @@ export async function listMarkets(): Promise<Market[]> {
     name: c.name,
     currency: c.currency,
     locale: c.locale,
-    live: c.is_live,
-    preview: !c.is_live && isGateEnabled(),
+    live: isMarketOpen(c.code, c.is_live, false),
+    preview: !c.is_live && isMarketOpen(c.code, false, isGateEnabled()),
     flag: FLAG_BY_COUNTRY[c.code] ?? "",
   }));
 }
 
 /**
- * The visitor's chosen market, defaulting to the home market. The cookie only
- * ever names a market; whether that choice is honoured for content is decided
- * against `countries.is_live` at the places that use it.
+ * Portugal-first marketing, including visitors with a legacy UK cookie.
+ * Public content can describe a market before registration and bookings open.
  */
 export async function getSelectedCountry(): Promise<MarketCountry> {
   const store = await cookies();
   const chosen = parseSelectedMarket(store.get(MARKET_COOKIE)?.value);
-  if (chosen === "GB" || isGateEnabled()) return chosen;
+  // Marketing can describe Portugal before launch, without opening registration.
+  return chosen === "GB" ? "PT" : chosen;
+}
 
-  // Public site: a market that is not live cannot be shown, even to a visitor
-  // whose cookie still names it (set during the private preview).
+export async function isRegistrationOpen(country: MarketCountry): Promise<boolean> {
   const supabase = await createClient();
-  const { data } = await supabase.from("countries").select("is_live").eq("code", chosen).maybeSingle();
-  return data?.is_live ? chosen : "GB";
+  const { data } = await supabase.from("countries").select("is_live").eq("code", country).maybeSingle();
+  return !!data && isMarketOpen(country, data.is_live, isGateEnabled());
 }

@@ -1,4 +1,6 @@
 import { createServiceClient } from "@/lib/supabase/service";
+import { renderEmail } from "@/lib/email/render";
+import { sendEmail, type EmailDelivery } from "@/lib/email/transport";
 
 export type NotificationType =
   | "booking_request" | "booking_available" | "booking_confirmation" | "booking_cancellation"
@@ -11,7 +13,7 @@ export type NotificationType =
   | "timesheet_submitted" | "timesheet_confirmed" | "timesheet_disputed"
   | "message_received";
 
-export type ChannelSender = (msg: { to: string; subject: string; body: string }) => Promise<void>;
+export type ChannelSender = (msg: { to: string; subject: string; body: string; html: string; text: string }) => Promise<void | EmailDelivery>;
 
 /** Pure: substitute {{var}} tokens. */
 export function renderTemplate(
@@ -22,24 +24,7 @@ export function renderTemplate(
   return { subject: sub(tpl.subject), body: sub(tpl.body) };
 }
 
-/** Prod sender via Resend HTTP API (no SDK dependency). */
-const resendSender: ChannelSender = async (msg) => {
-  const key = process.env.RESEND_API_KEY!;
-  const from = process.env.RESEND_FROM ?? "CareBridge Connect <noreply@carebridge.example>";
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ from, to: msg.to, subject: msg.subject, text: msg.body }),
-  });
-  if (!res.ok) throw new Error(`Resend failed: ${res.status}`);
-};
-
-/** Dev/default: the notifications row is the durable record; no external email. */
-const recordOnlySender: ChannelSender = async () => {};
-
-function defaultSender(): ChannelSender {
-  return process.env.RESEND_API_KEY ? resendSender : recordOnlySender;
-}
+const defaultSender: ChannelSender = (msg) => sendEmail(msg);
 
 /**
  * Render the template for `type`, insert a notifications row, attempt delivery,
@@ -51,42 +36,33 @@ export function localeForCountry(countryCode: string | null | undefined): string
 }
 
 /**
- * Pure: which market a recipient belongs to. A professional's and an
- * organisation's country are recorded on their row (0076, 0087); a private
- * client has none, so the market chosen at sign-up (auth user_metadata.market)
- * decides. Anything unknown is the UK.
+ * Immutable users.country_code is authoritative. Historical profile country
+ * supports legacy null snapshots; accounts without either deliberately use GB.
  */
 export function recipientCountry(args: {
+  accountCountry?: string | null;
   professionalCountry?: string | null;
   organisationCountry?: string | null;
-  signupMarket?: unknown;
 }): string {
-  return (
-    args.professionalCountry ??
-    args.organisationCountry ??
-    (args.signupMarket === "PT" ? "PT" : "GB")
-  );
+  return [args.accountCountry, args.professionalCountry, args.organisationCountry]
+    .find((country) => country === "PT" || country === "GB") ?? "GB";
 }
 
 /** The template locale for a recipient: Portuguese for anyone in the Portuguese market. */
 async function localeForRecipient(
   admin: ReturnType<typeof createServiceClient>,
   recipientUserId: string,
+  accountCountry?: string | null,
 ): Promise<string> {
+  if (accountCountry === "PT" || accountCountry === "GB") return localeForCountry(accountCountry);
   const [{ data: pro }, { data: org }] = await Promise.all([
     admin.from("professionals").select("country_code").eq("user_id", recipientUserId).maybeSingle(),
     admin.from("organisations").select("country_code").eq("user_id", recipientUserId).maybeSingle(),
   ]);
-  let signupMarket: unknown;
-  if (!pro?.country_code && !org?.country_code) {
-    const { data } = await admin.auth.admin.getUserById(recipientUserId);
-    signupMarket = data.user?.user_metadata?.market;
-  }
   return localeForCountry(
     recipientCountry({
       professionalCountry: pro?.country_code,
       organisationCountry: org?.country_code,
-      signupMarket,
     }),
   );
 }
@@ -95,13 +71,16 @@ export async function sendNotification(
   type: NotificationType,
   recipientUserId: string,
   payload: Record<string, string | number>,
-  sender: ChannelSender = defaultSender(),
+  sender: ChannelSender = defaultSender,
 ): Promise<void> {
   const admin = createServiceClient();
   try {
+    const { data: u, error: recipientError } = await admin.from("users")
+      .select("email, country_code").eq("id", recipientUserId).maybeSingle();
+    if (recipientError) throw new Error("Could not read notification recipient");
     // The recipient's language first, then that variant — falling back to the
     // English row wherever a translation has not landed yet.
-    const locale = await localeForRecipient(admin, recipientUserId);
+    const locale = await localeForRecipient(admin, recipientUserId, u?.country_code);
     let { data: tpl } = await admin
       .from("notification_templates")
       .select("subject, body")
@@ -116,9 +95,6 @@ export async function sendNotification(
         .eq("locale", "en-GB")
         .single());
     }
-    const [{ data: u }] = await Promise.all([
-      admin.from("users").select("email").eq("id", recipientUserId).maybeSingle(),
-    ]);
     if (!tpl) return;
 
     const { subject, body } = renderTemplate(tpl, payload);
@@ -129,7 +105,11 @@ export async function sendNotification(
       .single();
 
     try {
-      if (u?.email) await sender({ to: u.email, subject, body });
+      if (!u?.email) throw new Error("No notification recipient");
+      const email = renderEmail({ subject, body, locale });
+      const delivery = await sender({ to: u.email, body, ...email });
+      // Record-only mode is queued; there was no delivery attempt.
+      if (delivery === "skipped") return;
       if (row) await admin.from("notifications").update({ status: "sent", sent_at: new Date().toISOString() }).eq("id", row.id);
     } catch {
       if (row) await admin.from("notifications").update({ status: "failed" }).eq("id", row.id);

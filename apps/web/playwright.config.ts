@@ -13,15 +13,12 @@ const LOCAL = {
 } as const;
 
 const e2eEnv = {
-  NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL ?? LOCAL.NEXT_PUBLIC_SUPABASE_URL,
-  NEXT_PUBLIC_SUPABASE_ANON_KEY:
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? LOCAL.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-  SUPABASE_SERVICE_ROLE_KEY:
-    process.env.SUPABASE_SERVICE_ROLE_KEY ?? LOCAL.SUPABASE_SERVICE_ROLE_KEY,
-  STRIPE_WEBHOOK_SECRET:
-    process.env.STRIPE_WEBHOOK_SECRET ?? LOCAL.STRIPE_WEBHOOK_SECRET,
-  STRIPE_SECRET_KEY:
-    process.env.STRIPE_SECRET_KEY ?? LOCAL.STRIPE_SECRET_KEY,
+  ...LOCAL,
+  NEXT_PUBLIC_APP_URL: "http://127.0.0.1:3100",
+  RESEND_API_KEY: "",
+  ANTHROPIC_API_KEY: "",
+  PAYOUT_ENC_KEY: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+  CRON_SECRET: "carebridge-local-e2e-only",
   // Force the private-preview gate OFF for e2e, overriding any value the dev
   // server would otherwise inherit from a hosted `.env.local`.
   PRODUCTION_GATE_ENABLED: "false",
@@ -41,10 +38,10 @@ export default defineConfig({
   workers: 1,
   retries: 0,
   reporter: [["list"], ["html", { open: "never" }]],
-  use: { baseURL: "http://127.0.0.1:3000" },
+  use: { baseURL: "http://127.0.0.1:3100" },
   webServer: {
-    command: "npx next dev -H 127.0.0.1 -p 3000",
-    url: "http://127.0.0.1:3000",
+    command: "npx next dev --webpack -H 127.0.0.1 -p 3100",
+    url: "http://127.0.0.1:3100",
     // Must not reuse a dev server started with hosted `.env.local` credentials.
     reuseExistingServer: false,
     timeout: 180_000,

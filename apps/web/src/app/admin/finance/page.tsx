@@ -1,3 +1,7 @@
+import { getPortalT } from "@/lib/i18n/portal-server";
+import { Tr } from "@/components/portal-locale";
+import { TableScroll } from "@/components/table-scroll";
+import { AdminTableHeader } from "@/components/admin-table-header";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createServiceClient } from "@/lib/supabase/service";
@@ -26,6 +30,8 @@ export default async function AdminFinancePage({
     requesterUserId?: string;
   }>;
 }) {
+  const t = await getPortalT();
+
   if (!(await requireAdmin())) redirect("/login");
   const { from, to, bookingStatus, professionalId, requesterUserId } = await searchParams;
   const admin = createServiceClient();
@@ -104,26 +110,20 @@ export default async function AdminFinancePage({
     );
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-10">
+    <main id="main-content" tabIndex={-1} className="mx-auto max-w-4xl px-4 py-10">
       <div>
-        <h1 className="mt-1 text-3xl font-bold">Finance</h1>
+        <h1 className="mt-1 text-3xl font-bold"><Tr>{"Finance"}</Tr></h1>
       </div>
 
       {/* Date filter */}
       <form method="GET" className="mt-6 flex items-center gap-3 text-sm">
-        <div className="flex items-center gap-2 text-[#4a4a4a]">
-          From
-          <DatePicker name="from" aria-label="From date" defaultValue={from ?? ""} className="w-40" />
+        <div className="flex items-center gap-2 text-ink"><Tr>{"From"}</Tr><DatePicker name="from" aria-label={t("From date")} defaultValue={from ?? ""} className="w-40" />
         </div>
-        <div className="flex items-center gap-2 text-[#4a4a4a]">
-          To
-          <DatePicker name="to" aria-label="To date" defaultValue={to ?? ""} className="w-40" />
+        <div className="flex items-center gap-2 text-ink"><Tr>{"To"}</Tr><DatePicker name="to" aria-label={t("To date")} defaultValue={to ?? ""} className="w-40" />
         </div>
-        <div className="flex items-center gap-2 text-[#4a4a4a]">
-          Booking status
-          <Select
+        <div className="flex items-center gap-2 text-ink"><Tr>{"Booking status"}</Tr><Select
             name="bookingStatus"
-            aria-label="Booking status"
+            aria-label={t("Booking status")}
             defaultValue={bookingStatus ?? ""}
             className="w-40"
             options={[
@@ -137,11 +137,9 @@ export default async function AdminFinancePage({
             ]}
           />
         </div>
-        <div className="flex items-center gap-2 text-[#4a4a4a]">
-          Professional
-          <Select
+        <div className="flex items-center gap-2 text-ink"><Tr>{"Professional"}</Tr><Select
             name="professionalId"
-            aria-label="Professional"
+            aria-label={t("Professional")}
             defaultValue={professionalId ?? ""}
             className="w-48"
             options={[
@@ -150,11 +148,9 @@ export default async function AdminFinancePage({
             ]}
           />
         </div>
-        <div className="flex items-center gap-2 text-[#4a4a4a]">
-          Client or organisation
-          <Select
+        <div className="flex items-center gap-2 text-ink"><Tr>{"Client or organisation"}</Tr><Select
             name="requesterUserId"
-            aria-label="Client or organisation"
+            aria-label={t("Client or organisation")}
             defaultValue={requesterUserId ?? ""}
             className="w-52"
             options={[
@@ -168,33 +164,29 @@ export default async function AdminFinancePage({
         </div>
         <button
           type="submit"
-          className="rounded-full bg-[#2e7d32] px-3 py-1.5 text-white hover:bg-[#246627]"
-        >
-          Filter
-        </button>
+          className="rounded-full bg-brand-strong px-3 py-1.5 text-white hover:bg-brand-strong-hover"
+        ><Tr>{"Filter"}</Tr></button>
         {(from || to) && (
-          <Link href="/admin/finance" className="text-[#4a4a4a] underline hover:text-[#14301e]">
-            Clear
-          </Link>
+          <Link href="/admin/finance" className="text-ink underline hover:text-heading"><Tr>{"Clear"}</Tr></Link>
         )}
       </form>
 
       {/* Headline cards */}
       <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">
-        <div className="rounded-2xl border border-[#dbe7e0] bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
-          <p className="text-xs tracking-wide text-[#4a4a4a] uppercase">Net collected</p>
+        <div className="rounded-2xl border border-line bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
+          <p className="text-xs tracking-wide text-ink uppercase"><Tr>{"Net collected"}</Tr></p>
           <p className="mt-2 text-2xl font-bold">{formatAmountsByCurrency(netCollectedByCurrency)}</p>
         </div>
-        <div className="rounded-2xl border border-[#dbe7e0] bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
-          <p className="text-xs tracking-wide text-[#4a4a4a] uppercase">Total refunded</p>
+        <div className="rounded-2xl border border-line bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
+          <p className="text-xs tracking-wide text-ink uppercase"><Tr>{"Total refunded"}</Tr></p>
           <p className="mt-2 text-2xl font-bold">{formatAmountsByCurrency(totalRefundedByCurrency)}</p>
         </div>
-        <div className="rounded-2xl border border-[#dbe7e0] bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
-          <p className="text-xs tracking-wide text-[#4a4a4a] uppercase">Total paid out</p>
+        <div className="rounded-2xl border border-line bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
+          <p className="text-xs tracking-wide text-ink uppercase"><Tr>{"Total paid out"}</Tr></p>
           <p className="mt-2 text-2xl font-bold">{formatAmountsByCurrency(totalPaidOutByCurrency)}</p>
         </div>
-        <div className="rounded-2xl border border-[#dbe7e0] bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
-          <p className="text-xs tracking-wide text-[#4a4a4a] uppercase">Platform revenue</p>
+        <div className="rounded-2xl border border-line bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
+          <p className="text-xs tracking-wide text-ink uppercase"><Tr>{"Platform revenue"}</Tr></p>
           <p className="mt-2 text-2xl font-bold">{formatAmountsByCurrency(platformRevenueByCurrency)}</p>
         </div>
       </div>
@@ -202,36 +194,33 @@ export default async function AdminFinancePage({
       {/* Booking analytics */}
       <section className="mt-10">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-xl font-bold">Bookings, fees and payouts</h2>
+          <h2 className="text-xl font-bold"><Tr>{"Bookings, fees and payouts"}</Tr></h2>
           <Link
             href={`/admin/finance/report${reportQuery ? `?${reportQuery}` : ""}`}
-            className="rounded-full border border-[#dbe7e0] px-3 py-1.5 text-sm text-[#2e7d32] hover:bg-[#f5f7f6]"
-          >
-            Printable report (PDF)
-          </Link>
+            className="rounded-full border border-line px-3 py-1.5 text-sm text-brand-strong hover:bg-surface"
+          ><Tr>{"Printable report (PDF)"}</Tr></Link>
         </div>
 
         <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-4">
-          <div className="rounded-2xl border border-[#dbe7e0] bg-white p-4">
-            <p className="text-xs uppercase tracking-wide text-[#4a4a4a]">Completion rate</p>
+          <div className="rounded-2xl border border-line bg-white p-4">
+            <p className="text-xs uppercase tracking-wide text-ink"><Tr>{"Completion rate"}</Tr></p>
             <p className="mt-2 text-2xl font-bold">{analytics.completionRate}%</p>
-            <p className="mt-0.5 text-xs text-[#7a8a81]">
-              {analytics.completed} of {analytics.concluded} concluded
-            </p>
+            <p className="mt-0.5 text-xs text-muted">
+              {analytics.completed}<Tr>{"of"}</Tr>{analytics.concluded}<Tr>{"concluded"}</Tr></p>
           </div>
-          <div className="rounded-2xl border border-[#dbe7e0] bg-white p-4">
-            <p className="text-xs uppercase tracking-wide text-[#4a4a4a]">Cancellation rate</p>
+          <div className="rounded-2xl border border-line bg-white p-4">
+            <p className="text-xs uppercase tracking-wide text-ink"><Tr>{"Cancellation rate"}</Tr></p>
             <p className="mt-2 text-2xl font-bold">{analytics.cancellationRate}%</p>
-            <p className="mt-0.5 text-xs text-[#7a8a81]">{analytics.noShow} no-shows</p>
+            <p className="mt-0.5 text-xs text-muted">{analytics.noShow}<Tr>{"no-shows"}</Tr></p>
           </div>
-          <div className="rounded-2xl border border-[#dbe7e0] bg-white p-4">
-            <p className="text-xs uppercase tracking-wide text-[#4a4a4a]">Average booking</p>
+          <div className="rounded-2xl border border-line bg-white p-4">
+            <p className="text-xs uppercase tracking-wide text-ink"><Tr>{"Average booking"}</Tr></p>
             <p className="mt-2 text-2xl font-bold">{formatAmountsByCurrency(analytics.averageBookingValueByCurrency)}</p>
           </div>
-          <div className="rounded-2xl border border-[#dbe7e0] bg-white p-4">
-            <p className="text-xs uppercase tracking-wide text-[#4a4a4a]">Bookings this month</p>
+          <div className="rounded-2xl border border-line bg-white p-4">
+            <p className="text-xs uppercase tracking-wide text-ink"><Tr>{"Bookings this month"}</Tr></p>
             <p className="mt-2 text-2xl font-bold">{analytics.monthly.at(-1)?.bookings ?? 0}</p>
-            <p className="mt-0.5 text-xs text-[#7a8a81]">
+            <p className="mt-0.5 text-xs text-muted">
               {analytics.monthOnMonthGrowth === null
                 ? "No prior month to compare"
                 : `${analytics.monthOnMonthGrowth > 0 ? "+" : ""}${analytics.monthOnMonthGrowth}% on last month`}
@@ -239,21 +228,21 @@ export default async function AdminFinancePage({
           </div>
         </div>
 
-        <div className="mt-4 overflow-x-auto rounded-2xl border border-[#dbe7e0]">
+        <TableScroll className="mt-4 rounded-2xl border border-line">
           <table className="w-full text-sm">
-            <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#4a4a4a]">
+            <AdminTableHeader>
               <tr>
-                <th className="p-3 font-medium">Shift</th>
-                <th className="p-3 font-medium">Role</th>
-                <th className="p-3 font-medium">Professional</th>
-                <th className="p-3 font-medium">Client</th>
-                <th className="p-3 font-medium">Charge</th>
-                <th className="p-3 font-medium">Payout</th>
-                <th className="p-3 font-medium">Platform fee</th>
-                <th className="p-3 font-medium">Money</th>
+                <th className="p-3 font-medium"><Tr>{"Shift"}</Tr></th>
+                <th className="p-3 font-medium"><Tr>{"Role"}</Tr></th>
+                <th className="p-3 font-medium"><Tr>{"Professional"}</Tr></th>
+                <th className="p-3 font-medium"><Tr>{"Client"}</Tr></th>
+                <th className="p-3 font-medium"><Tr>{"Charge"}</Tr></th>
+                <th className="p-3 font-medium"><Tr>{"Payout"}</Tr></th>
+                <th className="p-3 font-medium"><Tr>{"Platform fee"}</Tr></th>
+                <th className="p-3 font-medium"><Tr>{"Money"}</Tr></th>
               </tr>
-            </thead>
-            <tbody className="divide-y divide-[#dbe7e0]">
+            </AdminTableHeader>
+            <tbody className="divide-y divide-line">
               {bookingRows.map((row) => (
                 <tr key={row.bookingId}>
                   <td className="p-3 whitespace-nowrap">{formatDate(row.scheduledStart)}</td>
@@ -266,7 +255,7 @@ export default async function AdminFinancePage({
                   <td className="p-3">
                     <span
                       title={MONEY_STATE_HINT[row.state]}
-                      className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#4a4a4a]"
+                      className="rounded-full bg-surface px-2.5 py-0.5 text-xs font-medium text-ink"
                     >
                       {MONEY_STATE_LABEL[row.state]}
                     </span>
@@ -275,10 +264,10 @@ export default async function AdminFinancePage({
               ))}
             </tbody>
             {bookingRows.length > 0 && (
-              <tfoot className="border-t border-[#dbe7e0] bg-[#f5f7f6] font-medium">
+              <tfoot className="border-t border-line bg-surface font-medium">
                 <tr>
                   <td className="p-3" colSpan={4}>
-                    {bookingRows.length} booking{bookingRows.length === 1 ? "" : "s"}
+                    {bookingRows.length}<Tr>{"booking"}</Tr><Tr>{bookingRows.length === 1 ? "" : "s"}</Tr>
                   </td>
                   <td className="p-3">{formatAmountsByCurrency(totalsAsAmounts((t) => t.charged))}</td>
                   <td className="p-3">{formatAmountsByCurrency(totalsAsAmounts((t) => t.payout))}</td>
@@ -289,13 +278,13 @@ export default async function AdminFinancePage({
             )}
           </table>
           {bookingRows.length === 0 && (
-            <p className="p-6 text-sm text-[#4a4a4a]">No bookings match these filters.</p>
+            <p className="p-6 text-sm text-ink"><Tr>{"No bookings match these filters."}</Tr></p>
           )}
-        </div>
+        </TableScroll>
 
-        <div className="mt-4 rounded-2xl border border-[#dbe7e0] p-4">
-          <p className="text-sm font-medium text-[#1e5a33]">Monthly trend</p>
-          <ul className="mt-3 space-y-1.5 text-sm text-[#4a4a4a]">
+        <div className="mt-4 rounded-2xl border border-line p-4">
+          <p className="text-sm font-medium text-brand-ink"><Tr>{"Monthly trend"}</Tr></p>
+          <ul className="mt-3 space-y-1.5 text-sm text-ink">
             {analytics.monthly.map((point) => (
               <li key={point.month} className="flex items-center gap-3">
                 <span className="w-20 shrink-0">{point.month}</span>
@@ -304,8 +293,8 @@ export default async function AdminFinancePage({
                   className="h-2 rounded-full bg-[#6cc24a]"
                   style={{ width: `${Math.min(point.bookings * 24, 240)}px` }}
                 />
-                <span className="text-xs text-[#7a8a81]">
-                  {point.bookings} booking{point.bookings === 1 ? "" : "s"} ·{" "}
+                <span className="text-xs text-muted">
+                  {point.bookings}<Tr>{"booking"}</Tr><Tr>{point.bookings === 1 ? "" : "s"}</Tr> ·{" "}
                   {formatAmountsByCurrency(point.revenueByCurrency)}
                 </span>
               </li>
@@ -316,20 +305,20 @@ export default async function AdminFinancePage({
 
       {/* Payments table */}
       <section className="mt-10">
-        <h2 className="text-xl font-bold">Payments</h2>
+        <h2 className="text-xl font-bold"><Tr>{"Payments"}</Tr></h2>
         {payments && payments.length > 0 ? (
-          <div className="mt-4 overflow-x-auto rounded-2xl border border-[#dbe7e0] shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
+          <TableScroll className="mt-4 rounded-2xl border border-line shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
             <table className="w-full text-sm">
-              <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#4a4a4a]">
+              <AdminTableHeader>
                 <tr>
-                  <th className="p-3 font-medium">Date</th>
-                  <th className="p-3 font-medium">Booking start</th>
-                  <th className="p-3 font-medium">Amount</th>
-                  <th className="p-3 font-medium">Refunded</th>
-                  <th className="p-3 font-medium">Status</th>
+                  <th className="p-3 font-medium"><Tr>{"Date"}</Tr></th>
+                  <th className="p-3 font-medium"><Tr>{"Booking start"}</Tr></th>
+                  <th className="p-3 font-medium"><Tr>{"Amount"}</Tr></th>
+                  <th className="p-3 font-medium"><Tr>{"Refunded"}</Tr></th>
+                  <th className="p-3 font-medium"><Tr>{"Status"}</Tr></th>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-[#dbe7e0]">
+              </AdminTableHeader>
+              <tbody className="divide-y divide-line">
                 {payments.map((p) => {
                   const booking = p.bookings as { id: string; scheduled_start: string } | null;
                   const refunded = Number(p.refunded_amount ?? 0);
@@ -342,7 +331,7 @@ export default async function AdminFinancePage({
                       <td className="p-3">{formatMoney(p.amount, p.currency)}</td>
                       <td className="p-3">{refunded > 0 ? formatMoney(refunded, p.currency) : "—"}</td>
                       <td className="p-3">
-                        <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#4a4a4a]">
+                        <span className="rounded-full bg-surface px-2.5 py-0.5 text-xs font-medium text-ink">
                           {p.status.replace(/_/g, " ")}
                         </span>
                       </td>
@@ -351,36 +340,34 @@ export default async function AdminFinancePage({
                 })}
               </tbody>
             </table>
-          </div>
+          </TableScroll>
         ) : (
-          <p className="mt-3 text-sm text-[#4a4a4a]">No payments.</p>
+          <p className="mt-3 text-sm text-ink"><Tr>{"No payments."}</Tr></p>
         )}
       </section>
 
       {/* Payouts table */}
       <section className="mt-12">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold">Payouts</h2>
+          <h2 className="text-xl font-bold"><Tr>{"Payouts"}</Tr></h2>
           <Link
             href="/admin/finance/payouts"
-            className="rounded-full bg-[#2e7d32] px-3 py-1.5 text-sm text-white hover:bg-[#246627]"
-          >
-            Manage payouts
-          </Link>
+            className="rounded-full bg-brand-strong px-3 py-1.5 text-sm text-white hover:bg-brand-strong-hover"
+          ><Tr>{"Manage payouts"}</Tr></Link>
         </div>
         {payouts && payouts.length > 0 ? (
-          <div className="mt-4 overflow-x-auto rounded-2xl border border-[#dbe7e0] shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
+          <TableScroll className="mt-4 rounded-2xl border border-line shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
             <table className="w-full text-sm">
-              <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#4a4a4a]">
+              <AdminTableHeader>
                 <tr>
-                  <th className="p-3 font-medium">Date</th>
-                  <th className="p-3 font-medium">Professional</th>
-                  <th className="p-3 font-medium">Amount</th>
-                  <th className="p-3 font-medium">Status</th>
-                  <th className="p-3 font-medium">Method / Ref</th>
+                  <th className="p-3 font-medium"><Tr>{"Date"}</Tr></th>
+                  <th className="p-3 font-medium"><Tr>{"Professional"}</Tr></th>
+                  <th className="p-3 font-medium"><Tr>{"Amount"}</Tr></th>
+                  <th className="p-3 font-medium"><Tr>{"Status"}</Tr></th>
+                  <th className="p-3 font-medium"><Tr>{"Method / Ref"}</Tr></th>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-[#dbe7e0]">
+              </AdminTableHeader>
+              <tbody className="divide-y divide-line">
                 {payouts.map((p) => {
                   const prof = p.professionals as { full_name: string } | null;
                   return (
@@ -389,11 +376,11 @@ export default async function AdminFinancePage({
                       <td className="p-3">{prof?.full_name ?? "—"}</td>
                       <td className="p-3">{formatMoney(p.amount, p.currency)}</td>
                       <td className="p-3">
-                        <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#4a4a4a]">
+                        <span className="rounded-full bg-surface px-2.5 py-0.5 text-xs font-medium text-ink">
                           {p.status.replace(/_/g, " ")}
                         </span>
                       </td>
-                      <td className="p-3 text-[#4a4a4a]">
+                      <td className="p-3 text-ink">
                         {p.method && p.reference ? `${p.method} · ${p.reference}` : p.method ?? "—"}
                       </td>
                     </tr>
@@ -401,9 +388,9 @@ export default async function AdminFinancePage({
                 })}
               </tbody>
             </table>
-          </div>
+          </TableScroll>
         ) : (
-          <p className="mt-3 text-sm text-[#4a4a4a]">No payouts.</p>
+          <p className="mt-3 text-sm text-ink"><Tr>{"No payouts."}</Tr></p>
         )}
       </section>
     </main>

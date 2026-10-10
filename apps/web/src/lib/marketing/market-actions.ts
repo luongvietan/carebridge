@@ -1,20 +1,15 @@
 "use server";
-import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { isGateEnabled } from "@/lib/auth/gate";
 import { createClient } from "@/lib/supabase/server";
-import { MARKET_COOKIE, type MarketCountry } from "@/lib/marketing/market";
-
-const ONE_YEAR_SECONDS = 60 * 60 * 24 * 365;
+import { isMarketOpen, type MarketCountry } from "@/lib/marketing/market";
+import { persistMarketCookie } from "@/lib/marketing/market-cookie";
 
 /**
  * Choose a market from the homepage switch (client request, 10 Aug).
  *
- * A market can only be selected while it is live in the database — Portugal
- * stays a "launching soon" badge until Ana's regulatory confirmation arrives,
- * and going live is then one `update countries set is_live = true` away, with
- * no code change. The cookie stores only the two-letter code, so a tampered
- * value degrades to the home market rather than to anything attacker-chosen.
+ * Only Portugal can open for this launch, publicly after approval or privately
+ * behind the gate. UK stays launching soon regardless of an old database flag.
  */
 export async function selectMarket(code: string): Promise<{ ok: boolean }> {
   if (!/^[A-Z]{2}$/.test(code)) return { ok: false };
@@ -28,16 +23,9 @@ export async function selectMarket(code: string): Promise<{ ok: boolean }> {
   if (!country) return { ok: false };
   // Private preview: behind the access gate a not-yet-live market can be
   // chosen, so the client can review it before launch. Public: live only.
-  if (!country.is_live && !isGateEnabled()) return { ok: false };
+  if (!isMarketOpen(country.code, country.is_live, isGateEnabled())) return { ok: false };
 
-  const store = await cookies();
-  store.set(MARKET_COOKIE, code as MarketCountry, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: ONE_YEAR_SECONDS,
-  });
+  await persistMarketCookie(code as MarketCountry);
   revalidatePath("/");
   return { ok: true };
 }

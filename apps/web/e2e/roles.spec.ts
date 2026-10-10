@@ -14,7 +14,7 @@ async function signIn(page: Page, email: string) {
   await page.goto("/login");
   await page.locator('input[name="email"]').fill(email);
   await page.locator('input[name="password"]').fill("password123");
-  await page.getByRole("button", { name: /sign in/i }).click();
+  await page.getByRole("button", { name: /^(Sign in|Entrar)$/i }).click();
   await expect(page).toHaveURL(/\/professional/);
 }
 
@@ -28,7 +28,7 @@ test("a professional takes on a second role without disturbing the first", async
     email,
     password: "password123",
     email_confirm: true,
-    user_metadata: { account_type: "professional", full_name: proName },
+    user_metadata: { market: "GB", account_type: "professional", full_name: proName },
   });
   expect(proUser.user).toBeTruthy();
 

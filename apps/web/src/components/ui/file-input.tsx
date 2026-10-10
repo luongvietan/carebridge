@@ -121,15 +121,15 @@ export function FilePreviewInput({
           href={selected.objectUrl}
           target="_blank"
           rel="noreferrer"
-          className={`block shrink-0 overflow-hidden border border-[#2e7d32] bg-[#f5f7f6] ${panelClass}`}
-          title="Open selected image full size"
+          className={`block shrink-0 overflow-hidden border border-brand-strong bg-surface ${panelClass}`}
+          title={t("Open selected image full size")}
         >
-          <img src={selected.objectUrl} alt="Selected file preview" className={`${isAvatar ? "object-cover" : "object-contain"} h-full w-full`} />
+          <img src={selected.objectUrl} alt={t("Selected file preview")} className={`${isAvatar ? "object-cover" : "object-contain"} h-full w-full`} />
         </a>
       );
     } else {
       panel = (
-        <div className={`grid shrink-0 place-items-center border border-[#2e7d32] bg-[#f5f7f6] text-[#2e7d32] ${panelClass}`}>
+        <div className={`grid shrink-0 place-items-center border border-brand-strong bg-surface text-brand-strong ${panelClass}`}>
           <PdfGlyph className="h-8 w-8" />
         </div>
       );
@@ -141,8 +141,8 @@ export function FilePreviewInput({
           href={existing.url}
           target="_blank"
           rel="noreferrer"
-          className={`block shrink-0 overflow-hidden border border-[#dbe7e0] bg-[#f5f7f6] ${panelClass}`}
-          title="Open current file full size"
+          className={`block shrink-0 overflow-hidden border border-line bg-surface ${panelClass}`}
+          title={t("Open current file full size")}
         >
           <img src={existing.url} alt={t("Current file on record")} className={`${isAvatar ? "object-cover" : "object-contain"} h-full w-full`} />
         </a>
@@ -153,8 +153,8 @@ export function FilePreviewInput({
           href={existing.url}
           target="_blank"
           rel="noreferrer"
-          className={`grid shrink-0 place-items-center border border-[#dbe7e0] bg-[#f5f7f6] text-[#7a8a81] ${panelClass}`}
-          title="Open current document"
+          className={`grid shrink-0 place-items-center border border-line bg-surface text-muted ${panelClass}`}
+          title={t("Open current document")}
         >
           <PdfGlyph className="h-8 w-8" />
         </a>
@@ -162,7 +162,7 @@ export function FilePreviewInput({
     }
   } else {
     panel = (
-      <div className={`grid shrink-0 place-items-center border border-dashed border-[#dbe7e0] bg-[#f5f7f6] text-center text-[11px] leading-tight text-[#7a8a81] ${panelClass}`}>
+      <div className={`grid shrink-0 place-items-center border border-dashed border-line bg-surface text-center text-[11px] leading-tight text-muted ${panelClass}`}>
         {emptyLabel ?? (isAvatar ? t("No photo") : t("No file"))}
       </div>
     );
@@ -178,36 +178,37 @@ export function FilePreviewInput({
           name={name}
           accept={accept}
           required={required}
+          aria-invalid={Boolean(error)}
           aria-label={ariaLabel}
           aria-describedby={selected || error ? describedBy : undefined}
           onChange={onChange}
-          className="block w-full text-sm file:mr-3 file:cursor-pointer file:rounded-full file:border-0 file:bg-[#14301e] file:px-3 file:py-1.5 file:text-white hover:file:bg-[#33433a]"
+          className="block w-full text-sm file:mr-3 file:cursor-pointer file:rounded-full file:border-0 file:bg-heading file:px-3 file:py-1.5 file:text-white hover:file:bg-[#33433a]"
         />
-        <p id={describedBy} className="mt-1.5 text-xs">
+        <p id={describedBy} aria-live="polite" className="mt-1.5 text-xs">
           {error ? (
-            <span className="text-[#da1e28]">{error}</span>
+            <span className="text-danger">{error}</span>
           ) : selected ? (
-            <span className="text-[#4a4a4a]">
+            <span className="text-ink">
               <span className="font-medium">{selected.name}</span>{" "}
-              <span className="text-[#7a8a81]">· {formatBytes(selected.size)}</span>{" "}
-              <button type="button" onClick={clear} className="text-[#2e7d32] underline">
+              <span className="text-muted">· {formatBytes(selected.size)}</span>{" "}
+              <button type="button" onClick={clear} className="text-brand-strong underline">
                 {t("Remove")}
               </button>
             </span>
           ) : existing ? (
-            <span className="text-[#7a8a81]">
+            <span className="text-muted">
               {existing.filename ? t("{name} on record", { name: existing.filename }) : t("File on record")}
               {existing.downloadUrl && (
                 <>
                   {" · "}
-                  <a href={existing.downloadUrl} className="text-[#2e7d32] underline">
+                  <a href={existing.downloadUrl} className="text-brand-strong underline">
                     {t("Download")}
                   </a>
                 </>
               )}
             </span>
           ) : (
-            <span className="text-[#7a8a81]">{t("PDF, JPEG or PNG · up to 25MB")}</span>
+            <span className="text-muted">{t("PDF, JPEG or PNG · up to 25MB")}</span>
           )}
         </p>
       </div>

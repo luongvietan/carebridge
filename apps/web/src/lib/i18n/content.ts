@@ -36,6 +36,7 @@ import {
   verificationChecklistPt,
 } from "@/data/marketing-copy-pt";
 import { marketingImages } from "@/data/marketing-images";
+import { UK_CONTACT_PHONE } from "@/lib/site";
 
 /** Which photo a role card uses: the health set or the childcare set, by position. */
 export type RoleImageRef = { set: "health" | "child"; index: number };
@@ -85,7 +86,7 @@ const uiEn = {
     backToTop: "Back to top",
     rights: "All rights reserved.",
     address: "Manchester, United Kingdom",
-    phone: "+44 (0)161 000 0000",
+    phone: UK_CONTACT_PHONE,
   },
   hero: { complianceBuiltIn: "Compliance built in", verifiedRoles: "10 verified role types" },
   statsFootnote:
@@ -145,7 +146,7 @@ const uiEn = {
     email: "Email",
     phone: "Phone",
     address: "Address",
-    phoneValue: "+44 (0)161 000 0000",
+    phoneValue: UK_CONTACT_PHONE,
     addressValue: "Manchester, United Kingdom",
     whatsapp: "",
     whatsappValue: "",

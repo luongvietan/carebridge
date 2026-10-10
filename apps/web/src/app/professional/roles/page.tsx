@@ -8,8 +8,10 @@ import { RoleManager, type AddableRole, type RoleCard } from "@/components/role-
 export const dynamic = "force-dynamic";
 
 export default async function ProfessionalRolesPage() {
-  const t = await getPortalT();
-  const supabase = await createClient();
+  const [{ t }, supabase] = await Promise.all([
+    getPortalT().then((t) => ({ t })),
+    createClient(),
+  ]);
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -24,9 +26,9 @@ export default async function ProfessionalRolesPage() {
 
   if (!prof) {
     return (
-      <main className="mx-auto max-w-3xl px-4 py-10">
+      <main id="main-content" tabIndex={-1} className="mx-auto max-w-3xl px-4 py-10">
         <h1 className="text-3xl font-bold">{t("Your roles")}</h1>
-        <p className="mt-4 text-sm text-[#4a4a4a]">{t("Sign in to manage the roles you work in.")}</p>
+        <p className="mt-4 text-sm text-ink">{t("Sign in to manage the roles you work in.")}</p>
       </main>
     );
   }
@@ -62,9 +64,9 @@ export default async function ProfessionalRolesPage() {
     }));
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-10">
+    <main id="main-content" tabIndex={-1} className="mx-auto max-w-3xl px-4 py-10">
       <h1 className="mt-1 text-3xl font-bold">{t("Your roles")}</h1>
-      <p className="mt-2 text-sm text-[#4a4a4a]">
+      <p className="mt-2 text-sm text-ink">
         {t("You can work in more than one role. Each is cleared separately — its own assessment, and whichever documents and registrations that role requires — so one waiting on paperwork never holds up another.")}
       </p>
 

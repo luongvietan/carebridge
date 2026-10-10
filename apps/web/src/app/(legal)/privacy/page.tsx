@@ -16,7 +16,7 @@ export default async function PrivacyPage() {
   return (
     <>
       <SiteNav />
-      <main className="mx-auto max-w-3xl px-5 py-16">
+      <main id="main-content" tabIndex={-1} className="mx-auto max-w-3xl px-5 py-16">
         {pt ? (
           <>
             <LegalDraftNotice />
@@ -24,8 +24,8 @@ export default async function PrivacyPage() {
           </>
         ) : (
           <>
-            <h1 className="text-3xl font-semibold tracking-tight text-[#14301e]">Privacy Policy</h1>
-            <p className="mt-5 leading-relaxed text-[#4a4a4a]">
+            <h1 className="text-3xl font-semibold tracking-tight text-heading">Privacy Policy</h1>
+            <p className="mt-5 leading-relaxed text-ink">
               CareBridge Connect Ltd handles personal data in line with UK GDPR. We collect only the
               information needed to verify professionals, manage bookings and process payments, store it
               securely, and never share it without a lawful basis. This placeholder will be replaced with

@@ -10,6 +10,11 @@ export type PaymentActionResult = { ok: true; url?: string } | { error: string }
 export async function startCheckout(bookingId: string): Promise<PaymentActionResult> {
   const user = await requireAuth();
   const admin = createServiceClient();
+  const { data: account } = await admin.from("users").select("account_type").eq("id", user.id).single();
+  if (account?.account_type !== "private_client" && account?.account_type !== "organisation") {
+    return { error: "This account cannot start a booking payment." };
+  }
+  const bookingArea = account.account_type === "organisation" ? "organisation" : "client";
 
   const { data: booking } = await admin
     .from("bookings")
@@ -67,8 +72,8 @@ export async function startCheckout(bookingId: string): Promise<PaymentActionRes
     // the Stripe dashboard) follow the currency without any list here.
     locale: booking.snap_currency.trim().toUpperCase() === "EUR" ? "pt" : "auto",
     line_items: buildCheckoutLineItems({ total_client_charge: Number(booking.total_client_charge), snap_currency: booking.snap_currency, role_name: roleName }),
-    success_url: `${appUrl}/client/bookings?paid=1`,
-    cancel_url: `${appUrl}/client/bookings?paid=0`,
+    success_url: `${appUrl}/${bookingArea}/bookings?paid=1`,
+    cancel_url: `${appUrl}/${bookingArea}/bookings?paid=0`,
     metadata: { booking_id: bookingId, payment_id: paymentId },
     payment_intent_data: { metadata: { booking_id: bookingId, payment_id: paymentId } },
   });

@@ -8,8 +8,10 @@ import { SubmitHoursForm, type ShiftAwaitingHours } from "@/components/timesheet
 export const dynamic = "force-dynamic";
 
 export default async function ProfessionalBookingsPage() {
-  const t = await getPortalT();
-  const supabase = await createClient();
+  const [{ t }, supabase] = await Promise.all([
+    getPortalT().then((t) => ({ t })),
+    createClient(),
+  ]);
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -74,15 +76,15 @@ export default async function ProfessionalBookingsPage() {
     }));
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-10">
+    <main id="main-content" tabIndex={-1} className="mx-auto max-w-4xl px-4 py-10">
       <h1 className="mt-1 text-3xl font-bold">{t("Bookings")}</h1>
       {awaitingHours.length > 0 && (
         <section className="mt-10">
           <h2 className="text-xl font-bold">{t("Hours to submit")}</h2>
-          <p className="mt-2 text-sm text-[#4a4a4a]">
+          <p className="mt-2 text-sm text-ink">
             {t("Log the hours you actually worked. Your payment is released once the client confirms them, and automatically after three working days if they do not respond.")}
           </p>
-          <div className="mt-4 divide-y divide-[#dbe7e0] border border-[#dbe7e0]">
+          <div className="mt-4 divide-y divide-line border border-line">
             {awaitingHours.map((shift) => (
               <SubmitHoursForm key={shift.bookingId} shift={shift} />
             ))}

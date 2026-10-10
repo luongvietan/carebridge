@@ -1,5 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { localService } from "../local-market";
 
 const PASSWORD = "password123";
 
@@ -17,7 +18,7 @@ async function seedAdmin(sb: SupabaseClient, stamp: number) {
     email,
     password: PASSWORD,
     email_confirm: true,
-    user_metadata: { account_type: "admin", full_name: "Matrix E2E Admin" },
+    user_metadata: { market: "GB", account_type: "admin", full_name: "Matrix E2E Admin" },
   });
   if (error || !data.user) throw error ?? new Error("admin user");
   // Signup metadata can't grant admin (0031 hardening downgrades it to
@@ -30,7 +31,7 @@ async function login(page: Page, email: string) {
   await page.goto("/login");
   await page.locator('input[name="email"]').fill(email);
   await page.locator('input[name="password"]').fill(PASSWORD);
-  await page.getByRole("button", { name: /sign in/i }).click();
+  await page.getByRole("button", { name: /^(Sign in|Entrar)$/i }).click();
   await expect(page).toHaveURL(/\/admin/, { timeout: 15_000 });
 }
 
@@ -44,6 +45,45 @@ test("login form renders", async ({ page }) => {
   await page.goto("/login");
   await expect(page.locator('input[name="email"]')).toBeVisible();
   await expect(page.locator('input[name="password"]')).toBeVisible();
+});
+
+test("a legacy UK cookie keeps Portugal content and UK launching soon", async ({ page, context }) => {
+  await context.addCookies([{ name: "cbc_market", value: "GB", url: "http://127.0.0.1:3100" }]);
+  await page.goto("/");
+  await expect(page.getByRole("list", { name: "Países onde operamos" })).toContainText("Reino Unido");
+  await expect(page.getByRole("list", { name: "Países onde operamos" })).toContainText("em breve");
+  await expect(page.getByRole("button", { name: /Reino Unido/ })).toHaveCount(0);
+});
+
+test("public registration stays closed before Portugal approval", async ({ page }) => {
+  const sb = localService();
+  const { data: prior } = await sb.from("countries").select("is_live").eq("code", "PT").single();
+  await sb.from("countries").update({ is_live: false }).eq("code", "PT");
+  try {
+    await page.goto("/register?as=professional");
+    await expect(page.getByRole("heading", { name: "Inscrições em breve" })).toBeVisible();
+    await expect(page.locator('input[name="email"]')).toHaveCount(0);
+  } finally {
+    await sb.from("countries").update({ is_live: prior!.is_live }).eq("code", "PT");
+  }
+});
+
+test("contact saves an enquiry without claiming an unconfigured email was sent", async ({ page }) => {
+  const sb = localService();
+  const email = `matrixcontact_${Date.now()}@test.dev`;
+  try {
+    await page.goto("/contact");
+    await page.locator('input[name="name"]').fill("Trial enquiry");
+    await page.locator('input[name="email"]').fill(email);
+    await page.locator('textarea[name="message"]').fill("Local isolated enquiry test.");
+    await page.locator('form button[type="submit"]').click();
+    await expect(page.getByText("A mensagem está guardada. Não foi enviado um novo email de confirmação.")).toBeVisible();
+    const { count, error } = await sb.from("contact_messages").select("id", { count: "exact", head: true }).eq("email", email);
+    expect(error).toBeNull();
+    expect(count).toBe(1);
+  } finally {
+    await sb.from("contact_messages").delete().eq("email", email);
+  }
 });
 
 test("export endpoint rejects an unauthenticated request", async ({ request }) => {

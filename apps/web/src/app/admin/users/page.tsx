@@ -1,3 +1,6 @@
+import { Tr } from "@/components/portal-locale";
+import { TableScroll } from "@/components/table-scroll";
+import { AdminTableHeader } from "@/components/admin-table-header";
 import Link from "next/link";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
@@ -302,36 +305,34 @@ export default async function AdminUsersPage({
   );
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-10">
-      <h1 className="mt-1 text-3xl font-bold">Professionals</h1>
-      <p className="mt-2 text-sm text-[#4a4a4a]">
-        Search and filter professionals by status, location and compliance.
-      </p>
+    <main id="main-content" tabIndex={-1} className="mx-auto max-w-6xl px-4 py-10">
+      <h1 className="mt-1 text-3xl font-bold"><Tr>{"Professionals"}</Tr></h1>
+      <p className="mt-2 text-sm text-ink"><Tr>{"Search and filter professionals by status, location and compliance."}</Tr></p>
 
-      <Suspense fallback={<div className="mt-6 h-32 animate-pulse rounded-2xl bg-[#f5f7f6]" />}>
+      <Suspense fallback={<div className="mt-6 h-32 animate-pulse rounded-2xl bg-surface" />}>
         <UserFilters roles={roles ?? []} />
       </Suspense>
 
-      <div className="mt-8 overflow-x-auto rounded-2xl border border-[#dbe7e0] shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
+      <TableScroll className="mt-8 rounded-2xl border border-line shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
         <table className="w-full text-sm">
-          <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#4a4a4a]">
+          <AdminTableHeader>
             <tr>
-              <th className="p-3 font-medium">Name</th>
-              <th className="p-3 font-medium">Email</th>
-              <th className="p-3 font-medium">Role</th>
-              <th className="p-3 font-medium">Professional status</th>
-              <th className="p-3 font-medium">Compliance</th>
-              <th className="p-3 font-medium">Status</th>
-              <th className="p-3 font-medium">Account</th>
+              <th className="p-3 font-medium"><Tr>{"Name"}</Tr></th>
+              <th className="p-3 font-medium"><Tr>{"Email"}</Tr></th>
+              <th className="p-3 font-medium"><Tr>{"Role"}</Tr></th>
+              <th className="p-3 font-medium"><Tr>{"Professional status"}</Tr></th>
+              <th className="p-3 font-medium"><Tr>{"Compliance"}</Tr></th>
+              <th className="p-3 font-medium"><Tr>{"Status"}</Tr></th>
+              <th className="p-3 font-medium"><Tr>{"Account"}</Tr></th>
             </tr>
-          </thead>
-          <tbody className="divide-y divide-[#dbe7e0]">
+          </AdminTableHeader>
+          <tbody className="divide-y divide-line">
             {professionals.map((prof) => (
               <tr key={prof.id}>
                 <td className="p-3">
                   <Link
                     href={`/admin/users/${prof.id}`}
-                    className="text-[#2e7d32] hover:underline"
+                    className="text-brand-strong hover:underline"
                   >
                     {prof.full_name}
                   </Link>
@@ -339,7 +340,7 @@ export default async function AdminUsersPage({
                 <td className="p-3">{prof.users?.email ?? "—"}</td>
                 <td className="p-3">{prof.professional_roles?.name ?? "—"}</td>
                 <td className="p-3">
-                  <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#4a4a4a]">
+                  <span className="rounded-full bg-surface px-2.5 py-0.5 text-xs font-medium text-ink">
                     {formatLabel(prof.professional_status)}
                   </span>
                 </td>
@@ -347,12 +348,12 @@ export default async function AdminUsersPage({
                   <ComplianceLightBadge light={lightByProfessional.get(prof.id) ?? "pending"} />
                 </td>
                 <td className="p-3">
-                  <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#4a4a4a]">
+                  <span className="rounded-full bg-surface px-2.5 py-0.5 text-xs font-medium text-ink">
                     {formatLabel(prof.compliance_status)}
                   </span>
                 </td>
                 <td className="p-3">
-                  <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#4a4a4a]">
+                  <span className="rounded-full bg-surface px-2.5 py-0.5 text-xs font-medium text-ink">
                     {prof.users?.account_status ? formatLabel(prof.users.account_status) : "—"}
                   </span>
                 </td>
@@ -361,9 +362,9 @@ export default async function AdminUsersPage({
           </tbody>
         </table>
         {professionals.length === 0 && (
-          <p className="p-6 text-sm text-[#4a4a4a]">No professionals match these filters.</p>
+          <p className="p-6 text-sm text-ink"><Tr>{"No professionals match these filters."}</Tr></p>
         )}
-      </div>
+      </TableScroll>
     </main>
   );
 }

@@ -20,6 +20,7 @@ export default async function FaqPage() {
     <MarketingPageMotion>
       <SiteNav />
 
+      <main id="main-content" tabIndex={-1} className="scroll-mt-24">
       <MarketingPageHero
         badge={pt ? "Centro de ajuda" : "Help centre"}
         title={pt ? "Perguntas frequentes" : "Frequently asked questions"}
@@ -31,7 +32,6 @@ export default async function FaqPage() {
         image={marketingImages.pageHero.faq}
       />
 
-      <main>
         <section className={marketingSection}>
           <div data-reveal className="text-center">
             <h2 className={marketingHeading}>{pt ? "Perguntas comuns" : "Common questions"}</h2>
@@ -43,7 +43,7 @@ export default async function FaqPage() {
           </div>
 
           <div data-reveal-stagger className="mt-12">
-            <FaqList faqs={faqsForLocale(locale)} />
+            <FaqList faqs={faqsForLocale(locale)} locale={locale} />
           </div>
         </section>
 

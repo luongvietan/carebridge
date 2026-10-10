@@ -31,17 +31,14 @@ export async function addRole(_prev: RoleActionResult | null, formData: FormData
 
   const admin = createServiceClient();
 
-  const { data: prof } = await admin
-    .from("professionals")
-    .select("country_code")
-    .eq("id", professionalId)
-    .single();
-
-  const { data: role } = await admin
-    .from("professional_roles")
-    .select("id, name, country_code, is_active, registration_register")
-    .eq("id", roleId)
-    .maybeSingle();
+  const [{ data: prof }, { data: role }] = await Promise.all([
+    admin.from("professionals").select("country_code").eq("id", professionalId).single(),
+    admin
+      .from("professional_roles")
+      .select("id, name, country_code, is_active, registration_register")
+      .eq("id", roleId)
+      .maybeSingle(),
+  ]);
   if (!role || !role.is_active) return { error: "That role is not available." };
   if (role.country_code !== (prof?.country_code ?? "GB")) {
     return { error: "That role belongs to another country." };

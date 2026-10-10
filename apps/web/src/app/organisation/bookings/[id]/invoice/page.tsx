@@ -1,3 +1,4 @@
+import { AdminTableHeader } from "@/components/admin-table-header";
 import { getPortalLocale, getPortalT } from "@/lib/i18n/portal-server";
 import { getContentForVisitor } from "@/lib/i18n/server";
 import { notFound, redirect } from "next/navigation";
@@ -26,11 +27,13 @@ export default async function OrganisationInvoicePage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const t = await getPortalT();
-  const locale = await getPortalLocale();
-  const { ui } = await getContentForVisitor();
-  const { id } = await params;
-  const supabase = await createClient();
+  const [{ t }, locale, { ui }, { id }, supabase] = await Promise.all([
+    getPortalT().then((t) => ({ t })),
+    getPortalLocale(),
+    getContentForVisitor(),
+    params,
+    createClient(),
+  ]);
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -85,15 +88,15 @@ export default async function OrganisationInvoicePage({
   const currency = booking.snap_currency ?? "GBP";
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-10 print:max-w-none print:px-0 print:py-0">
+    <main id="main-content" tabIndex={-1} className="mx-auto max-w-3xl px-4 py-10 print:max-w-none print:px-0 print:py-0">
       <div className="print:hidden">
         <BackLink href="/organisation">{t("Back to dashboard")}</BackLink>
       </div>
 
       <header className="mt-6 flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[#1e5a33]">{t("Invoice")}</h1>
-          <p className="mt-1 text-sm text-[#4a4a4a]">
+          <h1 className="text-2xl font-bold text-brand-ink">{t("Invoice")}</h1>
+          <p suppressHydrationWarning className="mt-1 text-sm text-ink">
             {t("Booking")}{" "}{booking.id.slice(0, 8).toUpperCase()}{" "}{t("· issued")}{" "}
             {formatLondon(new Date().toISOString(), locale)}
           </p>
@@ -101,53 +104,53 @@ export default async function OrganisationInvoicePage({
         <div className="print:hidden">
           <PrintButton
             label={t("Save as PDF")}
-            className="rounded-full bg-[#2e7d32] px-4 py-2 text-sm text-white hover:bg-[#246627]"
+            className="rounded-full bg-brand-strong px-4 py-2 text-sm text-white hover:bg-brand-strong-hover"
           />
         </div>
       </header>
 
       <section className="mt-8 grid gap-6 sm:grid-cols-2">
         <div>
-          <p className="text-xs uppercase tracking-wide text-[#7a8a81]">{t("From")}</p>
-          <p className="mt-1 font-semibold text-[#1e5a33]">{t("CareBridge Connect Ltd")}</p>
-          <p className="text-sm text-[#4a4a4a]">{ui.footer.address}</p>
-          <p className="text-sm text-[#4a4a4a]">{CONTACT_EMAIL}</p>
+          <p className="text-xs uppercase tracking-wide text-muted">{t("From")}</p>
+          <p className="mt-1 font-semibold text-brand-ink">{t("CareBridge Connect Ltd")}</p>
+          <p className="text-sm text-ink">{ui.footer.address}</p>
+          <p className="text-sm text-ink">{CONTACT_EMAIL}</p>
         </div>
         <div>
-          <p className="text-xs uppercase tracking-wide text-[#7a8a81]">{t("To")}</p>
-          <p className="mt-1 font-semibold text-[#1e5a33]">
+          <p className="text-xs uppercase tracking-wide text-muted">{t("To")}</p>
+          <p className="mt-1 font-semibold text-brand-ink">
             {organisation?.organisation_name ?? t("Organisation")}
           </p>
           {organisation?.address_line1 && (
-            <p className="text-sm text-[#4a4a4a]">
+            <p className="text-sm text-ink">
               {organisation.address_line1}, {organisation.city} {organisation.postcode}
             </p>
           )}
           {organisation?.billing_email && (
-            <p className="text-sm text-[#4a4a4a]">{organisation.billing_email}</p>
+            <p className="text-sm text-ink">{organisation.billing_email}</p>
           )}
         </div>
       </section>
 
       <table className="mt-8 w-full border-collapse text-sm">
-        <thead>
-          <tr className="border-b border-[#1e5a33] text-left">
+        <AdminTableHeader>
+          <tr className="border-b border-brand-ink text-left">
             <th className="py-2 pr-3 font-semibold">{t("Description")}</th>
             <th className="py-2 pr-3 text-right font-semibold">{t("Hours")}</th>
             <th className="py-2 pr-3 text-right font-semibold">{t("Rate")}</th>
             <th className="py-2 text-right font-semibold">{t("Amount")}</th>
           </tr>
-        </thead>
+        </AdminTableHeader>
         <tbody>
-          <tr className="border-b border-[#dbe7e0]">
+          <tr className="border-b border-line">
             <td className="py-3 pr-3">
               {(booking.professional_roles as { name: string } | null)?.name ?? t("Care booking")}
-              <span className="block text-xs text-[#7a8a81]">
+              <span className="block text-xs text-muted">
                 {formatLondon(booking.scheduled_start, locale)}{" "}{t("to")}{" "}{formatLondon(booking.scheduled_end, locale)} ·{" "}
                 {booking.location_address}
               </span>
               {(booking.professionals as { full_name: string } | null)?.full_name && (
-                <span className="block text-xs text-[#7a8a81]">
+                <span className="block text-xs text-muted">
                   {t("Worked by")}{" "}{(booking.professionals as { full_name: string }).full_name}
                 </span>
               )}
@@ -173,7 +176,7 @@ export default async function OrganisationInvoicePage({
               </td>
             </tr>
           )}
-          <tr className="border-t-2 border-[#1e5a33] text-base font-bold">
+          <tr className="border-t-2 border-brand-ink text-base font-bold">
             <td className="py-3 pr-3 text-right" colSpan={3}>
               {t("Total")}
             </td>
@@ -184,12 +187,12 @@ export default async function OrganisationInvoicePage({
         </tfoot>
       </table>
 
-      <p className="mt-6 text-sm text-[#4a4a4a]">
+      <p className="mt-6 text-sm text-ink">
         {t("Payment status:")}{" "}<span className="font-semibold">{t(MONEY_STATE_LABEL[state])}</span>
         {payment?.paid_at && ` · ${t("paid on")} ${formatLondon(payment.paid_at, locale)}`}
       </p>
 
-      <footer className="mt-10 border-t border-[#dbe7e0] pt-4 text-xs text-[#7a8a81]">
+      <footer className="mt-10 border-t border-line pt-4 text-xs text-muted">
         {t("CareBridge Connect Ltd — a marketplace connecting families and organisations with verified healthcare and childcare professionals. This invoice covers the booking shown above.")}
       </footer>
     </main>

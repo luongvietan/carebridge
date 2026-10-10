@@ -13,8 +13,9 @@ type MarketingPageMotionProps = {
   smoothScroll?: boolean;
 };
 
-const REVEAL_FROM = { autoAlpha: 0, y: 28, force3D: true };
-const REVEAL_TO = { autoAlpha: 1, y: 0, force3D: true };
+// Opacity preserves readable content in the accessibility tree before scrolling.
+const REVEAL_FROM = { opacity: 0, y: 28, force3D: true };
+const REVEAL_TO = { opacity: 1, y: 0, force3D: true };
 
 export function MarketingPageMotion({
   children,
@@ -67,7 +68,7 @@ export function MarketingPageMotion({
         }
 
         gsap.set("[data-reveal]", REVEAL_FROM);
-        gsap.set("[data-reveal-child]", { autoAlpha: 0, y: 24, force3D: true });
+        gsap.set("[data-reveal-child]", { opacity: 0, y: 24, force3D: true });
 
         ScrollTrigger.batch("[data-reveal]", {
           start: "top 90%",
@@ -92,7 +93,7 @@ export function MarketingPageMotion({
               if (!children.length) return;
 
               gsap.to(children, {
-                autoAlpha: 1,
+                opacity: 1,
                 y: 0,
                 force3D: true,
                 duration: 0.65,

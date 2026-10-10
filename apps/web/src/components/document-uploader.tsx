@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { Tr, usePortalT } from "@/components/portal-locale";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -23,7 +24,7 @@ export type DocItem = {
 
 const STATUS_STYLE: Record<string, string> = {
   approved: "bg-[#defbe6] text-[#0e6027]",
-  pending_review: "bg-[#f5f7f6] text-[#4a4a4a]",
+  pending_review: "bg-surface text-ink",
   further_info_required: "bg-[#fcf4d6] text-[#684e1b]",
   rejected: "bg-[#fff1f1] text-[#a2191f]",
   expired: "bg-[#fff1f1] text-[#a2191f]",
@@ -39,15 +40,15 @@ const STATUS_LABEL: Record<string, string> = {
 
 function Badge({ status, notUploaded }: { status: string | null; notUploaded: string }) {
   const t = usePortalT();
-  if (!status) return <span className="bg-[#f5f7f6] px-2 py-1 text-xs text-[#7a8a81]">{notUploaded}</span>;
+  if (!status) return <span className="bg-surface px-2 py-1 text-xs text-muted">{notUploaded}</span>;
   return (
-    <span className={`px-2 py-1 text-xs ${STATUS_STYLE[status] ?? "bg-[#f5f7f6] text-[#4a4a4a]"}`}>
+    <span className={`px-2 py-1 text-xs ${STATUS_STYLE[status] ?? "bg-surface text-ink"}`}>
       {t(STATUS_LABEL[status] ?? status.replace(/_/g, " "))}
     </span>
   );
 }
 
-const field = "rounded-xl border border-[#dbe7e0] bg-white px-2 py-1.5 text-sm focus:border-[#2e7d32] focus:outline-none";
+const field = "rounded-xl border border-line bg-white px-2 py-1.5 text-sm focus:border-brand-strong focus:outline-none";
 
 export function DocumentUploader({
   items,
@@ -82,12 +83,12 @@ export function DocumentUploader({
   return (
     <div>
       <OnboardingSteps current={4} locale={locale} />
-      <p className="mt-8 text-sm text-[#4a4a4a]">
+      <p className="mt-8 text-sm text-ink">
         {d.intro}
       </p>
-      {error && <p className="mt-3 text-sm text-[#da1e28]"><Tr>{error}</Tr></p>}
+      {error && <p role="alert" className="mt-3 text-sm text-danger"><Tr>{error}</Tr></p>}
 
-      <div className="mt-6 divide-y divide-[#dbe7e0] border border-[#dbe7e0]">
+      <div className="mt-6 divide-y divide-line border border-line">
         {items.map((item) => {
           const guidance = guidanceFor(item.code);
           return (
@@ -95,14 +96,14 @@ export function DocumentUploader({
             <div className="flex items-center justify-between">
               <div>
                 <span className="font-semibold">{item.name}</span>
-                {item.critical && <span className="ml-2 text-xs text-[#2e7d32]">{d.critical}</span>}
-                {item.optional && <span className="ml-2 text-xs text-[#7a8a81]">{d.optional}</span>}
+                {item.critical && <span className="ml-2 text-xs text-brand-strong">{d.critical}</span>}
+                {item.optional && <span className="ml-2 text-xs text-muted">{d.optional}</span>}
               </div>
               <Badge status={item.status} notUploaded={d.notUploaded} />
             </div>
             {guidance && (
-              <p className="mt-2 text-xs leading-relaxed text-[#4a4a4a]">
-                <span className="font-semibold text-[#1e5a33]">{d.accepted}</span> {guidance.accepted}
+              <p className="mt-2 text-xs leading-relaxed text-ink">
+                <span className="font-semibold text-brand-ink">{d.accepted}</span> {guidance.accepted}
               </p>
             )}
             {(item.status === "rejected" || item.status === "further_info_required") &&
@@ -123,8 +124,8 @@ export function DocumentUploader({
               </div>
               <input name="referenceNumber" placeholder={d.referencePlaceholder} aria-label={d.referenceLabel} className={field} />
               <input name="issuingBody" placeholder={d.issuingPlaceholder} aria-label={d.issuingLabel} className={field} />
-              <div className="text-xs text-[#4a4a4a]">
-                {d.issued}{guidance?.maxAgeMonths && <span className="text-[#da1e28]"> *</span>}
+              <div className="text-xs text-ink">
+                {d.issued}{guidance?.maxAgeMonths && <span className="text-danger"> *</span>}
                 <DatePicker
                   name="issuedDate"
                   required={Boolean(guidance?.maxAgeMonths)}
@@ -134,8 +135,8 @@ export function DocumentUploader({
                   className="mt-1 w-40"
                 />
               </div>
-              <div className="text-xs text-[#4a4a4a]">
-                {d.expiry}{item.hasExpiry && <span className="text-[#da1e28]"> *</span>}
+              <div className="text-xs text-ink">
+                {d.expiry}{item.hasExpiry && <span className="text-danger"> *</span>}
                 <DatePicker
                   name="expiryDate"
                   required={item.hasExpiry}
@@ -146,7 +147,7 @@ export function DocumentUploader({
               <button
                 type="submit"
                 disabled={busy === item.typeId}
-                className="bg-[#14301e] px-3 py-2 text-sm text-white hover:bg-[#33433a] disabled:opacity-50"
+                className="bg-heading px-3 py-2 text-sm text-white hover:bg-[#33433a] disabled:opacity-50"
               >
                 {busy === item.typeId ? d.uploading : item.status ? d.replace : d.upload}
               </button>
@@ -157,16 +158,16 @@ export function DocumentUploader({
       </div>
 
       {locale === "pt-PT" && (
-        <p className="mt-6 text-sm text-[#4a4a4a]">
+        <p className="mt-6 text-sm text-ink">
           {d.bankDetails}{" "}
-          <a href="/professional/payout-details" className="font-semibold text-[#2e7d32] hover:underline">
+          <Link href="/professional/payout-details" className="font-semibold text-brand-strong hover:underline">
             {d.bankDetailsLink}
-          </a>
+          </Link>
         </p>
       )}
 
       {allUploaded && (
-        <div className="mt-6 border border-[#2e7d32] bg-[#defbe6] p-4 text-sm text-[#0e6027]">
+        <div className="mt-6 border border-brand-strong bg-[#defbe6] p-4 text-sm text-[#0e6027]">
           {d.allDone}
         </div>
       )}

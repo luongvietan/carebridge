@@ -1,5 +1,7 @@
 # Portugal launch — state of play and go-live runbook
 
+> **Current release: 10 October 2026.** Use [Release operations](RELEASE_OPERATIONS.md). The dated notes below are historical. Portugal is now the default market; UK stays launching soon even during private preview. A stale UK cookie does not move public content back to UK. Public Portugal signup/bookings remain closed until approved; gate access permits Portugal preview. Account journeys follow stored country and a server-controlled signup snapshot. PT specialist assessments require 15 common + 5 specialist questions, including resumed attempts. The branded contact acknowledgement preserves saved enquiries when email fails; notification status is truthful when delivery is unconfigured. `/admin/readiness` shows environment presence and role-bank coverage. These changes are prepared locally, not deployed.
+
 > Written 2026-09-29, after Ana's 9–26 September messages (WhatsApp) asked for Portugal first,
 > the domain move, an AI assistant and final testing by **5 October 2026**.
 

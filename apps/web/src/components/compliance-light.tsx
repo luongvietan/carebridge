@@ -3,8 +3,8 @@ import { LIGHT_DESCRIPTION, LIGHT_LABEL, type ComplianceLight } from "@/lib/comp
 const STYLE: Record<ComplianceLight, { dot: string; text: string; bg: string }> = {
   green: { dot: "bg-[#24a148]", text: "text-[#0e6027]", bg: "bg-[#defbe6]" },
   amber: { dot: "bg-[#f1c21b]", text: "text-[#684e1b]", bg: "bg-[#fcf4d6]" },
-  red: { dot: "bg-[#da1e28]", text: "text-[#a2191f]", bg: "bg-[#fff1f1]" },
-  pending: { dot: "bg-[#9aa8a0]", text: "text-[#4a4a4a]", bg: "bg-[#f5f7f6]" },
+  red: { dot: "bg-danger", text: "text-[#a2191f]", bg: "bg-[#fff1f1]" },
+  pending: { dot: "bg-muted", text: "text-ink", bg: "bg-surface" },
 };
 
 /** Green / amber / red compliance status (client request, 7 Aug). The colour is

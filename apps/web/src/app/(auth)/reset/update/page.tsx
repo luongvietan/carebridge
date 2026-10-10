@@ -1,5 +1,6 @@
 "use client";
 
+import { RequiredMark } from "@/components/required-mark";
 import { usePortalT } from "@/components/portal-locale";
 import { Tr } from "@/components/portal-locale";
 import { useState } from "react";
@@ -35,8 +36,18 @@ export default function UpdatePasswordPage() {
     const supabase = createClient();
     // The recovery link (via /auth/confirm) established a session, so updateUser
     // can set the new password for the signed-in user.
-    const { error: updErr } = await supabase.auth.updateUser({ password });
-    setPending(false);
+    const updateResult = await (async () => {
+      try {
+        return await supabase.auth.updateUser({ password });
+      } catch {
+        setError(t("Could not complete the operation. Please try again."));
+        return null;
+      } finally {
+        setPending(false);
+      }
+    })();
+    if (!updateResult) return;
+    const updErr = updateResult.error;
     if (updErr) {
       setError(
         updErr.message.includes("session")
@@ -51,7 +62,7 @@ export default function UpdatePasswordPage() {
 
   if (done) {
     return (
-      <main className="mx-auto max-w-md p-8">
+      <main id="main-content" tabIndex={-1} className="mx-auto max-w-md p-8">
         <h1 className="text-2xl font-bold">{t("Password updated")}</h1>
         <p className="mt-3 text-slate-600">{t("Redirecting you to sign in…")}</p>
       </main>
@@ -59,18 +70,18 @@ export default function UpdatePasswordPage() {
   }
 
   return (
-    <main className="mx-auto max-w-md p-8">
+    <main id="main-content" tabIndex={-1} className="mx-auto max-w-md p-8">
       <h1 className="text-2xl font-bold">{t("Choose a new password")}</h1>
-      <form onSubmit={onSubmit} className="mt-6 space-y-4">
+      <form aria-busy={pending} onSubmit={onSubmit} className="mt-6 space-y-4">
         <label className="block text-sm font-medium">
           {t("New password")}
-          <input type="password" name="password" required minLength={8} className={inputClass} />
+          <RequiredMark /><input type="password" name="password" required minLength={8} className={inputClass} />
         </label>
         <label className="block text-sm font-medium">
           {t("Confirm new password")}
-          <input type="password" name="confirm" required minLength={8} className={inputClass} />
+          <RequiredMark /><input type="password" name="confirm" required minLength={8} className={inputClass} />
         </label>
-        {error && <p className="text-sm text-[#da1e28]"><Tr>{error}</Tr></p>}
+        {error && <p role="alert" className="text-sm text-danger"><Tr>{error}</Tr></p>}
         <button
           type="submit"
           disabled={pending}

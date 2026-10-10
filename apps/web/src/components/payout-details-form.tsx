@@ -1,14 +1,15 @@
 "use client";
+import { RequiredMark } from "@/components/required-mark";
 import { Tr } from "@/components/portal-locale";
 import { useActionState, useState } from "react";
 import { savePayoutDetails, type PayoutResult } from "@/lib/payouts/actions";
 
 const field =
-  "mt-1 w-full rounded-xl border border-[#dbe7e0] bg-white px-3 py-2 text-sm focus:border-[#2e7d32] focus:outline-none";
+  "mt-1 w-full rounded-xl border border-line bg-white px-3 py-2 text-sm focus:border-brand-strong focus:outline-none";
 
 const COPY = {
   "en-GB": {
-    saved: "Bank details saved — we store only the last 4 digits.",
+    saved: "Bank details saved securely. Only the last 4 digits are displayed.",
     current: "Current account ending",
     uk: "UK bank account",
     iban: "IBAN (Portugal / SEPA)",
@@ -19,7 +20,7 @@ const COPY = {
     saving: "Saving…",
   },
   "pt-PT": {
-    saved: "Dados bancários guardados — guardamos apenas os últimos 4 dígitos.",
+    saved: "Dados bancários guardados de forma segura. Apenas os últimos 4 dígitos são apresentados.",
     current: "Conta atual terminada em",
     uk: "Conta bancária no Reino Unido",
     iban: "IBAN (Portugal / SEPA)",
@@ -58,13 +59,13 @@ export function PayoutDetailsForm({
   );
 
   if (state && "ok" in state) {
-    return <p className="mt-4 text-sm text-[#2e7d32]">{t.saved}</p>;
+    return <p role="status" className="mt-4 text-sm text-brand-strong">{t.saved}</p>;
   }
 
   return (
-    <form action={action} className="mt-8 space-y-4">
+    <form aria-busy={pending} action={action} className="mt-8 space-y-4">
       {last4 !== null && (
-        <p className="text-sm text-[#4a4a4a]">
+        <p className="text-sm text-ink">
           {t.current} ••••{last4}
         </p>
       )}
@@ -86,14 +87,14 @@ export function PayoutDetailsForm({
 
       <label className="block text-sm font-medium" htmlFor="accountName">
         {t.accountName}
-        <input id="accountName" name="accountName" required className={field} />
+        <RequiredMark /><input id="accountName" name="accountName" required className={field} />
       </label>
 
       {kind === "uk" ? (
         <>
           <label className="block text-sm font-medium" htmlFor="sortCode">
             {t.sortCode}
-            <input
+            <RequiredMark /><input
               id="sortCode"
               name="sortCode"
               required
@@ -105,7 +106,7 @@ export function PayoutDetailsForm({
           </label>
           <label className="block text-sm font-medium" htmlFor="accountNumber">
             {t.accountNumber}
-            <input
+            <RequiredMark /><input
               id="accountNumber"
               name="accountNumber"
               required
@@ -119,7 +120,7 @@ export function PayoutDetailsForm({
       ) : (
         <label className="block text-sm font-medium" htmlFor="iban">
           IBAN
-          <input
+          <RequiredMark /><input
             id="iban"
             name="iban"
             required
@@ -131,12 +132,12 @@ export function PayoutDetailsForm({
         </label>
       )}
 
-      {state && "error" in state && <p className="text-sm text-[#da1e28]"><Tr>{state.error}</Tr></p>}
+      {state && "error" in state && <p role="alert" className="text-sm text-danger"><Tr>{state.error}</Tr></p>}
 
       <button
         type="submit"
         disabled={pending}
-        className="rounded-full bg-[#2e7d32] px-4 py-3 text-sm text-white hover:bg-[#246627] disabled:opacity-50"
+        className="rounded-full bg-brand-strong px-4 py-3 text-sm text-white hover:bg-brand-strong-hover disabled:opacity-50"
       >
         {pending ? t.saving : t.save}
       </button>

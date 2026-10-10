@@ -37,6 +37,7 @@ export default async function AboutPage() {
     <MarketingPageMotion>
       <SiteNav />
 
+      <main id="main-content" tabIndex={-1} className="scroll-mt-24">
       <MarketingPageHero
         badge={ui.aboutPage.badge}
         title={ui.aboutPage.title}
@@ -46,7 +47,6 @@ export default async function AboutPage() {
 
       <StatsBand />
 
-      <main>
         <section className={marketingSection}>
           <div data-reveal className="mx-auto max-w-3xl text-center">
             {welcome.paragraphs.map((paragraph) => (
@@ -90,12 +90,12 @@ export default async function AboutPage() {
               data-reveal-child
               className="col-span-12 flex flex-col justify-center pt-2 lg:col-span-5 lg:pt-0"
             >
-              <h2 className="text-xl font-bold text-[#1e5a33] sm:text-2xl">{mission.heading}</h2>
+              <h2 className="text-xl font-bold text-brand-ink sm:text-2xl">{mission.heading}</h2>
               <p className="mt-4 text-[15px] leading-relaxed text-[#33433a] sm:text-base">
                 {mission.text}
               </p>
 
-              <h2 className="mt-8 text-xl font-bold text-[#1e5a33] sm:text-2xl">{vision.heading}</h2>
+              <h2 className="mt-8 text-xl font-bold text-brand-ink sm:text-2xl">{vision.heading}</h2>
               <p className="mt-4 text-[15px] leading-relaxed text-[#33433a] sm:text-base">
                 {vision.text}
               </p>
@@ -115,7 +115,7 @@ export default async function AboutPage() {
             className={`rounded-[28px] ${marketingSurface} p-6 sm:rounded-[32px] sm:p-10`}
           >
             <h2 className={marketingHeading}>{commitment.heading}</h2>
-            <p className="mt-4 text-sm leading-relaxed text-[#4a4a4a] sm:text-base">
+            <p className="mt-4 text-sm leading-relaxed text-ink sm:text-base">
               {commitment.intro}
             </p>
             <ul className="mt-6 space-y-3">
@@ -128,7 +128,7 @@ export default async function AboutPage() {
                     strokeWidth={1.75}
                     className="mt-0.5 shrink-0"
                   />
-                  <span className="text-sm font-medium leading-snug text-[#1e5a33] sm:text-[15px]">
+                  <span className="text-sm font-medium leading-snug text-brand-ink sm:text-[15px]">
                     {bullet}
                   </span>
                 </li>
@@ -148,7 +148,7 @@ export default async function AboutPage() {
               <div
                 key={item}
                 data-reveal-child
-                className={`rounded-2xl bg-white p-5 text-sm font-medium text-[#1e5a33] ${marketingCardShadow}`}
+                className={`rounded-2xl bg-white p-5 text-sm font-medium text-brand-ink ${marketingCardShadow}`}
               >
                 {item}
               </div>
@@ -159,19 +159,19 @@ export default async function AboutPage() {
         <section className={`${marketingSection} pt-0`}>
           <div
             data-reveal
-            className={`rounded-[28px] border-2 border-[#2e7d32]/25 ${marketingSurface} p-6 sm:rounded-[32px] sm:p-10`}
+            className={`rounded-[28px] border-2 border-brand-strong/25 ${marketingSurface} p-6 sm:rounded-[32px] sm:p-10`}
           >
             <h2 className={marketingHeading}>{importantInfo.heading}</h2>
             <div className="mt-6 space-y-4">
               {importantInfo.paragraphs.map((paragraph) => (
-                <p key={paragraph} className="text-sm leading-relaxed text-[#4a4a4a] sm:text-base">
+                <p key={paragraph} className="text-sm leading-relaxed text-ink sm:text-base">
                   {paragraph}
                 </p>
               ))}
             </div>
             <ForwardLink
               href="/disclaimer"
-              className="mt-6 text-sm font-semibold text-[#2e7d32] hover:underline"
+              className="mt-6 text-sm font-semibold text-brand-strong hover:underline"
             >
               {ui.aboutPage.readDisclaimer}
             </ForwardLink>
@@ -185,21 +185,21 @@ export default async function AboutPage() {
             className={`rounded-[28px] bg-white p-8 ${marketingCardShadow} sm:rounded-[32px] sm:p-12`}
           >
             <h2 className={marketingHeading}>{founder.heading}</h2>
-            <blockquote className="mt-5 border-l-4 border-[#2e7d32] pl-5">
+            <blockquote className="mt-5 border-l-4 border-brand-strong pl-5">
               {founder.quote.split("\n\n").map((paragraph) => (
                 <p
                   key={paragraph}
-                  className="mt-4 text-sm leading-relaxed text-[#4a4a4a] first:mt-0 sm:text-base"
+                  className="mt-4 text-sm leading-relaxed text-ink first:mt-0 sm:text-base"
                 >
                   {paragraph}
                 </p>
               ))}
             </blockquote>
             <div className="mt-8 border-t border-[#e7efe9] pt-6">
-              <p className="font-bold text-[#1e5a33]">{founder.name}</p>
-              <p className="mt-1 text-sm text-[#4a4a4a]">{founder.title}</p>
-              <p className="text-sm text-[#4a4a4a]">{founder.company}</p>
-              <p className="mt-4 text-sm font-semibold text-[#2e7d32]">{founder.tagline}</p>
+              <p className="font-bold text-brand-ink">{founder.name}</p>
+              <p className="mt-1 text-sm text-ink">{founder.title}</p>
+              <p className="text-sm text-ink">{founder.company}</p>
+              <p className="mt-4 text-sm font-semibold text-brand-strong">{founder.tagline}</p>
             </div>
           </div>
         </section>

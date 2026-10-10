@@ -28,8 +28,13 @@ export async function GET(req: NextRequest) {
   const auth = req.headers.get("authorization");
   if (auth !== `Bearer ${secret}`) return new Response("Unauthorized", { status: 401 });
 
-  const { sent } = await sendDueComplianceReminders();
-  const { sent: restrictionNotices } = await sendDueAutoRestrictionNotices();
-  const { confirmed: timesheetsConfirmed } = await autoConfirmDueTimesheets();
+  const [reminders, restrictions, timesheets] = await Promise.all([
+    sendDueComplianceReminders(),
+    sendDueAutoRestrictionNotices(),
+    autoConfirmDueTimesheets(),
+  ]);
+  const { sent } = reminders;
+  const { sent: restrictionNotices } = restrictions;
+  const { confirmed: timesheetsConfirmed } = timesheets;
   return NextResponse.json({ ok: true, sent, restrictionNotices, timesheetsConfirmed });
 }

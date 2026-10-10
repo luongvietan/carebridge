@@ -1,5 +1,6 @@
 "use client";
 
+import { RequiredMark } from "@/components/required-mark";
 import { usePortalLocale, usePortalT, Tr } from "@/components/portal-locale";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -8,7 +9,7 @@ import { postMessage, startThread } from "@/lib/messaging/actions";
 import { formatLondon } from "@/lib/format/datetime";
 
 const field =
-  "mt-1 w-full rounded-xl border border-[#dbe7e0] bg-white px-3 py-2 text-sm text-[#1e5a33] focus:border-[#2e7d32] focus:outline-none focus:ring-2 focus:ring-[#2e7d32]/15";
+  "mt-1 w-full rounded-xl border border-line bg-white px-3 py-2 text-sm text-brand-ink focus:border-brand-strong focus:outline-none focus:ring-2 focus:ring-brand-strong/15";
 
 export type ThreadSummary = {
   id: string;
@@ -25,6 +26,7 @@ export function StartThreadForm({
   recipients: { userId: string; label: string }[];
 }) {
   const t = usePortalT();
+  const locale = usePortalLocale();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [withUserId, setWithUserId] = useState("");
@@ -37,14 +39,19 @@ export function StartThreadForm({
     setError(null);
     const fd = new FormData(e.currentTarget);
     if (recipients.length > 0) fd.set("withUserId", withUserId);
-    const result = await startThread(fd);
-    setBusy(false);
-    if ("error" in result) {
-      setError(t(result.error));
-      return;
+    try {
+      const result = await startThread(fd);
+      if ("error" in result) {
+        setError(t(result.error));
+        return;
+      }
+      setOpen(false);
+      router.refresh();
+    } catch {
+      setError(locale === "pt-PT" ? "Não foi possível concluir a operação. Tente novamente." : "Could not complete the operation. Please try again.");
+    } finally {
+      setBusy(false);
     }
-    setOpen(false);
-    router.refresh();
   }
 
   if (!open) {
@@ -52,7 +59,7 @@ export function StartThreadForm({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="rounded-full bg-[#2e7d32] px-4 py-2 text-sm text-white hover:bg-[#246627]"
+        className="rounded-full bg-brand-strong px-4 py-2 text-sm text-white hover:bg-brand-strong-hover"
       >
         {t("New message")}
       </button>
@@ -60,7 +67,7 @@ export function StartThreadForm({
   }
 
   return (
-    <form onSubmit={onSubmit} className="mt-4 rounded-2xl border border-[#dbe7e0] p-4">
+    <form aria-busy={busy} onSubmit={onSubmit} className="mt-4 rounded-2xl border border-line p-4">
       {recipients.length > 0 ? (
         <div className="text-sm font-medium">
           {t("To")}
@@ -76,34 +83,34 @@ export function StartThreadForm({
           />
         </div>
       ) : (
-        <p className="text-sm text-[#4a4a4a]">
+        <p className="text-sm text-ink">
           {t("Your message goes to the CareBridge Connect team.")}
         </p>
       )}
 
       <label className="mt-3 block text-sm font-medium">
         {t("Subject")}
-        <input name="subject" required className={field} />
+        <RequiredMark /><input name="subject" required className={field} />
       </label>
       <label className="mt-3 block text-sm font-medium">
         {t("Message")}
-        <textarea name="body" required rows={4} className={field} />
+        <RequiredMark /><textarea name="body" required rows={4} className={field} />
       </label>
 
-      {error && <p className="mt-2 text-sm text-[#da1e28]"><Tr>{error}</Tr></p>}
+      {error && <p role="alert" className="mt-2 text-sm text-danger"><Tr>{error}</Tr></p>}
 
       <div className="mt-3 flex gap-2">
         <button
           type="submit"
           disabled={busy}
-          className="rounded-full bg-[#2e7d32] px-4 py-2 text-sm text-white hover:bg-[#246627] disabled:opacity-50"
+          className="rounded-full bg-brand-strong px-4 py-2 text-sm text-white hover:bg-brand-strong-hover disabled:opacity-50"
         >
           {busy ? t("Sending…") : t("Send")}
         </button>
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="rounded-full border border-[#dbe7e0] px-4 py-2 text-sm text-[#4a4a4a] hover:bg-[#f5f7f6]"
+          className="rounded-full border border-line px-4 py-2 text-sm text-ink hover:bg-surface"
         >
           {t("Cancel")}
         </button>
@@ -115,7 +122,7 @@ export function StartThreadForm({
 export function ThreadList({ threads }: { threads: ThreadSummary[] }) {
   const t = usePortalT();
   if (threads.length === 0) {
-    return <p className="mt-4 text-sm text-[#4a4a4a]">{t("No conversations yet.")}</p>;
+    return <p className="mt-4 text-sm text-ink">{t("No conversations yet.")}</p>;
   }
   return (
     <ul className="mt-4 space-y-4">
@@ -142,18 +149,23 @@ function Thread({ thread }: { thread: ThreadSummary }) {
     setError(null);
     const fd = new FormData(form);
     fd.set("threadId", thread.id);
-    const result = await postMessage(fd);
-    setBusy(false);
-    if ("error" in result) {
-      setError(t(result.error));
-      return;
+    try {
+      const result = await postMessage(fd);
+      if ("error" in result) {
+        setError(t(result.error));
+        return;
+      }
+      form.reset();
+      router.refresh();
+    } catch {
+      setError(locale === "pt-PT" ? "Não foi possível concluir a operação. Tente novamente." : "Could not complete the operation. Please try again.");
+    } finally {
+      setBusy(false);
     }
-    form.reset();
-    router.refresh();
   }
 
   return (
-    <li className="rounded-2xl border border-[#dbe7e0] p-4">
+    <li className="rounded-2xl border border-line p-4">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
@@ -162,15 +174,15 @@ function Thread({ thread }: { thread: ThreadSummary }) {
       >
         <span>
           <span className="font-semibold">{thread.subject}</span>
-          <span className="ml-2 text-xs text-[#7a8a81]">{thread.participants.join(", ")}</span>
+          <span className="ml-2 text-xs text-muted">{thread.participants.join(", ")}</span>
         </span>
-        <span className="text-xs text-[#7a8a81]">
+        <span className="text-xs text-muted">
           {formatLondon(thread.lastMessageAt, locale)} · {thread.messages.length === 1 ? t("1 message") : t("{n} messages", { n: thread.messages.length })}
         </span>
       </button>
 
       {!open && latest && (
-        <p className="mt-2 truncate text-sm text-[#4a4a4a]">
+        <p className="mt-2 truncate text-sm text-ink">
           {latest.senderName}: {latest.body}
         </p>
       )}
@@ -182,24 +194,24 @@ function Thread({ thread }: { thread: ThreadSummary }) {
               <li
                 key={message.id}
                 className={`rounded-xl p-3 text-sm ${
-                  message.isMine ? "bg-[#f2fbf5]" : "bg-[#f5f7f6]"
+                  message.isMine ? "bg-[#f2fbf5]" : "bg-surface"
                 }`}
               >
-                <p className="text-xs text-[#7a8a81]">
+                <p className="text-xs text-muted">
                   {message.senderName} · {formatLondon(message.createdAt, locale)}
                 </p>
-                <p className="mt-1 whitespace-pre-wrap text-[#1e5a33]">{message.body}</p>
+                <p className="mt-1 whitespace-pre-wrap text-brand-ink">{message.body}</p>
               </li>
             ))}
           </ul>
 
-          <form onSubmit={onReply} className="mt-3">
+          <form aria-busy={busy} onSubmit={onReply} className="mt-3">
             <textarea name="body" required rows={3} className={field} placeholder={t("Write a reply…")} />
-            {error && <p className="mt-2 text-sm text-[#da1e28]"><Tr>{error}</Tr></p>}
+            {error && <p role="alert" className="mt-2 text-sm text-danger"><Tr>{error}</Tr></p>}
             <button
               type="submit"
               disabled={busy}
-              className="mt-2 rounded-full bg-[#2e7d32] px-4 py-2 text-sm text-white hover:bg-[#246627] disabled:opacity-50"
+              className="mt-2 rounded-full bg-brand-strong px-4 py-2 text-sm text-white hover:bg-brand-strong-hover disabled:opacity-50"
             >
               {busy ? t("Sending…") : t("Reply")}
             </button>

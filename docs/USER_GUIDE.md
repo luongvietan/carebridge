@@ -29,7 +29,7 @@ Sign in at `/login` with an admin account → `/admin`.
 - **Reports** (`/admin/reports`) — download any dataset as CSV or Excel.
 - **Audit report** — filter by date, entity type, actor type; preview recent entries and download filtered export.
 
-Nine datasets: professionals, clients, organisations, bookings, assessments, compliance documents, payments, payouts, audit log.
+Thirteen datasets: professionals, clients, organisations, bookings, assessments, compliance documents, registration verifications, timesheets, incidents, messages, payments, payouts and audit log.
 
 ---
 
@@ -38,9 +38,9 @@ Nine datasets: professionals, clients, organisations, bookings, assessments, com
 1. Register → confirm email → sign in.
 2. **Onboarding** (`/professional/onboarding/...`):
    - Eligibility screening
+   - Assessment (up to 3 attempts per cycle; each role requires its own approved question bank)
    - Profile
    - Document upload
-   - Assessment (up to 3 attempts)
 3. **Payout details** — enter bank details (encrypted at rest).
 4. **Bookings** (`/professional/bookings`) — accept or decline open bookings.
 

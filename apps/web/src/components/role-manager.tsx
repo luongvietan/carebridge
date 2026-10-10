@@ -1,6 +1,7 @@
 "use client";
 
 
+import { RequiredMark } from "@/components/required-mark";
 import { usePortalLocale, usePortalT, Tr } from "@/components/portal-locale";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -18,7 +19,7 @@ import { REFERENCE_LABEL, REFERENCE_PLACEHOLDER } from "@/lib/compliance/regulat
 import type { RegulatorRegister } from "@/lib/compliance/regulated-roles";
 
 const field =
-  "mt-1 w-full rounded-xl border border-[#dbe7e0] bg-white px-3.5 py-2.5 text-sm text-[#1e5a33] placeholder:text-[#9aa8a0] focus:border-[#2e7d32] focus:outline-none focus:ring-2 focus:ring-[#2e7d32]/15";
+  "mt-1 w-full rounded-xl border border-line bg-white px-3.5 py-2.5 text-sm text-brand-ink placeholder:text-muted focus:border-brand-strong focus:outline-none focus:ring-2 focus:ring-brand-strong/15";
 
 export type RoleCard = {
   roleId: string;
@@ -45,7 +46,7 @@ export function RoleManager({
         <RoleRow key={role.roleId} role={role} />
       ))}
       {roles.length === 0 && (
-        <p className="rounded-2xl border border-[#dbe7e0] bg-white p-6 text-sm text-[#4a4a4a]">
+        <p className="rounded-2xl border border-line bg-white p-6 text-sm text-ink">
           {t("You have not chosen a role yet. Complete your profile and we will set your main role up for you.")}
         </p>
       )}
@@ -67,8 +68,10 @@ function RoleRow({ role }: { role: RoleCard }) {
     setError(null);
     const fd = new FormData();
     fd.set("professionalRoleId", role.roleId);
-    const result = await withdrawRole(null, fd);
-    setBusy(false);
+    let result: Awaited<ReturnType<typeof withdrawRole>>;
+    try { result = await withdrawRole(null, fd); }
+    catch { setError(t("Could not complete the operation. Please try again.")); return; }
+    finally { setBusy(false); }
     if ("error" in result) {
       setError(t(result.error));
       return;
@@ -77,10 +80,10 @@ function RoleRow({ role }: { role: RoleCard }) {
   }
 
   return (
-    <section className="rounded-2xl border border-[#dbe7e0] bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
+    <section className="rounded-2xl border border-line bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-bold text-[#14301e]">{role.roleName}</h2>
+          <h2 className="text-lg font-bold text-heading">{role.roleName}</h2>
           {role.isPrimary && <p className="mt-0.5 text-xs text-[#6b7280]">{t("Your main role")}</p>}
         </div>
         <span
@@ -91,15 +94,15 @@ function RoleRow({ role }: { role: RoleCard }) {
       </div>
 
       {role.status === "active" && outstanding.length === 0 && (
-        <p className="mt-3 text-sm text-[#4a4a4a]">
+        <p className="mt-3 text-sm text-ink">
           {t("You can accept bookings in this role.")}
         </p>
       )}
 
       {outstanding.length > 0 && (
         <div className="mt-4">
-          <p className="text-sm font-semibold text-[#14301e]">{t("Still to do")}</p>
-          <ul className="mt-2 space-y-1.5 text-sm text-[#4a4a4a]">
+          <p className="text-sm font-semibold text-heading">{t("Still to do")}</p>
+          <ul className="mt-2 space-y-1.5 text-sm text-ink">
             {outstanding.map((item) => (
               <li key={item} className="flex gap-2">
                 <span aria-hidden className="text-[#8a5a00]">
@@ -112,7 +115,7 @@ function RoleRow({ role }: { role: RoleCard }) {
           {!role.gaps.assessmentPassed && !role.assessmentLockedUntil && (
             <ForwardLink
               href={`/professional/onboarding/assessment?role=${role.roleId}`}
-              className="mt-4 inline-flex text-sm text-[#2e7d32] hover:text-[#246627]"
+              className="mt-4 inline-flex text-sm text-brand-strong hover:text-brand-strong-hover"
             >
               {t("Sit the {role} assessment", { role: role.roleName })}
             </ForwardLink>
@@ -120,7 +123,10 @@ function RoleRow({ role }: { role: RoleCard }) {
           {role.assessmentLockedUntil && (
             <p className="mt-3 text-sm text-[#a4262c]">
               {t("You can try this role’s assessment again from {date}. Your other roles are unaffected.", {
-                date: new Date(role.assessmentLockedUntil).toLocaleDateString(locale),
+                date: new Date(role.assessmentLockedUntil).toLocaleDateString(locale, {
+                  timeZone: "UTC",
+                  dateStyle: "medium",
+                }),
               })}
             </p>
           )}
@@ -137,7 +143,7 @@ function RoleRow({ role }: { role: RoleCard }) {
           >
             {busy ? t("Withdrawing…") : t("Withdraw from this role")}
           </button>
-          {error && <p className="mt-2 text-sm text-[#a4262c]"><Tr>{error}</Tr></p>}
+          {error && <p role="alert" className="mt-2 text-sm text-[#a4262c]"><Tr>{error}</Tr></p>}
         </div>
       )}
     </section>
@@ -167,7 +173,7 @@ function AddRoleForm({ addable }: { addable: AddableRole[] }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="rounded-full bg-[#2e7d32] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#246627]"
+        className="rounded-full bg-brand-strong px-5 py-3 text-sm font-semibold text-white transition hover:bg-brand-strong-hover"
       >
         {t("Add another role")}
       </button>
@@ -180,8 +186,10 @@ function AddRoleForm({ addable }: { addable: AddableRole[] }) {
     setError(null);
     const fd = new FormData(e.currentTarget);
     fd.set("professionalRoleId", roleId);
-    const result = await addRole(null, fd);
-    setBusy(false);
+    let result: Awaited<ReturnType<typeof addRole>>;
+    try { result = await addRole(null, fd); }
+    catch { setError(t("Could not complete the operation. Please try again.")); return; }
+    finally { setBusy(false); }
     if ("error" in result) {
       setError(t(result.error));
       return;
@@ -194,14 +202,14 @@ function AddRoleForm({ addable }: { addable: AddableRole[] }) {
   return (
     <form
       onSubmit={onSubmit}
-      className="rounded-2xl border border-[#dbe7e0] bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]"
+      className="rounded-2xl border border-line bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]"
     >
-      <h2 className="text-lg font-bold text-[#14301e]">{t("Add another role")}</h2>
-      <p className="mt-2 text-sm text-[#4a4a4a]">
+      <h2 className="text-lg font-bold text-heading">{t("Add another role")}</h2>
+      <p className="mt-2 text-sm text-ink">
         {t("You will sit the assessment for the new role and supply anything it needs that we do not already hold. Your existing roles carry on as they are.")}
       </p>
 
-      <label className="mt-4 block text-sm font-medium text-[#14301e]">
+      <label className="mt-4 block text-sm font-medium text-heading">
         {t("Role")}
         <Select
           options={addable.map((r) => ({ value: r.id, label: r.name }))}
@@ -214,9 +222,9 @@ function AddRoleForm({ addable }: { addable: AddableRole[] }) {
       </label>
 
       {chosen?.register && (
-        <label className="mt-4 block text-sm font-medium text-[#14301e]">
+        <label className="mt-4 block text-sm font-medium text-heading">
           {REFERENCE_LABEL[chosen.register]}
-          <input
+          <RequiredMark /><input
             name="registrationReference"
             required
             placeholder={REFERENCE_PLACEHOLDER[chosen.register]}
@@ -225,20 +233,20 @@ function AddRoleForm({ addable }: { addable: AddableRole[] }) {
         </label>
       )}
 
-      {error && <p className="mt-4 text-sm text-[#a4262c]"><Tr>{error}</Tr></p>}
+      {error && <p role="alert" className="mt-4 text-sm text-[#a4262c]"><Tr>{error}</Tr></p>}
 
       <div className="mt-6 flex gap-3">
         <button
           type="submit"
           disabled={busy || !roleId}
-          className="rounded-full bg-[#2e7d32] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#246627] disabled:opacity-50"
+          className="rounded-full bg-brand-strong px-5 py-3 text-sm font-semibold text-white transition hover:bg-brand-strong-hover disabled:opacity-50"
         >
           {busy ? t("Adding…") : t("Add role")}
         </button>
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="rounded-full border border-[#dbe7e0] px-5 py-3 text-sm font-semibold text-[#14301e] transition hover:bg-[#f6faf7]"
+          className="rounded-full border border-line px-5 py-3 text-sm font-semibold text-heading transition hover:bg-[#f6faf7]"
         >
           {t("Cancel")}
         </button>

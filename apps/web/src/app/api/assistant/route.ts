@@ -1,12 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { cookies } from "next/headers";
 import { detectLocale, type AssistantLocale } from "@/lib/assistant/language";
 import { answerFromKnowledge } from "@/lib/assistant/fallback";
 import { buildSystemPrompt } from "@/lib/assistant/prompt";
 import { askClaude } from "@/lib/assistant/llm";
 import { allowRequest } from "@/lib/assistant/rate-limit";
-import { LOCALE_BY_COUNTRY, MARKET_COOKIE, parseSelectedMarket } from "@/lib/marketing/market";
+import { localeForCountry } from "@/lib/marketing/market";
+import { getSelectedCountry } from "@/lib/marketing/market-server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -34,10 +34,7 @@ export async function POST(req: NextRequest) {
   const last = messages[messages.length - 1];
   if (last.role !== "user") return NextResponse.json({ error: "invalid_request" }, { status: 400 });
 
-  const store = await cookies();
-  const marketLocale = LOCALE_BY_COUNTRY[
-    parseSelectedMarket(store.get(MARKET_COOKIE)?.value)
-  ] as AssistantLocale;
+  const marketLocale = localeForCountry(await getSelectedCountry()) as AssistantLocale;
   const locale = detectLocale(last.content, marketLocale);
 
   const reply = await askClaude(buildSystemPrompt(locale), messages);

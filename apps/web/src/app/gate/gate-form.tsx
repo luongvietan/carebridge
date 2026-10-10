@@ -1,6 +1,7 @@
 "use client";
 
 
+import { RequiredMark } from "@/components/required-mark";
 import { usePortalT, Tr } from "@/components/portal-locale";
 import { useActionState } from "react";
 import { submitGateAccess, type GateAccessResult } from "@/lib/auth/gate-actions";
@@ -18,11 +19,11 @@ export function GateForm({ next }: GateFormProps) {
   );
 
   return (
-    <form action={formAction} className="mt-8 space-y-5">
+    <form aria-busy={pending} action={formAction} className="mt-8 space-y-5">
       {next && <input type="hidden" name="next" value={next} />}
       <label className="block text-sm font-medium text-[#33433a]">
         {t("Access code")}
-        <input
+        <RequiredMark /><input
           type="password"
           name="accessCode"
           required

@@ -1,3 +1,6 @@
+import { makeT } from "@/lib/i18n/portal";
+import { getSelectedCountry } from "@/lib/marketing/market-server";
+
 import Link from "next/link";
 import { CtaPillLink } from "@/components/cta-pill-link";
 import { SiteFooter } from "@/components/site-footer";
@@ -11,16 +14,17 @@ const helpfulLinks = [
   { href: "/contact", label: "Contact" },
 ] as const;
 
-export default function NotFound() {
+export default async function NotFound() {
+  const t = makeT((await getSelectedCountry()) === "PT" ? "pt-PT" : "en-GB");
   return (
     <>
       <SiteNav />
 
-      <main
+      <main id="main-content" tabIndex={-1}
         className={`${marketingSection} flex min-h-[calc(100vh-12rem)] flex-col items-center justify-center text-center`}
       >
         <div
-          className={`w-full max-w-xl rounded-[28px] bg-[#f5f7f6] px-8 py-12 sm:rounded-[32px] sm:px-12 sm:py-14 ${marketingCardShadow}`}
+          className={`w-full max-w-xl rounded-[28px] bg-surface px-8 py-12 sm:rounded-[32px] sm:px-12 sm:py-14 ${marketingCardShadow}`}
         >
           <p
             aria-hidden
@@ -29,33 +33,32 @@ export default function NotFound() {
             404
           </p>
 
-          <h1 className="mt-2 text-2xl font-bold tracking-tight text-[#1e5a33] sm:text-3xl">
-            Page not found
+          <h1 className="mt-2 text-2xl font-bold tracking-tight text-brand-ink sm:text-3xl">
+            {t("Page not found")}
           </h1>
 
-          <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-[#4a4a4a] sm:text-base">
-            The page you are looking for may have been moved, removed, or the address may be
-            incorrect.
+          <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-ink sm:text-base">
+            {t("The page you are looking for may have been moved, removed, or the address may be incorrect.")}
           </p>
 
           <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <CtaPillLink href="/" shadow="lg">
-              Back to home
+              {t("Back to home")}
             </CtaPillLink>
           </div>
 
-          <nav aria-label="Helpful links" className="mt-10 border-t border-[#dbe7e0] pt-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#9aa8a0]">
-              You might be looking for
+          <nav aria-label={t("Helpful links")} className="mt-10 border-t border-line pt-8">
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">
+              {t("You might be looking for")}
             </p>
             <ul className="mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
               {helpfulLinks.map(({ href, label }) => (
                 <li key={href}>
                   <Link
                     href={href}
-                    className="text-sm font-medium text-[#2e7d32] transition hover:text-[#246627] hover:underline"
+                    className="text-sm font-medium text-brand-strong transition hover:text-brand-strong-hover hover:underline"
                   >
-                    {label}
+                    {t(label)}
                   </Link>
                 </li>
               ))}

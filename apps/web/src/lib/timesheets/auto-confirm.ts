@@ -24,11 +24,10 @@ export async function autoConfirmDueTimesheets(now: Date = new Date()): Promise<
     .eq("status", "submitted")
     .lte("submitted_at", cutoff);
 
-  let confirmed = 0;
-  for (const sheet of due ?? []) {
+  const confirmationResults = await Promise.all((due ?? []).map(async (sheet) => {
     // Belt and braces against the query above: a queried sheet is never
     // auto-confirmed, however it came to be selected.
-    if (!isAutoConfirmable(sheet.status)) continue;
+    if (!isAutoConfirmable(sheet.status)) return false;
     const { error } = await admin
       .from("timesheets")
       .update({
@@ -39,8 +38,7 @@ export async function autoConfirmDueTimesheets(now: Date = new Date()): Promise<
       })
       .eq("id", sheet.id)
       .eq("status", "submitted");
-    if (error) continue;
-    confirmed += 1;
+    if (error) return false;
 
     await admin.from("audit_log").insert({
       actor_type: "system",
@@ -58,6 +56,8 @@ export async function autoConfirmDueTimesheets(now: Date = new Date()): Promise<
     if (pro?.user_id) {
       await sendNotification("timesheet_confirmed", pro.user_id, { booking_id: sheet.booking_id });
     }
-  }
+    return true;
+  }));
+  const confirmed = confirmationResults.filter(Boolean).length;
   return { confirmed };
 }

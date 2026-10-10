@@ -1,5 +1,6 @@
 "use client";
 
+import { Tr, usePortalT } from "@/components/portal-locale";
 import { useRouter } from "next/navigation";
 import { useReducer } from "react";
 import { applyProfessionalStatusAction } from "@/lib/admin/status-actions";
@@ -13,7 +14,7 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { useConfirmDialog } from "@/components/ui/app-dialog";
 
 const INPUT_CLASS =
-  "w-full rounded-xl border border-[#dbe7e0] bg-white px-3.5 py-2.5 text-sm text-[#1e5a33] placeholder:text-[#9aa8a0] focus:border-[#2e7d32] focus:outline-none focus:ring-2 focus:ring-[#2e7d32]/15";
+  "w-full rounded-xl border border-line bg-white px-3.5 py-2.5 text-sm text-brand-ink placeholder:text-muted focus:border-brand-strong focus:outline-none focus:ring-2 focus:ring-brand-strong/15";
 
 const REASON_CODES = [
   "last_minute_cancellation",
@@ -90,6 +91,8 @@ function reducer(state: State, action: Action): State {
 }
 
 export function StatusActionForm({ professionalId, currentStatus }: Props) {
+  const t = usePortalT();
+
   const router = useRouter();
   const { confirm, dialog } = useConfirmDialog();
   const actions = allowedActions(currentStatus);
@@ -111,9 +114,7 @@ export function StatusActionForm({ professionalId, currentStatus }: Props) {
 
   if (actions.length === 0) {
     return (
-      <p className="text-sm text-[#4a4a4a]">
-        No status actions are available for this professional.
-      </p>
+      <p className="text-sm text-ink"><Tr>{"No status actions are available for this professional."}</Tr></p>
     );
   }
 
@@ -138,9 +139,9 @@ export function StatusActionForm({ professionalId, currentStatus }: Props) {
     const IRREVERSIBLE: StatusActionType[] = ["reject", "remove", "full_suspension"];
     if (
       IRREVERSIBLE.includes(state.action as StatusActionType) &&
-      !(await confirm(`Apply "${formatLabel(state.action)}" to this professional? This is hard to undo.`, {
+      !(await confirm(t("Apply {action} to this professional? This is hard to undo.", { action: t(formatLabel(state.action)) }), {
         variant: "destructive",
-        confirmLabel: "Apply",
+        confirmLabel: t("Apply"),
       }))
     ) {
       return;
@@ -148,6 +149,7 @@ export function StatusActionForm({ professionalId, currentStatus }: Props) {
 
     dispatch({ type: "pending" });
 
+    try {
     const result = await applyProfessionalStatusAction(professionalId, state.action, {
       reasonCode: state.reasonCode || undefined,
       reasonText: state.reasonText.trim() || undefined,
@@ -162,51 +164,47 @@ export function StatusActionForm({ professionalId, currentStatus }: Props) {
 
     dispatch({ type: "clear-form" });
     router.refresh();
+    } catch {
+      dispatch({ type: "error", error: "Could not complete the operation. Please try again." });
+    }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 text-sm">
+    <form aria-busy={state.pending} onSubmit={handleSubmit} className="space-y-4 text-sm">
       {dialog}
-      <div className="flex flex-col gap-1 text-[#4a4a4a]">
-        Action
-        <Select
-          aria-label="Action"
+      <div className="flex flex-col gap-1 text-ink"><Tr>{"Action"}</Tr><Select
+          aria-label={t("Action")}
           value={state.action}
           onValueChange={(v) => dispatch({ type: "set", field: "action", value: v as StatusActionType })}
           options={[
-            { value: "", label: "Select an action…" },
-            ...actions.map((a) => ({ value: a, label: formatLabel(a) })),
+            { value: "", label: t("Select an action…") },
+            ...actions.map((a) => ({ value: a, label: t(formatLabel(a)) })),
           ]}
         />
       </div>
 
-      <div className="flex flex-col gap-1 text-[#4a4a4a]">
-        Reason code{isPunitive ? " (required)" : ""}
+      <div className="flex flex-col gap-1 text-ink"><Tr>{"Reason code"}</Tr><Tr>{isPunitive ? " (required)" : ""}</Tr>
         <Select
-          aria-label="Reason code"
+          aria-label={t("Reason code")}
           value={state.reasonCode}
           onValueChange={(v) => dispatch({ type: "set", field: "reasonCode", value: v })}
           options={[
-            { value: "", label: isPunitive ? "Select a reason…" : "None" },
-            ...REASON_CODES.map((code) => ({ value: code, label: formatLabel(code) })),
+            { value: "", label: isPunitive ? t("Select a reason…") : t("None") },
+            ...REASON_CODES.map((code) => ({ value: code, label: t(formatLabel(code)) })),
           ]}
         />
       </div>
 
-      <label className="flex flex-col gap-1 text-[#4a4a4a]">
-        Reason text
-        <textarea
+      <label className="flex flex-col gap-1 text-ink"><Tr>{"Reason text"}</Tr><textarea
           value={state.reasonText}
           onChange={(e) => dispatch({ type: "set", field: "reasonText", value: e.target.value })}
           rows={2}
           className={INPUT_CLASS}
-          placeholder={state.reasonCode === "other" ? "Required when reason is 'other'" : "Optional details"}
+          placeholder={state.reasonCode === "other" ? t("Required when reason is 'other'") : t("Optional details")}
         />
       </label>
 
-      <label className="flex flex-col gap-1 text-[#4a4a4a]">
-        Internal notes
-        <textarea
+      <label className="flex flex-col gap-1 text-ink"><Tr>{"Internal notes"}</Tr><textarea
           value={state.internalNotes}
           onChange={(e) => dispatch({ type: "set", field: "internalNotes", value: e.target.value })}
           rows={2}
@@ -214,23 +212,21 @@ export function StatusActionForm({ professionalId, currentStatus }: Props) {
         />
       </label>
 
-      <div className="flex flex-col gap-1 text-[#4a4a4a]">
-        Review date
-        <DatePicker
-          aria-label="Review date"
+      <div className="flex flex-col gap-1 text-ink"><Tr>{"Review date"}</Tr><DatePicker
+          aria-label={t("Review date")}
           value={state.reviewDate}
           onValueChange={(v) => dispatch({ type: "set", field: "reviewDate", value: v })}
         />
       </div>
 
-      {state.error && <p className="text-sm text-[#da1e28]">{state.error}</p>}
+      {state.error && <p role="alert" className="text-sm text-danger"><Tr>{state.error}</Tr></p>}
 
       <button
         type="submit"
         disabled={state.pending}
-        className="rounded-full bg-[#2e7d32] px-4 py-1.5 text-white hover:bg-[#246627] disabled:opacity-50"
+        className="rounded-full bg-brand-strong px-4 py-1.5 text-white hover:bg-brand-strong-hover disabled:opacity-50"
       >
-        {state.pending ? "Applying…" : "Apply action"}
+        <Tr>{state.pending ? "Applying…" : "Apply action"}</Tr>
       </button>
     </form>
   );

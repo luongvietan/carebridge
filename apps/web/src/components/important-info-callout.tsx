@@ -11,10 +11,10 @@ export async function ImportantInfoCallout() {
         data-reveal
         className={`rounded-[28px] border-2 border-[#00a99d]/30 ${marketingSurface} p-6 sm:rounded-[32px] sm:p-8`}
       >
-        <h2 className="text-lg font-bold text-[#1e5a33] sm:text-xl">
+        <h2 className="text-lg font-bold text-brand-ink sm:text-xl">
           {importantInformation.heading}
         </h2>
-        <p className="mt-3 max-w-3xl text-sm leading-relaxed text-[#4a4a4a]">
+        <p className="mt-3 max-w-3xl text-sm leading-relaxed text-ink">
           {importantInformation.intro} {importantInformation.paragraphs[0]}
         </p>
         <p className="mt-4 max-w-3xl rounded-xl border border-[#f5c6cb] bg-[#fff5f5] px-4 py-3 text-sm font-medium leading-relaxed text-[#8b2e2e]">

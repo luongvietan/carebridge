@@ -15,6 +15,9 @@ export function getSiteOrigin(): string {
 export const CONTACT_EMAIL =
   process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "info@carebridgeconnect.co.uk";
 
+/** Optional UK phone number. Never show a fabricated placeholder number. */
+export const UK_CONTACT_PHONE = process.env.NEXT_PUBLIC_UK_PHONE?.trim() ?? "";
+
 /**
  * The Portuguese company's address for the footer and contact page. Ana has
  * not sent it yet, so it falls back to the country; set

@@ -1,4 +1,4 @@
-﻿import { test, expect, type Page, type Browser } from "@playwright/test";
+import { test, expect, type Page, type Browser } from "@playwright/test";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { buildBookingInsert } from "../src/lib/bookings/create";
 import type { RateCard } from "../src/lib/rates/snapshot";
@@ -14,11 +14,6 @@ function service(): SupabaseClient {
   );
 }
 
-
-/** The wall clock a picker committed, shown back unchanged by the app. */
-function formatPickedDate(date: Date) {
-  return date.toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" });
-}
 
 function formatDate(iso: string) {
   // The app renders booking times in Europe/London (formatLondon), so the test
@@ -45,12 +40,12 @@ async function login(page: Page, email: string, urlPattern: RegExp) {
   await page.goto("/login");
   await page.locator('input[name="email"]').fill(email);
   await page.locator('input[name="password"]').fill(PASSWORD);
-  await page.getByRole("button", { name: /sign in/i }).click();
+  await page.getByRole("button", { name: /^(Sign in|Entrar)$/i }).click();
   await expect(page).toHaveURL(urlPattern);
 }
 
-async function rnRoleId(sb: SupabaseClient) {
-  const { data: role } = await sb.from("professional_roles").select("id").eq("code", "adult_nurse").single();
+async function rnRoleId(sb: SupabaseClient, country = "GB") {
+  const { data: role } = await sb.from("professional_roles").select("id").eq("code", country === "PT" ? "pt_enfermeiro_adulto" : "adult_nurse").single();
   if (!role) throw new Error("adult_nurse role missing");
   return role.id as string;
 }
@@ -70,13 +65,13 @@ async function seedAdmin(sb: SupabaseClient, stamp: number) {
   return { email, userId: data.user.id };
 }
 
-async function seedClient(sb: SupabaseClient, stamp: number) {
+async function seedClient(sb: SupabaseClient, stamp: number, market = "GB") {
   const email = `bkclient_${stamp}@test.dev`;
   const { data, error } = await sb.auth.admin.createUser({
     email,
     password: PASSWORD,
     email_confirm: true,
-    user_metadata: { account_type: "private_client", full_name: "E2E Client" },
+    user_metadata: { account_type: "private_client", full_name: "E2E Client", market },
   });
   if (error || !data.user) throw error ?? new Error("client user");
   await new Promise((r) => setTimeout(r, 800));
@@ -92,13 +87,14 @@ async function seedClient(sb: SupabaseClient, stamp: number) {
 type ProSeed = { email: string; userId: string; proId: string; name: string };
 
 async function seedEligiblePro(sb: SupabaseClient, stamp: number, roleId: string): Promise<ProSeed> {
+  const { data: role } = await sb.from("professional_roles").select("country_code").eq("id", roleId).single();
   const name = `EligiblePro${stamp}`;
   const email = `bkpro_${stamp}@test.dev`;
   const { data, error } = await sb.auth.admin.createUser({
     email,
     password: PASSWORD,
     email_confirm: true,
-    user_metadata: { account_type: "professional", full_name: name },
+    user_metadata: { account_type: "professional", full_name: name, market: role!.country_code },
   });
   if (error || !data.user) throw error ?? new Error("pro user");
   await new Promise((r) => setTimeout(r, 800));
@@ -107,6 +103,7 @@ async function seedEligiblePro(sb: SupabaseClient, stamp: number, roleId: string
     .insert({
       user_id: data.user.id,
       full_name: name,
+      country_code: role!.country_code,
       professional_role_id: roleId,
       professional_status: "active",
       compliance_status: "approved",
@@ -180,19 +177,22 @@ async function pickDate(page: Page, triggerName: string, d: Date) {
 }
 
 async function fillBookingForm(page: Page, location: string, start: Date, durationLabel: string) {
-  await chooseFrom(page, page.getByRole("combobox", { name: "Professional role" }), "Adult Nurse");
-  await pickDate(page, "Start", start);
-  await chooseFrom(page, page.getByRole("combobox", { name: "Shift duration" }), durationLabel);
+  await chooseFrom(page, page.getByRole("combobox", { name: "Categoria profissional", exact: true }), "Enfermeiro/a — Adultos");
+  await pickDate(page, "Início", start);
+  await chooseFrom(page, page.getByRole("combobox", { name: "Duração do serviço", exact: true }), durationLabel);
   await page.locator('input[name="locationAddress"]').fill(location);
   await page.locator('input[name="locationPostcode"]').fill("E1 6AN");
-  await page.getByRole("button", { name: /create booking/i }).click();
+  await page.getByRole("button", { name: /criar marcação/i }).click();
 }
 
-test("open-market happy path: client creates booking, professional accepts", async ({ page, browser }) => {
+test("Portugal happy path: client creates EUR booking, professional accepts", async ({ page, browser }) => {
   const sb = service();
   const stamp = Date.now();
-  const roleId = await rnRoleId(sb);
-  const client = await seedClient(sb, stamp);
+  const { data: prior } = await sb.from("countries").select("is_live").eq("code", "PT").single();
+  await sb.from("countries").update({ is_live: true }).eq("code", "PT");
+  try {
+  const roleId = await rnRoleId(sb, "PT");
+  const client = await seedClient(sb, stamp, "PT");
   const pro = await seedEligiblePro(sb, stamp + 1, roleId);
   const location = `OpenMarket ${stamp}`;
 
@@ -203,16 +203,17 @@ test("open-market happy path: client creates booking, professional accepts", asy
   // now a Select; pick a whole-hour preset and let the form compute the end.
   const start = new Date(Date.now() + 48 * 3_600_000);
   start.setHours(9, 0, 0, 0);
-  await fillBookingForm(page, location, start, "8 hours"); // submits the form
+  await fillBookingForm(page, location, start, "8 horas"); // submits the form
   await expect(page).toHaveURL(/\/client\/bookings\/?$/);
-  await expect(page.locator("tr", { hasText: formatPickedDate(start) })).toBeVisible();
+  await expect(page.locator("tr", { hasText: start.toLocaleString("pt-PT", { dateStyle: "medium", timeStyle: "short" }) })).toBeVisible();
 
   const { data: created } = await sb
     .from("bookings")
-    .select("id, status, duration_hours, total_client_charge, total_payout")
+    .select("id, status, duration_hours, total_client_charge, total_payout, snap_currency")
     .eq("location_address", location)
     .single();
   expect(created?.status).toBe("open");
+  expect(created?.snap_currency.trim()).toBe("EUR");
   // Derive the expected totals from the active rate card rather than hardcoding
   // 40/28 — another test may have amended the shared rate card.
   const { data: activeRate } = await sb
@@ -234,8 +235,8 @@ test("open-market happy path: client creates booking, professional accepts", asy
   await proPage.goto("/professional/bookings");
   const row = proPage.locator("tr", { hasText: location });
   await expect(row).toBeVisible();
-  await row.getByRole("button", { name: /^accept$/i }).click();
-  await expect(row.getByText(/accepted/i)).toBeVisible({ timeout: 15_000 });
+  await row.getByRole("button", { name: /^aceitar$/i }).click();
+  await expect(row.getByText(/aceite/i)).toBeVisible({ timeout: 15_000 });
 
   const { data: after } = await sb
     .from("bookings")
@@ -247,6 +248,18 @@ test("open-market happy path: client creates booking, professional accepts", asy
   expect(Number(after!.total_client_charge)).toBe(expectedCharge);
   expect(Number(after!.total_payout)).toBe(expectedPayout);
   await proCtx.close();
+  } finally {
+    await sb.from("countries").update({ is_live: prior!.is_live }).eq("code", "PT");
+  }
+});
+
+test("legacy UK client keeps history but cannot create new UK bookings", async ({ page }) => {
+  const sb = service();
+  const client = await seedClient(sb, Date.now());
+  await login(page, client.email, /\/client/);
+  await page.goto("/client/bookings/new");
+  await expect(page.getByRole("heading", { name: "Bookings launching soon" })).toBeVisible();
+  await expect(page.locator('input[name="locationAddress"]')).toHaveCount(0);
 });
 
 test("admin assigns an eligible professional to an open booking", async ({ page }) => {

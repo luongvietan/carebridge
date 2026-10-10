@@ -33,12 +33,12 @@ function ServiceCard({
           className="object-cover"
           sizes="(max-width: 1024px) 100vw, 33vw"
         />
-        <span className="absolute bottom-3 right-3 grid h-10 w-10 place-items-center rounded-full bg-white text-[#4a4a4a] shadow-md transition group-hover:scale-105">
+        <span className="absolute bottom-3 right-3 grid h-10 w-10 place-items-center rounded-full bg-white text-ink shadow-md transition group-hover:scale-105">
           <Icon icon={ArrowUpRight01Icon} size={18} strokeWidth={2} />
         </span>
       </div>
-      <h3 className="mt-5 text-xl font-bold text-[#1e5a33]">{title}</h3>
-      <p className="mt-2 text-sm leading-relaxed text-[#4a4a4a]">{description}</p>
+      <h3 className="mt-5 text-xl font-bold text-brand-ink">{title}</h3>
+      <p className="mt-2 text-sm leading-relaxed text-ink">{description}</p>
     </Link>
   );
 }
@@ -70,9 +70,9 @@ export async function ServicesOfferSection() {
         })}
       </div>
 
-      <p className="mx-auto mt-8 max-w-2xl text-center text-sm text-[#4a4a4a]">
+      <p className="mx-auto mt-8 max-w-2xl text-center text-sm text-ink">
         {ui.servicesOffer.more}{" "}
-        <ForwardLink href="/services" className="text-sm text-[#2e7d32] hover:underline">
+        <ForwardLink href="/services" className="text-sm text-brand-strong hover:underline">
           {ui.servicesOffer.viewAll}
         </ForwardLink>
       </p>

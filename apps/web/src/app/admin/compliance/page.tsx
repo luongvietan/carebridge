@@ -1,3 +1,7 @@
+import { getPortalT } from "@/lib/i18n/portal-server";
+import { Tr } from "@/components/portal-locale";
+import { TableScroll } from "@/components/table-scroll";
+import { AdminTableHeader } from "@/components/admin-table-header";
 import { createServiceClient } from "@/lib/supabase/service";
 import { ReviewQueue } from "@/components/review-queue";
 import { RunSweepButton } from "@/components/run-sweep-button";
@@ -18,7 +22,7 @@ const TILE_TONE = {
   green: "border-[#a7e0b8] bg-[#f2fbf5]",
   amber: "border-[#f0dfa0] bg-[#fefbf0]",
   red: "border-[#f5b8bb] bg-[#fff5f5]",
-  neutral: "border-[#dbe7e0] bg-white",
+  neutral: "border-line bg-white",
 } as const;
 
 function StatTile({
@@ -34,14 +38,16 @@ function StatTile({
 }) {
   return (
     <div className={`rounded-2xl border p-4 ${TILE_TONE[tone]}`}>
-      <p className="text-2xl font-bold text-[#1e5a33]">{value}</p>
-      <p className="mt-1 text-sm text-[#4a4a4a]">{label}</p>
-      {hint && <p className="mt-0.5 text-xs text-[#7a8a81]">{hint}</p>}
+      <p className="text-2xl font-bold text-brand-ink">{value}</p>
+      <p className="mt-1 text-sm text-ink">{label}</p>
+      {hint && <p className="mt-0.5 text-xs text-muted">{hint}</p>}
     </div>
   );
 }
 
 export default async function AdminCompliancePage() {
+  const t = await getPortalT();
+
   const admin = createServiceClient();
 
   const pendingQuery = admin
@@ -157,10 +163,10 @@ export default async function AdminCompliancePage() {
   });
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-10">
+    <main id="main-content" tabIndex={-1} className="mx-auto max-w-4xl px-4 py-10">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="mt-1 text-3xl font-bold">Compliance</h1>
+          <h1 className="mt-1 text-3xl font-bold"><Tr>{"Compliance"}</Tr></h1>
         </div>
         <RunSweepButton />
       </div>
@@ -168,68 +174,66 @@ export default async function AdminCompliancePage() {
       <section className="mt-8">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <StatTile
-            label="Fully compliant"
+            label={t("Fully compliant")}
             value={overview.counts.green}
             tone="green"
-            hint="Available for bookings"
+            hint={t("Available for bookings")}
           />
           <StatTile
-            label="Expiring soon"
+            label={t("Expiring soon")}
             value={overview.counts.amber}
             tone="amber"
-            hint="Within the next 30 days"
+            hint={t("Within the next 30 days")}
           />
           <StatTile
-            label="Compliance expired"
+            label={t("Compliance expired")}
             value={overview.counts.red}
             tone="red"
-            hint={`${overview.counts.autoRestricted} automatically restricted`}
+            hint={t("{n} automatically restricted", { n: overview.counts.autoRestricted })}
           />
           <StatTile
-            label="Awaiting approval"
+            label={t("Awaiting approval")}
             value={overview.counts.pending}
             tone="neutral"
-            hint="Applications in progress"
+            hint={t("Applications in progress")}
           />
         </div>
 
         <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <StatTile label="Expiring in 30 days" value={overview.counts.expiring30} tone="amber" />
-          <StatTile label="31 to 60 days" value={overview.counts.expiring60} tone="neutral" />
-          <StatTile label="61 to 90 days" value={overview.counts.expiring90} tone="neutral" />
+          <StatTile label={t("Expiring in 30 days")} value={overview.counts.expiring30} tone="amber" />
+          <StatTile label={t("31 to 60 days")} value={overview.counts.expiring60} tone="neutral" />
+          <StatTile label={t("61 to 90 days")} value={overview.counts.expiring90} tone="neutral" />
           <StatTile
-            label="Register checks outstanding"
+            label={t("Register checks outstanding")}
             value={overview.counts.outstandingVerifications}
             tone={overview.counts.outstandingVerifications > 0 ? "red" : "green"}
           />
         </div>
 
-        <p className="mt-3 text-xs text-[#7a8a81]">
-          {overview.remindersSent} renewal reminder{overview.remindersSent === 1 ? "" : "s"} sent in
-          the last 30 days.
-        </p>
+        <p className="mt-3 text-xs text-muted">
+          {overview.remindersSent}<Tr>{"renewal reminder"}</Tr><Tr>{overview.remindersSent === 1 ? "" : "s"}</Tr><Tr>{"sent in the last 30 days."}</Tr></p>
       </section>
 
       <section className="mt-12">
-        <h2 className="text-xl font-bold">Compliance status by professional</h2>
-        <div className="mt-4 overflow-x-auto rounded-2xl border border-[#dbe7e0]">
+        <h2 className="text-xl font-bold"><Tr>{"Compliance status by professional"}</Tr></h2>
+        <TableScroll className="mt-4 rounded-2xl border border-line">
           <table className="w-full text-sm">
-            <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#4a4a4a]">
+            <AdminTableHeader>
               <tr>
-                <th className="p-3 font-medium">Professional</th>
-                <th className="p-3 font-medium">Role</th>
-                <th className="p-3 font-medium">Status</th>
-                <th className="p-3 font-medium">Outstanding</th>
-                <th className="p-3 font-medium">Next expiry</th>
+                <th className="p-3 font-medium"><Tr>{"Professional"}</Tr></th>
+                <th className="p-3 font-medium"><Tr>{"Role"}</Tr></th>
+                <th className="p-3 font-medium"><Tr>{"Status"}</Tr></th>
+                <th className="p-3 font-medium"><Tr>{"Outstanding"}</Tr></th>
+                <th className="p-3 font-medium"><Tr>{"Next expiry"}</Tr></th>
               </tr>
-            </thead>
-            <tbody className="divide-y divide-[#dbe7e0]">
+            </AdminTableHeader>
+            <tbody className="divide-y divide-line">
               {overview.professionals.map((row) => (
                 <tr key={row.professionalId}>
                   <td className="p-3">
                     <ForwardLink
                       href={`/admin/users/${row.professionalId}`}
-                      className="text-[#2e7d32] hover:underline"
+                      className="text-brand-strong hover:underline"
                     >
                       {row.fullName}
                     </ForwardLink>
@@ -238,9 +242,9 @@ export default async function AdminCompliancePage() {
                   <td className="p-3">
                     <ComplianceLightBadge light={row.light} />
                   </td>
-                  <td className="p-3 text-[#4a4a4a]">
+                  <td className="p-3 text-ink">
                     {row.registrationLapsed && (
-                      <span className="block text-xs text-[#a2191f]">Register check outstanding</span>
+                      <span className="block text-xs text-[#a2191f]"><Tr>{"Register check outstanding"}</Tr></span>
                     )}
                     {row.outstandingDocuments.length > 0
                       ? row.outstandingDocuments.join(", ")
@@ -254,15 +258,15 @@ export default async function AdminCompliancePage() {
             </tbody>
           </table>
           {overview.professionals.length === 0 && (
-            <p className="p-6 text-sm text-[#4a4a4a]">No professionals registered yet.</p>
+            <p className="p-6 text-sm text-ink"><Tr>{"No professionals registered yet."}</Tr></p>
           )}
-        </div>
+        </TableScroll>
       </section>
 
       <section className="mt-12">
-        <h2 className="text-xl font-bold">Documents approaching expiry</h2>
+        <h2 className="text-xl font-bold"><Tr>{"Documents approaching expiry"}</Tr></h2>
         {overview.expiring.length > 0 ? (
-          <ul className="mt-4 divide-y divide-[#dbe7e0] border border-[#dbe7e0] text-sm">
+          <ul className="mt-4 divide-y divide-line border border-line text-sm">
             {overview.expiring.map((doc) => (
               <li
                 key={`${doc.professionalId}-${doc.documentName}-${doc.expiryDate}`}
@@ -271,73 +275,64 @@ export default async function AdminCompliancePage() {
                 <span>
                   {doc.professionalName} — {doc.documentName}
                 </span>
-                <span className={doc.bucket === "30" ? "text-[#684e1b]" : "text-[#7a8a81]"}>
-                  expires {doc.expiryDate} ({doc.bucket === "30" ? "within 30" : doc.bucket === "60" ? "31–60" : "61–90"} days)
-                </span>
+                <span className={doc.bucket === "30" ? "text-[#684e1b]" : "text-muted"}><Tr>{"expires"}</Tr>{doc.expiryDate} ({doc.bucket === "30" ? "within 30" : doc.bucket === "60" ? "31–60" : "61–90"}<Tr>{"days)"}</Tr></span>
               </li>
             ))}
           </ul>
         ) : (
-          <p className="mt-3 text-sm text-[#4a4a4a]">
-            Nothing expires in the next 90 days.
-          </p>
+          <p className="mt-3 text-sm text-ink"><Tr>{"Nothing expires in the next 90 days."}</Tr></p>
         )}
       </section>
 
       <section className="mt-12">
-        <h2 className="text-xl font-bold">Documents awaiting review</h2>
+        <h2 className="text-xl font-bold"><Tr>{"Documents awaiting review"}</Tr></h2>
         <ReviewQueue items={items} />
       </section>
 
       <section className="mt-12">
-        <h2 className="text-xl font-bold">Registrations awaiting verification</h2>
-        <p className="mt-2 text-sm text-[#4a4a4a]">
-          Nurses, nannies and childminders cannot be activated until their registration has been
-          checked against the public register. A check lasts twelve months.
-        </p>
+        <h2 className="text-xl font-bold"><Tr>{"Registrations awaiting verification"}</Tr></h2>
+        <p className="mt-2 text-sm text-ink"><Tr>{"Nurses, nannies and childminders cannot be activated until their registration has been checked against the public register. A check lasts twelve months."}</Tr></p>
         <RegistrationVerificationPanel items={registrationChecks} />
       </section>
 
       <section className="mt-12">
-        <h2 className="text-xl font-bold">Compliance alerts</h2>
+        <h2 className="text-xl font-bold"><Tr>{"Compliance alerts"}</Tr></h2>
         {alerts && alerts.length > 0 ? (
-          <ul className="mt-4 divide-y divide-[#dbe7e0] border border-[#dbe7e0] text-sm">
+          <ul className="mt-4 divide-y divide-line border border-line text-sm">
             {alerts.map((a) => (
               <li key={a.id} className="flex justify-between p-3">
                 <span>
                   {(a.professionals as { full_name: string } | null)?.full_name ?? "Professional"} —{" "}
                   <span
-                    className={
-                      a.alert_type.endsWith("expired") ? "text-[#da1e28]" : "text-[#684e1b]"
-                    }
+                    className={a.alert_type.endsWith("expired") ? "text-danger" : "text-[#684e1b]"}
                   >
                     {a.alert_type.replace(/_/g, " ")}
                   </span>
                 </span>
-                {a.due_date && <span className="text-[#7a8a81]">due {a.due_date}</span>}
+                {a.due_date && <span className="text-muted"><Tr>{"due"}</Tr>{a.due_date}</span>}
               </li>
             ))}
           </ul>
         ) : (
-          <p className="mt-3 text-sm text-[#4a4a4a]">No active alerts.</p>
+          <p className="mt-3 text-sm text-ink"><Tr>{"No active alerts."}</Tr></p>
         )}
       </section>
 
       <section className="mt-12">
-        <h2 className="text-xl font-bold">Non-compliant professionals</h2>
+        <h2 className="text-xl font-bold"><Tr>{"Non-compliant professionals"}</Tr></h2>
         {nonCompliant && nonCompliant.length > 0 ? (
-          <ul className="mt-4 divide-y divide-[#dbe7e0] border border-[#dbe7e0] text-sm">
+          <ul className="mt-4 divide-y divide-line border border-line text-sm">
             {nonCompliant.map((p) => (
               <li key={p.id} className="flex justify-between p-3">
                 <span>{p.full_name}</span>
-                <span className="text-[#7a8a81]">
+                <span className="text-muted">
                   {p.professional_status.replace(/_/g, " ")} · {p.compliance_status.replace(/_/g, " ")}
                 </span>
               </li>
             ))}
           </ul>
         ) : (
-          <p className="mt-3 text-sm text-[#4a4a4a]">All professionals are compliant.</p>
+          <p className="mt-3 text-sm text-ink"><Tr>{"All professionals are compliant."}</Tr></p>
         )}
       </section>
     </main>

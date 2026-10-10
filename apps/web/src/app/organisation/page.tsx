@@ -1,3 +1,5 @@
+import { TableScroll } from "@/components/table-scroll";
+import { AdminTableHeader } from "@/components/admin-table-header";
 import { getPortalLocale, getPortalT } from "@/lib/i18n/portal-server";
 import { DashboardGrid } from "@/components/dashboard-grid";
 import { ForwardLink } from "@/components/forward-link";
@@ -21,9 +23,11 @@ const ACTIVE = new Set(["open", "accepted", "assigned", "in_progress"]);
  * are always looking at the same numbers.
  */
 export default async function OrganisationHome() {
-  const t = await getPortalT();
-  const locale = await getPortalLocale();
-  const supabase = await createClient();
+  const [{ t }, locale, supabase] = await Promise.all([
+    getPortalT().then((t) => ({ t })),
+    getPortalLocale(),
+    createClient(),
+  ]);
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -54,10 +58,10 @@ export default async function OrganisationHome() {
   );
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-10">
+    <main id="main-content" tabIndex={-1} className="mx-auto max-w-4xl px-4 py-10">
       <h1 className="mt-1 text-3xl font-bold">{t("Dashboard")}</h1>
       {user?.email && (
-        <p className="mt-2 text-sm text-[#4a4a4a]">{t("Signed in as")}{" "}{user.email}</p>
+        <p className="mt-2 text-sm text-ink">{t("Signed in as")}{" "}{user.email}</p>
       )}
 
       <section className="mt-8 grid grid-cols-2 gap-3 md:grid-cols-4">
@@ -68,7 +72,7 @@ export default async function OrganisationHome() {
       </section>
 
       {professionals.size > 0 && (
-        <p className="mt-3 text-sm text-[#4a4a4a]">
+        <p className="mt-3 text-sm text-ink">
           {professionals.size === 1
             ? t("1 professional has worked for you:")
             : t("{n} professionals have worked for you:", { n: professionals.size })}{" "}
@@ -81,17 +85,17 @@ export default async function OrganisationHome() {
           <h2 className="text-xl font-bold">{t("Payment history")}</h2>
           <ForwardLink
             href="/organisation/bookings"
-            className="text-sm text-[#2e7d32] hover:underline"
+            className="text-sm text-brand-strong hover:underline"
           >
             {t("All bookings")}
           </ForwardLink>
         </div>
         {rows.length === 0 ? (
-          <p className="mt-3 text-sm text-[#4a4a4a]">{t("No bookings yet.")}</p>
+          <p className="mt-3 text-sm text-ink">{t("No bookings yet.")}</p>
         ) : (
-          <div className="mt-4 overflow-x-auto rounded-2xl border border-[#dbe7e0]">
+          <TableScroll className="mt-4 rounded-2xl border border-line">
             <table className="w-full text-sm">
-              <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#4a4a4a]">
+              <AdminTableHeader>
                 <tr>
                   <th className="p-3 font-medium">{t("Shift")}</th>
                   <th className="p-3 font-medium">{t("Role")}</th>
@@ -100,8 +104,8 @@ export default async function OrganisationHome() {
                   <th className="p-3 font-medium">{t("Payment")}</th>
                   <th className="p-3 font-medium">{t("Invoice")}</th>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-[#dbe7e0]">
+              </AdminTableHeader>
+              <tbody className="divide-y divide-line">
                 {rows.slice(0, 20).map((row) => (
                   <tr key={row.bookingId}>
                     <td className="p-3 whitespace-nowrap">
@@ -111,14 +115,14 @@ export default async function OrganisationHome() {
                     <td className="p-3">{row.professionalName ?? "—"}</td>
                     <td className="p-3">{formatMoney(row.clientCharge, row.currency)}</td>
                     <td className="p-3">
-                      <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#4a4a4a]">
+                      <span className="rounded-full bg-surface px-2.5 py-0.5 text-xs font-medium text-ink">
                         {t(MONEY_STATE_LABEL[row.state])}
                       </span>
                     </td>
                     <td className="p-3">
                       <ForwardLink
                         href={`/organisation/bookings/${row.bookingId}/invoice`}
-                        className="text-[#2e7d32] hover:underline"
+                        className="text-brand-strong hover:underline"
                       >
                         {t("View")}
                       </ForwardLink>
@@ -127,7 +131,7 @@ export default async function OrganisationHome() {
                 ))}
               </tbody>
             </table>
-          </div>
+          </TableScroll>
         )}
       </section>
 
@@ -167,9 +171,9 @@ export default async function OrganisationHome() {
 
 function Tile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-[#dbe7e0] bg-white p-4">
-      <p className="text-2xl font-bold text-[#1e5a33]">{value}</p>
-      <p className="mt-1 text-sm text-[#4a4a4a]">{label}</p>
+    <div className="rounded-2xl border border-line bg-white p-4">
+      <p className="text-2xl font-bold text-brand-ink">{value}</p>
+      <p className="mt-1 text-sm text-ink">{label}</p>
     </div>
   );
 }

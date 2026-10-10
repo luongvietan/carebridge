@@ -1,3 +1,7 @@
+import { getPortalT } from "@/lib/i18n/portal-server";
+import { Tr } from "@/components/portal-locale";
+import { TableScroll } from "@/components/table-scroll";
+import { AdminTableHeader } from "@/components/admin-table-header";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AccountStatusControl } from "@/components/account-status-control";
@@ -48,6 +52,8 @@ export default async function AdminAccountsPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const t = await getPortalT();
+
   if (!(await requireAdmin())) redirect("/login");
 
   const params = await searchParams;
@@ -68,18 +74,14 @@ export default async function AdminAccountsPage({
   const users = (data ?? []) as UserRow[];
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-10">
-      <h1 className="mt-1 text-3xl font-bold">All accounts</h1>
-      <p className="mt-2 text-sm text-[#4a4a4a]">
-        View and manage account status across professionals, clients and organisations.
-      </p>
+    <main id="main-content" tabIndex={-1} className="mx-auto max-w-6xl px-4 py-10">
+      <h1 className="mt-1 text-3xl font-bold"><Tr>{"All accounts"}</Tr></h1>
+      <p className="mt-2 text-sm text-ink"><Tr>{"View and manage account status across professionals, clients and organisations."}</Tr></p>
 
       <form method="GET" className="mt-6 flex flex-wrap items-end gap-4">
-        <div className="flex flex-col gap-1 text-sm text-[#4a4a4a]">
-          Account type
-          <Select
+        <div className="flex flex-col gap-1 text-sm text-ink"><Tr>{"Account type"}</Tr><Select
             name="account_type"
-            aria-label="Account type"
+            aria-label={t("Account type")}
             defaultValue={accountTypeFilter ?? ""}
             className="w-56"
             options={[
@@ -90,33 +92,29 @@ export default async function AdminAccountsPage({
         </div>
         <button
           type="submit"
-          className="rounded-full bg-[#2e7d32] px-4 py-1.5 text-sm text-white hover:bg-[#246627]"
-        >
-          Apply filter
-        </button>
+          className="rounded-full bg-brand-strong px-4 py-1.5 text-sm text-white hover:bg-brand-strong-hover"
+        ><Tr>{"Apply filter"}</Tr></button>
         {accountTypeFilter && (
-          <Link href="/admin/accounts" className="text-sm text-[#2e7d32] hover:underline">
-            Clear filter
-          </Link>
+          <Link href="/admin/accounts" className="text-sm text-brand-strong hover:underline"><Tr>{"Clear filter"}</Tr></Link>
         )}
       </form>
 
-      <div className="mt-8 overflow-x-auto rounded-2xl border border-[#dbe7e0] shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
+      <TableScroll className="mt-8 rounded-2xl border border-line shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
         <table className="w-full text-sm">
-          <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#4a4a4a]">
+          <AdminTableHeader>
             <tr>
-              <th className="p-3 font-medium">Email</th>
-              <th className="p-3 font-medium">Account type</th>
-              <th className="p-3 font-medium">Account status</th>
-              <th className="p-3 font-medium">Actions</th>
+              <th className="p-3 font-medium"><Tr>{"Email"}</Tr></th>
+              <th className="p-3 font-medium"><Tr>{"Account type"}</Tr></th>
+              <th className="p-3 font-medium"><Tr>{"Account status"}</Tr></th>
+              <th className="p-3 font-medium"><Tr>{"Actions"}</Tr></th>
             </tr>
-          </thead>
-          <tbody className="divide-y divide-[#dbe7e0]">
+          </AdminTableHeader>
+          <tbody className="divide-y divide-line">
             {users.map((user) => (
               <tr key={user.id}>
                 <td className="p-3">
                   {user.account_type === "private_client" || user.account_type === "organisation" ? (
-                    <Link href={`/admin/accounts/${user.id}`} className="text-[#2e7d32] hover:underline">
+                    <Link href={`/admin/accounts/${user.id}`} className="text-brand-strong hover:underline">
                       {user.email}
                     </Link>
                   ) : (
@@ -124,19 +122,19 @@ export default async function AdminAccountsPage({
                   )}
                 </td>
                 <td className="p-3">
-                  <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#4a4a4a]">
+                  <span className="rounded-full bg-surface px-2.5 py-0.5 text-xs font-medium text-ink">
                     {formatLabel(user.account_type)}
-                    {user.is_founder ? " (founder)" : ""}
+                    <Tr>{user.is_founder ? " (founder)" : ""}</Tr>
                   </span>
                 </td>
                 <td className="p-3">
-                  <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#4a4a4a]">
+                  <span className="rounded-full bg-surface px-2.5 py-0.5 text-xs font-medium text-ink">
                     {formatLabel(user.account_status)}
                   </span>
                 </td>
                 <td className="p-3">
                   {isProtectedAccount(user) ? (
-                    <span className="text-[#4a4a4a]">—</span>
+                    <span className="text-ink">—</span>
                   ) : (
                     <div className="flex flex-wrap items-center gap-3">
                       <AccountStatusControl userId={user.id} current={user.account_status} />
@@ -149,9 +147,9 @@ export default async function AdminAccountsPage({
           </tbody>
         </table>
         {users.length === 0 && (
-          <p className="p-6 text-sm text-[#4a4a4a]">No accounts match this filter.</p>
+          <p className="p-6 text-sm text-ink"><Tr>{"No accounts match this filter."}</Tr></p>
         )}
-      </div>
+      </TableScroll>
     </main>
   );
 }

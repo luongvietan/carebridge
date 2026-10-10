@@ -16,9 +16,14 @@ export const LOCALE_BY_COUNTRY: Record<MarketCountry, string> = {
   PT: "pt-PT",
 };
 
-/** Anything unrecognised — absent, tampered, stale — falls back to the UK. */
+/** Portugal is the initial launch market. Legacy UK account values remain valid. */
 export function parseSelectedMarket(value: string | null | undefined): MarketCountry {
-  return KNOWN.includes((value ?? "") as MarketCountry) ? ((value ?? "") as MarketCountry) : "GB";
+  return KNOWN.includes((value ?? "") as MarketCountry) ? ((value ?? "") as MarketCountry) : "PT";
+}
+
+/** UK onboarding stays closed; preview access does not override that policy. */
+export function isMarketOpen(code: string, live: boolean, preview: boolean): boolean {
+  return code === "PT" && (live || preview);
 }
 
 export function localeForCountry(country: MarketCountry): string {

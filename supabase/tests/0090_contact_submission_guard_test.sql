@@ -1,0 +1,12 @@
+begin;
+select plan(8);
+select ok(not has_function_privilege('anon', 'public.submit_contact_enquiry(text,text,text,text)', 'execute'), 'anonymous clients cannot call the persistence RPC');
+select ok(not has_function_privilege('authenticated', 'public.submit_contact_enquiry(text,text,text,text)', 'execute'), 'signed-in clients cannot bypass the server action');
+select ok(has_function_privilege('service_role', 'public.submit_contact_enquiry(text,text,text,text)', 'execute'), 'service role can persist enquiries');
+select is(public.submit_contact_enquiry('Jo', 'atomic-test@example.test', null, 'one'), 'saved', 'first enquiry is saved');
+select is(public.submit_contact_enquiry('Jo', 'ATOMIC-TEST@example.test', null, 'one'), 'duplicate', 'mailbox normalization preserves deduplication');
+select is(public.submit_contact_enquiry('Jo', 'atomic-test@example.test', null, 'two'), 'saved', 'second distinct enquiry is saved');
+select is(public.submit_contact_enquiry('Jo', 'atomic-test@example.test', null, 'three'), 'saved', 'third distinct enquiry is saved');
+select is(public.submit_contact_enquiry('Jo', 'atomic-test@example.test', null, 'four'), 'throttled', 'fourth recent enquiry is throttled');
+select * from finish();
+rollback;

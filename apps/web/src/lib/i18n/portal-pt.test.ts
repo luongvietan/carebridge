@@ -5,6 +5,7 @@ import { PORTAL_PT } from "./portal-pt";
 import { makeT } from "./portal";
 import { MONEY_STATE_LABEL } from "@/lib/finance/booking-finance";
 import { ROLE_STATUS_LABEL } from "@/lib/roles/outstanding";
+import ts from "typescript";
 
 const SRC = join(__dirname, "..", "..");
 
@@ -18,6 +19,32 @@ function files(dir: string, out: string[] = []): string[] {
 }
 
 describe("signed-in app translations", () => {
+  it("has Portuguese for every static Tr label", () => {
+    const missing: string[] = [];
+    const decode = (text: string) => text.replace(/&(amp|apos|quot|lt|gt);/g, (_, entity: string) => ({ amp: "&", apos: "'", quot: '"', lt: "<", gt: ">" })[entity]!);
+    for (const file of files(SRC).filter((path) => path.endsWith(".tsx"))) {
+      const source = ts.createSourceFile(file, readFileSync(file, "utf8"), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+      const visit = (node: ts.Node) => {
+        if (ts.isJsxElement(node) && node.openingElement.tagName.getText(source) === "Tr") {
+          for (const child of node.children) {
+            if (ts.isJsxExpression(child) && child.expression && ts.isConditionalExpression(child.expression)) {
+              const checkLabels = (branch: ts.Node) => {
+                if (ts.isStringLiteral(branch) && branch.text && !(branch.text in PORTAL_PT)) missing.push(`${file.slice(SRC.length + 1)}: ${branch.text}`);
+                ts.forEachChild(branch, checkLabels);
+              };
+              checkLabels(child.expression);
+            }
+            const key = ts.isJsxText(child) ? decode(child.text.replace(/\s+/g, " ").trim())
+              : ts.isJsxExpression(child) && child.expression && ts.isStringLiteral(child.expression) ? child.expression.text : undefined;
+            if (key && !(key in PORTAL_PT)) missing.push(`${file.slice(SRC.length + 1)}: ${key}`);
+          }
+        }
+        ts.forEachChild(node, visit);
+      };
+      visit(source);
+    }
+    expect(missing).toEqual([]);
+  });
   it("has Portuguese for every string the app passes to t()", () => {
     const missing: string[] = [];
     const re = /\bt\(\s*"((?:[^"\\]|\\.)*)"/g;

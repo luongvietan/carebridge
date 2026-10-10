@@ -2,18 +2,19 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Modal } from "@/components/ui/modal";
+import { usePortalT } from "@/components/portal-locale";
 
 const INPUT_CLASS =
-  "mt-3 w-full rounded-xl border border-[#dbe7e0] bg-white px-3.5 py-2.5 text-sm text-[#14301e] placeholder:text-[#9aa8a0] focus:border-[#2e7d32] focus:outline-none focus:ring-2 focus:ring-[#2e7d32]/15";
+  "mt-3 w-full rounded-xl border border-line bg-white px-3.5 py-2.5 text-sm text-heading placeholder:text-muted focus:border-brand-strong focus:outline-none focus:ring-2 focus:ring-brand-strong/15";
 
 const BTN_CANCEL =
-  "rounded-full border border-[#dbe7e0] px-4 py-1.5 text-sm font-medium text-[#4a4a4a] transition hover:border-[#bcd8c7] hover:bg-[#f5f7f6]";
+  "rounded-full border border-line px-4 py-1.5 text-sm font-medium text-ink transition hover:border-line-hover hover:bg-surface";
 
 const BTN_CONFIRM =
-  "rounded-full bg-[#2e7d32] px-4 py-1.5 text-sm font-medium text-white transition hover:bg-[#246627]";
+  "rounded-full bg-brand-strong px-4 py-1.5 text-sm font-medium text-white transition hover:bg-brand-strong-hover";
 
 const BTN_DESTRUCTIVE =
-  "rounded-full bg-[#da1e28] px-4 py-1.5 text-sm font-medium text-white transition hover:bg-[#b81921]";
+  "rounded-full bg-danger px-4 py-1.5 text-sm font-medium text-white transition hover:bg-[#b81921]";
 
 type ConfirmOptions = {
   confirmLabel?: string;
@@ -51,25 +52,25 @@ type PendingPrompt = {
 
 function ConfirmDialog({
   message,
-  confirmLabel = "OK",
-  cancelLabel = "Cancel",
+  confirmLabel,
+  cancelLabel,
   variant = "default",
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
+  const t = usePortalT();
   return (
-    <Modal open onClose={onCancel}>
-      <p className="text-sm leading-relaxed text-[#4a4a4a]">{message}</p>
+    <Modal open onClose={onCancel} title={t(message)}>
       <div className="mt-6 flex justify-end gap-2">
         <button type="button" onClick={onCancel} className={BTN_CANCEL}>
-          {cancelLabel}
+          {t(cancelLabel ?? "Cancel")}
         </button>
         <button
           type="button"
           onClick={onConfirm}
           className={variant === "destructive" ? BTN_DESTRUCTIVE : BTN_CONFIRM}
         >
-          {confirmLabel}
+          {t(confirmLabel ?? "OK")}
         </button>
       </div>
     </Modal>
@@ -79,11 +80,12 @@ function ConfirmDialog({
 function PromptDialog({
   message,
   defaultValue = "",
-  confirmLabel = "OK",
-  cancelLabel = "Cancel",
+  confirmLabel,
+  cancelLabel,
   onConfirm,
   onCancel,
 }: PromptDialogProps) {
+  const t = usePortalT();
   const inputRef = useRef<HTMLInputElement>(null);
   const [value, setValue] = useState(defaultValue);
 
@@ -93,9 +95,9 @@ function PromptDialog({
   }, []);
 
   return (
-    <Modal open onClose={onCancel}>
-      <label className="block text-sm text-[#4a4a4a]">
-        {message}
+    <Modal open onClose={onCancel} title={t(message)}>
+      <label className="block text-sm text-ink">
+        {t(message)}
         <input
           ref={inputRef}
           type="text"
@@ -112,10 +114,10 @@ function PromptDialog({
       </label>
       <div className="mt-6 flex justify-end gap-2">
         <button type="button" onClick={onCancel} className={BTN_CANCEL}>
-          {cancelLabel}
+          {t(cancelLabel ?? "Cancel")}
         </button>
         <button type="button" onClick={() => onConfirm(value)} className={BTN_CONFIRM}>
-          {confirmLabel}
+          {t(confirmLabel ?? "OK")}
         </button>
       </div>
     </Modal>

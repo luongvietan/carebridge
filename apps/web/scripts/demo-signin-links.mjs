@@ -57,7 +57,7 @@ async function tokenFor(email) {
 
 const wanted = process.argv.slice(2).length ? process.argv.slice(2) : Object.keys(ACCOUNTS);
 
-for (const key of wanted) {
+await Promise.all(wanted.map(async (key) => {
   const account = ACCOUNTS[key];
   if (!account) {
     console.error(`unknown account "${key}" — one of: ${Object.keys(ACCOUNTS).join(", ")}`);
@@ -68,5 +68,5 @@ for (const key of wanted) {
   url.searchParams.set("type", "magiclink");
   url.searchParams.set("next", account.next);
   console.log(`\n${key.padEnd(7)} ${account.who}\n        ${account.email}\n        ${url}`);
-}
+}));
 console.log("\nSingle use, expires within the hour. Enter the /gate code first if the browser has no gate cookie.\n");

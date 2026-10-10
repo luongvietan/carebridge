@@ -1,11 +1,13 @@
 "use client";
+import { RequiredMark } from "@/components/required-mark";
+import { Tr } from "@/components/portal-locale";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Select } from "@/components/ui/select";
 import { openIncident, updateIncident } from "@/lib/admin/incident-actions";
 
 const field =
-  "mt-1 w-full rounded-xl border border-[#dbe7e0] bg-white px-3 py-2 text-sm text-[#1e5a33] focus:border-[#2e7d32] focus:outline-none focus:ring-2 focus:ring-[#2e7d32]/15";
+  "mt-1 w-full rounded-xl border border-line bg-white px-3 py-2 text-sm text-brand-ink focus:border-brand-strong focus:outline-none focus:ring-2 focus:ring-brand-strong/15";
 
 const CATEGORIES = [
   { value: "complaint", label: "Complaint" },
@@ -49,8 +51,15 @@ export function OpenIncidentForm({
     fd.set("category", category);
     fd.set("severity", severity);
     fd.set("professionalId", professionalId);
-    const result = await openIncident(fd);
-    setBusy(false);
+    let result: Awaited<ReturnType<typeof openIncident>>;
+    try {
+      result = await openIncident(fd);
+    } catch {
+      setError("Could not complete the operation. Please try again.");
+      return;
+    } finally {
+      setBusy(false);
+    }
     if ("error" in result) {
       setError(result.error);
       return;
@@ -64,19 +73,15 @@ export function OpenIncidentForm({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="rounded-full bg-[#2e7d32] px-4 py-2 text-sm text-white hover:bg-[#246627]"
-      >
-        Record a concern
-      </button>
+        className="rounded-full bg-brand-strong px-4 py-2 text-sm text-white hover:bg-brand-strong-hover"
+      ><Tr>{"Record a concern"}</Tr></button>
     );
   }
 
   return (
-    <form onSubmit={onSubmit} className="mt-4 rounded-2xl border border-[#dbe7e0] p-4">
+    <form aria-busy={busy} onSubmit={onSubmit} className="mt-4 rounded-2xl border border-line p-4">
       <div className="grid gap-3 sm:grid-cols-3">
-        <div className="text-sm font-medium">
-          Kind
-          <Select
+        <div className="text-sm font-medium"><Tr>{"Kind"}</Tr><Select
             name="category"
             aria-label="Kind of concern"
             required
@@ -87,9 +92,7 @@ export function OpenIncidentForm({
             options={CATEGORIES}
           />
         </div>
-        <div className="text-sm font-medium">
-          Severity
-          <Select
+        <div className="text-sm font-medium"><Tr>{"Severity"}</Tr><Select
             name="severity"
             aria-label="Severity"
             value={severity}
@@ -98,9 +101,7 @@ export function OpenIncidentForm({
             options={SEVERITIES}
           />
         </div>
-        <div className="text-sm font-medium">
-          About (optional)
-          <Select
+        <div className="text-sm font-medium"><Tr>{"About (optional)"}</Tr><Select
             name="professionalId"
             aria-label="Professional concerned"
             value={professionalId}
@@ -115,36 +116,28 @@ export function OpenIncidentForm({
         </div>
       </div>
 
-      <label className="mt-3 block text-sm font-medium">
-        Subject
-        <input name="subject" required className={field} placeholder="Short summary" />
+      <label className="mt-3 block text-sm font-medium"><Tr>{"Subject"}</Tr><RequiredMark /><input name="subject" required className={field} placeholder="Short summary" />
       </label>
-      <label className="mt-3 block text-sm font-medium">
-        What was reported
-        <textarea name="details" required rows={4} className={field} />
+      <label className="mt-3 block text-sm font-medium"><Tr>{"What was reported"}</Tr><RequiredMark /><textarea name="details" required rows={4} className={field} />
       </label>
-      <label className="mt-3 block text-sm font-medium">
-        Reported by (optional)
-        <input name="reportedBy" className={field} placeholder="Name, and how it reached us" />
+      <label className="mt-3 block text-sm font-medium"><Tr>{"Reported by (optional)"}</Tr><input name="reportedBy" className={field} placeholder="Name, and how it reached us" />
       </label>
 
-      {error && <p className="mt-2 text-sm text-[#da1e28]">{error}</p>}
+      {error && <p role="alert" className="mt-2 text-sm text-danger"><Tr>{error}</Tr></p>}
 
       <div className="mt-4 flex gap-2">
         <button
           type="submit"
           disabled={busy}
-          className="rounded-full bg-[#2e7d32] px-4 py-2 text-sm text-white hover:bg-[#246627] disabled:opacity-50"
+          className="rounded-full bg-brand-strong px-4 py-2 text-sm text-white hover:bg-brand-strong-hover disabled:opacity-50"
         >
-          {busy ? "Recording…" : "Record concern"}
+          <Tr>{busy ? "Recording…" : "Record concern"}</Tr>
         </button>
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="rounded-full border border-[#dbe7e0] px-4 py-2 text-sm text-[#4a4a4a] hover:bg-[#f5f7f6]"
-        >
-          Cancel
-        </button>
+          className="rounded-full border border-line px-4 py-2 text-sm text-ink hover:bg-surface"
+        ><Tr>{"Cancel"}</Tr></button>
       </div>
     </form>
   );
@@ -161,7 +154,9 @@ export function UpdateIncidentForm({
   };
 }) {
   const router = useRouter();
-  const [status, setStatus] = useState(incident.status);
+  // The parent remounts this form when the server status changes; lazy
+  // initialization keeps the editable draft local to that mounted incident.
+  const [status, setStatus] = useState(() => incident.status);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -172,18 +167,23 @@ export function UpdateIncidentForm({
     const fd = new FormData(e.currentTarget);
     fd.set("id", incident.id);
     fd.set("status", status);
-    const result = await updateIncident(fd);
-    setBusy(false);
+    let result: Awaited<ReturnType<typeof updateIncident>>;
+    try {
+      result = await updateIncident(fd);
+    } catch {
+      setError("Could not complete the operation. Please try again.");
+      return;
+    } finally {
+      setBusy(false);
+    }
     if ("error" in result) setError(result.error);
     else router.refresh();
   }
 
   return (
-    <form onSubmit={onSubmit} className="mt-3 border-t border-[#dbe7e0] pt-3">
+    <form aria-busy={busy} onSubmit={onSubmit} className="mt-3 border-t border-line pt-3">
       <div className="grid gap-3 sm:grid-cols-3">
-        <div className="text-sm font-medium">
-          Status
-          <Select
+        <div className="text-sm font-medium"><Tr>{"Status"}</Tr><Select
             name="status"
             aria-label="Status"
             value={status}
@@ -192,9 +192,7 @@ export function UpdateIncidentForm({
             options={STATUSES}
           />
         </div>
-        <label className="text-sm font-medium sm:col-span-2">
-          Investigation
-          <input
+        <label className="text-sm font-medium sm:col-span-2"><Tr>{"Investigation"}</Tr><input
             name="investigation"
             defaultValue={incident.investigation ?? ""}
             className={field}
@@ -202,22 +200,20 @@ export function UpdateIncidentForm({
           />
         </label>
       </div>
-      <label className="mt-3 block text-sm font-medium">
-        Outcome
-        <input
+      <label className="mt-3 block text-sm font-medium"><Tr>{"Outcome"}</Tr><input
           name="outcome"
           defaultValue={incident.outcome ?? ""}
           className={field}
           placeholder="Required before resolving or closing"
         />
       </label>
-      {error && <p className="mt-2 text-sm text-[#da1e28]">{error}</p>}
+      {error && <p role="alert" className="mt-2 text-sm text-danger"><Tr>{error}</Tr></p>}
       <button
         type="submit"
         disabled={busy}
-        className="mt-3 rounded-full border border-[#2e7d32] px-4 py-1.5 text-sm text-[#2e7d32] hover:bg-[#f2fbf5] disabled:opacity-50"
+        className="mt-3 rounded-full border border-brand-strong px-4 py-1.5 text-sm text-brand-strong hover:bg-[#f2fbf5] disabled:opacity-50"
       >
-        {busy ? "Saving…" : "Save"}
+        <Tr>{busy ? "Saving…" : "Save"}</Tr>
       </button>
     </form>
   );

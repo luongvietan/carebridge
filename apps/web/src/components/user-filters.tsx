@@ -7,7 +7,7 @@ import { Select } from "@/components/ui/select";
 import { DAYS_OF_WEEK } from "@/lib/onboarding/profile-children";
 
 const INPUT_CLASS =
-  "rounded-xl border border-[#dbe7e0] bg-white px-3 py-1.5 text-sm text-[#1e5a33] placeholder:text-[#9aa8a0] focus:border-[#2e7d32] focus:outline-none focus:ring-2 focus:ring-[#2e7d32]/15";
+  "rounded-xl border border-line bg-white px-3 py-1.5 text-sm text-brand-ink placeholder:text-muted focus:border-brand-strong focus:outline-none focus:ring-2 focus:ring-brand-strong/15";
 
 const PROFESSIONAL_STATUSES = [
   "pending_verification",
@@ -132,7 +132,7 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
   return (
     <form onSubmit={handleSubmit} className="mt-6 space-y-4 text-sm">
       <div className="flex flex-wrap items-end gap-3">
-        <label className="flex flex-col gap-1 text-[#4a4a4a]">
+        <label className="flex flex-col gap-1 text-ink">
           Name or email
           <input
             type="search"
@@ -142,7 +142,7 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
             className={INPUT_CLASS}
           />
         </label>
-        <div className="flex flex-col gap-1 text-[#4a4a4a]">
+        <div className="flex flex-col gap-1 text-ink">
           Professional status
           <Select
             className="w-52"
@@ -152,7 +152,7 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
             options={withAny(PROFESSIONAL_STATUSES)}
           />
         </div>
-        <div className="flex flex-col gap-1 text-[#4a4a4a]">
+        <div className="flex flex-col gap-1 text-ink">
           Compliance status
           <Select
             className="w-52"
@@ -162,7 +162,7 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
             options={withAny(COMPLIANCE_STATUSES)}
           />
         </div>
-        <div className="flex flex-col gap-1 text-[#4a4a4a]">
+        <div className="flex flex-col gap-1 text-ink">
           Role
           <Select
             className="w-48"
@@ -172,7 +172,7 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
             options={[{ value: "", label: "Any" }, ...roles.map((r) => ({ value: r.id, label: r.name }))]}
           />
         </div>
-        <div className="flex flex-col gap-1 text-[#4a4a4a]">
+        <div className="flex flex-col gap-1 text-ink">
           DBS status
           <Select
             className="w-44"
@@ -182,7 +182,7 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
             options={DOC_STATUS_OPTIONS}
           />
         </div>
-        <div className="flex flex-col gap-1 text-[#4a4a4a]">
+        <div className="flex flex-col gap-1 text-ink">
           Registration status
           <Select
             className="w-44"
@@ -192,7 +192,7 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
             options={DOC_STATUS_OPTIONS}
           />
         </div>
-        <div className="flex flex-col gap-1 text-[#4a4a4a]">
+        <div className="flex flex-col gap-1 text-ink">
           Ofsted status
           <Select
             className="w-44"
@@ -202,7 +202,7 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
             options={DOC_STATUS_OPTIONS}
           />
         </div>
-        <div className="flex flex-col gap-1 text-[#4a4a4a]">
+        <div className="flex flex-col gap-1 text-ink">
           Assessment status
           <Select
             className="w-44"
@@ -212,7 +212,7 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
             options={ASSESSMENT_STATUS_OPTIONS}
           />
         </div>
-        <div className="flex flex-col gap-1 text-[#4a4a4a]">
+        <div className="flex flex-col gap-1 text-ink">
           Available on
           <Select
             className="w-44"
@@ -224,7 +224,7 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
         </div>
       </div>
       <div className="flex flex-wrap items-end gap-3">
-        <label className="flex flex-col gap-1 text-[#4a4a4a]">
+        <label className="flex flex-col gap-1 text-ink">
           Postcode
           <input
             type="text"
@@ -234,7 +234,7 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
             className={INPUT_CLASS}
           />
         </label>
-        <label className="flex flex-col gap-1 text-[#4a4a4a]">
+        <label className="flex flex-col gap-1 text-ink">
           Min travel (km)
           <input
             type="number"
@@ -245,18 +245,18 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
             className={`${INPUT_CLASS} w-24`}
           />
         </label>
-        <label className="flex items-center gap-2 self-end pb-1 text-[#4a4a4a]">
+        <label className="flex items-center gap-2 self-end pb-1 text-ink">
           <input
             type="checkbox"
             checked={filters.requireValidDocs}
             onChange={(e) => dispatch({ type: "set", field: "requireValidDocs", value: e.target.checked })}
-            className="accent-[#2e7d32]"
+            className="accent-brand-strong"
           />
           Valid critical docs only
         </label>
         <button
           type="submit"
-          className="rounded-full bg-[#2e7d32] px-4 py-1.5 text-white hover:bg-[#246627]"
+          className="rounded-full bg-brand-strong px-4 py-1.5 text-white hover:bg-brand-strong-hover"
         >
           Search
         </button>
@@ -264,7 +264,7 @@ export function UserFilters({ roles }: { roles: RoleOption[] }) {
           <button
             type="button"
             onClick={() => router.push("/admin/users")}
-            className="text-[#4a4a4a] underline hover:text-[#14301e]"
+            className="text-ink underline hover:text-heading"
           >
             Clear
           </button>

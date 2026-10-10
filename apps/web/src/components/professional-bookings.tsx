@@ -1,4 +1,6 @@
 "use client";
+import { TableScroll } from "@/components/table-scroll";
+import { AdminTableHeader } from "@/components/admin-table-header";
 
 import { usePortalLocale, usePortalT, Tr } from "@/components/portal-locale";
 import { useState } from "react";
@@ -38,8 +40,8 @@ function BookingActions({
   async function handleAccept() {
     setBusy("accept");
     setError(null);
-    const result = await acceptBooking(bookingId);
-    setBusy(null);
+    let result: Awaited<ReturnType<typeof acceptBooking>>;
+    try { result = await acceptBooking(bookingId); } catch { setError(t("Could not complete the operation. Please try again.")); return; } finally { setBusy(null); }
     if ("error" in result) setError(t(result.error));
     else onDone();
   }
@@ -47,15 +49,15 @@ function BookingActions({
   async function handleDecline() {
     setBusy("decline");
     setError(null);
-    const result = await declineBooking(bookingId);
-    setBusy(null);
+    let result: Awaited<ReturnType<typeof declineBooking>>;
+    try { result = await declineBooking(bookingId); } catch { setError(t("Could not complete the operation. Please try again.")); return; } finally { setBusy(null); }
     if ("error" in result) setError(t(result.error));
     else onDone();
   }
 
   return (
     <div className="flex flex-col items-end gap-1">
-      {error && <span className="text-xs text-[#da1e28]"><Tr>{error}</Tr></span>}
+      {error && <span role="alert" className="text-xs text-danger"><Tr>{error}</Tr></span>}
       {!eligible && (
         <span className="text-xs text-[#684e1b]">{t("Complete onboarding to accept bookings")}</span>
       )}
@@ -64,7 +66,7 @@ function BookingActions({
           type="button"
           onClick={handleAccept}
           disabled={!eligible || busy !== null}
-          className="rounded-full bg-[#2e7d32] px-3 py-1.5 text-sm text-white hover:bg-[#246627] disabled:opacity-50"
+          className="rounded-full bg-brand-strong px-3 py-1.5 text-sm text-white hover:bg-brand-strong-hover disabled:opacity-50"
         >
           {busy === "accept" ? t("Accepting…") : t("Accept")}
         </button>
@@ -72,7 +74,7 @@ function BookingActions({
           type="button"
           onClick={handleDecline}
           disabled={busy !== null}
-          className="rounded-full border border-[#dbe7e0] px-4 py-1.5 text-sm font-medium text-[#1e5a33] transition hover:border-[#bcd8c7] hover:bg-[#f5f7f6] disabled:opacity-50"
+          className="rounded-full border border-line px-4 py-1.5 text-sm font-medium text-brand-ink transition hover:border-line-hover hover:bg-surface disabled:opacity-50"
         >
           {busy === "decline" ? t("Declining…") : t("Decline")}
         </button>
@@ -89,20 +91,20 @@ function UndoDeclineControl({ bookingId, onDone }: { bookingId: string; onDone: 
   async function handleUndo() {
     setBusy(true);
     setError(null);
-    const result = await undoDecline(bookingId);
-    setBusy(false);
+    let result: Awaited<ReturnType<typeof undoDecline>>;
+    try { result = await undoDecline(bookingId); } catch { setError("Could not complete the operation. Please try again."); return; } finally { setBusy(false); }
     if ("error" in result) setError(t(result.error));
     else onDone();
   }
 
   return (
     <div className="flex flex-col items-end gap-1">
-      {error && <span className="text-xs text-[#da1e28]"><Tr>{error}</Tr></span>}
+      {error && <span role="alert" className="text-xs text-danger"><Tr>{error}</Tr></span>}
       <button
         type="button"
         onClick={handleUndo}
         disabled={busy}
-        className="rounded-full border border-[#dbe7e0] px-4 py-1.5 text-sm font-medium text-[#1e5a33] transition hover:border-[#bcd8c7] hover:bg-[#f5f7f6] disabled:opacity-50"
+        className="rounded-full border border-line px-4 py-1.5 text-sm font-medium text-brand-ink transition hover:border-line-hover hover:bg-surface disabled:opacity-50"
       >
         {busy ? t("Restoring…") : t("Undo decline")}
       </button>
@@ -120,8 +122,8 @@ function CompleteControl({ bookingId, onDone }: { bookingId: string; onDone: () 
     if (!(await confirm(t("Mark this booking as completed?"), { confirmLabel: t("Mark completed") }))) return;
     setBusy(true);
     setError(null);
-    const result = await completeBooking(bookingId);
-    setBusy(false);
+    let result: Awaited<ReturnType<typeof completeBooking>>;
+    try { result = await completeBooking(bookingId); } catch { setError("Could not complete the operation. Please try again."); return; } finally { setBusy(false); }
     if ("error" in result) setError(t(result.error));
     else onDone();
   }
@@ -129,12 +131,12 @@ function CompleteControl({ bookingId, onDone }: { bookingId: string; onDone: () 
   return (
     <div className="flex flex-col items-end gap-1">
       {dialog}
-      {error && <span className="text-xs text-[#da1e28]"><Tr>{error}</Tr></span>}
+      {error && <span role="alert" className="text-xs text-danger"><Tr>{error}</Tr></span>}
       <button
         type="button"
         onClick={handleComplete}
         disabled={busy}
-        className="rounded-full bg-[#2e7d32] px-3 py-1.5 text-sm text-white hover:bg-[#246627] disabled:opacity-50"
+        className="rounded-full bg-brand-strong px-3 py-1.5 text-sm text-white hover:bg-brand-strong-hover disabled:opacity-50"
       >
         {busy ? t("Saving…") : t("Mark completed")}
       </button>
@@ -153,15 +155,15 @@ function BookingTable({ rows, showActions, showComplete, showUndo, eligible, onR
   const t = usePortalT();
   const locale = usePortalLocale();
   if (rows.length === 0) {
-    return <p className="mt-3 text-sm text-[#4a4a4a]">{t("None.")}</p>;
+    return <p className="mt-3 text-sm text-ink">{t("None.")}</p>;
   }
 
   const hasActionsCol = showActions || showComplete || showUndo;
 
   return (
-    <div className="mt-4 overflow-x-auto rounded-2xl border border-[#dbe7e0] shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
+    <TableScroll className="mt-4 rounded-2xl border border-line shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
       <table className="w-full text-sm">
-        <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#4a4a4a]">
+        <AdminTableHeader>
           <tr>
             <th className="p-3 font-medium">{t("Start")}</th>
             <th className="p-3 font-medium">{t("Type of care")}</th>
@@ -172,15 +174,15 @@ function BookingTable({ rows, showActions, showComplete, showUndo, eligible, onR
               <th scope="col" className="p-3 font-medium"><span className="sr-only">{t("Actions")}</span></th>
             )}
           </tr>
-        </thead>
-        <tbody className="divide-y divide-[#dbe7e0]">
+        </AdminTableHeader>
+        <tbody className="divide-y divide-line">
           {rows.map((b) => (
             <tr key={b.id}>
               <td className="p-3">{formatLondon(b.scheduled_start, locale)}</td>
               <td className="p-3">{b.care_types?.name ?? "—"}</td>
               <td className="p-3">{b.location_address}</td>
               <td className="p-3">
-                <span className="rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#4a4a4a]">
+                <span className="rounded-full bg-surface px-2.5 py-0.5 text-xs font-medium text-ink">
                   {t(b.status.replace(/_/g, " "))}
                 </span>
               </td>
@@ -202,7 +204,7 @@ function BookingTable({ rows, showActions, showComplete, showUndo, eligible, onR
           ))}
         </tbody>
       </table>
-    </div>
+    </TableScroll>
   );
 }
 
@@ -232,7 +234,7 @@ export function ProfessionalBookings({
       {declined.length > 0 && (
         <section className="mt-12">
           <h2 className="text-xl font-bold">{t("Declined bookings")}</h2>
-          <p className="mt-1 text-sm text-[#4a4a4a]">
+          <p className="mt-1 text-sm text-ink">
             {t("Still open for others — undo a decline to offer it to yourself again.")}
           </p>
           <BookingTable rows={declined} showUndo onRefresh={() => router.refresh()} />

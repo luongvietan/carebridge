@@ -1,3 +1,6 @@
+import { Tr } from "@/components/portal-locale";
+import { TableScroll } from "@/components/table-scroll";
+import { AdminTableHeader } from "@/components/admin-table-header";
 import { redirect } from "next/navigation";
 import { BackLink } from "@/components/back-link";
 import { createServiceClient } from "@/lib/supabase/service";
@@ -105,34 +108,32 @@ export default async function AdminPayoutsPage() {
   );
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-10">
+    <main id="main-content" tabIndex={-1} className="mx-auto max-w-4xl px-4 py-10">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="mt-1 text-3xl font-bold">Payouts</h1>
+          <h1 className="mt-1 text-3xl font-bold"><Tr>{"Payouts"}</Tr></h1>
         </div>
         <BackLink
           href="/admin/finance"
-          className="rounded-full border border-[#dbe7e0] px-4 py-1.5 text-sm text-[#1e5a33] hover:bg-[#f5f7f6]"
-        >
-          Finance overview
-        </BackLink>
+          className="rounded-full border border-line px-4 py-1.5 text-sm text-brand-ink hover:bg-surface"
+        ><Tr>{"Finance overview"}</Tr></BackLink>
       </div>
 
       {/* Bookings awaiting payout */}
       <section className="mt-10">
-        <h2 className="text-xl font-bold">Awaiting payout</h2>
+        <h2 className="text-xl font-bold"><Tr>{"Awaiting payout"}</Tr></h2>
         {pendingPayout.length > 0 ? (
-          <div className="mt-4 overflow-x-auto rounded-2xl border border-[#dbe7e0] shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
+          <TableScroll className="mt-4 rounded-2xl border border-line shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
             <table className="w-full text-sm">
-              <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#4a4a4a]">
+              <AdminTableHeader>
                 <tr>
-                  <th className="p-3 font-medium">Professional</th>
-                  <th className="p-3 font-medium">Account last 4</th>
-                  <th className="p-3 font-medium">Payout amount</th>
-                  <th scope="col" className="p-3 font-medium"><span className="sr-only">Actions</span></th>
+                  <th className="p-3 font-medium"><Tr>{"Professional"}</Tr></th>
+                  <th className="p-3 font-medium"><Tr>{"Account last 4"}</Tr></th>
+                  <th className="p-3 font-medium"><Tr>{"Payout amount"}</Tr></th>
+                  <th scope="col" className="p-3 font-medium"><span className="sr-only"><Tr>{"Actions"}</Tr></span></th>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-[#dbe7e0]">
+              </AdminTableHeader>
+              <tbody className="divide-y divide-line">
                 {pendingPayout.map((b) => {
                   const prof = b.professionals as { id: string; full_name: string } | null;
                   const last4 = b.assigned_professional_id
@@ -147,8 +148,7 @@ export default async function AdminPayoutsPage() {
                       <td className="p-3">
                         {formatMoney(net)}
                         {refunded > 0 && (
-                          <span className="block text-xs text-[#684e1b]">
-                            after {formatMoney(refunded)} refund (of {formatMoney(b.total_payout)})
+                          <span className="block text-xs text-[#684e1b]"><Tr>{"after"}</Tr>{formatMoney(refunded)}<Tr>{"refund (of"}</Tr>{formatMoney(b.total_payout)})
                           </span>
                         )}
                       </td>
@@ -160,27 +160,27 @@ export default async function AdminPayoutsPage() {
                 })}
               </tbody>
             </table>
-          </div>
+          </TableScroll>
         ) : (
-          <p className="mt-3 text-sm text-[#4a4a4a]">No bookings awaiting payout.</p>
+          <p className="mt-3 text-sm text-ink"><Tr>{"No bookings awaiting payout."}</Tr></p>
         )}
       </section>
 
       {/* Recorded payouts → Mark paid */}
       <section className="mt-12">
-        <h2 className="text-xl font-bold">Recorded — awaiting bank transfer</h2>
+        <h2 className="text-xl font-bold"><Tr>{"Recorded — awaiting bank transfer"}</Tr></h2>
         {recordedPayouts && recordedPayouts.length > 0 ? (
-          <div className="mt-4 overflow-x-auto rounded-2xl border border-[#dbe7e0] shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
+          <TableScroll className="mt-4 rounded-2xl border border-line shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
             <table className="w-full text-sm">
-              <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#4a4a4a]">
+              <AdminTableHeader>
                 <tr>
-                  <th className="p-3 font-medium">Professional</th>
-                  <th className="p-3 font-medium">Account last 4</th>
-                  <th className="p-3 font-medium">Amount</th>
-                  <th className="p-3 font-medium">Mark paid</th>
+                  <th className="p-3 font-medium"><Tr>{"Professional"}</Tr></th>
+                  <th className="p-3 font-medium"><Tr>{"Account last 4"}</Tr></th>
+                  <th className="p-3 font-medium"><Tr>{"Amount"}</Tr></th>
+                  <th className="p-3 font-medium"><Tr>{"Mark paid"}</Tr></th>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-[#dbe7e0]">
+              </AdminTableHeader>
+              <tbody className="divide-y divide-line">
                 {recordedPayouts.map((p) => {
                   const prof = p.professionals as { id: string; full_name: string } | null;
                   const last4 = prof ? (last4Map.get(prof.id) ?? null) : null;
@@ -197,9 +197,9 @@ export default async function AdminPayoutsPage() {
                 })}
               </tbody>
             </table>
-          </div>
+          </TableScroll>
         ) : (
-          <p className="mt-3 text-sm text-[#4a4a4a]">No recorded payouts awaiting payment.</p>
+          <p className="mt-3 text-sm text-ink"><Tr>{"No recorded payouts awaiting payment."}</Tr></p>
         )}
       </section>
     </main>

@@ -2571,6 +2571,7 @@ export type Database = {
       users: {
         Row: {
           account_status: Database["public"]["Enums"]["account_status"]
+          country_code: string | null
           account_type: Database["public"]["Enums"]["account_type"]
           created_at: string
           email: string
@@ -2582,6 +2583,7 @@ export type Database = {
         }
         Insert: {
           account_status?: Database["public"]["Enums"]["account_status"]
+          country_code?: string | null
           account_type: Database["public"]["Enums"]["account_type"]
           created_at?: string
           email: string
@@ -2593,6 +2595,7 @@ export type Database = {
         }
         Update: {
           account_status?: Database["public"]["Enums"]["account_status"]
+          country_code?: string | null
           account_type?: Database["public"]["Enums"]["account_type"]
           created_at?: string
           email?: string
@@ -3095,6 +3098,10 @@ export type Database = {
         }
         Returns: string
       }
+      submit_contact_enquiry: {
+        Args: { p_name: string; p_email: string; p_subject: string | null; p_message: string }
+        Returns: string
+      }
       fn_anonymise_user: {
         Args: { p_admin_id: string; p_user_id: string }
         Returns: undefined
@@ -3379,4 +3386,3 @@ export const Constants = {
     },
   },
 } as const
-

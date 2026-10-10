@@ -1,5 +1,7 @@
 "use client";
 
+import { RequiredMark } from "@/components/required-mark";
+import { Tr, usePortalT } from "@/components/portal-locale";
 import { useRouter } from "next/navigation";
 import { useReducer } from "react";
 import { amendRateCard } from "@/lib/admin/rate-actions";
@@ -8,7 +10,7 @@ import { Select } from "@/components/ui/select";
 import { currencySymbol, formatRate } from "@/lib/format/money";
 
 const INPUT_CLASS =
-  "w-full rounded-xl border border-[#dbe7e0] bg-white px-3.5 py-2.5 text-sm text-[#1e5a33] placeholder:text-[#9aa8a0] focus:border-[#2e7d32] focus:outline-none focus:ring-2 focus:ring-[#2e7d32]/15";
+  "w-full rounded-xl border border-line bg-white px-3.5 py-2.5 text-sm text-brand-ink placeholder:text-muted focus:border-brand-strong focus:outline-none focus:ring-2 focus:ring-brand-strong/15";
 
 type Props = {
   roleId: string;
@@ -59,6 +61,8 @@ function reducer(state: State, action: Action): State {
 }
 
 export function AmendRateForm({ roleId, roleName, defaultCurrency }: Props) {
+  const t = usePortalT();
+
   const router = useRouter();
   const [state, dispatch] = useReducer(reducer, {
     ...initialState,
@@ -84,6 +88,7 @@ export function AmendRateForm({ roleId, roleName, defaultCurrency }: Props) {
     e.preventDefault();
     dispatch({ type: "pending" });
 
+    try {
     const result = await amendRateCard(roleId, {
       clientChargeRate: Number(state.clientChargeRate),
       professionalPayoutRate: showPayoutInput ? Number(state.professionalPayoutRate) : null,
@@ -99,18 +104,18 @@ export function AmendRateForm({ roleId, roleName, defaultCurrency }: Props) {
 
     dispatch({ type: "reset" });
     router.refresh();
+    } catch {
+      dispatch({ type: "error", error: "Could not complete the operation. Please try again." });
+    }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 text-sm">
-      <p className="text-[#4a4a4a]">
-        Amend rates for <span className="font-medium text-[#14301e]">{roleName}</span>
+    <form aria-busy={state.pending} onSubmit={handleSubmit} className="space-y-4 text-sm">
+      <p className="text-ink"><Tr>{"Amend rates for"}</Tr><span className="font-medium text-heading">{roleName}</span>
       </p>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <label className="flex flex-col gap-1 text-[#4a4a4a]">
-          Client charge rate ({symbol}/hr)
-          <input
+        <label className="flex flex-col gap-1 text-ink"><Tr>{"Client charge rate ("}</Tr>{symbol}<Tr>{"/hr)"}</Tr><RequiredMark /><input
             type="number"
             step="0.01"
             min="0"
@@ -122,9 +127,7 @@ export function AmendRateForm({ roleId, roleName, defaultCurrency }: Props) {
         </label>
 
         {showPayoutInput && (
-          <label className="flex flex-col gap-1 text-[#4a4a4a]">
-            Professional payout rate ({symbol}/hr)
-            <input
+          <label className="flex flex-col gap-1 text-ink"><Tr>{"Professional payout rate ("}</Tr>{symbol}<Tr>{"/hr)"}</Tr><RequiredMark /><input
               type="number"
               step="0.01"
               min="0"
@@ -136,24 +139,22 @@ export function AmendRateForm({ roleId, roleName, defaultCurrency }: Props) {
           </label>
         )}
 
-        <div className="flex flex-col gap-1 text-[#4a4a4a]">
-          Platform fee type
-          <Select
-            aria-label="Platform fee type"
+        <div className="flex flex-col gap-1 text-ink"><Tr>{"Platform fee type"}</Tr><Select
+            aria-label={t("Platform fee type")}
             value={state.platformFeeType}
             onValueChange={(v) => dispatch({ type: "set", field: "platformFeeType", value: v as PlatformFeeType })}
             options={[
-              { value: "derived", label: "Derived (enter payout directly)" },
-              { value: "percentage", label: "Percentage of charge" },
-              { value: "fixed", label: `Fixed (${symbol}/hr)` },
+              { value: "derived", label: t("Derived (enter payout directly)") },
+              { value: "percentage", label: t("Percentage of charge") },
+              { value: "fixed", label: t("Fixed ({symbol}/hr)", { symbol }) },
             ]}
           />
         </div>
 
         {showFeeValue && (
-          <label className="flex flex-col gap-1 text-[#4a4a4a]">
-            {state.platformFeeType === "percentage" ? "Platform fee (%)" : `Platform fee (${symbol}/hr)`}
-            <input
+          <label className="flex flex-col gap-1 text-ink">
+            {state.platformFeeType === "percentage" ? t("Platform fee (%)") : t("Platform fee ({symbol}/hr)", { symbol })}
+            <RequiredMark /><input
               type="number"
               step="0.01"
               min="0"
@@ -165,10 +166,8 @@ export function AmendRateForm({ roleId, roleName, defaultCurrency }: Props) {
           </label>
         )}
 
-        <div className="flex flex-col gap-1 text-[#4a4a4a]">
-          Currency
-          <Select
-            aria-label="Currency"
+        <div className="flex flex-col gap-1 text-ink"><Tr>{"Currency"}</Tr><Select
+            aria-label={t("Currency")}
             value={state.currency}
             onValueChange={(v) => dispatch({ type: "set", field: "currency", value: v })}
             options={SUPPORTED_CURRENCIES.map((c) => ({ value: c, label: c }))}
@@ -178,30 +177,25 @@ export function AmendRateForm({ roleId, roleName, defaultCurrency }: Props) {
 
       {preview &&
         (preview.ok ? (
-          <p className="text-sm text-[#4a4a4a]">
-            Professional payout will be{" "}
-            <span className="font-semibold text-[#14301e]">
-              {formatRate(preview.rate.professionalPayoutRate, state.currency)}/hr
-            </span>{" "}
-            — the platform keeps{" "}
+          <p className="text-sm text-ink"><Tr>{"Professional payout will be"}</Tr>{" "}
+            <span className="font-semibold text-heading">
+              {formatRate(preview.rate.professionalPayoutRate, state.currency)}<Tr>{"/hr"}</Tr></span>{" "}<Tr>{"— the platform keeps"}</Tr>{" "}
             {formatRate(
               Number(state.clientChargeRate) - preview.rate.professionalPayoutRate,
               state.currency,
-            )}
-            /hr.
-          </p>
+            )}<Tr>{"/hr."}</Tr></p>
         ) : (
-          <p className="text-sm text-[#da1e28]">{preview.error}</p>
+          <p className="text-sm text-danger"><Tr>{preview.error}</Tr></p>
         ))}
 
-      {state.error && <p className="text-sm text-[#da1e28]">{state.error}</p>}
+      {state.error && <p role="alert" className="text-sm text-danger"><Tr>{state.error}</Tr></p>}
 
       <button
         type="submit"
         disabled={state.pending}
-        className="rounded-full bg-[#2e7d32] px-4 py-1.5 text-white hover:bg-[#246627] disabled:opacity-50"
+        className="rounded-full bg-brand-strong px-4 py-1.5 text-white hover:bg-brand-strong-hover disabled:opacity-50"
       >
-        {state.pending ? "Saving…" : "Amend rate card"}
+        <Tr>{state.pending ? "Saving…" : "Amend rate card"}</Tr>
       </button>
     </form>
   );

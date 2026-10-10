@@ -29,14 +29,14 @@ export default async function DocumentsPage() {
     return (
       <div>
         <OnboardingSteps current={4} locale={locale} />
-        <div className="mt-8 rounded-2xl border border-[#dbe7e0] bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
+        <div className="mt-8 rounded-2xl border border-line bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
           <h2 className="text-xl font-bold">{d.profileFirst}</h2>
-          <p className="mt-2 text-sm text-[#4a4a4a]">
+          <p className="mt-2 text-sm text-ink">
             {d.profileFirstBody}
           </p>
           <ForwardLink
             href="/professional/onboarding/profile"
-            className="mt-6 rounded-full bg-[#2e7d32] px-4 py-3 text-sm text-white hover:bg-[#246627]"
+            className="mt-6 rounded-full bg-brand-strong px-4 py-3 text-sm text-white hover:bg-brand-strong-hover"
           >
             {d.toProfile}
           </ForwardLink>

@@ -12,6 +12,13 @@
   --color-teal: #00a99d;           /* Secondary — teal accent */
   --color-teal-dark: #007a73;      /* Accent — AA-safe teal for text/icons on white */
   --color-ink: #4a4a4a;            /* Body text (Ana's dark grey) */
+  --color-line: #dbe7e0;
+  --color-line-hover: #bcd8c7;
+  --color-surface: #f5f7f6;
+  --color-surface-hover: #eef5f0;
+  --color-muted: #596b60;
+  --color-danger: #b81921;
+  --color-heading: #14301e;
 }
 
 html.lenis,
@@ -35,15 +42,21 @@ html.lenis body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
   html.lenis,
   html.lenis body {
     scroll-behavior: auto;
   }
 }
 
-/* Brand dropdown chevron — replace the native arrow on every select with the
-   Home-style chevron so dropdowns match the marketing inputs. */
-select {
+/* Optional brand chevron. Native selects keep their platform affordance unless
+   the field explicitly opts into this treatment. */
+select.brand-select {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
@@ -54,7 +67,7 @@ select {
   padding-right: 2.5rem;
 }
 
-select::-ms-expand {
+select.brand-select::-ms-expand {
   display: none;
 }
 
@@ -66,8 +79,6 @@ input[type="time"]::-webkit-calendar-picker-indicator,
 input[type="month"]::-webkit-calendar-picker-indicator {
   cursor: pointer;
   opacity: 0.7;
-  filter: invert(40%) sepia(57%) saturate(548%) hue-rotate(96deg) brightness(95%)
-    contrast(91%);
   transition: opacity 0.15s ease;
 }
 
@@ -105,4 +116,35 @@ select option:checked,
 select option:hover {
   background-color: #eef5f0;
   color: #1e5a33;
+}
+
+/* Keep focus visible even when local utility classes remove the default outline. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--color-brand-strong) !important;
+  outline-offset: 3px;
+}
+[tabindex="-1"]:focus { outline: none; }
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 100;
+  transform: translateY(-200%);
+  border-radius: 0.75rem;
+  background: white;
+  color: var(--color-brand-ink);
+  padding: 0.75rem 1rem;
+  box-shadow: 0 4px 16px #14301e33;
+}
+.skip-link:focus { transform: translateY(0); }
+dialog::backdrop { background: #14301e99; }
+main { min-width: 0; }
+[data-reveal]:focus-within, [data-reveal-child]:focus-within {
+  opacity: 1 !important;
+  transform: none !important;
+}
+input, select, textarea { min-width: 0; max-width: 100%; }
+@media (forced-colors: active) {
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible { outline-color: Highlight !important; }
+  select.brand-select { appearance: auto; background-image: none; }
 }

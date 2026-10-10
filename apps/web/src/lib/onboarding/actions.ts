@@ -18,7 +18,7 @@ import { parseSkillIds, parseAvailabilityDays } from "@/lib/onboarding/profile-c
 import { eligibilityCompleted, assessmentPassed } from "@/lib/onboarding/progress";
 import { validationMessage } from "@/lib/validation/form-messages";
 import { isValidNif } from "@/lib/validation/nif";
-import { getSelectedCountry } from "@/lib/marketing/market-server";
+import { getAccountCountry } from "@/lib/accounts/market-server";
 
 const PROFILE_FIELD_LABELS: Record<string, string> = {
   fullName: "Full name",
@@ -105,13 +105,7 @@ export async function submitEligibility(
   // Training is not mandatory in Portugal as it is in the UK (client, 30 Sep):
   // a Portuguese applicant is not asked to attest to it and is never held
   // pending on it. The competency assessment still applies in full.
-  const { data: ownCountry } = await createServiceClient()
-    .from("professionals")
-    .select("country_code")
-    .eq("user_id", user.id)
-    .maybeSingle();
-  const skipTraining =
-    ownCountry?.country_code === "PT" || (!ownCountry && (await getSelectedCountry()) === "PT");
+  const skipTraining = (await getAccountCountry(user)) === "PT";
 
   // Per-item attestation: an unchecked box means that training is not current.
   const trainingItems: Record<string, boolean> = {};

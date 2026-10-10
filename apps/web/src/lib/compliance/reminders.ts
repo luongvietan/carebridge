@@ -97,12 +97,10 @@ export async function sendDueComplianceReminders(): Promise<{ sent: number }> {
   }
 
   const targets = planReminders(alerts, userIdByProf, alreadyNotified);
-  for (const t of targets) {
-    await sendNotification("compliance_expiry_reminder", t.userId, {
-      due_date: t.dueDate ?? "",
-      document_id: t.documentId ?? "",
-    });
-  }
+  await Promise.all(targets.map((t) => sendNotification("compliance_expiry_reminder", t.userId, {
+    due_date: t.dueDate ?? "",
+    document_id: t.documentId ?? "",
+  })));
   return { sent: targets.length };
 }
 
@@ -127,22 +125,22 @@ export async function sendDueAutoRestrictionNotices(): Promise<{ sent: number }>
   const { data: pros } = await admin.from("professionals").select("id, user_id").in("id", profIds);
   const userIdByProf = new Map((pros ?? []).map((p) => [p.id, p.user_id]));
 
-  let sent = 0;
-  for (const a of actions) {
+  const sentResults = await Promise.all(actions.map(async (a) => {
     const userId = userIdByProf.get(a.professional_id);
-    if (!userId) continue;
+    if (!userId) return false;
     const { count } = await admin
       .from("notifications")
       .select("id", { count: "exact", head: true })
       .eq("recipient_user_id", userId)
       .eq("type", "professional_suspended")
       .gte("created_at", a.applied_at);
-    if ((count ?? 0) > 0) continue; // already notified for this restriction
+    if ((count ?? 0) > 0) return false; // already notified for this restriction
     await sendNotification("professional_suspended", userId, {
       reason: "A required compliance document is missing or has expired.",
       action: "booking restriction",
     });
-    sent += 1;
-  }
+    return true;
+  }));
+  const sent = sentResults.filter(Boolean).length;
   return { sent };
 }

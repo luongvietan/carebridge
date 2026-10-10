@@ -77,7 +77,7 @@ export function MarketSwitch({ markets, selected }: Props) {
               aria-pressed={isActive}
               className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-sm backdrop-blur-sm transition-colors disabled:opacity-70 ${
                 isActive
-                  ? "border-[#6cc24a] bg-[#2e7d32]/60 font-semibold text-white"
+                  ? "border-[#6cc24a] bg-brand-strong/60 font-semibold text-white"
                   : "border-white/25 bg-black/25 text-white hover:bg-black/40"
               }`}
             >

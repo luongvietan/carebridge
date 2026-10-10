@@ -1,4 +1,6 @@
 "use client";
+import { RequiredMark } from "@/components/required-mark";
+import { Tr } from "@/components/portal-locale";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Select } from "@/components/ui/select";
@@ -26,7 +28,7 @@ export type RegistrationCheckItem = {
 };
 
 const field =
-  "mt-1 w-full rounded-xl border border-[#dbe7e0] bg-white px-3 py-2 text-sm text-[#1e5a33] focus:border-[#2e7d32] focus:outline-none focus:ring-2 focus:ring-[#2e7d32]/15";
+  "mt-1 w-full rounded-xl border border-line bg-white px-3 py-2 text-sm text-brand-ink focus:border-brand-strong focus:outline-none focus:ring-2 focus:ring-brand-strong/15";
 
 function VerificationForm({ item }: { item: RegistrationCheckItem }) {
   const router = useRouter();
@@ -41,8 +43,8 @@ function VerificationForm({ item }: { item: RegistrationCheckItem }) {
     const fd = new FormData(e.currentTarget);
     fd.set("professionalId", item.professionalId);
     fd.set("outcome", outcome);
-    const result = await recordRegistrationVerification(fd);
-    setBusy(false);
+    let result: Awaited<ReturnType<typeof recordRegistrationVerification>>;
+    try { result = await recordRegistrationVerification(fd); } catch { setError("Could not complete the operation. Please try again."); return; } finally { setBusy(false); }
     if ("error" in result) setError(result.error);
     else router.refresh();
   }
@@ -52,29 +54,25 @@ function VerificationForm({ item }: { item: RegistrationCheckItem }) {
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <div>
           <span className="font-semibold">{item.professionalName}</span>
-          <span className="ml-2 text-sm text-[#7a8a81]">{item.roleName}</span>
+          <span className="ml-2 text-sm text-muted">{item.roleName}</span>
         </div>
         <a
           href={REGISTER_LOOKUP_URL[item.register]}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-sm text-[#2e7d32] underline"
-        >
-          Open the {REGISTER_LABEL[item.register]}
+          className="text-sm text-brand-strong underline"
+        ><Tr>{"Open the"}</Tr>{REGISTER_LABEL[item.register]}
         </a>
       </div>
 
       {item.lastCheckedAt && (
-        <p className="mt-2 text-xs text-[#684e1b]">
-          Last checked {item.lastCheckedAt.slice(0, 10)} — {item.lastOutcome?.replace(/_/g, " ")}
-          {item.validUntil && `, valid until ${item.validUntil}`}. A new check is due.
-        </p>
+        <p className="mt-2 text-xs text-[#684e1b]"><Tr>{"Last checked"}</Tr>{item.lastCheckedAt.slice(0, 10)} — {item.lastOutcome?.replace(/_/g, " ")}
+          {item.validUntil && `, valid until ${item.validUntil}`}<Tr>{". A new check is due."}</Tr></p>
       )}
 
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         <label className="block text-sm font-medium">
-          {REFERENCE_LABEL[item.register]} checked
-          <input
+          {REFERENCE_LABEL[item.register]}<Tr>{"checked"}</Tr><RequiredMark /><input
             name="reference"
             required
             defaultValue={item.reference ?? ""}
@@ -82,9 +80,7 @@ function VerificationForm({ item }: { item: RegistrationCheckItem }) {
             className={field}
           />
         </label>
-        <div className="block text-sm font-medium">
-          What the register showed
-          <Select
+        <div className="block text-sm font-medium"><Tr>{"What the register showed"}</Tr><Select
             name="outcome"
             aria-label="What the register showed"
             required
@@ -98,31 +94,29 @@ function VerificationForm({ item }: { item: RegistrationCheckItem }) {
       </div>
 
       {outcome === "active" && (
-        <div className="mt-3 space-y-2 rounded-xl bg-[#f5f7f6] p-3 text-sm">
+        <div className="mt-3 space-y-2 rounded-xl bg-surface p-3 text-sm">
           <label className="flex items-start gap-2">
-            <input type="checkbox" name="confirmActive" className="mt-1 accent-[#2e7d32]" />
-            <span>I have confirmed the registration is currently active on the register.</span>
+            <input type="checkbox" name="confirmActive" className="mt-1 accent-brand-strong" />
+            <span><Tr>{"I have confirmed the registration is currently active on the register."}</Tr></span>
           </label>
           <label className="flex items-start gap-2">
-            <input type="checkbox" name="confirmIdentity" className="mt-1 accent-[#2e7d32]" />
-            <span>The name and details on the register match this applicant.</span>
+            <input type="checkbox" name="confirmIdentity" className="mt-1 accent-brand-strong" />
+            <span><Tr>{"The name and details on the register match this applicant."}</Tr></span>
           </label>
         </div>
       )}
 
-      <label className="mt-3 block text-sm font-medium">
-        Notes (optional)
-        <input name="notes" className={field} placeholder="Anything worth recording about the check" />
+      <label className="mt-3 block text-sm font-medium"><Tr>{"Notes (optional)"}</Tr><input name="notes" className={field} placeholder="Anything worth recording about the check" />
       </label>
 
-      {error && <p className="mt-2 text-sm text-[#da1e28]">{error}</p>}
+      {error && <p role="alert" className="mt-2 text-sm text-danger"><Tr>{error}</Tr></p>}
 
       <button
         type="submit"
         disabled={busy || !outcome}
-        className="mt-3 rounded-full bg-[#2e7d32] px-4 py-2 text-sm text-white hover:bg-[#246627] disabled:opacity-50"
+        className="mt-3 rounded-full bg-brand-strong px-4 py-2 text-sm text-white hover:bg-brand-strong-hover disabled:opacity-50"
       >
-        {busy ? "Recording…" : "Record verification"}
+        <Tr>{busy ? "Recording…" : "Record verification"}</Tr>
       </button>
     </form>
   );
@@ -131,13 +125,11 @@ function VerificationForm({ item }: { item: RegistrationCheckItem }) {
 export function RegistrationVerificationPanel({ items }: { items: RegistrationCheckItem[] }) {
   if (items.length === 0) {
     return (
-      <p className="mt-3 text-sm text-[#4a4a4a]">
-        Every regulated professional has a current register check on file.
-      </p>
+      <p className="mt-3 text-sm text-ink"><Tr>{"Every regulated professional has a current register check on file."}</Tr></p>
     );
   }
   return (
-    <div className="mt-4 divide-y divide-[#dbe7e0] border border-[#dbe7e0]">
+    <div className="mt-4 divide-y divide-line border border-line">
       {items.map((item) => (
         <VerificationForm key={`${item.professionalId}-${item.register}`} item={item} />
       ))}

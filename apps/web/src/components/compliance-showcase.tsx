@@ -12,29 +12,31 @@ const chartBars = [32, 58, 42, 76, 50, 88, 44, 68, 55, 92, 48];
 function ComplianceStatusCard({
   insetSrc,
   insetAlt,
+  statusLabel,
 }: {
   insetSrc: string;
   insetAlt: string;
+  statusLabel: string;
 }) {
   return (
-    <div className="absolute bottom-5 right-5 overflow-hidden rounded-[18px] bg-white shadow-[0_20px_50px_-12px_rgba(12,58,37,0.28)] ring-1 ring-[#e7efe9] sm:bottom-7 sm:right-7 sm:rounded-[22px]">
+    <div className="absolute bottom-3 left-3 right-3 max-w-[calc(100%-1.5rem)] overflow-hidden rounded-[18px] bg-white shadow-[0_20px_50px_-12px_rgba(12,58,37,0.28)] ring-1 ring-[#e7efe9] sm:bottom-7 sm:left-auto sm:right-7 sm:max-w-[calc(100%-3.5rem)] sm:rounded-[22px]">
       <div className="flex items-stretch p-2 sm:p-2.5">
-        <div className="relative w-[76px] shrink-0 overflow-hidden rounded-xl sm:w-[88px] sm:rounded-2xl">
+        <div className="relative w-12 shrink-0 overflow-hidden rounded-xl sm:w-[88px] sm:rounded-2xl">
           <Image src={insetSrc} alt={insetAlt} fill className="object-cover" sizes="96px" />
         </div>
 
-        <div className="flex min-w-[168px] flex-col justify-center px-3 py-2 sm:min-w-[200px] sm:px-4 sm:py-2.5">
-          <p className="text-[13px] font-bold leading-none tracking-tight text-[#1e5a33] sm:text-sm">
-            Compliance status
+        <div className="flex min-w-0 flex-1 flex-col justify-center px-2 py-2 sm:min-w-[200px] sm:px-4 sm:py-2.5">
+          <p className="text-xs font-bold leading-snug tracking-tight text-brand-ink sm:text-sm">
+            {statusLabel}
           </p>
           <div
             className="mt-3 flex h-11 w-full items-end justify-between gap-[3px] sm:mt-3.5 sm:h-12 sm:gap-1"
             aria-hidden
           >
-            {chartBars.map((height, i) => (
+            {chartBars.map((height) => (
               <span
-                key={i}
-                className="w-[7px] flex-1 rounded-full bg-gradient-to-t from-[#246627] via-[#2e7d32] to-[#82cf58] sm:w-2"
+                key={height}
+                className="min-w-0 flex-1 rounded-full bg-gradient-to-t from-brand-strong-hover via-brand-strong to-[#82cf58] sm:w-2"
                 style={{ height: `${height}%`, minHeight: "4px" }}
               />
             ))}
@@ -46,6 +48,7 @@ function ComplianceStatusCard({
 }
 
 type ComplianceShowcaseProps = {
+  locale?: string;
   heading: string;
   body: string;
   getStarted: string;
@@ -53,7 +56,7 @@ type ComplianceShowcaseProps = {
   checklist: readonly string[];
 };
 
-export function ComplianceShowcase({ heading, body, getStarted, features, checklist }: ComplianceShowcaseProps) {
+export function ComplianceShowcase({ heading, body, getStarted, features, checklist, locale = "en-GB" }: ComplianceShowcaseProps) {
   const [openIndex, setOpenIndex] = useState(0);
   const { compliance } = marketingImages;
 
@@ -67,14 +70,14 @@ export function ComplianceShowcase({ heading, body, getStarted, features, checkl
           <h2 className={`leading-tight ${marketingHeading}`}>
             {heading}
           </h2>
-          <p className="mt-4 max-w-md text-sm leading-relaxed text-[#4a4a4a] sm:text-base">
+          <p className="mt-4 max-w-md text-sm leading-relaxed text-ink sm:text-base">
             {body}
           </p>
 
-          <ul className="mt-6 grid gap-x-6 gap-y-2 text-sm text-[#1e5a33] sm:grid-cols-2">
+          <ul className="mt-6 grid gap-x-6 gap-y-2 text-sm text-brand-ink sm:grid-cols-2">
             {checklist.map((item) => (
               <li key={item} className="flex items-start gap-2">
-                <span aria-hidden className="font-semibold text-[#2e7d32]">
+                <span aria-hidden className="font-semibold text-brand-strong">
                   &#10003;
                 </span>
                 {item}
@@ -91,15 +94,15 @@ export function ComplianceShowcase({ heading, body, getStarted, features, checkl
                   key={item.title}
                   className={`overflow-hidden rounded-2xl transition ${
                     isOpen
-                      ? "bg-[#2e7d32] text-white"
-                      : "bg-white text-[#1e5a33]"
+                      ? "bg-brand-strong text-white"
+                      : "bg-white text-brand-ink"
                   }`}
                 >
                   <button
                     type="button"
                     onClick={() => setOpenIndex(index)}
                     className={`flex w-full items-center justify-between gap-4 px-5 py-4 text-left text-[15px] font-semibold sm:px-6 sm:py-5 sm:text-base ${
-                      !isOpen ? "hover:bg-[#eef5f0]" : ""
+                      !isOpen ? "hover:bg-surface-hover" : ""
                     }`}
                     aria-expanded={isOpen}
                   >
@@ -144,6 +147,7 @@ export function ComplianceShowcase({ heading, body, getStarted, features, checkl
             />
 
             <ComplianceStatusCard
+              statusLabel={locale === "pt-PT" ? "Estado de conformidade" : "Compliance status"}
               insetSrc={compliance.inset.src}
               insetAlt={compliance.inset.alt}
             />

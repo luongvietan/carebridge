@@ -29,15 +29,17 @@ describe("localeForCountry", () => {
 });
 
 describe("recipientCountry", () => {
+  it("uses immutable account country ahead of historical profiles", () => {
+    expect(recipientCountry({ accountCountry: "PT", professionalCountry: "GB" })).toBe("PT");
+    expect(recipientCountry({ accountCountry: "GB", organisationCountry: "PT" })).toBe("GB");
+  });
   it("prefers the professional's, then the organisation's recorded country", () => {
-    expect(recipientCountry({ professionalCountry: "PT", signupMarket: "GB" })).toBe("PT");
+    expect(recipientCountry({ professionalCountry: "PT" })).toBe("PT");
     expect(recipientCountry({ organisationCountry: "PT" })).toBe("PT");
   });
 
-  it("falls back to the market chosen at sign-up, and to the UK when unknown", () => {
-    expect(recipientCountry({ signupMarket: "PT" })).toBe("PT");
-    expect(recipientCountry({ signupMarket: "GB" })).toBe("GB");
-    expect(recipientCountry({ signupMarket: 42 })).toBe("GB");
+  it("falls back to the UK when no stored country is known", () => {
+    expect(recipientCountry({ accountCountry: "unknown" })).toBe("GB");
     expect(recipientCountry({})).toBe("GB");
   });
 });
@@ -51,7 +53,9 @@ function makeAdmin(resultsByTable: Record<string, unknown[]>, signupMarket?: str
   // One queue per table, shared across every from(table) call in a request —
   // successive queries against the same table consume it in order.
   const queues = new Map<string, unknown[]>();
+  const updates: Record<string, unknown>[] = [];
   return {
+    updates,
     auth: {
       admin: {
         getUserById: vi.fn(async () => ({
@@ -72,7 +76,7 @@ function makeAdmin(resultsByTable: Record<string, unknown[]>, signupMarket?: str
       };
       return {
         ...chain,
-        update: () => ({ eq: async () => ({ data: null, error: null }) }),
+        update: (value: Record<string, unknown>) => { updates.push(value); return { eq: async () => ({ data: null, error: null }) }; },
       };
     }),
   };
@@ -88,6 +92,16 @@ const EN_TEMPLATE = { subject: "Hi {{name}}", body: "Booking {{id}}" };
 const PT_TEMPLATE = { subject: "Olá {{name}}", body: "Marcação {{id}}" };
 
 describe("sendNotification", () => {
+  it("keeps record-only delivery queued and missing recipients failed", async () => {
+    vi.stubEnv("RESEND_API_KEY", "");
+    mockAdmin = makeAdmin({ professionals: [{ country_code: "GB" }], notification_templates: [EN_TEMPLATE], users: [{ email: "a@b.co" }], notifications: [{ id: "n1" }] });
+    await sendNotification("booking_confirmation", "user1", {});
+    expect(mockAdmin.updates).not.toContainEqual(expect.objectContaining({ status: "sent" }));
+    mockAdmin = makeAdmin({ professionals: [{ country_code: "GB" }], notification_templates: [EN_TEMPLATE], users: [null], notifications: [{ id: "n1" }] });
+    await sendNotification("booking_confirmation", "user1", {}, vi.fn());
+    expect(mockAdmin.updates).toEqual([{ status: "failed" }]);
+    vi.unstubAllEnvs();
+  });
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -108,6 +122,8 @@ describe("sendNotification", () => {
     expect(sender).toHaveBeenCalledWith(
       expect.objectContaining({ to: "a@b.co", subject: "Hi Jo", body: "Booking b1" }),
     );
+    expect(mockAdmin.updates).toEqual([expect.objectContaining({ status: "sent", sent_at: expect.any(String) })]);
+    expect(sender).toHaveBeenCalledWith(expect.objectContaining({ html: expect.stringContaining("CareBridge Connect"), text: expect.stringContaining("Booking b1") }));
   });
 
   it("marks notification failed when sender throws", async () => {
@@ -121,6 +137,7 @@ describe("sendNotification", () => {
     await expect(
       sendNotification("booking_confirmation", "user1", { id: "b1", name: "Jo" }, sender),
     ).resolves.toBeUndefined(); // best-effort: never throw
+    expect(mockAdmin.updates).toEqual([{ status: "failed" }]);
   });
 
   it("sends a Portuguese professional the Portuguese variant", async () => {
@@ -156,7 +173,7 @@ describe("sendNotification", () => {
         professionals: [null],
         organisations: [null],
         notification_templates: [PT_TEMPLATE],
-        users: [{ email: "a@b.co" }],
+        users: [{ email: "a@b.co", country_code: "PT" }],
         notifications: [{ id: "n1" }],
       },
       "PT",
@@ -164,6 +181,22 @@ describe("sendNotification", () => {
     const sender: ChannelSender = vi.fn().mockResolvedValue(undefined);
     await run(sender);
     expect(sender).toHaveBeenCalledWith(expect.objectContaining({ subject: "Olá Jo" }));
+  });
+
+  it("keeps Portuguese snapshot language despite changed Auth metadata and profile", async () => {
+    mockAdmin = makeAdmin({ professionals: [{ country_code: "GB" }], notification_templates: [PT_TEMPLATE], users: [{ email: "a@b.co", country_code: "PT" }], notifications: [{ id: "n1" }] }, "GB");
+    const sender: ChannelSender = vi.fn().mockResolvedValue(undefined);
+    await run(sender);
+    expect(sender).toHaveBeenCalledWith(expect.objectContaining({ html: expect.stringContaining('lang="pt-PT"') }));
+    expect(mockAdmin.auth.admin.getUserById).not.toHaveBeenCalled();
+  });
+
+  it("uses English for legacy null country instead of mutable Portuguese metadata", async () => {
+    mockAdmin = makeAdmin({ professionals: [null], organisations: [null], notification_templates: [EN_TEMPLATE], users: [{ email: "a@b.co", country_code: null }], notifications: [{ id: "n1" }] }, "PT");
+    const sender: ChannelSender = vi.fn().mockResolvedValue(undefined);
+    await run(sender);
+    expect(sender).toHaveBeenCalledWith(expect.objectContaining({ html: expect.stringContaining('lang="en-GB"') }));
+    expect(mockAdmin.auth.admin.getUserById).not.toHaveBeenCalled();
   });
 
   it("falls back to the English row when no Portuguese variant exists yet", async () => {

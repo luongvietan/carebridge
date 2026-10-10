@@ -1,3 +1,7 @@
+import { getPortalT } from "@/lib/i18n/portal-server";
+import { Tr } from "@/components/portal-locale";
+import { TableScroll } from "@/components/table-scroll";
+import { AdminTableHeader } from "@/components/admin-table-header";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth/admin";
@@ -31,6 +35,8 @@ export default async function AdminAuditPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const t = await getPortalT();
+
   if (!(await requireAdmin())) redirect("/login");
 
   const params = await searchParams;
@@ -64,28 +70,18 @@ export default async function AdminAuditPage({
   const rows = data ?? [];
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-10">
-      <h1 className="mt-1 text-3xl font-bold">Audit log</h1>
-      <p className="mt-2 text-sm text-[#4a4a4a]">
-        Append-only record of registrations, document uploads, assessment completions, approvals,
-        payments, administrator actions and sign-ins, including failed attempts (spec §16).
-        Showing the most recent {MAX_ROWS} entries.
-      </p>
+    <main id="main-content" tabIndex={-1} className="mx-auto max-w-6xl px-4 py-10">
+      <h1 className="mt-1 text-3xl font-bold"><Tr>{"Audit log"}</Tr></h1>
+      <p className="mt-2 text-sm text-ink"><Tr>{"Append-only record of registrations, document uploads, assessment completions, approvals, payments, administrator actions and sign-ins, including failed attempts (spec §16). Showing the most recent"}</Tr>{MAX_ROWS}<Tr>{"entries."}</Tr></p>
 
       <form method="GET" className="mt-6 flex flex-wrap items-end gap-4 text-sm">
-        <div className="flex flex-col gap-1 text-[#4a4a4a]">
-          From
-          <input type="date" name="from" defaultValue={from ?? ""} className="rounded-xl border border-[#dbe7e0] px-3 py-2" />
+        <div className="flex flex-col gap-1 text-ink"><Tr>{"From"}</Tr><input type="date" name="from" aria-label={t("From date")} defaultValue={from ?? ""} className="rounded-xl border border-line px-3 py-2" />
         </div>
-        <div className="flex flex-col gap-1 text-[#4a4a4a]">
-          To
-          <input type="date" name="to" defaultValue={to ?? ""} className="rounded-xl border border-[#dbe7e0] px-3 py-2" />
+        <div className="flex flex-col gap-1 text-ink"><Tr>{"To"}</Tr><input type="date" name="to" aria-label={t("To date")} defaultValue={to ?? ""} className="rounded-xl border border-line px-3 py-2" />
         </div>
-        <div className="flex flex-col gap-1 text-[#4a4a4a]">
-          Entity
-          <Select
+        <div className="flex flex-col gap-1 text-ink"><Tr>{"Entity"}</Tr><Select
             name="entityType"
-            aria-label="Entity type"
+            aria-label={t("Entity type")}
             defaultValue={entityTypeFilter ?? ""}
             className="w-52"
             options={[
@@ -94,11 +90,9 @@ export default async function AdminAuditPage({
             ]}
           />
         </div>
-        <div className="flex flex-col gap-1 text-[#4a4a4a]">
-          Actor
-          <Select
+        <div className="flex flex-col gap-1 text-ink"><Tr>{"Actor"}</Tr><Select
             name="actorType"
-            aria-label="Actor type"
+            aria-label={t("Actor type")}
             defaultValue={actorTypeFilter ?? ""}
             className="w-40"
             options={[
@@ -107,54 +101,48 @@ export default async function AdminAuditPage({
             ]}
           />
         </div>
-        <label className="flex flex-col gap-1 text-[#4a4a4a]">
-          Search
-          <input
+        <label className="flex flex-col gap-1 text-ink"><Tr>{"Search"}</Tr><input
             type="search"
             name="search"
             defaultValue={search ?? ""}
-            placeholder="Action, details, or paste an id"
-            className="w-64 rounded-xl border border-[#dbe7e0] px-3 py-2"
+            placeholder={t("Action, details, or paste an id")}
+            className="w-64 rounded-xl border border-line px-3 py-2"
           />
         </label>
-        <button type="submit" className="rounded-full bg-[#2e7d32] px-4 py-2 text-white hover:bg-[#246627]">
-          Apply filter
-        </button>
+        <button type="submit" className="rounded-full bg-brand-strong px-4 py-2 text-white hover:bg-brand-strong-hover"><Tr>{"Apply filter"}</Tr></button>
         {(from || to || entityTypeFilter || actorTypeFilter || search) && (
-          <Link href="/admin/audit" className="text-[#2e7d32] hover:underline">
-            Clear
-          </Link>
+          <Link href="/admin/audit" className="text-brand-strong hover:underline"><Tr>{"Clear"}</Tr></Link>
         )}
       </form>
 
-      <div className="mt-8 overflow-x-auto rounded-2xl border border-[#dbe7e0] shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
+      <TableScroll className="mt-8 rounded-2xl border border-line shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
         <table className="w-full text-sm">
-          <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#4a4a4a]">
+          <AdminTableHeader>
             <tr>
-              <th className="p-3 font-medium">When</th>
-              <th className="p-3 font-medium">Actor</th>
-              <th className="p-3 font-medium">Action</th>
-              <th className="p-3 font-medium">Entity</th>
-              <th className="p-3 font-medium">Details</th>
+              <th className="p-3 font-medium"><Tr>{"When"}</Tr></th>
+              <th className="p-3 font-medium"><Tr>{"Actor"}</Tr></th>
+              <th className="p-3 font-medium"><Tr>{"Action"}</Tr></th>
+              <th className="p-3 font-medium"><Tr>{"Entity"}</Tr></th>
+              <th className="p-3 font-medium"><Tr>{"Details"}</Tr></th>
             </tr>
-          </thead>
-          <tbody className="divide-y divide-[#dbe7e0]">
+          </AdminTableHeader>
+          <tbody className="divide-y divide-line">
             {rows.map((r) => (
               <tr key={r.id}>
-                <td className="whitespace-nowrap p-3 text-[#4a4a4a]">{formatLondon(r.occurred_at)}</td>
+                <td className="whitespace-nowrap p-3 text-ink">{formatLondon(r.occurred_at)}</td>
                 <td className="p-3">{r.actor_type}</td>
                 <td className="p-3 font-medium">{r.action}</td>
-                <td className="p-3 text-[#4a4a4a]">
+                <td className="p-3 text-ink">
                   {r.entity_type ?? "—"}
-                  {r.entity_id ? <span className="block text-xs text-[#9aa8a0]">{r.entity_id}</span> : null}
+                  {r.entity_id ? <span className="block text-xs text-muted">{r.entity_id}</span> : null}
                 </td>
-                <td className="p-3 text-[#4a4a4a]">{r.summary ?? "—"}</td>
+                <td className="p-3 text-ink">{r.summary ?? "—"}</td>
               </tr>
             ))}
           </tbody>
         </table>
-        {rows.length === 0 && <p className="p-6 text-sm text-[#4a4a4a]">No audit entries match these filters.</p>}
-      </div>
+        {rows.length === 0 && <p className="p-6 text-sm text-ink"><Tr>{"No audit entries match these filters."}</Tr></p>}
+      </TableScroll>
     </main>
   );
 }

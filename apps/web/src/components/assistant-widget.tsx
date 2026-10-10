@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Icon, MessageQuestionIcon } from "@/components/ui/icon";
 
@@ -14,6 +14,7 @@ const COPY = {
     greeting: "Hello! How can I help you today?",
     placeholder: "Type your question…",
     send: "Send",
+    thinking: "Preparing a reply…",
     close: "Close",
     error: "Sorry, something went wrong. Please try again, or use our Contact page.",
     busy: "Too many questions just now. Please try again in a few minutes.",
@@ -25,6 +26,7 @@ const COPY = {
     greeting: "Olá! Como posso ajudar?",
     placeholder: "Escreva a sua pergunta…",
     send: "Enviar",
+    thinking: "A preparar uma resposta…",
     close: "Fechar",
     error: "Desculpe, ocorreu um erro. Tente novamente ou use a página de Contacto.",
     busy: "Demasiadas perguntas neste momento. Tente novamente dentro de alguns minutos.",
@@ -43,6 +45,11 @@ export function AssistantWidget({ locale }: { locale: "en-GB" | "pt-PT" }) {
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  const panelId = useId();
+  useEffect(() => { if (open) inputRef.current?.focus(); }, [open]);
+  function close() { setOpen(false); toggleRef.current?.focus(); }
 
   useEffect(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight });
@@ -81,18 +88,21 @@ export function AssistantWidget({ locale }: { locale: "en-GB" | "pt-PT" }) {
   }
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-3 sm:bottom-6 sm:right-6">
+    <div style={{ bottom: "max(1rem, env(safe-area-inset-bottom))", right: "max(1rem, env(safe-area-inset-right))" }} className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-3 sm:bottom-6 sm:right-6">
       {open && (
         <section
+          id={panelId}
           role="dialog"
+          aria-modal="false"
+          onKeyDown={(event) => { if (event.key === "Escape") { event.stopPropagation(); close(); } }}
           aria-label={t.title}
-          className="flex h-[min(32rem,calc(100vh-7rem))] w-[min(22rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-[#d8e4dc] bg-white shadow-xl"
+          className="flex h-[min(32rem,calc(100dvh-7rem))] w-[min(22rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-[#d8e4dc] bg-white shadow-xl"
         >
-          <header className="flex items-center justify-between bg-[#2e7d32] px-4 py-3 text-white">
+          <header className="flex items-center justify-between bg-brand-strong px-4 py-3 text-white">
             <h2 className="text-sm font-semibold">{t.title}</h2>
             <button
               type="button"
-              onClick={() => setOpen(false)}
+              onClick={close}
               aria-label={t.close}
               className="rounded-full px-2 text-lg leading-none hover:bg-white/15"
             >
@@ -100,22 +110,22 @@ export function AssistantWidget({ locale }: { locale: "en-GB" | "pt-PT" }) {
             </button>
           </header>
 
-          <div ref={listRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-4 text-sm">
-            <p className="rounded-xl bg-[#f3f7f4] px-3 py-2 text-[#4a4a4a]">{t.greeting}</p>
-            <p className="text-xs text-[#7a8a81]">{t.hint}</p>
-            {turns.map((m, i) => (
+          <div ref={listRef} role="log" aria-live="polite" aria-relevant="additions text" className="flex-1 space-y-3 overflow-y-auto px-4 py-4 text-sm">
+            <p className="rounded-xl bg-[#f3f7f4] px-3 py-2 text-ink">{t.greeting}</p>
+            <p className="text-xs text-muted">{t.hint}</p>
+            {turns.map((m, index) => (
               <p
-                key={i}
+                key={index}
                 className={
                   m.role === "user"
-                    ? "ml-8 rounded-xl bg-[#2e7d32] px-3 py-2 text-white"
-                    : "mr-8 whitespace-pre-line rounded-xl bg-[#f3f7f4] px-3 py-2 text-[#14301e]"
+                    ? "ml-8 rounded-xl bg-brand-strong px-3 py-2 text-white"
+                    : "mr-8 whitespace-pre-line rounded-xl bg-[#f3f7f4] px-3 py-2 text-heading"
                 }
               >
                 {m.content}
               </p>
             ))}
-            {busy && <p className="mr-8 rounded-xl bg-[#f3f7f4] px-3 py-2 text-[#7a8a81]">…</p>}
+            {busy && <p className="mr-8 rounded-xl bg-[#f3f7f4] px-3 py-2 text-muted">…</p>}
             {notice && (
               <p role="alert" className="text-xs text-[#b3261e]">
                 {notice}
@@ -123,19 +133,20 @@ export function AssistantWidget({ locale }: { locale: "en-GB" | "pt-PT" }) {
             )}
           </div>
 
-          <form onSubmit={send} className="flex gap-2 border-t border-[#e3ebe6] p-3">
+          <form aria-busy={busy} onSubmit={send} className="flex gap-2 border-t border-[#e3ebe6] p-3">
             <input
+              ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               maxLength={1000}
               placeholder={t.placeholder}
               aria-label={t.placeholder}
-              className="min-w-0 flex-1 rounded-full border border-[#cfdcd3] px-4 py-2 text-sm outline-none focus:border-[#2e7d32]"
+              className="min-w-0 flex-1 rounded-full border border-[#cfdcd3] px-4 py-2 text-sm outline-none focus:border-brand-strong"
             />
             <button
               type="submit"
               disabled={busy || !input.trim()}
-              className="rounded-full bg-[#2e7d32] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+              className="rounded-full bg-brand-strong px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
             >
               {t.send}
             </button>
@@ -145,10 +156,12 @@ export function AssistantWidget({ locale }: { locale: "en-GB" | "pt-PT" }) {
 
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        ref={toggleRef}
+        aria-controls={panelId}
+        onClick={() => open ? close() : setOpen(true)}
         aria-expanded={open}
-        aria-label={t.open}
-        className="grid h-14 w-14 place-items-center rounded-full bg-[#2e7d32] text-white shadow-lg transition hover:bg-[#276b2b]"
+        aria-label={open ? t.close : t.open}
+        className="grid h-14 w-14 place-items-center rounded-full bg-brand-strong text-white shadow-lg transition hover:bg-[#276b2b]"
       >
         <Icon icon={MessageQuestionIcon} size={26} color="#ffffff" strokeWidth={1.75} />
       </button>

@@ -3,17 +3,19 @@ import { DashboardGrid } from "@/components/dashboard-grid";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function ClientHome() {
-  const t = await getPortalT();
-  const supabase = await createClient();
+  const [{ t }, supabase] = await Promise.all([
+    getPortalT().then((t) => ({ t })),
+    createClient(),
+  ]);
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-10">
+    <main id="main-content" tabIndex={-1} className="mx-auto max-w-4xl px-4 py-10">
       <h1 className="mt-1 text-3xl font-bold">{t("Dashboard")}</h1>
       {user?.email && (
-        <p className="mt-2 text-sm text-[#4a4a4a]">{t("Signed in as")}{" "}{user.email}</p>
+        <p className="mt-2 text-sm text-ink">{t("Signed in as")}{" "}{user.email}</p>
       )}
 
       <DashboardGrid

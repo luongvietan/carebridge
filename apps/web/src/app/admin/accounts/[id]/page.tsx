@@ -1,3 +1,7 @@
+import { getPortalT } from "@/lib/i18n/portal-server";
+import { Tr } from "@/components/portal-locale";
+import { TableScroll } from "@/components/table-scroll";
+import { AdminTableHeader } from "@/components/admin-table-header";
 import { BackLink } from "@/components/back-link";
 import { organisationCategoryLabel } from "@/lib/accounts/organisation-categories";
 import { ForwardLink } from "@/components/forward-link";
@@ -16,8 +20,8 @@ function formatLabel(value: string) {
 function Field({ label, value }: { label: string; value: string | null | undefined }) {
   return (
     <div>
-      <dt className="text-xs uppercase tracking-wide text-[#9aa8a0]">{label}</dt>
-      <dd className="mt-0.5 text-sm text-[#14301e]">{value || "—"}</dd>
+      <dt className="text-xs uppercase tracking-wide text-muted">{label}</dt>
+      <dd className="mt-0.5 text-sm text-heading">{value || "—"}</dd>
     </div>
   );
 }
@@ -32,6 +36,8 @@ export default async function AdminAccountDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const t = await getPortalT();
+
   if (!(await requireAdmin())) redirect("/login");
   const { id } = await params;
   const admin = createServiceClient();
@@ -68,105 +74,101 @@ export default async function AdminAccountDetailPage({
   const auditRows = audit ?? [];
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-10">
-      <BackLink href="/admin/accounts" className="text-sm text-[#2e7d32] hover:underline">
-        All accounts
-      </BackLink>
+    <main id="main-content" tabIndex={-1} className="mx-auto max-w-4xl px-4 py-10">
+      <BackLink href="/admin/accounts" className="text-sm text-brand-strong hover:underline"><Tr>{"All accounts"}</Tr></BackLink>
       <h1 className="mt-2 text-3xl font-bold">
         {org?.organisation_name ?? client?.full_name ?? user.email}
       </h1>
-      <p className="mt-1 text-sm text-[#4a4a4a]">
+      <p className="mt-1 text-sm text-ink">
         {formatLabel(user.account_type)} · {formatLabel(user.account_status)}
       </p>
 
-      <section className="mt-8 rounded-2xl border border-[#dbe7e0] bg-white p-6">
-        <h2 className="text-lg font-bold">Profile</h2>
+      <section className="mt-8 rounded-2xl border border-line bg-white p-6">
+        <h2 className="text-lg font-bold"><Tr>{"Profile"}</Tr></h2>
         <dl className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3">
-          <Field label="Login email" value={user.email} />
+          <Field label={t("Login email")} value={user.email} />
           {client && (
             <>
-              <Field label="Full name" value={client.full_name} />
-              <Field label="Phone" value={client.phone} />
-              <Field label="Contact email" value={client.email_contact} />
-              <Field label="Address" value={[client.address_line1, client.address_line2, client.city, client.postcode].filter(Boolean).join(", ")} />
+              <Field label={t("Full name")} value={client.full_name} />
+              <Field label={t("Phone")} value={client.phone} />
+              <Field label={t("Contact email")} value={client.email_contact} />
+              <Field label={t("Address")} value={[client.address_line1, client.address_line2, client.city, client.postcode].filter(Boolean).join(", ")} />
             </>
           )}
           {org && (
             <>
-              <Field label="Organisation" value={org.organisation_name} />
-              <Field label="Contact person" value={org.contact_person} />
-              <Field label="Phone" value={org.phone} />
-              <Field label="Contact email" value={org.email_contact} />
-              <Field label="Market" value={org.country_code === "PT" ? "Portugal" : "United Kingdom"} />
+              <Field label={t("Organisation")} value={org.organisation_name} />
+              <Field label={t("Contact person")} value={org.contact_person} />
+              <Field label={t("Phone")} value={org.phone} />
+              <Field label={t("Contact email")} value={org.email_contact} />
+              <Field label={t("Market")} value={org.country_code === "PT" ? "Portugal" : "United Kingdom"} />
               {org.country_code === "PT" ? (
                 <>
-                  <Field label="Type of organisation" value={organisationCategoryLabel(org.organisation_category)} />
-                  <Field label="NIPC" value={org.tax_number} />
-                  <Field label="ERS / ISS licence" value={org.licence_number} />
+                  <Field label={t("Type of organisation")} value={organisationCategoryLabel(org.organisation_category)} />
+                  <Field label={t("NIPC")} value={org.tax_number} />
+                  <Field label={t("ERS / ISS licence")} value={org.licence_number} />
                 </>
               ) : (
-                <Field label="CQC number" value={org.cqc_registration_number} />
+                <Field label={t("CQC number")} value={org.cqc_registration_number} />
               )}
-              <Field label="Billing email" value={org.billing_email} />
-              <Field label="Address" value={[org.address_line1, org.address_line2, org.city, org.postcode].filter(Boolean).join(", ")} />
+              <Field label={t("Billing email")} value={org.billing_email} />
+              <Field label={t("Address")} value={[org.address_line1, org.address_line2, org.city, org.postcode].filter(Boolean).join(", ")} />
             </>
           )}
           {!client && !org && user.account_type === "professional" && (
-            <Field label="Note" value="Professionals are managed in the Users section." />
+            <Field label={t("Note")} value="Professionals are managed in the Users section." />
           )}
         </dl>
         {user.account_type === "professional" && (
-          <ForwardLink href="/admin/users" className="mt-4 inline-block text-sm text-[#2e7d32] hover:underline">
-            Open in Users
-          </ForwardLink>
+          <ForwardLink href="/admin/users" className="mt-4 inline-block text-sm text-brand-strong hover:underline"><Tr>{"Open in Users"}</Tr></ForwardLink>
         )}
       </section>
 
       <section className="mt-8">
-        <h2 className="text-lg font-bold">Bookings ({bookingRows.length})</h2>
-        <div className="mt-3 overflow-x-auto rounded-2xl border border-[#dbe7e0]">
+        <h2 className="text-lg font-bold"><Tr>{"Bookings ("}</Tr>{bookingRows.length})</h2>
+        <TableScroll className="mt-3 rounded-2xl border border-line">
           <table className="w-full text-sm">
-            <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#4a4a4a]">
+            <AdminTableHeader>
               <tr>
-                <th className="p-3 font-medium">Start</th>
-                <th className="p-3 font-medium">Role</th>
-                <th className="p-3 font-medium">Status</th>
-                <th className="p-3 font-medium">Location</th>
-                <th className="p-3 font-medium">Charge</th>
+                <th className="p-3 font-medium"><Tr>{"Start"}</Tr></th>
+                <th className="p-3 font-medium"><Tr>{"Role"}</Tr></th>
+                <th className="p-3 font-medium"><Tr>{"Status"}</Tr></th>
+                <th className="p-3 font-medium"><Tr>{"Location"}</Tr></th>
+                <th className="p-3 font-medium"><Tr>{"Charge"}</Tr></th>
               </tr>
-            </thead>
-            <tbody className="divide-y divide-[#dbe7e0]">
+            </AdminTableHeader>
+            <tbody className="divide-y divide-line">
               {bookingRows.map((b) => (
                 <tr key={b.id}>
-                  <td className="whitespace-nowrap p-3 text-[#4a4a4a]">{formatLondon(b.scheduled_start)}</td>
+                  <td className="whitespace-nowrap p-3 text-ink">{formatLondon(b.scheduled_start)}</td>
                   <td className="p-3">{(b.professional_roles as { name: string } | null)?.name ?? "—"}</td>
                   <td className="p-3">{formatLabel(b.status)}</td>
-                  <td className="p-3 text-[#4a4a4a]">{b.location_address ?? "—"}</td>
+                  <td className="p-3 text-ink">{b.location_address ?? "—"}</td>
                   <td className="p-3">{formatMoney(Number(b.total_client_charge ?? 0), b.snap_currency ?? "GBP")}</td>
                 </tr>
               ))}
             </tbody>
           </table>
-          {bookingRows.length === 0 && <p className="p-6 text-sm text-[#4a4a4a]">No bookings for this account.</p>}
-        </div>
+          {bookingRows.length === 0 && <p className="p-6 text-sm text-ink"><Tr>{"No bookings for this account."}</Tr></p>}
+        </TableScroll>
       </section>
 
       <section className="mt-8">
-        <h2 className="text-lg font-bold">Account history</h2>
+        <h2 className="text-lg font-bold"><Tr>{"Account history"}</Tr></h2>
         {auditRows.length > 0 ? (
-          <ul className="mt-3 divide-y divide-[#dbe7e0] rounded-2xl border border-[#dbe7e0] text-sm">
+          <ul className="mt-3 divide-y divide-line rounded-2xl border border-line text-sm">
             {auditRows.map((a) => (
               <li key={a.id} className="flex flex-wrap justify-between gap-2 p-3">
                 <span>
                   <span className="font-medium">{a.action}</span>
-                  {a.summary ? <span className="text-[#4a4a4a]"> — {a.summary}</span> : null}
+                  {a.summary ? <span className="text-ink"> — {a.summary}</span> : null}
                 </span>
-                <span className="text-[#9aa8a0]">{formatLondon(a.occurred_at)}</span>
+                <span className="text-muted">{formatLondon(a.occurred_at)}</span>
               </li>
             ))}
           </ul>
         ) : (
-          <p className="mt-3 text-sm text-[#4a4a4a]">No recorded actions on this account.</p>
+          <p className="mt-3 text-sm text-ink"><Tr>{"No recorded actions on this account."}</Tr></p>
         )}
       </section>
     </main>

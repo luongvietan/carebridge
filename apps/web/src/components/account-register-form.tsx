@@ -1,4 +1,5 @@
 "use client";
+import { RequiredMark } from "@/components/required-mark";
 import { Tr } from "@/components/portal-locale";
 import { useActionState, useState } from "react";
 import { Select } from "@/components/ui/select";
@@ -18,7 +19,7 @@ import {
 import { requesterCopy, type RequesterLocale } from "@/lib/requester-copy";
 
 const field =
-  "mt-1 w-full rounded-xl border border-[#dbe7e0] bg-white px-3 py-2 text-sm focus:border-[#2e7d32] focus:outline-none";
+  "mt-1 w-full rounded-xl border border-line bg-white px-3 py-2 text-sm focus:border-brand-strong focus:outline-none";
 
 type Variant = "client" | "organisation";
 
@@ -49,11 +50,11 @@ export function AccountRegisterForm({
 
   if (state && "ok" in state) {
     return (
-      <div className="rounded-2xl border border-[#dbe7e0] bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
+      <div role="status" className="rounded-2xl border border-line bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
         <h2 className="text-xl font-bold">{t.saved}</h2>
         <ForwardLink
           href={bookingsHref}
-          className="mt-6 rounded-full bg-[#2e7d32] px-4 py-3 text-sm text-white hover:bg-[#246627]"
+          className="mt-6 rounded-full bg-brand-strong px-4 py-3 text-sm text-white hover:bg-brand-strong-hover"
         >
           {t.goToBookings}
         </ForwardLink>
@@ -62,12 +63,12 @@ export function AccountRegisterForm({
   }
 
   return (
-    <form key={formKey} action={formAction} className="space-y-4">
+    <form aria-busy={pending} key={formKey} action={formAction} className="space-y-4">
       {variant === "client" ? (
         <>
           <label className="block text-sm font-medium">
             {t.fullName}
-            <input name="fullName" required defaultValue={clientValues?.fullName ?? ""} className={field} />
+            <RequiredMark /><input name="fullName" required defaultValue={clientValues?.fullName ?? ""} className={field} />
           </label>
           <label className="block text-sm font-medium">
             {t.phone}
@@ -79,7 +80,7 @@ export function AccountRegisterForm({
           </label>
           <label className="block text-sm font-medium">
             {t.address1}
-            <input name="addressLine1" required defaultValue={clientValues?.addressLine1 ?? ""} className={field} />
+            <RequiredMark /><input name="addressLine1" required defaultValue={clientValues?.addressLine1 ?? ""} className={field} />
           </label>
           <label className="block text-sm font-medium">
             {t.address2}
@@ -88,11 +89,11 @@ export function AccountRegisterForm({
           <div className="grid grid-cols-2 gap-4">
             <label className="block text-sm font-medium">
               {t.city}
-              <input name="city" required defaultValue={clientValues?.city ?? ""} className={field} />
+              <RequiredMark /><input name="city" required defaultValue={clientValues?.city ?? ""} className={field} />
             </label>
             <label className="block text-sm font-medium">
               {t.postcode}
-              <input name="postcode" required defaultValue={clientValues?.postcode ?? ""} className={field} />
+              <RequiredMark /><input name="postcode" required defaultValue={clientValues?.postcode ?? ""} className={field} />
             </label>
           </div>
         </>
@@ -100,11 +101,11 @@ export function AccountRegisterForm({
         <>
           <label className="block text-sm font-medium">
             {t.organisationName}
-            <input name="organisationName" required defaultValue={orgValues?.organisationName ?? ""} className={field} />
+            <RequiredMark /><input name="organisationName" required defaultValue={orgValues?.organisationName ?? ""} className={field} />
           </label>
           <label className="block text-sm font-medium">
             {t.contactPerson}
-            <input name="contactPerson" required defaultValue={orgValues?.contactPerson ?? ""} className={field} />
+            <RequiredMark /><input name="contactPerson" required defaultValue={orgValues?.contactPerson ?? ""} className={field} />
           </label>
           <label className="block text-sm font-medium">
             {t.phone}
@@ -140,7 +141,7 @@ export function AccountRegisterForm({
               </div>
               <label className="block text-sm font-medium">
                 {t.taxNumber}
-                <input
+                <RequiredMark /><input
                   name="taxNumber"
                   required
                   inputMode="numeric"
@@ -148,24 +149,24 @@ export function AccountRegisterForm({
                   defaultValue={orgValues?.taxNumber ?? ""}
                   className={field}
                 />
-                <span className="mt-1 block text-xs font-normal text-[#4a4a4a]">{t.taxNumberHint}</span>
+                <span className="mt-1 block text-xs font-normal text-ink">{t.taxNumberHint}</span>
               </label>
               {licence && (
                 <label className="block text-sm font-medium">
                   {LICENCE_LABEL[licence]}
                   <input name="licenceNumber" defaultValue={orgValues?.licenceNumber ?? ""} className={field} />
-                  <span className="mt-1 block text-xs font-normal text-[#4a4a4a]">{t.licenceHint}</span>
+                  <span className="mt-1 block text-xs font-normal text-ink">{t.licenceHint}</span>
                 </label>
               )}
             </>
           )}
           <label className="block text-sm font-medium">
             {t.billingEmail}
-            <input name="billingEmail" type="email" required defaultValue={orgValues?.billingEmail ?? ""} className={field} />
+            <RequiredMark /><input name="billingEmail" type="email" required defaultValue={orgValues?.billingEmail ?? ""} className={field} />
           </label>
           <label className="block text-sm font-medium">
             {t.address1}
-            <input name="addressLine1" required defaultValue={orgValues?.addressLine1 ?? ""} className={field} />
+            <RequiredMark /><input name="addressLine1" required defaultValue={orgValues?.addressLine1 ?? ""} className={field} />
           </label>
           <label className="block text-sm font-medium">
             {t.address2}
@@ -174,11 +175,11 @@ export function AccountRegisterForm({
           <div className="grid grid-cols-2 gap-4">
             <label className="block text-sm font-medium">
               {t.city}
-              <input name="city" required defaultValue={orgValues?.city ?? ""} className={field} />
+              <RequiredMark /><input name="city" required defaultValue={orgValues?.city ?? ""} className={field} />
             </label>
             <label className="block text-sm font-medium">
               {t.postcode}
-              <input name="postcode" required defaultValue={orgValues?.postcode ?? ""} className={field} />
+              <RequiredMark /><input name="postcode" required defaultValue={orgValues?.postcode ?? ""} className={field} />
             </label>
           </div>
           <label className="block text-sm font-medium">
@@ -188,11 +189,11 @@ export function AccountRegisterForm({
         </>
       )}
 
-      {state && "error" in state && <p className="text-sm text-[#da1e28]"><Tr>{state.error}</Tr></p>}
+      {state && "error" in state && <p role="alert" className="text-sm text-danger"><Tr>{state.error}</Tr></p>}
       <button
         type="submit"
         disabled={pending}
-        className="rounded-full bg-[#2e7d32] px-4 py-3 text-sm text-white hover:bg-[#246627] disabled:opacity-50"
+        className="rounded-full bg-brand-strong px-4 py-3 text-sm text-white hover:bg-brand-strong-hover disabled:opacity-50"
       >
         {pending ? t.saving : t.save}
       </button>

@@ -15,17 +15,18 @@ export type UpcomingEvent = {
 export type UpcomingDay = { date: string; events: UpcomingEvent[] };
 
 const LONDON = "Europe/London";
+const LONDON_DATE_FORMAT = new Intl.DateTimeFormat("en-CA", {
+  timeZone: LONDON,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
 
 /** The London calendar date an instant falls on — a 23:30 UTC booking in summer
  *  belongs to the next day here, and the calendar must agree with the times
  *  shown everywhere else. */
 function londonDate(iso: string): string {
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: LONDON,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(new Date(iso));
+  const parts = LONDON_DATE_FORMAT.formatToParts(new Date(iso));
   const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
   return `${get("year")}-${get("month")}-${get("day")}`;
 }

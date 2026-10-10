@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useEffect, useId, useRef, useState, useTransition } from "react";
 import { usePortalT } from "@/components/portal-locale";
 import { BrandMark } from "@/components/site-nav-client";
 import { signOut } from "@/lib/auth/actions";
@@ -26,6 +26,24 @@ export function RoleNav({ areaLabel, items, email }: RoleNavProps) {
   const t = usePortalT();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuId = useId();
+  const headerRef = useRef<HTMLElement>(null);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (!menuOpen) return;
+    headerRef.current?.querySelector<HTMLElement>(`[id="${menuId}"] a`)?.focus();
+    function onKey(event: KeyboardEvent) {
+      if (event.key === "Escape") { setMenuOpen(false); toggleRef.current?.focus(); }
+    }
+    function onPointer(event: PointerEvent) {
+      if (!headerRef.current?.contains(event.target as Node)) setMenuOpen(false);
+    }
+    function onResize() { if (window.innerWidth >= 1024) setMenuOpen(false); }
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("pointerdown", onPointer);
+    window.addEventListener("resize", onResize);
+    return () => { document.removeEventListener("keydown", onKey); document.removeEventListener("pointerdown", onPointer); window.removeEventListener("resize", onResize); };
+  }, [menuOpen, menuId]);
   const [pending, startTransition] = useTransition();
 
   function handleSignOut() {
@@ -42,10 +60,10 @@ export function RoleNav({ areaLabel, items, email }: RoleNavProps) {
         href={href}
         aria-current={active ? "page" : undefined}
         className={`flex items-center gap-2 whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-          active ? "bg-white text-[#1e5a33] shadow-sm" : "text-[#4a4a4a] hover:text-[#2e7d32]"
+          active ? "bg-white text-brand-ink shadow-sm" : "text-ink hover:text-brand-strong"
         }`}
       >
-        {active && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#2e7d32]" aria-hidden />}
+        {active && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-brand-strong" aria-hidden />}
         {label}
       </Link>
     );
@@ -61,8 +79,8 @@ export function RoleNav({ areaLabel, items, email }: RoleNavProps) {
         aria-current={active ? "page" : undefined}
         className={`block rounded-xl px-3 py-2 text-sm transition-colors ${
           active
-            ? "bg-[#2e7d32] font-medium text-white"
-            : "text-[#4a4a4a] hover:bg-[#eef5f0] hover:text-[#2e7d32]"
+            ? "bg-brand-strong font-medium text-white"
+            : "text-ink hover:bg-surface-hover hover:text-brand-strong"
         }`}
       >
         {label}
@@ -71,13 +89,15 @@ export function RoleNav({ areaLabel, items, email }: RoleNavProps) {
   };
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[#e7efe9] bg-white/90 backdrop-blur-md">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-3.5 lg:px-8">
-        <div className="flex items-center gap-3">
+    <header ref={headerRef} className="sticky top-0 z-50 border-b border-[#e7efe9] bg-white/90 backdrop-blur-md">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-3 sm:gap-4 sm:px-5 py-3.5 lg:px-8">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
           <button
             type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#e3ece6] text-[#4a4a4a] lg:hidden"
-            aria-expanded={menuOpen}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#e3ece6] text-ink lg:hidden"
+            ref={toggleRef}
+          aria-controls={menuId}
+          aria-expanded={menuOpen}
             aria-label={menuOpen ? t("Close menu") : t("Open menu")}
             onClick={() => setMenuOpen((open) => !open)}
           >
@@ -86,14 +106,14 @@ export function RoleNav({ areaLabel, items, email }: RoleNavProps) {
           <Link href="/" className="flex items-center">
             <BrandMark height={36} />
           </Link>
-          <span className="ml-1 hidden rounded-full bg-[#eef5f0] px-3 py-1 text-xs font-semibold text-[#2e7d32] sm:inline-block">
+          <span className="ml-1 hidden rounded-full bg-surface-hover px-3 py-1 text-xs font-semibold text-brand-strong sm:inline-block">
             {t(areaLabel)}
           </span>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
           {email && (
-            <span className="hidden max-w-[12rem] truncate text-sm text-[#4a4a4a] md:block" title={email}>
+            <span className="hidden max-w-[12rem] truncate text-sm text-ink md:block" title={email}>
               {email}
             </span>
           )}
@@ -101,7 +121,7 @@ export function RoleNav({ areaLabel, items, email }: RoleNavProps) {
             type="button"
             onClick={handleSignOut}
             disabled={pending}
-            className="rounded-full px-4 py-2 text-sm font-medium text-[#4a4a4a] transition-colors hover:text-[#2e7d32] disabled:opacity-50"
+            className="shrink-0 rounded-full px-2 py-2 text-sm font-medium sm:px-4 text-ink transition-colors hover:text-brand-strong disabled:opacity-50"
           >
             {pending ? t("Signing out…") : t("Sign out")}
           </button>
@@ -117,8 +137,8 @@ export function RoleNav({ areaLabel, items, email }: RoleNavProps) {
       </nav>
 
       {menuOpen && (
-        <nav className="border-t border-[#e7efe9] bg-white px-5 py-4 lg:hidden">
-          <span className="mb-2 inline-block rounded-full bg-[#eef5f0] px-3 py-1 text-xs font-semibold text-[#2e7d32]">
+        <nav id={menuId} aria-label={t(areaLabel)} className="border-t border-[#e7efe9] bg-white px-5 py-4 lg:hidden">
+          <span className="mb-2 inline-block rounded-full bg-surface-hover px-3 py-1 text-xs font-semibold text-brand-strong">
             {t(areaLabel)}
           </span>
           <div className="flex flex-col gap-1 rounded-2xl border border-[#e3ece6] bg-[#f7faf8] p-2">

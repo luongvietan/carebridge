@@ -1,3 +1,7 @@
+import { getPortalT } from "@/lib/i18n/portal-server";
+import { Tr } from "@/components/portal-locale";
+import { TableScroll } from "@/components/table-scroll";
+import { AdminTableHeader } from "@/components/admin-table-header";
 import { notFound, redirect } from "next/navigation";
 import { BackLink } from "@/components/back-link";
 import { ForwardLink } from "@/components/forward-link";
@@ -41,7 +45,7 @@ function formatDate(value: string) {
 }
 
 const cardClass =
-  "mt-10 rounded-2xl border border-[#dbe7e0] bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)] text-sm";
+  "mt-10 rounded-2xl border border-line bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)] text-sm";
 
 type EligibilityScreening = {
   employment_status: string | null;
@@ -58,14 +62,14 @@ function EligibilityScreeningCard({
 }) {
   return (
     <section className={cardClass}>
-      <h2 className="text-lg font-bold">Eligibility screening</h2>
+      <h2 className="text-lg font-bold"><Tr>{"Eligibility screening"}</Tr></h2>
       {!screening ? (
-        <p className="mt-4 text-[#4a4a4a]">No eligibility screening on record.</p>
+        <p className="mt-4 text-ink"><Tr>{"No eligibility screening on record."}</Tr></p>
       ) : (
         <>
           <dl className="mt-4 grid gap-3 sm:grid-cols-3">
             <div>
-              <dt className="text-[#7a8a81]">Employment status</dt>
+              <dt className="text-muted"><Tr>{"Employment status"}</Tr></dt>
               <dd>
                 {screening.employment_status
                   ? (employmentStatusLabels[
@@ -75,19 +79,17 @@ function EligibilityScreeningCard({
               </dd>
             </div>
             <div>
-              <dt className="text-[#7a8a81]">Mandatory training</dt>
+              <dt className="text-muted"><Tr>{"Mandatory training"}</Tr></dt>
               <dd>
                 {screening.training_current ? (
-                  <span className="text-[#0e6027]">All attested current</span>
+                  <span className="text-[#0e6027]"><Tr>{"All attested current"}</Tr></span>
                 ) : (
-                  <span className="text-[#a2191f]">
-                    Not current — updated certificate required before approval
-                  </span>
+                  <span className="text-[#a2191f]"><Tr>{"Not current — updated certificate required before approval"}</Tr></span>
                 )}
               </dd>
             </div>
             <div>
-              <dt className="text-[#7a8a81]">Outcome</dt>
+              <dt className="text-muted"><Tr>{"Outcome"}</Tr></dt>
               <dd>{formatLabel(screening.outcome)}</dd>
             </div>
           </dl>
@@ -95,7 +97,7 @@ function EligibilityScreeningCard({
             {mandatoryTrainingItems.map((t) => (
               <li key={t.key} className="flex items-center gap-2">
                 <span aria-hidden className={attestations[t.key] ? "text-[#0e6027]" : "text-[#a2191f]"}>
-                  {attestations[t.key] ? "✓" : "✗"}
+                  <Tr>{attestations[t.key] ? "✓" : "✗"}</Tr>
                 </span>
                 <span>{t.label}</span>
               </li>
@@ -128,30 +130,30 @@ function StatusHistoryCard({
 }) {
   return (
     <section className="mt-10">
-      <h2 className="text-lg font-bold">Status action history</h2>
-      <div className="mt-4 overflow-x-auto rounded-2xl border border-[#dbe7e0] shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
+      <h2 className="text-lg font-bold"><Tr>{"Status action history"}</Tr></h2>
+      <TableScroll className="mt-4 rounded-2xl border border-line shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
         <table className="w-full text-sm">
-          <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#4a4a4a]">
+          <AdminTableHeader>
             <tr>
-              <th className="p-3 font-medium">Applied</th>
-              <th className="p-3 font-medium">Action</th>
-              <th className="p-3 font-medium">Reason</th>
-              <th className="p-3 font-medium">Internal notes</th>
-              <th className="p-3 font-medium">Review date</th>
-              <th className="p-3 font-medium">Resulting status</th>
-              <th className="p-3 font-medium">Resolved</th>
-              <th className="p-3 font-medium">By</th>
+              <th className="p-3 font-medium"><Tr>{"Applied"}</Tr></th>
+              <th className="p-3 font-medium"><Tr>{"Action"}</Tr></th>
+              <th className="p-3 font-medium"><Tr>{"Reason"}</Tr></th>
+              <th className="p-3 font-medium"><Tr>{"Internal notes"}</Tr></th>
+              <th className="p-3 font-medium"><Tr>{"Review date"}</Tr></th>
+              <th className="p-3 font-medium"><Tr>{"Resulting status"}</Tr></th>
+              <th className="p-3 font-medium"><Tr>{"Resolved"}</Tr></th>
+              <th className="p-3 font-medium"><Tr>{"By"}</Tr></th>
             </tr>
-          </thead>
-          <tbody className="divide-y divide-[#dbe7e0]">
-            {history.map((row, index) => (
-              <tr key={`${row.applied_at}-${index}`}>
+          </AdminTableHeader>
+          <tbody className="divide-y divide-line">
+            {history.map((row) => (
+              <tr key={`${row.applied_at}-${row.action_type}-${row.reason_code ?? ""}`}>
                 <td className="p-3 whitespace-nowrap">{formatDateTime(row.applied_at)}</td>
                 <td className="p-3">{formatLabel(row.action_type)}</td>
                 <td className="p-3">
                   {row.reason_code ? formatLabel(row.reason_code) : "—"}
                   {row.reason_text ? (
-                    <div className="text-xs text-[#7a8a81]">{row.reason_text}</div>
+                    <div className="text-xs text-muted">{row.reason_text}</div>
                   ) : null}
                 </td>
                 <td className="p-3">{row.internal_notes ?? "—"}</td>
@@ -172,9 +174,9 @@ function StatusHistoryCard({
           </tbody>
         </table>
         {history.length === 0 && (
-          <p className="p-6 text-sm text-[#4a4a4a]">No status actions recorded yet.</p>
+          <p className="p-6 text-sm text-ink"><Tr>{"No status actions recorded yet."}</Tr></p>
         )}
-      </div>
+      </TableScroll>
     </section>
   );
 }
@@ -184,6 +186,8 @@ export default async function AdminUserDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const t = await getPortalT();
+
   if (!(await requireAdmin())) redirect("/login");
 
   const { id } = await params;
@@ -284,7 +288,7 @@ export default async function AdminUserDetailPage({
   const attemptsThisCycle = completedAttempts.filter((a) => (a.assessment_cycle ?? 1) === latestCycle).length;
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-10">
+    <main id="main-content" tabIndex={-1} className="mx-auto max-w-4xl px-4 py-10">
       <div className="mt-1 flex flex-wrap items-baseline gap-x-4 gap-y-1">
         <h1 className="text-3xl font-bold">{professional.full_name}</h1>
         {verification && (
@@ -292,12 +296,10 @@ export default async function AdminUserDetailPage({
             <VerifiedBadge checks={verification.checks} fullyVerified={verification.fullyVerified} />
           </div>
         )}
-        <BackLink href="/admin/users" className="text-sm text-[#2e7d32] hover:underline">
-          Back to list
-        </BackLink>
+        <BackLink href="/admin/users" className="text-sm text-brand-strong hover:underline"><Tr>{"Back to list"}</Tr></BackLink>
       </div>
 
-      <section className="mt-8 rounded-2xl border border-[#dbe7e0] bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)] text-sm">
+      <section className="mt-8 rounded-2xl border border-line bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)] text-sm">
         <div className="flex items-start gap-4">
           {photoUrl ? (
             <a
@@ -305,46 +307,43 @@ export default async function AdminUserDetailPage({
               target="_blank"
               rel="noreferrer"
               className="group shrink-0"
-              title="Open profile photo"
+              title={t("Open profile photo")}
             >
               <img
                 src={photoUrl}
-                alt={`${professional.full_name} profile photo`}
-                className="h-24 w-24 rounded-full object-cover ring-1 ring-[#dbe7e0] transition group-hover:ring-[#2e7d32]"
+                alt={`${professional.full_name}`}
+                className="h-24 w-24 rounded-full object-cover ring-1 ring-line transition group-hover:ring-brand-strong"
               />
             </a>
           ) : (
-            <div className="grid h-24 w-24 shrink-0 place-items-center rounded-full bg-[#eef5f0] text-xs text-[#7a8a81]">
-              No photo
-            </div>
+            <div className="grid h-24 w-24 shrink-0 place-items-center rounded-full bg-surface-hover text-xs text-muted"><Tr>{"No photo"}</Tr></div>
           )}
           <div>
-            <h2 className="text-lg font-bold">Profile</h2>
+            <h2 className="text-lg font-bold"><Tr>{"Profile"}</Tr></h2>
             {photoUrl && (
-              <p className="mt-1 text-xs text-[#7a8a81]">Click photo to open full size</p>
+              <p className="mt-1 text-xs text-muted"><Tr>{"Click photo to open full size"}</Tr></p>
             )}
           </div>
         </div>
         <dl className="mt-4 grid gap-3 sm:grid-cols-2">
           <div>
-            <dt className="text-[#7a8a81]">Email</dt>
+            <dt className="text-muted"><Tr>{"Email"}</Tr></dt>
             <dd>{user?.email ?? "—"}</dd>
           </div>
           <div>
-            <dt className="text-[#7a8a81]">Roles</dt>
+            <dt className="text-muted"><Tr>{"Roles"}</Tr></dt>
             <dd>
               {roleAssignments.length === 0
                 ? ((professional.professional_roles as { name: string } | null)?.name ?? "—")
                 : roleAssignments.map((a) => (
                     <span key={a.roleId} className="mt-0.5 block">
                       {a.roleName}
-                      {a.isPrimary && <span className="text-[#7a8a81]"> — main</span>}
-                      <span className="ml-1.5 rounded-full bg-[#eef5f0] px-2 py-0.5 text-xs text-[#1e5a33]">
+                      {a.isPrimary && <span className="text-muted"><Tr>{"— main"}</Tr></span>}
+                      <span className="ml-1.5 rounded-full bg-surface-hover px-2 py-0.5 text-xs text-brand-ink">
                         {ROLE_STATUS_LABEL[a.status]}
                       </span>
                       {roleOutstanding(a.gaps).length > 0 && (
-                        <span className="mt-0.5 block text-xs text-[#7a8a81]">
-                          Outstanding: {roleOutstanding(a.gaps).join("; ")}
+                        <span className="mt-0.5 block text-xs text-muted"><Tr>{"Outstanding:"}</Tr>{roleOutstanding(a.gaps).join("; ")}
                         </span>
                       )}
                     </span>
@@ -365,26 +364,20 @@ export default async function AdminUserDetailPage({
                   : professional.registration_number;
             return (
               <div>
-                <dt className="text-[#7a8a81]">{REFERENCE_LABEL[register]}</dt>
+                <dt className="text-muted">{REFERENCE_LABEL[register]}</dt>
                 <dd>
                   {value ?? "—"}
-                  <span className="mt-0.5 block text-xs text-[#7a8a81]">
-                    Check this against the {REGISTER_LABEL[register]} before approving.
-                  </span>
+                  <span className="mt-0.5 block text-xs text-muted"><Tr>{"Check this against the"}</Tr>{REGISTER_LABEL[register]}<Tr>{"before approving."}</Tr></span>
                 </dd>
               </div>
             );
           })()}
           <div>
-            <dt className="text-[#7a8a81]">Right to work</dt>
+            <dt className="text-muted"><Tr>{"Right to work"}</Tr></dt>
             <dd>
               {professional.right_to_work_basis === "share_code" ? (
-                <>
-                  Share code {professional.right_to_work_share_code ?? "—"}
-                  <span className="mt-0.5 block text-xs text-[#7a8a81]">
-                    Redeem this code at gov.uk/view-right-to-work with the professional&apos;s date
-                    of birth, and confirm the result before approving the Right to Work document.
-                  </span>
+                <><Tr>{"Share code"}</Tr>{professional.right_to_work_share_code ?? "—"}
+                  <span className="mt-0.5 block text-xs text-muted"><Tr>{"Redeem this code at gov.uk/view-right-to-work with the professional's date of birth, and confirm the result before approving the Right to Work document."}</Tr></span>
                 </>
               ) : professional.right_to_work_basis === "uk_irish_citizen" ? (
                 "British or Irish citizen (passport)"
@@ -394,7 +387,7 @@ export default async function AdminUserDetailPage({
             </dd>
           </div>
           <div>
-            <dt className="text-[#7a8a81]">Professional registration</dt>
+            <dt className="text-muted"><Tr>{"Professional registration"}</Tr></dt>
             <dd>
               {professional.registration_body || professional.registration_number
                 ? `${professional.registration_body ?? "—"} ${professional.registration_number ?? ""}`.trim()
@@ -402,23 +395,23 @@ export default async function AdminUserDetailPage({
             </dd>
           </div>
           <div>
-            <dt className="text-[#7a8a81]">Professional status</dt>
+            <dt className="text-muted"><Tr>{"Professional status"}</Tr></dt>
             <dd>{formatLabel(professional.professional_status)}</dd>
           </div>
           <div>
-            <dt className="text-[#7a8a81]">Compliance status</dt>
+            <dt className="text-muted"><Tr>{"Compliance status"}</Tr></dt>
             <dd>{formatLabel(professional.compliance_status)}</dd>
           </div>
           <div>
-            <dt className="text-[#7a8a81]">Account status</dt>
+            <dt className="text-muted"><Tr>{"Account status"}</Tr></dt>
             <dd>{user?.account_status ? formatLabel(user.account_status) : "—"}</dd>
           </div>
           <div>
-            <dt className="text-[#7a8a81]">Skills &amp; specialities</dt>
+            <dt className="text-muted"><Tr>{"Skills & specialities"}</Tr></dt>
             <dd>{skillNames.length > 0 ? skillNames.join(", ") : "—"}</dd>
           </div>
           <div>
-            <dt className="text-[#7a8a81]">Availability</dt>
+            <dt className="text-muted"><Tr>{"Availability"}</Tr></dt>
             <dd>
               {availabilityDays.size > 0
                 ? DAYS_OF_WEEK.filter((d) => availabilityDays.has(d.value))
@@ -429,19 +422,17 @@ export default async function AdminUserDetailPage({
           </div>
         </dl>
         <p className="mt-4">
-          <ForwardLink href="/admin/compliance" className="text-[#2e7d32] hover:underline">
-            View compliance documents
-          </ForwardLink>
+          <ForwardLink href="/admin/compliance" className="text-brand-strong hover:underline"><Tr>{"View compliance documents"}</Tr></ForwardLink>
         </p>
       </section>
 
       <EligibilityScreeningCard screening={screening} attestations={attestations} />
 
-      <section className="mt-10 rounded-2xl border border-[#dbe7e0] bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)] text-sm">
-        <h2 className="text-lg font-bold">Competency assessment</h2>
+      <section className="mt-10 rounded-2xl border border-line bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)] text-sm">
+        <h2 className="text-lg font-bold"><Tr>{"Competency assessment"}</Tr></h2>
         <dl className="mt-4 grid gap-3 sm:grid-cols-3">
           <div>
-            <dt className="text-[#7a8a81]">Result</dt>
+            <dt className="text-muted"><Tr>{"Result"}</Tr></dt>
             <dd>
               {completedAttempts.length === 0
                 ? "Not yet attempted"
@@ -451,11 +442,11 @@ export default async function AdminUserDetailPage({
             </dd>
           </div>
           <div>
-            <dt className="text-[#7a8a81]">Best score</dt>
+            <dt className="text-muted"><Tr>{"Best score"}</Tr></dt>
             <dd>{bestScore != null ? `${bestScore}%` : "—"}</dd>
           </div>
           <div>
-            <dt className="text-[#7a8a81]">Attempts used</dt>
+            <dt className="text-muted"><Tr>{"Attempts used"}</Tr></dt>
             <dd>
               {attemptsThisCycle} / 3
               {latestCycle > 1 ? ` (reapplication ${latestCycle})` : ""}
@@ -463,24 +454,24 @@ export default async function AdminUserDetailPage({
           </div>
         </dl>
         {completedAttempts.length > 0 && (
-          <div className="mt-4 overflow-x-auto rounded-xl border border-[#dbe7e0]">
+          <TableScroll className="mt-4 rounded-xl border border-line">
             <table className="w-full text-sm">
-              <thead className="border-b border-[#dbe7e0] bg-[#f5f7f6] text-left text-[#4a4a4a]">
+              <AdminTableHeader>
                 <tr>
-                  <th className="p-3 font-medium">Attempt</th>
-                  <th className="p-3 font-medium">Score</th>
-                  <th className="p-3 font-medium">Result</th>
-                  <th className="p-3 font-medium">Completed</th>
+                  <th className="p-3 font-medium"><Tr>{"Attempt"}</Tr></th>
+                  <th className="p-3 font-medium"><Tr>{"Score"}</Tr></th>
+                  <th className="p-3 font-medium"><Tr>{"Result"}</Tr></th>
+                  <th className="p-3 font-medium"><Tr>{"Completed"}</Tr></th>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-[#dbe7e0]">
+              </AdminTableHeader>
+              <tbody className="divide-y divide-line">
                 {completedAttempts.map((a) => (
                   <tr key={`${a.assessment_cycle ?? 1}-${a.attempt_number}`}>
                     <td className="p-3">
                       {latestCycle > 1 ? `${a.assessment_cycle ?? 1}.${a.attempt_number}` : a.attempt_number}
                     </td>
                     <td className="p-3">{a.score != null ? `${a.score}%` : "—"}</td>
-                    <td className="p-3">{a.passed ? "Pass" : "Fail"}</td>
+                    <td className="p-3"><Tr>{a.passed ? "Pass" : "Fail"}</Tr></td>
                     <td className="p-3 whitespace-nowrap">
                       {a.completed_at ? formatDateTime(a.completed_at) : "—"}
                     </td>
@@ -488,12 +479,12 @@ export default async function AdminUserDetailPage({
                 ))}
               </tbody>
             </table>
-          </div>
+          </TableScroll>
         )}
       </section>
 
-      <section className="mt-10 rounded-2xl border border-[#dbe7e0] bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
-        <h2 className="text-lg font-bold">Professional status action</h2>
+      <section className="mt-10 rounded-2xl border border-line bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
+        <h2 className="text-lg font-bold"><Tr>{"Professional status action"}</Tr></h2>
         <div className="mt-4">
           <StatusActionForm
             professionalId={professional.id}
@@ -503,8 +494,8 @@ export default async function AdminUserDetailPage({
       </section>
 
       {user?.account_status && (
-        <section className="mt-10 rounded-2xl border border-[#dbe7e0] bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
-          <h2 className="text-lg font-bold">Account access</h2>
+        <section className="mt-10 rounded-2xl border border-line bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
+          <h2 className="text-lg font-bold"><Tr>{"Account access"}</Tr></h2>
           <div className="mt-4">
             <AccountStatusControl
               userId={professional.user_id}

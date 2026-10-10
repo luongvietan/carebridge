@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import {
   Calendar03Icon,
   ChevronLeftIcon,
@@ -70,9 +70,9 @@ type CalendarPanel = "days" | "months" | "years";
 const YEARS_PER_PAGE = 12;
 
 const navBtnClass =
-  "grid h-8 w-8 place-items-center rounded-full text-[#4a4a4a] transition hover:bg-[#eef5f0] hover:text-[#2e7d32]";
+  "grid h-8 w-8 place-items-center rounded-full text-ink transition hover:bg-surface-hover hover:text-brand-strong";
 const headerBtnClass =
-  "rounded-md px-2 py-1 text-sm font-semibold text-[#1e5a33] transition hover:bg-[#eef5f0]";
+  "rounded-md px-2 py-1 text-sm font-semibold text-brand-ink transition hover:bg-surface-hover";
 
 function pad(n: number) {
   return String(n).padStart(2, "0");
@@ -109,7 +109,14 @@ function calendarDays(view: Date) {
 }
 
 function formatLong(d: Date, tag = "en-GB") {
-  return d.toLocaleDateString(tag, { day: "2-digit", month: "short", year: "numeric" });
+  // Preserve the chosen calendar day when formatting across time zones.
+  const calendarDate = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  return calendarDate.toLocaleDateString(tag, {
+    timeZone: "UTC",
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
 }
 
 /* ---------- shared popover behaviour ---------- */
@@ -117,14 +124,17 @@ function formatLong(d: Date, tag = "en-GB") {
 function usePopover() {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const popoverId = useId();
+  function close() { setOpen(false); triggerRef.current?.focus(); }
 
   useEffect(() => {
     if (!open) return;
     function onPointerDown(e: PointerEvent) {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) setOpen(false);
+      if (rootRef.current && !rootRef.current.contains(e.target as Node) && !(e.target as Element).closest?.("[role=listbox]")) setOpen(false);
     }
     function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape" && !e.defaultPrevented) close();
     }
     document.addEventListener("pointerdown", onPointerDown);
     document.addEventListener("keydown", onKey);
@@ -134,11 +144,11 @@ function usePopover() {
     };
   }, [open]);
 
-  return { open, setOpen, rootRef };
+  return { open, setOpen, rootRef, triggerRef, popoverId, close };
 }
 
 const triggerClass =
-  "flex w-full items-center justify-between gap-2 rounded-xl border border-[#dbe7e0] bg-white px-3.5 py-2.5 text-left text-sm text-[#1e5a33] transition focus:border-[#2e7d32] focus:outline-none focus:ring-2 focus:ring-[#2e7d32]/15 disabled:cursor-not-allowed disabled:opacity-50";
+  "flex w-full items-center justify-between gap-2 rounded-xl border border-line bg-white px-3.5 py-2.5 text-left text-sm text-brand-ink transition focus:border-brand-strong focus:outline-none focus:ring-2 focus:ring-brand-strong/15 disabled:cursor-not-allowed disabled:opacity-50";
 
 function useToday() {
   // `today` only drives the "current day" highlight. Initialise it after mount so
@@ -167,8 +177,9 @@ function Calendar({
 }) {
   const today = useToday();
   const w = useWords();
-  const [view, setView] = useState(() => selected ?? new Date());
-  const [focused, setFocused] = useState(() => selected ?? new Date());
+  const initialDate = selected && (!minDate || selected >= minDate) ? selected : minDate ?? new Date();
+  const [view, setView] = useState(() => initialDate);
+  const [focused, setFocused] = useState(() => initialDate);
   const [panel, setPanel] = useState<CalendarPanel>("days");
   const [yearPage, setYearPage] = useState(() => yearPageStart((selected ?? new Date()).getFullYear()));
   const gridRef = useRef<HTMLDivElement>(null);
@@ -193,6 +204,7 @@ function Calendar({
   function move(days: number) {
     const next = new Date(focused);
     next.setDate(focused.getDate() + days);
+    if (isDisabled(next)) return;
     setFocused(next);
     if (next.getMonth() !== view.getMonth() || next.getFullYear() !== view.getFullYear()) {
       setView(new Date(next.getFullYear(), next.getMonth(), 1));
@@ -211,7 +223,9 @@ function Calendar({
   }
 
   function shiftMonth(delta: number) {
-    setView(new Date(view.getFullYear(), view.getMonth() + delta, 1));
+    const next = new Date(view.getFullYear(), view.getMonth() + delta, 1);
+    setView(next);
+    setFocused(minDay && next < minDay && minDay.getMonth() === next.getMonth() && minDay.getFullYear() === next.getFullYear() ? minDay : next);
   }
 
   function openMonths() {
@@ -224,7 +238,9 @@ function Calendar({
   }
 
   function pickMonth(month: number) {
-    setView(new Date(view.getFullYear(), month, 1));
+    const next = new Date(view.getFullYear(), month, 1);
+    setView(next);
+    setFocused(minDay && next < minDay ? minDay : next);
     setPanel("days");
   }
 
@@ -246,7 +262,7 @@ function Calendar({
         {panel === "days" ? (
           <button
             type="button"
-            aria-label="Previous month"
+            aria-label={w.tag === "pt-PT" ? "Mês anterior" : "Previous month"}
             onClick={() => shiftMonth(-1)}
             className={navBtnClass}
           >
@@ -255,7 +271,7 @@ function Calendar({
         ) : (
           <button
             type="button"
-            aria-label={panel === "years" ? "Back to months" : "Back to days"}
+            aria-label={w.tag === "pt-PT" ? (panel === "years" ? "Voltar aos meses" : "Voltar aos dias") : (panel === "years" ? "Back to months" : "Back to days")}
             onClick={goBack}
             className={navBtnClass}
           >
@@ -277,7 +293,7 @@ function Calendar({
           <div className="flex items-center gap-0.5">
             <button
               type="button"
-              aria-label="Previous year"
+              aria-label={w.tag === "pt-PT" ? "Ano anterior" : "Previous year"}
               onClick={() => setView(new Date(view.getFullYear() - 1, view.getMonth(), 1))}
               className={navBtnClass}
             >
@@ -285,7 +301,7 @@ function Calendar({
             </button>
             <button
               type="button"
-              aria-label={`${view.getFullYear()}, choose year`}
+              aria-label={`${view.getFullYear()}, ${w.tag === "pt-PT" ? "escolher ano" : "choose year"}`}
               onClick={openYears}
               className={headerBtnClass}
             >
@@ -293,7 +309,7 @@ function Calendar({
             </button>
             <button
               type="button"
-              aria-label="Next year"
+              aria-label={w.tag === "pt-PT" ? "Ano seguinte" : "Next year"}
               onClick={() => setView(new Date(view.getFullYear() + 1, view.getMonth(), 1))}
               className={navBtnClass}
             >
@@ -305,18 +321,18 @@ function Calendar({
           <div className="flex items-center gap-0.5">
             <button
               type="button"
-              aria-label="Previous years"
+              aria-label={w.tag === "pt-PT" ? "Anos anteriores" : "Previous years"}
               onClick={() => setYearPage((p) => p - YEARS_PER_PAGE)}
               className={navBtnClass}
             >
               <Icon icon={ChevronLeftIcon} size={16} strokeWidth={2} aria-hidden />
             </button>
-            <span className="min-w-[6.5rem] text-center text-sm font-semibold text-[#1e5a33]">
+            <span className="min-w-[6.5rem] text-center text-sm font-semibold text-brand-ink">
               {yearPage} – {yearPage + YEARS_PER_PAGE - 1}
             </span>
             <button
               type="button"
-              aria-label="Next years"
+              aria-label={w.tag === "pt-PT" ? "Anos seguintes" : "Next years"}
               onClick={() => setYearPage((p) => p + YEARS_PER_PAGE)}
               className={navBtnClass}
             >
@@ -328,7 +344,7 @@ function Calendar({
         {panel === "days" ? (
           <button
             type="button"
-            aria-label="Next month"
+            aria-label={w.tag === "pt-PT" ? "Mês seguinte" : "Next month"}
             onClick={() => shiftMonth(1)}
             className={navBtnClass}
           >
@@ -341,13 +357,13 @@ function Calendar({
 
       {panel === "days" && (
         <>
-          <div className="grid grid-cols-7 gap-0.5 px-1 pb-1 text-center text-xs font-medium text-[#7a8a81]">
+          <div className="grid grid-cols-7 gap-0.5 px-1 pb-1 text-center text-xs font-medium text-muted">
             {w.weekdays.map((w) => (
               <span key={w} className="py-1">{w}</span>
             ))}
           </div>
 
-          <div ref={gridRef} role="grid" tabIndex={-1} onKeyDown={onKeyDown} className="grid grid-cols-7 gap-0.5 px-1">
+          <div ref={gridRef} role="group" aria-label={w.chooseDate} tabIndex={-1} onKeyDown={onKeyDown} className="grid grid-cols-7 gap-0.5 px-1">
             {days.map((d) => {
               const inMonth = d.getMonth() === view.getMonth();
               const isSelected = selected ? sameDay(d, selected) : false;
@@ -359,8 +375,7 @@ function Calendar({
                   key={toYMD(d)}
                   type="button"
                   data-ymd={toYMD(d)}
-                  role="gridcell"
-                  aria-selected={isSelected}
+                  aria-pressed={isSelected}
                   aria-disabled={disabled}
                   disabled={disabled}
                   aria-label={formatLong(d, w.tag)}
@@ -370,13 +385,13 @@ function Calendar({
                     disabled
                       ? "cursor-not-allowed text-[#c5cec8]"
                       : isSelected
-                        ? "bg-[#2e7d32] font-semibold text-white"
+                        ? "bg-brand-strong font-semibold text-white"
                         : isToday
-                          ? "font-semibold text-[#2e7d32] ring-1 ring-inset ring-[#bcd8c7] hover:bg-[#eef5f0]"
+                          ? "font-semibold text-brand-strong ring-1 ring-inset ring-line-hover hover:bg-surface-hover"
                           : inMonth
-                            ? "text-[#1e5a33] hover:bg-[#eef5f0]"
-                            : "text-[#9aa8a0] hover:bg-[#f5f7f6]"
-                  } focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2e7d32]/40`}
+                            ? "text-brand-ink hover:bg-surface-hover"
+                            : "text-muted hover:bg-surface"
+                  } focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-strong/40`}
                 >
                   {d.getDate()}
                 </button>
@@ -387,7 +402,7 @@ function Calendar({
       )}
 
       {panel === "months" && (
-        <div role="grid" className="grid grid-cols-3 gap-1 px-1">
+        <div role="group" aria-label={w.chooseDate} className="grid grid-cols-3 gap-1 px-1">
           {w.monthsShort.map((label, month) => {
             const isCurrent = today
               ? today.getFullYear() === view.getFullYear() && today.getMonth() === month
@@ -399,8 +414,7 @@ function Calendar({
               <button
                 key={label}
                 type="button"
-                role="gridcell"
-                aria-selected={isSelectedMonth}
+                aria-pressed={isSelectedMonth}
                 aria-disabled={disabled}
                 disabled={disabled}
                 aria-label={w.months[month]}
@@ -409,11 +423,11 @@ function Calendar({
                   disabled
                     ? "cursor-not-allowed text-[#c5cec8]"
                     : isSelectedMonth
-                      ? "bg-[#2e7d32] font-semibold text-white"
+                      ? "bg-brand-strong font-semibold text-white"
                       : isCurrent
-                        ? "font-semibold text-[#2e7d32] ring-1 ring-inset ring-[#bcd8c7] hover:bg-[#eef5f0]"
-                        : "text-[#1e5a33] hover:bg-[#eef5f0]"
-                } focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2e7d32]/40`}
+                        ? "font-semibold text-brand-strong ring-1 ring-inset ring-line-hover hover:bg-surface-hover"
+                        : "text-brand-ink hover:bg-surface-hover"
+                } focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-strong/40`}
               >
                 {label}
               </button>
@@ -423,7 +437,7 @@ function Calendar({
       )}
 
       {panel === "years" && (
-        <div role="grid" className="grid grid-cols-3 gap-1 px-1">
+        <div role="group" aria-label={w.chooseDate} className="grid grid-cols-3 gap-1 px-1">
           {years.map((year) => {
             const isCurrent = today ? today.getFullYear() === year : false;
             const isSelectedYear = selected?.getFullYear() === year;
@@ -432,8 +446,7 @@ function Calendar({
               <button
                 key={year}
                 type="button"
-                role="gridcell"
-                aria-selected={isSelectedYear}
+                aria-pressed={isSelectedYear}
                 aria-disabled={disabled}
                 disabled={disabled}
                 aria-label={String(year)}
@@ -442,11 +455,11 @@ function Calendar({
                   disabled
                     ? "cursor-not-allowed text-[#c5cec8]"
                     : isSelectedYear
-                      ? "bg-[#2e7d32] font-semibold text-white"
+                      ? "bg-brand-strong font-semibold text-white"
                       : isCurrent
-                        ? "font-semibold text-[#2e7d32] ring-1 ring-inset ring-[#bcd8c7] hover:bg-[#eef5f0]"
-                        : "text-[#1e5a33] hover:bg-[#eef5f0]"
-                } focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2e7d32]/40`}
+                        ? "font-semibold text-brand-strong ring-1 ring-inset ring-line-hover hover:bg-surface-hover"
+                        : "text-brand-ink hover:bg-surface-hover"
+                } focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-strong/40`}
               >
                 {year}
               </button>
@@ -459,7 +472,7 @@ function Calendar({
 }
 
 const popoverClass =
-  "absolute z-30 mt-1.5 m-0 w-[18rem] max-w-none rounded-2xl border border-[#dbe7e0] bg-white p-3 shadow-[0_12px_36px_-12px_rgba(15,38,28,0.22)] [&::backdrop]:hidden";
+  "absolute z-30 mt-1.5 m-0 w-[18rem] max-w-[calc(100vw-2rem)] rounded-2xl border border-line bg-white p-3 shadow-[0_12px_36px_-12px_rgba(15,38,28,0.22)] [&::backdrop]:hidden";
 
 /* ---------- DatePicker (date only) ---------- */
 
@@ -495,7 +508,7 @@ export function DatePicker({
   const isControlled = value !== undefined;
   const [internal, setInternal] = useState(defaultValue ?? "");
   const current = isControlled ? value : internal;
-  const { open, setOpen, rootRef } = usePopover();
+  const { open, setOpen, rootRef, triggerRef, popoverId, close } = usePopover();
 
   const selected = parseYMD(current);
 
@@ -506,7 +519,7 @@ export function DatePicker({
 
   function pick(d: Date) {
     setValue(toYMD(d));
-    setOpen(false);
+    close();
   }
 
   function pickToday() {
@@ -515,10 +528,13 @@ export function DatePicker({
 
   return (
     <div ref={rootRef} className={`relative ${className}`}>
-      {name && <input type="hidden" name={name} value={current} required={required} />}
+      {name && <input aria-hidden="true" tabIndex={-1} className="pointer-events-none absolute h-px w-px opacity-0" name={name} value={current} required={required} disabled={disabled} onChange={() => {}}
+        onInvalid={(event) => { event.preventDefault(); triggerRef.current?.focus(); setOpen(true); }} />}
       <button
         type="button"
         id={id}
+        ref={triggerRef}
+        aria-controls={open ? popoverId : undefined}
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-label={ariaLabel}
@@ -526,31 +542,31 @@ export function DatePicker({
         onClick={() => setOpen((o) => !o)}
         className={triggerClass}
       >
-        <span className={selected ? "" : "text-[#9aa8a0]"}>
+        <span className={selected ? "" : "text-muted"}>
           {selected ? formatLong(selected, w.tag) : placeholder ?? w.selectDate}
         </span>
-        <Icon icon={Calendar03Icon} size={16} strokeWidth={2} aria-hidden className="shrink-0 text-[#4a4a4a]" />
+        <Icon icon={Calendar03Icon} size={16} strokeWidth={2} aria-hidden className="shrink-0 text-ink" />
       </button>
 
       {open && (
-        <dialog open aria-label={ariaLabel ?? w.chooseDate} className={popoverClass}>
+        <div role="dialog" id={popoverId} aria-modal="false" aria-label={ariaLabel ?? w.chooseDate} className={popoverClass}>
           <Calendar selected={selected} onSelect={pick} minDate={minDate} />
-          <div className="mt-2 flex items-center justify-between border-t border-[#eef5f0] px-1 pt-2 text-sm">
-            <button type="button" onClick={pickToday} className="font-medium text-[#2e7d32] hover:underline">
+          <div className="mt-2 flex items-center justify-between border-t border-surface-hover px-1 pt-2 text-sm">
+            <button type="button" disabled={!!minDate && toYMD(new Date()) < toYMD(minDate)} onClick={pickToday} className="font-medium text-brand-strong hover:underline">
               {w.today}
             </button>
             <button
               type="button"
               onClick={() => {
                 setValue("");
-                setOpen(false);
+                close();
               }}
-              className="font-medium text-[#4a4a4a] hover:text-[#14301e] hover:underline"
+              className="font-medium text-ink hover:text-heading hover:underline"
             >
               {w.clear}
             </button>
           </div>
-        </dialog>
+        </div>
       )}
     </div>
   );
@@ -584,7 +600,7 @@ export function DateTimePicker({
   const isControlled = value !== undefined;
   const [internal, setInternal] = useState(defaultValue ?? "");
   const current = isControlled ? value : internal;
-  const { open, setOpen, rootRef } = usePopover();
+  const { open, setOpen, rootRef, triggerRef, popoverId } = usePopover();
 
   const { date, hour, minute } = splitDateTime(current);
   const selected = parseYMD(date);
@@ -600,10 +616,13 @@ export function DateTimePicker({
 
   return (
     <div ref={rootRef} className={`relative ${className}`}>
-      {name && <input type="hidden" name={name} value={current} required={required} />}
+      {name && <input aria-hidden="true" tabIndex={-1} className="pointer-events-none absolute h-px w-px opacity-0" name={name} value={current} required={required} disabled={disabled} onChange={() => {}}
+        onInvalid={(event) => { event.preventDefault(); triggerRef.current?.focus(); setOpen(true); }} />}
       <button
         type="button"
         id={id}
+        ref={triggerRef}
+        aria-controls={open ? popoverId : undefined}
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-label={ariaLabel}
@@ -611,26 +630,26 @@ export function DateTimePicker({
         onClick={() => setOpen((o) => !o)}
         className={triggerClass}
       >
-        <span className={display ? "" : "text-[#9aa8a0]"}>{display ?? placeholder ?? w.selectDateTime}</span>
-        <Icon icon={Calendar03Icon} size={16} strokeWidth={2} aria-hidden className="shrink-0 text-[#4a4a4a]" />
+        <span className={display ? "" : "text-muted"}>{display ?? placeholder ?? w.selectDateTime}</span>
+        <Icon icon={Calendar03Icon} size={16} strokeWidth={2} aria-hidden className="shrink-0 text-ink" />
       </button>
 
       {open && (
-        <dialog open aria-label={ariaLabel ?? w.chooseDateTime} className={popoverClass}>
+        <div role="dialog" id={popoverId} aria-modal="false" aria-label={ariaLabel ?? w.chooseDateTime} className={popoverClass}>
           <Calendar selected={selected} minDate={minDate} onSelect={(d) => commit(toYMD(d), hour || "09", minute || "00")} />
-          <div className="mt-2 flex items-center gap-2 border-t border-[#eef5f0] px-1 pt-3">
-            <Icon icon={Clock01Icon} size={16} strokeWidth={2} aria-hidden className="text-[#4a4a4a]" />
+          <div className="mt-2 flex items-center gap-2 border-t border-surface-hover px-1 pt-3">
+            <Icon icon={Clock01Icon} size={16} strokeWidth={2} aria-hidden className="text-ink" />
             <Select
-              aria-label="Hour"
+              aria-label={w.tag === "pt-PT" ? "Hora" : "Hour"}
               className="w-20"
               placeholder="HH"
               value={hour}
               onValueChange={(h) => commit(date, h, minute || "00")}
               options={HOURS}
             />
-            <span className="text-[#4a4a4a]">:</span>
+            <span className="text-ink">:</span>
             <Select
-              aria-label="Minute"
+              aria-label={w.tag === "pt-PT" ? "Minuto" : "Minute"}
               className="w-20"
               placeholder="mm"
               value={minute}
@@ -638,7 +657,7 @@ export function DateTimePicker({
               options={MINUTES}
             />
           </div>
-        </dialog>
+        </div>
       )}
     </div>
   );

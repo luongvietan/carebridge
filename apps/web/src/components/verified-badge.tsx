@@ -13,7 +13,7 @@ const STATE_MARK: Record<VerificationCheck["state"], string> = {
 const STATE_CLASS: Record<VerificationCheck["state"], string> = {
   verified: "text-[#0e6027]",
   outstanding: "text-[#a2191f]",
-  not_applicable: "text-[#7a8a81]",
+  not_applicable: "text-muted",
 };
 
 /**
@@ -59,21 +59,21 @@ export function VerifiedBadge({
       </button>
 
       {open && (
-        <ul className="mt-3 space-y-1.5 rounded-xl border border-[#dbe7e0] bg-white p-4 text-sm">
+        <ul className="mt-3 space-y-1.5 rounded-xl border border-line bg-white p-4 text-sm">
           {checks.map((check) => (
             <li key={check.key} className="flex items-start gap-2">
               <span aria-hidden className={`${STATE_CLASS[check.state]} font-semibold`}>
                 {STATE_MARK[check.state]}
               </span>
               <span>
-                <span className={check.state === "outstanding" ? "text-[#4a4a4a]" : ""}>
+                <span className={check.state === "outstanding" ? "text-ink" : ""}>
                   {t(check.label)}
                 </span>
                 {check.state === "outstanding" && (
                   <span className="ml-1 text-xs text-[#a2191f]">{t("— outstanding")}</span>
                 )}
                 {check.detail && check.state !== "outstanding" && (
-                  <span className="block text-xs text-[#7a8a81]">{t(check.detail)}</span>
+                  <span className="block text-xs text-muted">{t(check.detail)}</span>
                 )}
               </span>
             </li>

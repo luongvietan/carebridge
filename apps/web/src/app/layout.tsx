@@ -4,6 +4,7 @@ import { siteTagline } from "@/data/marketing-copy";
 import { getSiteOrigin } from "@/lib/site";
 import { localeForCountry } from "@/lib/marketing/market";
 import { AssistantWidget } from "@/components/assistant-widget";
+import { SkipLink } from "@/components/skip-link";
 import { PortalLocaleProvider } from "@/components/portal-locale";
 import { getSelectedCountry } from "@/lib/marketing/market-server";
 import "./globals.css";
@@ -49,8 +50,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const country = await getSelectedCountry();
   return (
     <html lang={localeForCountry(country)}>
-      <body className={`${plex.className} min-h-screen bg-white text-[#14301e] antialiased`}>
+      <body className={`${plex.className} min-h-screen bg-white text-heading antialiased`}>
         <PortalLocaleProvider locale={localeForCountry(country) as "en-GB" | "pt-PT"}>
+          <SkipLink />
           {children}
         </PortalLocaleProvider>
         <AssistantWidget locale={localeForCountry(country) as "en-GB" | "pt-PT"} />

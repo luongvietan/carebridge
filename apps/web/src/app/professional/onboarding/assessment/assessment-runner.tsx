@@ -122,19 +122,19 @@ export function AssessmentRunner({
     <div>
       <OnboardingSteps current={2} locale={locale} />
       <div className="mt-8">
-        {state.error && <p className="mb-4 text-sm text-[#da1e28]"><Tr>{state.error}</Tr></p>}
+        {state.error && <p role="alert" className="mb-4 text-sm text-danger"><Tr>{state.error}</Tr></p>}
 
         {state.phase === "intro" && (
-          <div className="rounded-2xl border border-[#dbe7e0] bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
+          <div className="rounded-2xl border border-line bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
             <h2 className="text-xl font-bold">{a.title}</h2>
-            <p className="mt-2 text-sm text-[#4a4a4a]">
+            <p className="mt-2 text-sm text-ink">
               {a.note}
             </p>
             <button
               type="button"
               onClick={begin}
               disabled={state.busy}
-              className="mt-6 rounded-full bg-[#2e7d32] px-4 py-3 text-sm text-white hover:bg-[#246627] disabled:opacity-50"
+              className="mt-6 rounded-full bg-brand-strong px-4 py-3 text-sm text-white hover:bg-brand-strong-hover disabled:opacity-50"
             >
               {state.busy ? a.loading : a.begin}
             </button>
@@ -142,7 +142,7 @@ export function AssessmentRunner({
         )}
 
         {state.phase === "questions" && state.roleName && (
-          <p className="mb-4 text-sm text-[#4a4a4a]">
+          <p className="mb-4 text-sm text-ink">
             {a.forRoleA}
             <strong>{state.roleName}</strong>
             {a.forRoleB}
@@ -152,8 +152,8 @@ export function AssessmentRunner({
         {state.phase === "questions" && (
           <div className="space-y-6">
             {state.questions.map((q, i) => (
-              <fieldset key={q.id} className="rounded-2xl border border-[#dbe7e0] bg-white p-5 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
-                <legend className="px-1 text-xs tracking-wide text-[#4a4a4a] uppercase">
+              <fieldset key={q.id} className="rounded-2xl border border-line bg-white p-5 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
+                <legend className="px-1 text-xs tracking-wide text-ink uppercase">
                   <Tr>{TOPIC_LABEL[q.topic] ?? q.topic.replace(/_/g, " ")}</Tr>
                 </legend>
                 <p className="font-semibold">
@@ -179,32 +179,32 @@ export function AssessmentRunner({
               type="button"
               onClick={submit}
               disabled={state.busy || !allAnswered}
-              className="rounded-full bg-[#2e7d32] px-4 py-3 text-sm text-white hover:bg-[#246627] disabled:opacity-50"
+              className="rounded-full bg-brand-strong px-4 py-3 text-sm text-white hover:bg-brand-strong-hover disabled:opacity-50"
             >
               {state.busy ? a.submitting : a.submit}
             </button>
-            {!allAnswered && <p className="text-sm text-[#7a8a81]">{a.answerAll}</p>}
+            {!allAnswered && <p className="text-sm text-muted">{a.answerAll}</p>}
           </div>
         )}
 
         {state.phase === "result" && state.result && (
-          <div className="rounded-2xl border border-[#dbe7e0] bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
+          <div className="rounded-2xl border border-line bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
             <h2 className="text-xl font-bold">
               {a.score} <span className="tabular-nums">{state.result.score}%</span>
             </h2>
             {state.result.passed ? (
               <>
-                <p className="mt-2 text-sm text-[#2e7d32]">{a.passed}</p>
+                <p className="mt-2 text-sm text-brand-strong">{a.passed}</p>
                 <div className="mt-6 flex flex-wrap gap-3">
                   <ForwardLink
                     href="/professional/onboarding/profile"
-                    className="rounded-full bg-[#2e7d32] px-4 py-3 text-sm text-white hover:bg-[#246627]"
+                    className="rounded-full bg-brand-strong px-4 py-3 text-sm text-white hover:bg-brand-strong-hover"
                   >
                     {a.toProfile}
                   </ForwardLink>
                   <ForwardLink
                     href="/professional/onboarding/assessment/certificate"
-                    className="rounded-full border border-[#2e7d32] px-4 py-3 text-sm text-[#2e7d32] hover:bg-[#eef5f0]"
+                    className="rounded-full border border-brand-strong px-4 py-3 text-sm text-brand-strong hover:bg-surface-hover"
                   >
                     {a.certificate}
                   </ForwardLink>
@@ -212,17 +212,17 @@ export function AssessmentRunner({
               </>
             ) : state.result.canRetry ? (
               <>
-                <p className="mt-2 text-sm text-[#da1e28]">{a.below}</p>
+                <p className="mt-2 text-sm text-danger">{a.below}</p>
                 <button
                   type="button"
                   onClick={() => dispatch({ type: "reset-intro" })}
-                  className="mt-6 rounded-full bg-[#2e7d32] px-4 py-3 text-sm text-white hover:bg-[#246627]"
+                  className="mt-6 rounded-full bg-brand-strong px-4 py-3 text-sm text-white hover:bg-brand-strong-hover"
                 >
                   {a.tryAgain}
                 </button>
               </>
             ) : (
-              <p className="mt-2 text-sm text-[#da1e28]">
+              <p className="mt-2 text-sm text-danger">
                 {a.usedAll}
               </p>
             )}
@@ -230,9 +230,9 @@ export function AssessmentRunner({
         )}
 
         {state.phase === "locked" && (
-          <div className="rounded-2xl border border-[#dbe7e0] bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
+          <div className="rounded-2xl border border-line bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
             <h2 className="text-xl font-bold">{a.lockedTitle}</h2>
-            <p className="mt-2 text-sm text-[#4a4a4a]">
+            <p className="mt-2 text-sm text-ink">
               {a.lockedBody}
             </p>
           </div>

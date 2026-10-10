@@ -29,6 +29,7 @@ export default async function ServicesPage() {
     <MarketingPageMotion>
       <SiteNav />
 
+      <main id="main-content" tabIndex={-1} className="scroll-mt-24">
       <MarketingPageHero
         badge={s.badge}
         title={s.title}
@@ -36,7 +37,6 @@ export default async function ServicesPage() {
         image={marketingImages.pageHero.services}
       />
 
-      <main>
         <section className={marketingSection}>
           <div data-reveal className="text-center">
             <h2 className={marketingHeading}>{s.healthHeading}</h2>
@@ -85,15 +85,15 @@ export default async function ServicesPage() {
           </div>
 
           <div data-reveal className="mx-auto mt-10 max-w-3xl text-center">
-            <h3 className="text-lg font-bold text-[#1e5a33]">{s.careTypesHeading}</h3>
-            <p className="mt-2 text-sm text-[#4a4a4a]">
+            <h3 className="text-lg font-bold text-brand-ink">{s.careTypesHeading}</h3>
+            <p className="mt-2 text-sm text-ink">
               {s.careTypesSub}
             </p>
             <div className="mt-5 flex flex-wrap justify-center gap-2">
               {childcareCareTypes.map((type) => (
                 <span
                   key={type}
-                  className={`rounded-full bg-white px-4 py-2 text-sm font-medium text-[#1e5a33] ${marketingCardShadow}`}
+                  className={`rounded-full bg-white px-4 py-2 text-sm font-medium text-brand-ink ${marketingCardShadow}`}
                 >
                   {type}
                 </span>
@@ -115,13 +115,13 @@ export default async function ServicesPage() {
               <div
                 key={service}
                 data-reveal-child
-                className={`rounded-2xl bg-white p-5 text-sm font-medium text-[#1e5a33] ${marketingCardShadow}`}
+                className={`rounded-2xl bg-white p-5 text-sm font-medium text-brand-ink ${marketingCardShadow}`}
               >
                 {service}
               </div>
             ))}
           </div>
-          <p className="mx-auto mt-6 max-w-2xl text-center text-sm text-[#4a4a4a]">
+          <p className="mx-auto mt-6 max-w-2xl text-center text-sm text-ink">
             {s.andOthers}
           </p>
         </section>
@@ -144,8 +144,8 @@ export default async function ServicesPage() {
                 <span className={`text-5xl font-bold ${marketingDecorativeNumber}`}>
                   {String(i + 1).padStart(2, "0")}
                 </span>
-                <h3 className="mt-3 text-lg font-bold text-[#1e5a33] sm:text-xl">{step.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-[#4a4a4a]">{step.description}</p>
+                <h3 className="mt-3 text-lg font-bold text-brand-ink sm:text-xl">{step.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-ink">{step.description}</p>
               </div>
             ))}
           </div>
@@ -156,10 +156,10 @@ export default async function ServicesPage() {
             data-reveal
             className={`rounded-[28px] ${marketingSurface} p-8 text-center sm:rounded-[32px] sm:p-12`}
           >
-            <h2 className="text-2xl font-bold tracking-tight text-[#1e5a33] sm:text-3xl">
+            <h2 className="text-2xl font-bold tracking-tight text-brand-ink sm:text-3xl">
               {s.readyHeading}
             </h2>
-            <p className="mx-auto mt-3 max-w-lg text-sm leading-relaxed text-[#4a4a4a] sm:text-base">
+            <p className="mx-auto mt-3 max-w-lg text-sm leading-relaxed text-ink sm:text-base">
               {s.readyBody}
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">

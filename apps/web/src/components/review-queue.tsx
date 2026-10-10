@@ -1,4 +1,5 @@
 "use client";
+import { Tr } from "@/components/portal-locale";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { reviewDocument, type ReviewDecision } from "@/lib/admin/compliance-actions";
@@ -19,9 +20,7 @@ export type ReviewItem = {
 function DocumentPreview({ item }: { item: ReviewItem }) {
   if (!item.previewUrl) {
     return (
-      <div className="flex h-36 w-48 shrink-0 items-center justify-center rounded-xl border border-dashed border-[#dbe7e0] bg-[#f5f7f6] text-xs text-[#7a8a81]">
-        Preview unavailable
-      </div>
+      <div className="flex h-36 w-48 shrink-0 items-center justify-center rounded-xl border border-dashed border-line bg-surface text-xs text-muted"><Tr>{"Preview unavailable"}</Tr></div>
     );
   }
 
@@ -31,7 +30,7 @@ function DocumentPreview({ item }: { item: ReviewItem }) {
         href={item.previewUrl}
         target="_blank"
         rel="noreferrer"
-        className="block shrink-0 overflow-hidden rounded-xl border border-[#dbe7e0] bg-[#f5f7f6]"
+        className="block shrink-0 overflow-hidden rounded-xl border border-line bg-surface"
       >
         <img
           src={item.previewUrl}
@@ -47,7 +46,7 @@ function DocumentPreview({ item }: { item: ReviewItem }) {
       src={item.previewUrl}
       title={`${item.docTypeName} for ${item.professionalName}`}
       sandbox=""
-      className="h-48 w-full min-w-[16rem] max-w-md shrink-0 rounded-xl border border-[#dbe7e0] bg-white"
+      className="h-48 w-full min-w-[16rem] max-w-md shrink-0 rounded-xl border border-line bg-white"
     />
   );
 }
@@ -69,31 +68,36 @@ export function ReviewQueue({ items }: { items: ReviewItem[] }) {
     }
     setBusy(documentId);
     setError(null);
+    try {
     const r = await reviewDocument(documentId, decision, note);
-    setBusy(null);
     if ("error" in r) setError(r.error);
     else router.refresh();
+    } catch {
+      setError("Could not complete the operation. Please try again.");
+    } finally {
+      setBusy(null);
+    }
   }
 
   if (items.length === 0) {
-    return <p className="mt-6 text-sm text-[#4a4a4a]">No documents are awaiting review.</p>;
+    return <p className="mt-6 text-sm text-ink"><Tr>{"No documents are awaiting review."}</Tr></p>;
   }
 
   return (
     <div className="mt-6">
       {dialog}
-      {error && <p className="mb-3 text-sm text-[#da1e28]">{error}</p>}
-      <div className="divide-y divide-[#dbe7e0] border border-[#dbe7e0]">
+      {error && <p role="alert" className="mb-3 text-sm text-danger"><Tr>{error}</Tr></p>}
+      <div className="divide-y divide-line border border-line">
         {items.map((it) => (
           <div key={it.documentId} className="flex flex-wrap gap-4 p-4">
             <DocumentPreview item={it} />
             <div className="flex min-w-[12rem] flex-1 flex-col justify-between gap-3">
               <div className="text-sm">
                 <span className="font-semibold">{it.professionalName}</span>
-                <span className="text-[#4a4a4a]"> — {it.docTypeName}</span>
-                {it.referenceNumber && <span className="text-[#7a8a81]"> · ref {it.referenceNumber}</span>}
-                {it.expiryDate && <span className="text-[#7a8a81]"> · expires {it.expiryDate}</span>}
-                <span className="ml-2 rounded-full bg-[#f5f7f6] px-2.5 py-0.5 text-xs font-medium text-[#4a4a4a]">
+                <span className="text-ink"> — {it.docTypeName}</span>
+                {it.referenceNumber && <span className="text-muted"><Tr>{"· ref"}</Tr>{it.referenceNumber}</span>}
+                {it.expiryDate && <span className="text-muted"><Tr>{"· expires"}</Tr>{it.expiryDate}</span>}
+                <span className="ml-2 rounded-full bg-surface px-2.5 py-0.5 text-xs font-medium text-ink">
                   {it.status.replace(/_/g, " ")}
                 </span>
               </div>
@@ -103,40 +107,30 @@ export function ReviewQueue({ items }: { items: ReviewItem[] }) {
                     href={it.previewUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-[#2e7d32] underline"
-                  >
-                    Open full size
-                  </a>
+                    className="text-brand-strong underline"
+                  ><Tr>{"Open full size"}</Tr></a>
                 )}
                 {it.downloadUrl && (
-                  <a href={it.downloadUrl} className="text-[#4a4a4a] underline">
-                    Download
-                  </a>
+                  <a href={it.downloadUrl} className="text-ink underline"><Tr>{"Download"}</Tr></a>
                 )}
                 <button
                   type="button"
                   onClick={() => decide(it.documentId, "approved")}
                   disabled={busy === it.documentId}
-                  className="rounded-full bg-[#2e7d32] px-3 py-1.5 text-white hover:bg-[#246627] disabled:opacity-50"
-                >
-                  Approve
-                </button>
+                  className="rounded-full bg-brand-strong px-3 py-1.5 text-white hover:bg-brand-strong-hover disabled:opacity-50"
+                ><Tr>{"Approve"}</Tr></button>
                 <button
                   type="button"
                   onClick={() => decide(it.documentId, "further_info_required")}
                   disabled={busy === it.documentId}
-                  className="rounded-full border border-[#dbe7e0] px-4 py-1.5 text-sm font-medium text-[#1e5a33] transition hover:border-[#bcd8c7] hover:bg-[#f5f7f6] disabled:opacity-50"
-                >
-                  Request info
-                </button>
+                  className="rounded-full border border-line px-4 py-1.5 text-sm font-medium text-brand-ink transition hover:border-line-hover hover:bg-surface disabled:opacity-50"
+                ><Tr>{"Request info"}</Tr></button>
                 <button
                   type="button"
                   onClick={() => decide(it.documentId, "rejected")}
                   disabled={busy === it.documentId}
-                  className="bg-[#da1e28] px-3 py-1.5 text-white hover:bg-[#b81921] disabled:opacity-50"
-                >
-                  Reject
-                </button>
+                  className="bg-danger px-3 py-1.5 text-white hover:bg-[#b81921] disabled:opacity-50"
+                ><Tr>{"Reject"}</Tr></button>
               </div>
             </div>
           </div>

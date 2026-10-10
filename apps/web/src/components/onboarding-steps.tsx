@@ -10,7 +10,7 @@ export function OnboardingSteps({
 }) {
   const STEPS = onboardingCopy[locale].steps;
   return (
-    <ol className="flex flex-wrap gap-px border border-[#dbe7e0] bg-[#dbe7e0] text-sm">
+    <ol className="grid grid-cols-1 gap-px sm:grid-cols-2 lg:grid-cols-4 border border-line bg-line text-sm">
       {STEPS.map((label, i) => {
         const step = i + 1;
         const active = step === current;
@@ -18,8 +18,9 @@ export function OnboardingSteps({
         return (
           <li
             key={label}
+            aria-current={active ? "step" : undefined}
             className={`flex-1 px-4 py-3 ${
-              active ? "bg-white font-semibold text-[#2e7d32]" : done ? "bg-white text-[#14301e]" : "bg-[#f5f7f6] text-[#7a8a81]"
+              active ? "bg-white font-semibold text-brand-strong" : done ? "bg-white text-heading" : "bg-surface text-muted"
             }`}
           >
             <span className="tabular-nums">{done ? "✓" : step}.</span> {label}

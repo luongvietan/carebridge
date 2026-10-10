@@ -30,12 +30,12 @@ jobs:
       - run: npm run test
       - run: npm run build
 
-      - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium firefox webkit
         working-directory: apps/web
 
-      - name: E2E (local Supabase, chromium)
-        run: npm run e2e -- --project=chromium
+      - name: E2E (local Supabase, desktop and mobile browsers)
+        run: npm run e2e
         working-directory: apps/web
         env:
           NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321

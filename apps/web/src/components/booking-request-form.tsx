@@ -1,8 +1,9 @@
 "use client";
+import { RequiredMark } from "@/components/required-mark";
 import { Tr } from "@/components/portal-locale";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { requesterCopy, type RequesterLocale } from "@/lib/requester-copy";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { createBooking } from "@/lib/bookings/actions";
 import { Select } from "@/components/ui/select";
 import { DateTimePicker } from "@/components/ui/date-picker";
@@ -10,7 +11,7 @@ import { MAX_SHIFT_HOURS } from "@/lib/validation/bookings";
 import { APP_TIME_ZONE, londonWallClockToUtc } from "@/lib/format/datetime";
 
 const field =
-  "mt-1 w-full rounded-xl border border-[#dbe7e0] bg-white px-3.5 py-2.5 text-sm text-[#1e5a33] placeholder:text-[#9aa8a0] focus:border-[#2e7d32] focus:outline-none focus:ring-2 focus:ring-[#2e7d32]/15";
+  "mt-1 w-full rounded-xl border border-line bg-white px-3.5 py-2.5 text-sm text-brand-ink placeholder:text-muted focus:border-brand-strong focus:outline-none focus:ring-2 focus:ring-brand-strong/15";
 
 type Role = { id: string; name: string; categoryId: string; category: string };
 type CareType = { id: string; name: string; description: string | null; categoryId: string };
@@ -36,7 +37,10 @@ export function BookingRequestForm({
     const h = i + 1;
     return { value: String(h), label: `${h} ${h === 1 ? t.hour : t.hours}` };
   });
-  const router = useRouter();
+  const [review, setReview] = useState<FormData | null>(null);
+  const reviewHeading = useRef<HTMLHeadingElement>(null);
+  useEffect(() => { if (review) reviewHeading.current?.focus(); }, [review]);
+  const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [start, setStart] = useState("");
@@ -81,9 +85,11 @@ export function BookingRequestForm({
       return;
     }
     const endIso = new Date(startIso.getTime() + Number(duration) * 3_600_000);
-    setPending(true);
     const fd = new FormData(e.currentTarget);
-    const result = await createBooking({
+    if (!review) { setReview(fd); return; }
+    setPending(true);
+    try {
+      const result = await createBooking({
       requesterType,
       professionalRoleId: fd.get("professionalRoleId") as string,
       careTypeId: (fd.get("careTypeId") as string) || undefined,
@@ -92,14 +98,23 @@ export function BookingRequestForm({
       locationAddress: fd.get("locationAddress") as string,
       locationPostcode: (fd.get("locationPostcode") as string) || undefined,
       notes: (fd.get("notes") as string) || undefined,
-    });
-    setPending(false);
-    if ("error" in result) setError(result.error);
-    else router.push(listHref);
+      });
+      if ("error" in result) setError(result.error);
+      else setSaved(true);
+    } catch {
+      setError(locale === "pt-PT" ? "Não foi possível concluir a operação. Tente novamente." : "Could not complete the operation. Please try again.");
+    } finally {
+      setPending(false);
+    }
   }
 
+  if (saved) return <div role="status" className="space-y-4 rounded-xl border border-line p-5">
+    <h2 className="font-semibold">{t.saved}</h2><p>{t.nextStep}</p>
+    <Link className="font-semibold text-brand-strong underline" href={listHref}>{t.viewBookings}</Link>
+  </div>;
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} aria-busy={pending} aria-describedby={error ? "booking-error" : undefined} onChange={() => { if (review) setReview(null); }} className="space-y-4">
+      <p className="text-sm text-ink">{t.timezone}</p>
       <div className="block text-sm font-medium">
         {t.role}
         <Select
@@ -108,6 +123,7 @@ export function BookingRequestForm({
           required
           defaultValue=""
           onValueChange={(v) => {
+            setReview(null);
             setRoleId(v);
             setCareTypeId("");
           }}
@@ -124,26 +140,26 @@ export function BookingRequestForm({
             aria-label={t.careType}
             required
             value={careTypeId}
-            onValueChange={setCareTypeId}
+            onValueChange={(v) => { setReview(null); setCareTypeId(v); }}
             placeholder={t.selectCareType}
             className="mt-1"
             options={availableCareTypes.map((c) => ({ value: c.id, label: c.name }))}
           />
           {careTypeId && (
-            <span className="mt-1 block text-xs font-normal text-[#7a8a81]">
+            <span className="mt-1 block text-xs font-normal text-muted">
               {availableCareTypes.find((c) => c.id === careTypeId)?.description}
             </span>
           )}
         </div>
       )}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="block text-sm font-medium">
           {t.start}
           <DateTimePicker
             aria-label={t.start}
             className="mt-1"
             value={start}
-            onValueChange={setStart}
+            onValueChange={(v) => { setReview(null); setStart(v); }}
             minDate={today ?? undefined}
           />
         </div>
@@ -154,13 +170,13 @@ export function BookingRequestForm({
             placeholder={t.selectDuration}
             className="mt-1"
             value={duration}
-            onValueChange={setDuration}
+            onValueChange={(v) => { setReview(null); setDuration(v); }}
             options={durations}
           />
         </div>
       </div>
       {endPreview && (
-        <p className="text-sm text-[#4a4a4a]">
+        <p className="text-sm text-ink">
           {t.endsAt}{" "}
           {endPreview.toLocaleString(t.dateLocale, {
             day: "2-digit",
@@ -174,7 +190,7 @@ export function BookingRequestForm({
       )}
       <label className="block text-sm font-medium">
         {t.location}
-        <input name="locationAddress" required className={field} />
+        <RequiredMark /><input name="locationAddress" required className={field} />
       </label>
       <label className="block text-sm font-medium">
         {t.postcode}
@@ -185,13 +201,30 @@ export function BookingRequestForm({
         <textarea name="notes" rows={3} className={field} />
       </label>
 
-      {error && <p className="text-sm text-[#da1e28]"><Tr>{error}</Tr></p>}
+      {error && <p id="booking-error" role="alert" className="text-sm text-danger"><Tr>{error}</Tr></p>}
+      {review && <section aria-label={t.review} className="space-y-3 rounded-xl border border-line bg-surface p-4">
+        <h2 ref={reviewHeading} tabIndex={-1} className="font-semibold">{t.review}</h2>
+        <p className="text-sm">{t.timezone}</p>
+        <dl className="grid gap-2 text-sm">
+          {[
+            [t.role, selectedRole?.name],
+            [t.careType, availableCareTypes.find((c) => c.id === careTypeId)?.name],
+            [t.start, startDate?.toLocaleString(t.dateLocale, { timeZone: APP_TIME_ZONE })],
+            [t.endsAt, endPreview?.toLocaleString(t.dateLocale, { timeZone: APP_TIME_ZONE })],
+            [t.location, review.get("locationAddress")],
+            [t.postcode, review.get("locationPostcode")],
+            [t.notes, review.get("notes")],
+          ].filter(([, value]) => value).map(([label, value]) => <div key={String(label)} className="min-w-0"><dt className="font-medium">{String(label)}</dt><dd className="break-words whitespace-pre-wrap">{String(value)}</dd></div>)}
+        </dl>
+        <p className="text-sm">{t.reviewHelp}</p>
+        <button type="button" onClick={() => setReview(null)} className="text-sm font-semibold underline">{t.edit}</button>
+      </section>}
       <button
         type="submit"
         disabled={pending}
-        className="rounded-full bg-[#2e7d32] px-4 py-3 text-sm text-white hover:bg-[#246627] disabled:opacity-50"
+        className="rounded-full bg-brand-strong px-4 py-3 text-sm text-white hover:bg-brand-strong-hover disabled:opacity-50"
       >
-        {pending ? t.creating : t.create}
+        {pending ? t.creating : review ? t.create : t.review}
       </button>
     </form>
   );
