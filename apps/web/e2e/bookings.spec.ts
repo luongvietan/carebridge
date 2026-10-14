@@ -3,7 +3,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { buildBookingInsert } from "../src/lib/bookings/create";
 import type { RateCard } from "../src/lib/rates/snapshot";
 import { chooseFrom } from "./select-helper";
-import { EMERGENCY_QUESTIONS, QUESTIONS, RESPONDENT_OPTIONS } from "../src/lib/risk-assessment/questionnaire";
+import { EMERGENCY_QUESTIONS, QUESTIONS, RESPONDENT_OPTIONS, RESPONDENT_QUESTION } from "../src/lib/risk-assessment/questionnaire";
 
 const PASSWORD = "password123";
 
@@ -177,18 +177,31 @@ async function pickDate(page: Page, triggerName: string, d: Date) {
   await page.keyboard.press("Escape"); // close the popover before the next field
 }
 
-// Private clients answer the risk and needs assessment before the booking form.
-// Unlisted questions take their first (calmest) option.
-async function completeRiskAssessment(page: Page, answers: Record<string, string> = {}) {
-  const pick = (legend: string, label: string) =>
-    page.getByRole("group", { name: legend, exact: true }).getByText(label, { exact: true }).click();
-  await pick("Quem está a preencher esta avaliação?", RESPONDENT_OPTIONS[1].label.pt);
-  for (const q of EMERGENCY_QUESTIONS) await pick(q.label.pt, "Não");
-  for (const q of QUESTIONS) {
-    const option = q.options.find((o) => o.id === (answers[q.id] ?? q.options[0].id))!;
-    await pick(q.label.pt, option.label.pt);
-  }
+// Private clients answer the risk and needs assessment before the booking form:
+// who is answering and consent, the emergency screen, then only the questions
+// that apply. Unlisted questions take their first (calmest) option.
+const pickIn = (page: Page, legend: string, label: string) =>
+  page.getByRole("group", { name: legend, exact: true }).getByText(label, { exact: true }).click();
+
+async function startRiskAssessment(page: Page) {
+  await pickIn(page, RESPONDENT_QUESTION.pt, RESPONDENT_OPTIONS[1].label.pt);
   await page.getByRole("checkbox").check();
+  await page.getByRole("button", { name: "Continuar", exact: true }).click();
+}
+
+async function completeRiskAssessment(page: Page, answers: Record<string, string> = {}) {
+  await startRiskAssessment(page);
+  for (const q of EMERGENCY_QUESTIONS) await pickIn(page, q.label.pt, "Não");
+  await page.getByRole("button", { name: "Continuar", exact: true }).click();
+  // Two passes: answering can reveal follow-up questions.
+  for (let pass = 0; pass < 2; pass++) {
+    for (const q of QUESTIONS) {
+      const group = page.getByRole("group", { name: q.label.pt, exact: true });
+      if ((await group.count()) === 0) continue;
+      const option = q.options.find((o) => o.id === (answers[q.id] ?? q.options[0].id))!;
+      await group.getByText(option.label.pt, { exact: true }).click();
+    }
+  }
   await page.getByRole("button", { name: "Ver recomendação" }).click();
   await expect(page.getByRole("heading", { name: "A nossa recomendação" })).toBeVisible();
   await page.getByRole("button", { name: "Continuar para os dados da marcação" }).click();
@@ -218,9 +231,9 @@ test("Portugal happy path: client creates EUR booking, professional accepts", as
 
   await login(page, client.email, /\/client/);
   await page.goto("/client/bookings/new");
-  // Clinical care points to an adult nurse, the role booked below, at low risk —
+  // A calm, green request; booking a nurse where support would do is allowed,
   // so the request is published straight away.
-  await completeRiskAssessment(page, { support_type: "clinical" });
+  await completeRiskAssessment(page);
   // 09:00 two days out, so the date picker only needs a day click (its committed
   // default time is 09:00) — no fragile hour/minute selection. Shift duration is
   // now a Select; pick a whole-hour preset and let the form compute the end.
@@ -293,13 +306,22 @@ test("Portugal: emergency answers stop the form; a high-risk request waits for a
     await login(page, client.email, /\/client/);
     await page.goto("/client/bookings/new");
 
-    // Any emergency "yes" stops the form and points to 112.
-    await page.getByRole("group", { name: EMERGENCY_QUESTIONS[0].label.pt, exact: true }).getByText("Sim", { exact: true }).click();
-    await expect(page.getByRole("heading", { name: "Ligue já para os serviços de emergência" })).toBeVisible();
+    // Any emergency "yes" stops the booking and shows the 112 guidance.
+    await startRiskAssessment(page);
+    await pickIn(page, EMERGENCY_QUESTIONS[0].label.pt, "Sim");
+    await expect(page.getByRole("heading", { name: "Ligue já 112" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Ligar 112" })).toHaveAttribute("href", "tel:112");
-    await page.getByRole("button", { name: "Respondi por engano — voltar" }).click();
+    await page.getByRole("link", { name: "Compreendo" }).click();
+    await expect(page).toHaveURL(/\/client\/bookings\/?$/);
+    const { count: afterEmergency } = await sb
+      .from("bookings")
+      .select("id", { count: "exact", head: true })
+      .eq("requester_user_id", client.userId);
+    expect(afterEmergency).toBe(0);
 
-    await completeRiskAssessment(page, { support_type: "clinical", behaviour: "often" });
+    // Medicine administration is a nursing outcome: held, nurse only.
+    await page.goto("/client/bookings/new");
+    await completeRiskAssessment(page, { C1: "administer" });
     await expect(page.getByText("A nossa equipa vai analisar este pedido antes de o publicar aos profissionais.")).toBeVisible();
     const start = new Date(Date.now() + 72 * 3_600_000);
     start.setHours(9, 0, 0, 0);
@@ -310,11 +332,11 @@ test("Portugal: emergency answers stop the form; a high-risk request waits for a
     expect(held?.status).toBe("pending_review");
     const { data: assessment } = await sb
       .from("booking_risk_assessments")
-      .select("risk_level, recommended_role_family, review_reasons, requires_review")
+      .select("risk_level, outcome, recommended_role_family, review_reasons, requires_review")
       .eq("booking_id", held!.id)
       .single();
-    expect(assessment).toMatchObject({ risk_level: "high", recommended_role_family: "nurse_adult", requires_review: true });
-    expect(assessment?.review_reasons).toContain("behaviour_risk");
+    expect(assessment).toMatchObject({ risk_level: "red", outcome: "N", recommended_role_family: "nurse_adult", requires_review: true });
+    expect(assessment?.review_reasons).toContain("medicine_administration");
 
     // Professionals cannot see a held request.
     const proCtx = await browser.newContext();
@@ -330,13 +352,28 @@ test("Portugal: emergency answers stop the form; a high-risk request waits for a
     await adminPage.goto("/admin/bookings/review");
     const card = adminPage.locator("article", { hasText: location });
     await expect(card).toBeVisible();
+    await card.getByLabel("Reason and risk-control measures (internal)").fill("Nurse confirmed by phone; medication plan seen.");
+    await card.getByLabel("Instructions for the professional (added to the safety brief)").fill("Bring gloves.");
     await card.getByRole("button", { name: "Approve and publish" }).click();
     await expect(card).toHaveCount(0, { timeout: 15_000 });
     const { data: approved } = await sb.from("bookings").select("status").eq("id", held!.id).single();
     expect(approved?.status).toBe("open");
 
     await proPage.reload();
-    await expect(proPage.locator("tr", { hasText: location })).toBeVisible();
+    const openRow = proPage.locator("tr", { hasText: location });
+    await expect(openRow).toBeVisible();
+    // The matched professional sees only the safety brief, and each view is logged.
+    await openRow.getByRole("button", { name: "Informação de segurança" }).click();
+    await expect(openRow.getByText("Administração de medicamentos (enfermeiro)")).toBeVisible();
+    await expect(openRow.getByText("Bring gloves.")).toBeVisible();
+    await expect(async () => {
+      const { count } = await sb
+        .from("audit_log")
+        .select("id", { count: "exact", head: true })
+        .eq("action", "booking.safety_brief_viewed")
+        .eq("entity_id", held!.id);
+      expect(count).toBeGreaterThanOrEqual(1);
+    }).toPass({ timeout: 15_000 });
     await proCtx.close();
     await adminCtx.close();
   } finally {

@@ -10,6 +10,7 @@ import { useConfirmDialog } from "@/components/ui/app-dialog";
 
 import { formatMoney } from "@/lib/format/money";
 import { formatLondon } from "@/lib/format/datetime";
+import { SafetyBriefButton } from "@/components/safety-brief-button";
 
 type BookingRow = {
   id: string;
@@ -22,6 +23,8 @@ type BookingRow = {
   total_payout: number | null;
   snap_currency?: string | null;
   care_types?: { name: string } | null;
+  /** Present when the private client's risk assessment left a safety brief. */
+  booking_safety_briefs?: { booking_id: string } | null;
 };
 
 function BookingActions({
@@ -180,7 +183,10 @@ function BookingTable({ rows, showActions, showComplete, showUndo, eligible, onR
             <tr key={b.id}>
               <td className="p-3">{formatLondon(b.scheduled_start, locale)}</td>
               <td className="p-3">{b.care_types?.name ?? "—"}</td>
-              <td className="p-3">{b.location_address}</td>
+              <td className="p-3">
+                {b.location_address}
+                {b.booking_safety_briefs && <SafetyBriefButton bookingId={b.id} />}
+              </td>
               <td className="p-3">
                 <span className="rounded-full bg-surface px-2.5 py-0.5 text-xs font-medium text-ink">
                   {t(b.status.replace(/_/g, " "))}

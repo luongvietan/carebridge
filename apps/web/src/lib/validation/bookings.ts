@@ -26,7 +26,7 @@ export const createBookingSchema = z
     riskAssessment: z
       .object({
         version: z.string(),
-        respondent: z.enum(["self", "family", "social_worker", "other"]),
+        respondent: z.enum(["self", "family", "legal_representative", "professional", "other"]),
         emergency: z.record(z.string(), z.boolean()),
         answers: z.record(z.string(), z.string()),
         consent: z.boolean(),

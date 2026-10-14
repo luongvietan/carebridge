@@ -31,7 +31,7 @@ export default async function ProfessionalBookingsPage() {
   const { data: rows } = await supabase
     .from("bookings")
     .select(
-      "id, status, scheduled_start, scheduled_end, location_address, professional_role_id, assigned_professional_id, total_payout, snap_currency, requires_timesheet, care_types(name)",
+      "id, status, scheduled_start, scheduled_end, location_address, professional_role_id, assigned_professional_id, total_payout, snap_currency, requires_timesheet, care_types(name), booking_safety_briefs(booking_id)",
     )
     .order("scheduled_start", { ascending: true });
 

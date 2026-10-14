@@ -12,7 +12,7 @@ export type NotificationType =
   | "professional_rejected" | "account_removed" | "professional_suspended"
   | "timesheet_submitted" | "timesheet_confirmed" | "timesheet_disputed"
   | "message_received"
-  | "booking_under_review" | "booking_review_approved" | "booking_review_declined" | "booking_review_required";
+  | "booking_under_review" | "booking_review_approved" | "booking_review_declined" | "booking_review_required" | "booking_review_more_info";
 
 export type ChannelSender = (msg: { to: string; subject: string; body: string; html: string; text: string }) => Promise<void | EmailDelivery>;
 

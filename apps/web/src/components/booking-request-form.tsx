@@ -11,7 +11,7 @@ import { MAX_SHIFT_HOURS } from "@/lib/validation/bookings";
 import { APP_TIME_ZONE, londonWallClockToUtc } from "@/lib/format/datetime";
 import { RiskAssessmentForm } from "@/components/risk-assessment-form";
 import { ROLE_FAMILY_BY_CODE, ROLE_FAMILY_LABEL } from "@/lib/risk-assessment/questionnaire";
-import { roleMatchesRecommendation, type RiskResult, type RiskSubmission } from "@/lib/risk-assessment/score";
+import { roleAllowed, roleMatchesRecommendation, type RiskResult, type RiskSubmission } from "@/lib/risk-assessment/score";
 
 const RISK_COPY = {
   "en-GB": {
@@ -160,7 +160,10 @@ export function BookingRequestForm({
           setReview(null);
           // Offer the recommended kind of professional first.
           const recommended = roles.find((r) => r.code && ROLE_FAMILY_BY_CODE[r.code] === result.recommendedFamily);
-          if (recommended && !roles.some((r) => r.id === roleId && r.code && roleMatchesRecommendation(result.recommendedFamily, r.code))) {
+          const keep = roles.some(
+            (r) => r.id === roleId && r.code && roleMatchesRecommendation(result.recommendedFamily, r.code) && roleAllowed(result, r.code),
+          );
+          if (recommended && !keep) {
             setRoleId(recommended.id);
             setCareTypeId("");
           }
@@ -169,8 +172,11 @@ export function BookingRequestForm({
     );
   }
 
-  const heldForReview =
-    !!risk && (risk.result.level === "high" || risk.result.level === "unclear");
+  // Only green requests publish straight away (Ana's pilot rule).
+  const heldForReview = !!risk && risk.result.flags.length > 0;
+  // A nursing outcome may only be booked with a nurse — the client cannot override it.
+  const bookableRoles =
+    risk && risk.result.outcome === "N" ? roles.filter((r) => r.code && roleAllowed(risk.result, r.code)) : roles;
   const roleDiffers =
     !!risk && !!selectedRole && !roleMatchesRecommendation(risk.result.recommendedFamily, selectedRole.code ?? "");
 
@@ -201,7 +207,7 @@ export function BookingRequestForm({
           }}
           placeholder={t.selectRole}
           className="mt-1"
-          options={roles.map((r) => ({ value: r.id, label: r.name, group: r.category }))}
+          options={bookableRoles.map((r) => ({ value: r.id, label: r.name, group: r.category }))}
         />
         {roleDiffers && !heldForReview && <span role="status" className="mt-1 block text-xs font-normal text-ink">{rc.differs}</span>}
       </div>

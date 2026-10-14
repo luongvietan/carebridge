@@ -19,7 +19,16 @@ import { activeRoleIds } from "@/lib/roles/assignments";
 import { sendNotification } from "@/lib/notifications/send";
 import { createBookingSchema } from "@/lib/validation/bookings";
 import { REQUESTER_ACCOUNT } from "./constants";
-import { reviewDecision, roleFamilyOf, scoreRisk, validateSubmission, type RiskSubmission } from "@/lib/risk-assessment/score";
+import {
+  assessRisk,
+  reviewDecision,
+  roleAllowed,
+  roleFamilyOf,
+  validateSubmission,
+  visibleAnswers,
+  type RiskSubmission,
+} from "@/lib/risk-assessment/score";
+import { professionalBrief } from "@/lib/risk-assessment/brief";
 import { notifyAdminsOfReview } from "@/lib/risk-assessment/notify";
 import { notifyMatchingProfessionals } from "./notify-matches";
 import {
@@ -128,19 +137,29 @@ export async function createBooking(form: unknown): Promise<BookingActionResult>
 
   // Private clients answer the risk and needs assessment first; it is scored
   // again here and decides whether the request goes live or waits for review.
-  let risk: { submission: RiskSubmission; result: ReturnType<typeof scoreRisk>; decision: ReturnType<typeof reviewDecision> } | null = null;
+  let risk: {
+    submission: RiskSubmission;
+    answers: Record<string, string>;
+    result: ReturnType<typeof assessRisk>;
+    decision: ReturnType<typeof reviewDecision>;
+  } | null = null;
   if (formData.requesterType === "client") {
     const submission = formData.riskAssessment;
     if (!submission) return { error: "Please complete the risk and needs assessment first." };
     const invalid = validateSubmission(submission);
     if (invalid === "emergency") {
-      return { error: "This sounds like an emergency. Call the emergency services now (112 in Portugal, 999 in the UK)." };
+      return { error: "This service cannot be used for emergencies. Call 112 now if the person is in immediate danger or has a serious or life-threatening problem." };
     }
     if (invalid === "outdated") return { error: "The assessment has been updated. Please reload the page and complete it again." };
     if (invalid === "consent") return { error: "Please confirm consent to the assessment." };
     if (invalid) return { error: "Please answer every question in the risk and needs assessment." };
-    const result = scoreRisk(submission.answers);
-    risk = { submission, result, decision: reviewDecision(result, role.code) };
+    const answers = visibleAnswers(submission.respondent, submission.answers);
+    const result = assessRisk(submission.respondent, answers);
+    // A nursing outcome may only be booked with a nurse; the client cannot override it.
+    if (!roleAllowed(result, role.code)) {
+      return { error: "Based on the assessment, this request can only be booked with a nurse." };
+    }
+    risk = { submission, answers, result, decision: reviewDecision(result, role.code) };
   }
 
   const [{ count: careTypesInCategory }, { data: chosenCareType }] = await Promise.all([
@@ -209,17 +228,21 @@ export async function createBooking(form: unknown): Promise<BookingActionResult>
       booking_id: result.id,
       questionnaire_version: risk.submission.version,
       respondent: risk.submission.respondent,
-      answers: risk.submission.answers,
+      answers: risk.answers,
       score: risk.result.score,
-      risk_level: risk.result.level,
+      risk_level: risk.result.band,
+      outcome: risk.result.outcome,
       recommended_role_family: risk.result.recommendedFamily,
       chosen_role_family: roleFamilyOf(role.code),
       requires_review: risk.decision.requiresReview,
-      review_reasons: risk.decision.reasons,
+      review_reasons: risk.decision.flags,
       consent_at: new Date().toISOString(),
       created_by: user.id,
     });
-    if (riskError) {
+    const { error: briefError } = riskError
+      ? { error: riskError }
+      : await admin.from("booking_safety_briefs").insert({ booking_id: result.id, items: professionalBrief(risk.answers) });
+    if (riskError || briefError) {
       // Never leave a request live without its assessment.
       await admin.from("bookings").delete().eq("id", result.id);
       return { error: "Could not save the risk and needs assessment. Please try again." };
@@ -227,7 +250,7 @@ export async function createBooking(form: unknown): Promise<BookingActionResult>
     if (risk.decision.requiresReview) {
       await Promise.all([
         sendNotification("booking_under_review", user.id, { booking_id: result.id }),
-        notifyAdminsOfReview(result.id, risk.result.level),
+        notifyAdminsOfReview(result.id),
       ]);
       return { ok: true, id: result.id, underReview: true };
     }

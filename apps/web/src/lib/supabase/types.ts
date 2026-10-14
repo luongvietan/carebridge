@@ -313,6 +313,7 @@ export type Database = {
           answers: Json
           score: number
           risk_level: string
+          outcome: string | null
           recommended_role_family: string
           chosen_role_family: string | null
           requires_review: boolean
@@ -324,6 +325,11 @@ export type Database = {
           review_note: string | null
           reviewed_by: string | null
           reviewed_at: string | null
+          permitted_role_id: string | null
+          requires_two_workers: boolean
+          required_competency: string | null
+          client_message: string | null
+          reassess_on: string | null
         }
         Insert: {
           id?: string
@@ -333,6 +339,7 @@ export type Database = {
           answers: Json
           score: number
           risk_level: string
+          outcome?: string | null
           recommended_role_family: string
           chosen_role_family?: string | null
           requires_review: boolean
@@ -344,6 +351,11 @@ export type Database = {
           review_note?: string | null
           reviewed_by?: string | null
           reviewed_at?: string | null
+          permitted_role_id?: string | null
+          requires_two_workers?: boolean
+          required_competency?: string | null
+          client_message?: string | null
+          reassess_on?: string | null
         }
         Update: {
           id?: string
@@ -353,6 +365,7 @@ export type Database = {
           answers?: Json
           score?: number
           risk_level?: string
+          outcome?: string | null
           recommended_role_family?: string
           chosen_role_family?: string | null
           requires_review?: boolean
@@ -364,10 +377,54 @@ export type Database = {
           review_note?: string | null
           reviewed_by?: string | null
           reviewed_at?: string | null
+          permitted_role_id?: string | null
+          requires_two_workers?: boolean
+          required_competency?: string | null
+          client_message?: string | null
+          reassess_on?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "booking_risk_assessments_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: true
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_risk_assessments_permitted_role_id_fkey"
+            columns: ["permitted_role_id"]
+            isOneToOne: false
+            referencedRelation: "professional_roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      booking_safety_briefs: {
+        Row: {
+          booking_id: string
+          items: string[]
+          instructions: string | null
+          requires_two_workers: boolean
+          updated_at: string
+        }
+        Insert: {
+          booking_id: string
+          items?: string[]
+          instructions?: string | null
+          requires_two_workers?: boolean
+          updated_at?: string
+        }
+        Update: {
+          booking_id?: string
+          items?: string[]
+          instructions?: string | null
+          requires_two_workers?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_safety_briefs_booking_id_fkey"
             columns: ["booking_id"]
             isOneToOne: true
             referencedRelation: "bookings"
