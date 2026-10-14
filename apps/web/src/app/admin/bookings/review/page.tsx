@@ -45,7 +45,7 @@ export default async function AdminBookingReviewPage() {
     .eq("status", "pending_review")
     .order("scheduled_start", { ascending: true });
 
-  const countries = [...new Set((bookings ?? []).map((b) => b.professional_roles?.country_code).filter(Boolean))] as string[];
+  const countries = [...new Set((bookings ?? []).flatMap((b) => (b.professional_roles?.country_code ? [b.professional_roles.country_code] : [])))];
   const { data: roles } = countries.length
     ? await admin
         .from("professional_roles")
@@ -75,9 +75,11 @@ export default async function AdminBookingReviewPage() {
           const answers = (ra?.answers ?? {}) as Record<string, string>;
           const band = ra?.risk_level ?? "red";
           const shown = ra ? visibleQuestions(withRespondent(ra.respondent, answers)) : [];
-          const countryRoles = (roles ?? [])
-            .filter((r) => r.country_code === b.professional_roles?.country_code)
-            .map((r) => ({ id: r.id, name: r.name, category: r.role_categories?.name ?? "" }));
+          const countryRoles = (roles ?? []).flatMap((r) =>
+            r.country_code === b.professional_roles?.country_code
+              ? [{ id: r.id, name: r.name, category: r.role_categories?.name ?? "" }]
+              : [],
+          );
           return (
             <article key={b.id} className="space-y-4 rounded-2xl border border-line bg-white p-5">
               <div className="flex flex-wrap items-start justify-between gap-3">

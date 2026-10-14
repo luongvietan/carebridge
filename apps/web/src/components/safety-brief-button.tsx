@@ -13,7 +13,8 @@ type Brief = Awaited<ReturnType<typeof readSafetyBrief>>;
  */
 export function SafetyBriefButton({ bookingId }: { bookingId: string }) {
   const t = usePortalT();
-  const lang = usePortalLocale() === "pt-PT" ? "pt" : "en";
+  const locale = usePortalLocale();
+  const lang = locale === "pt-PT" ? "pt" : "en";
   const [brief, setBrief] = useState<Brief | undefined>(undefined);
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
