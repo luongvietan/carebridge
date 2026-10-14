@@ -26,3 +26,6 @@ export const UK_CONTACT_PHONE = process.env.NEXT_PUBLIC_UK_PHONE?.trim() ?? "";
  */
 export const PT_COMPANY_ADDRESS =
   process.env.NEXT_PUBLIC_PT_COMPANY_ADDRESS?.trim() || "Portugal";
+
+/** Whether the real address is set, so legal texts can name it instead of a placeholder. */
+export const PT_COMPANY_ADDRESS_CONFIGURED = Boolean(process.env.NEXT_PUBLIC_PT_COMPANY_ADDRESS?.trim());

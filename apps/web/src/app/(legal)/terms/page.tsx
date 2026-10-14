@@ -3,13 +3,20 @@ import Link from "next/link";
 import { ArrowRight01Icon, Icon } from "@/components/ui/icon";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteNav } from "@/components/site-nav";
-import { LegalDraftNotice } from "@/components/legal-draft-notice";
-import { termsIndexPt } from "@/data/legal-copy-pt";
+import { LegalLanguageSwitch, legalHref, type LegalSearchParams } from "@/components/pt-legal-page";
+import {
+  PT_LEGAL_INDEX,
+  PT_LEGAL_PACK,
+  PT_LEGAL_ROUTES,
+  PT_LEGAL_SUMMARIES,
+  legalLangFromParam,
+  type LegalDocKey,
+} from "@/data/legal-copy-pt";
 import { getSelectedCountry } from "@/lib/marketing/market-server";
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ searchParams }: { searchParams: LegalSearchParams }): Promise<Metadata> {
   const pt = (await getSelectedCountry()) === "PT";
-  return { title: `${pt ? termsIndexPt.title : "Terms & Conditions"}` };
+  return { title: pt ? PT_LEGAL_INDEX[legalLangFromParam((await searchParams).lang)].title : "Terms & Conditions" };
 }
 
 const termsLinks = [
@@ -27,20 +34,31 @@ const termsLinks = [
   },
 ] as const;
 
-export default async function TermsPage() {
+export default async function TermsPage({ searchParams }: { searchParams: LegalSearchParams }) {
   const pt = (await getSelectedCountry()) === "PT";
-  const links = pt ? termsIndexPt.links : termsLinks;
+  const lang = legalLangFromParam((await searchParams).lang);
+  const links = pt
+    ? (Object.keys(PT_LEGAL_ROUTES) as LegalDocKey[]).map((key) => ({
+        href: legalHref(PT_LEGAL_ROUTES[key], lang),
+        title: PT_LEGAL_PACK[lang][key].title,
+        description: PT_LEGAL_SUMMARIES[lang][key],
+      }))
+    : termsLinks;
   return (
     <>
       <SiteNav />
-      <main id="main-content" tabIndex={-1} className="mx-auto max-w-3xl px-5 py-16">
-        {pt && <LegalDraftNotice />}
+      <main id="main-content" tabIndex={-1} lang={pt && lang === "en" ? "en" : undefined} className="mx-auto max-w-3xl px-5 py-16">
+        {pt && (
+          <div className="mb-6">
+            <LegalLanguageSwitch path="/terms" lang={lang} />
+          </div>
+        )}
         <h1 className="text-3xl font-semibold tracking-tight text-heading">
-          {pt ? termsIndexPt.title : "Terms & Conditions"}
+          {pt ? PT_LEGAL_INDEX[lang].title : "Terms & Conditions"}
         </h1>
         <p className="mt-5 leading-relaxed text-ink">
           {pt
-            ? termsIndexPt.intro
+            ? PT_LEGAL_INDEX[lang].intro
             : "CareBridge Connect provides separate terms for clients and healthcare professionals. Select the document that applies to you."}
         </p>
 
@@ -54,7 +72,7 @@ export default async function TermsPage() {
               <h2 className="text-lg font-semibold text-brand-ink">{link.title}</h2>
               <p className="mt-2 text-sm leading-relaxed text-ink">{link.description}</p>
               <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-strong">
-                {pt ? termsIndexPt.readDocument : "Read document"}
+                {pt ? PT_LEGAL_INDEX[lang].readDocument : "Read document"}
                 <Icon icon={ArrowRight01Icon} size={16} strokeWidth={2} aria-hidden />
               </span>
             </Link>

@@ -5,6 +5,9 @@ export type LegalSection = {
   intro?: string;
   paragraphs?: readonly string[];
   bullets?: readonly string[];
+  table?: { headers: readonly string[]; rows: readonly (readonly string[])[] };
+  /** Paragraphs after the bullets or table. */
+  after?: readonly string[];
 };
 
 export const aboutContent = {

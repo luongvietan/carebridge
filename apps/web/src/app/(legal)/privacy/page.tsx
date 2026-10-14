@@ -1,38 +1,27 @@
 import type { Metadata } from "next";
-import { LegalDocument } from "@/components/legal-document";
-import { LegalDraftNotice } from "@/components/legal-draft-notice";
+import { PtLegalPage, ptLegalMetadata, type LegalSearchParams } from "@/components/pt-legal-page";
 import { SiteNav } from "@/components/site-nav";
 import { SiteFooter } from "@/components/site-footer";
-import { privacyPolicyPt } from "@/data/legal-copy-pt";
 import { getSelectedCountry } from "@/lib/marketing/market-server";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const pt = (await getSelectedCountry()) === "PT";
-  return { title: `${pt ? privacyPolicyPt.title : "Privacy Policy"}` };
+export async function generateMetadata({ searchParams }: { searchParams: LegalSearchParams }): Promise<Metadata> {
+  if ((await getSelectedCountry()) === "PT") return ptLegalMetadata("privacy", searchParams);
+  return { title: "Privacy Policy" };
 }
 
-export default async function PrivacyPage() {
-  const pt = (await getSelectedCountry()) === "PT";
+export default async function PrivacyPage({ searchParams }: { searchParams: LegalSearchParams }) {
+  if ((await getSelectedCountry()) === "PT") return <PtLegalPage docKey="privacy" searchParams={searchParams} />;
   return (
     <>
       <SiteNav />
       <main id="main-content" tabIndex={-1} className="mx-auto max-w-3xl px-5 py-16">
-        {pt ? (
-          <>
-            <LegalDraftNotice />
-            <LegalDocument title={privacyPolicyPt.title} sections={privacyPolicyPt.sections} />
-          </>
-        ) : (
-          <>
-            <h1 className="text-3xl font-semibold tracking-tight text-heading">Privacy Policy</h1>
-            <p className="mt-5 leading-relaxed text-ink">
-              CareBridge Connect Ltd handles personal data in line with UK GDPR. We collect only the
-              information needed to verify professionals, manage bookings and process payments, store it
-              securely, and never share it without a lawful basis. This placeholder will be replaced with
-              the final policy before launch.
-            </p>
-          </>
-        )}
+        <h1 className="text-3xl font-semibold tracking-tight text-heading">Privacy Policy</h1>
+        <p className="mt-5 leading-relaxed text-ink">
+          CareBridge Connect Ltd handles personal data in line with UK GDPR. We collect only the
+          information needed to verify professionals, manage bookings and process payments, store it
+          securely, and never share it without a lawful basis. This placeholder will be replaced with
+          the final policy before launch.
+        </p>
       </main>
       <SiteFooter />
     </>

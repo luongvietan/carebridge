@@ -49,12 +49,18 @@ export function SiteFooterView({
   regulatoryDisclaimer,
   emergencyDisclaimer,
   consumerInfo = null,
+  legalEntity = "CareBridge Connect Ltd",
+  extraLegalLinks = [],
 }: {
   labels: FooterLabels;
   regulatoryDisclaimer: string;
   emergencyDisclaimer: string;
   /** Portugal's legally required complaints-book link and RAL notice; null elsewhere. */
   consumerInfo?: ConsumerInfo | null;
+  /** The operating company named in the copyright line. */
+  legalEntity?: string;
+  /** Further legal documents the market publishes (Portugal's cookies, cancellation, complaints, notice). */
+  extraLegalLinks?: readonly { href: string; label: string }[];
 }) {
   const contactItems = [
     { label: labels.address, icon: Location01Icon, href: null },
@@ -125,6 +131,14 @@ export function SiteFooterView({
             <Link href="/privacy" className="transition hover:text-white">
               {labels.privacy}
             </Link>
+            {extraLegalLinks.map((link) => (
+              <span key={link.href} className="contents">
+                <span aria-hidden>|</span>
+                <Link href={link.href} className="transition hover:text-white">
+                  {link.label}
+                </Link>
+              </span>
+            ))}
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
@@ -179,7 +193,7 @@ export function SiteFooterView({
           </div>
         )}
         <p className="mt-3 text-xs text-white/40" suppressHydrationWarning>
-          © {new Date().getFullYear()} CareBridge Connect Ltd. {labels.rights}
+          © {new Date().getFullYear()} {legalEntity}. {labels.rights}
         </p>
       </div>
     </footer>
