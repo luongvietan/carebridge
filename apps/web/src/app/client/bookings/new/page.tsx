@@ -26,7 +26,7 @@ export default async function ClientNewBookingPage() {
         </BackLink>
       </p>
       <div className="mt-8">
-        <BookingRequestForm roles={roles} careTypes={careTypes} requesterType="client" locale={country === "PT" ? "pt-PT" : "en-GB"} />
+        <BookingRequestForm roles={roles} careTypes={careTypes} requesterType="client" locale={country === "PT" ? "pt-PT" : "en-GB"} emergencyNumber={country === "PT" ? "112" : "999"} />
       </div>
     </main>
   );

@@ -21,6 +21,17 @@ export const createBookingSchema = z
     locationAddress: z.string().min(1),
     locationPostcode: z.string().optional(),
     notes: z.string().optional(),
+    // Private clients only: the risk and needs assessment (lib/risk-assessment),
+    // re-scored on the server — the client's own score is never trusted.
+    riskAssessment: z
+      .object({
+        version: z.string(),
+        respondent: z.enum(["self", "family", "social_worker", "other"]),
+        emergency: z.record(z.string(), z.boolean()),
+        answers: z.record(z.string(), z.string()),
+        consent: z.boolean(),
+      })
+      .optional(),
   })
   .refine((v) => new Date(v.scheduledEnd).getTime() > new Date(v.scheduledStart).getTime(), {
     message: "End time must be after the start time.",

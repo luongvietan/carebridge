@@ -637,6 +637,33 @@ export const PORTAL_PT: Record<string, string> = {
   "1 check outstanding": "1 verificação por concluir",
   "{n} checks outstanding": "{n} verificações por concluir",
   "— outstanding": "— por concluir",
+  // ---- risk and needs assessment (admin review, booking errors)
+  "Requests awaiting review": "Pedidos a aguardar análise",
+  "The risk and needs assessment held these private-client requests. Professionals cannot see them until you approve them. The assessment is guidance, not a medical diagnosis.":
+    "A avaliação de riscos e necessidades reteve estes pedidos de clientes particulares. Os profissionais só os veem depois de os aprovar. A avaliação é orientação e não um diagnóstico médico.",
+  "No requests are waiting for review.": "Não há pedidos a aguardar análise.",
+  Risk: "Risco",
+  Recommended: "Recomendado",
+  "Completed by": "Preenchido por",
+  "Why it is held": "Motivo da retenção",
+  Answers: "Respostas",
+  Notes: "Notas",
+  "No assessment was found for this request.": "Não foi encontrada avaliação para este pedido.",
+  "Message to the client (required to decline)": "Mensagem para o cliente (obrigatória para recusar)",
+  "Approve and publish": "Aprovar e publicar",
+  "Decline request": "Recusar pedido",
+  "Please give the client a reason.": "Indique um motivo ao cliente.",
+  "This request is no longer waiting for review.": "Este pedido já não está a aguardar análise.",
+  "This request's start time has passed. Decline it so the client can book again.":
+    "A hora de início deste pedido já passou. Recuse-o para que o cliente possa marcar novamente.",
+  "Please complete the risk and needs assessment first.": "Preencha primeiro a avaliação de riscos e necessidades.",
+  "This sounds like an emergency. Call the emergency services now (112 in Portugal, 999 in the UK).":
+    "Isto parece uma emergência. Ligue já para os serviços de emergência (112 em Portugal).",
+  "The assessment has been updated. Please reload the page and complete it again.":
+    "A avaliação foi atualizada. Recarregue a página e preencha-a novamente.",
+  "Please confirm consent to the assessment.": "Confirme o consentimento para a avaliação.",
+  "Please answer every question in the risk and needs assessment.": "Responda a todas as perguntas da avaliação de riscos e necessidades.",
+  "Could not save the risk and needs assessment. Please try again.": "Não foi possível guardar a avaliação de riscos e necessidades. Tente novamente.",
   // ---- statuses, methods and labels shown from data
   open: "aberta",
   accepted: "aceite",
@@ -645,6 +672,7 @@ export const PORTAL_PT: Record<string, string> = {
   completed: "concluída",
   cancelled: "cancelada",
   "no show": "não compareceu",
+  "pending review": "em análise",
   pending: "pendente",
   succeeded: "pago",
   failed: "falhou",

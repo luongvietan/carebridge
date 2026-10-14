@@ -3,6 +3,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { buildBookingInsert } from "../src/lib/bookings/create";
 import type { RateCard } from "../src/lib/rates/snapshot";
 import { chooseFrom } from "./select-helper";
+import { EMERGENCY_QUESTIONS, QUESTIONS, RESPONDENT_OPTIONS } from "../src/lib/risk-assessment/questionnaire";
 
 const PASSWORD = "password123";
 
@@ -41,7 +42,7 @@ async function login(page: Page, email: string, urlPattern: RegExp) {
   await page.locator('input[name="email"]').fill(email);
   await page.locator('input[name="password"]').fill(PASSWORD);
   await page.getByRole("button", { name: /^(Sign in|Entrar)$/i }).click();
-  await expect(page).toHaveURL(urlPattern);
+  await expect(page).toHaveURL(urlPattern, { timeout: 15_000 });
 }
 
 async function rnRoleId(sb: SupabaseClient, country = "GB") {
@@ -56,7 +57,7 @@ async function seedAdmin(sb: SupabaseClient, stamp: number) {
     email,
     password: PASSWORD,
     email_confirm: true,
-    user_metadata: { account_type: "admin", full_name: "E2E Admin" },
+    user_metadata: { market: "GB", account_type: "admin", full_name: "E2E Admin" },
   });
   if (error || !data.user) throw error ?? new Error("admin user");
   // Signup metadata can't grant admin (0031 hardening downgrades it to
@@ -176,12 +177,31 @@ async function pickDate(page: Page, triggerName: string, d: Date) {
   await page.keyboard.press("Escape"); // close the popover before the next field
 }
 
+// Private clients answer the risk and needs assessment before the booking form.
+// Unlisted questions take their first (calmest) option.
+async function completeRiskAssessment(page: Page, answers: Record<string, string> = {}) {
+  const pick = (legend: string, label: string) =>
+    page.getByRole("group", { name: legend, exact: true }).getByText(label, { exact: true }).click();
+  await pick("Quem está a preencher esta avaliação?", RESPONDENT_OPTIONS[1].label.pt);
+  for (const q of EMERGENCY_QUESTIONS) await pick(q.label.pt, "Não");
+  for (const q of QUESTIONS) {
+    const option = q.options.find((o) => o.id === (answers[q.id] ?? q.options[0].id))!;
+    await pick(q.label.pt, option.label.pt);
+  }
+  await page.getByRole("checkbox").check();
+  await page.getByRole("button", { name: "Ver recomendação" }).click();
+  await expect(page.getByRole("heading", { name: "A nossa recomendação" })).toBeVisible();
+  await page.getByRole("button", { name: "Continuar para os dados da marcação" }).click();
+}
+
 async function fillBookingForm(page: Page, location: string, start: Date, durationLabel: string) {
   await chooseFrom(page, page.getByRole("combobox", { name: "Categoria profissional", exact: true }), "Enfermeiro/a — Adultos");
   await pickDate(page, "Início", start);
   await chooseFrom(page, page.getByRole("combobox", { name: "Duração do serviço", exact: true }), durationLabel);
   await page.locator('input[name="locationAddress"]').fill(location);
   await page.locator('input[name="locationPostcode"]').fill("E1 6AN");
+  await page.getByRole("button", { name: /rever marcação/i }).click();
+  await expect(page.getByRole("heading", { name: /rever marcação/i })).toBeVisible();
   await page.getByRole("button", { name: /criar marcação/i }).click();
 }
 
@@ -198,12 +218,17 @@ test("Portugal happy path: client creates EUR booking, professional accepts", as
 
   await login(page, client.email, /\/client/);
   await page.goto("/client/bookings/new");
+  // Clinical care points to an adult nurse, the role booked below, at low risk —
+  // so the request is published straight away.
+  await completeRiskAssessment(page, { support_type: "clinical" });
   // 09:00 two days out, so the date picker only needs a day click (its committed
   // default time is 09:00) — no fragile hour/minute selection. Shift duration is
   // now a Select; pick a whole-hour preset and let the form compute the end.
   const start = new Date(Date.now() + 48 * 3_600_000);
   start.setHours(9, 0, 0, 0);
   await fillBookingForm(page, location, start, "8 horas"); // submits the form
+  await expect(page.getByRole("heading", { name: "Pedido de marcação criado" })).toBeVisible();
+  await page.getByRole("link", { name: "Ver marcações", exact: true }).click();
   await expect(page).toHaveURL(/\/client\/bookings\/?$/);
   await expect(page.locator("tr", { hasText: start.toLocaleString("pt-PT", { dateStyle: "medium", timeStyle: "short" }) })).toBeVisible();
 
@@ -248,6 +273,72 @@ test("Portugal happy path: client creates EUR booking, professional accepts", as
   expect(Number(after!.total_client_charge)).toBe(expectedCharge);
   expect(Number(after!.total_payout)).toBe(expectedPayout);
   await proCtx.close();
+  } finally {
+    await sb.from("countries").update({ is_live: prior!.is_live }).eq("code", "PT");
+  }
+});
+
+test("Portugal: emergency answers stop the form; a high-risk request waits for admin review", async ({ page, browser }) => {
+  const sb = service();
+  const stamp = Date.now();
+  const { data: prior } = await sb.from("countries").select("is_live").eq("code", "PT").single();
+  await sb.from("countries").update({ is_live: true }).eq("code", "PT");
+  try {
+    const roleId = await rnRoleId(sb, "PT");
+    const client = await seedClient(sb, stamp, "PT");
+    const pro = await seedEligiblePro(sb, stamp + 1, roleId);
+    const adminUser = await seedAdmin(sb, stamp + 2);
+    const location = `HeldForReview ${stamp}`;
+
+    await login(page, client.email, /\/client/);
+    await page.goto("/client/bookings/new");
+
+    // Any emergency "yes" stops the form and points to 112.
+    await page.getByRole("group", { name: EMERGENCY_QUESTIONS[0].label.pt, exact: true }).getByText("Sim", { exact: true }).click();
+    await expect(page.getByRole("heading", { name: "Ligue já para os serviços de emergência" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Ligar 112" })).toHaveAttribute("href", "tel:112");
+    await page.getByRole("button", { name: "Respondi por engano — voltar" }).click();
+
+    await completeRiskAssessment(page, { support_type: "clinical", behaviour: "often" });
+    await expect(page.getByText("A nossa equipa vai analisar este pedido antes de o publicar aos profissionais.")).toBeVisible();
+    const start = new Date(Date.now() + 72 * 3_600_000);
+    start.setHours(9, 0, 0, 0);
+    await fillBookingForm(page, location, start, "4 horas");
+    await expect(page.getByRole("heading", { name: "Pedido recebido — em análise" })).toBeVisible();
+
+    const { data: held } = await sb.from("bookings").select("id, status").eq("location_address", location).single();
+    expect(held?.status).toBe("pending_review");
+    const { data: assessment } = await sb
+      .from("booking_risk_assessments")
+      .select("risk_level, recommended_role_family, review_reasons, requires_review")
+      .eq("booking_id", held!.id)
+      .single();
+    expect(assessment).toMatchObject({ risk_level: "high", recommended_role_family: "nurse_adult", requires_review: true });
+    expect(assessment?.review_reasons).toContain("behaviour_risk");
+
+    // Professionals cannot see a held request.
+    const proCtx = await browser.newContext();
+    const proPage = await proCtx.newPage();
+    await login(proPage, pro.email, /\/professional/);
+    await proPage.goto("/professional/bookings");
+    await expect(proPage.locator("tr", { hasText: location })).toHaveCount(0);
+
+    // An admin approves it; it opens to matching professionals.
+    const adminCtx = await browser.newContext();
+    const adminPage = await adminCtx.newPage();
+    await login(adminPage, adminUser.email, /\/admin/);
+    await adminPage.goto("/admin/bookings/review");
+    const card = adminPage.locator("article", { hasText: location });
+    await expect(card).toBeVisible();
+    await card.getByRole("button", { name: "Approve and publish" }).click();
+    await expect(card).toHaveCount(0, { timeout: 15_000 });
+    const { data: approved } = await sb.from("bookings").select("status").eq("id", held!.id).single();
+    expect(approved?.status).toBe("open");
+
+    await proPage.reload();
+    await expect(proPage.locator("tr", { hasText: location })).toBeVisible();
+    await proCtx.close();
+    await adminCtx.close();
   } finally {
     await sb.from("countries").update({ is_live: prior!.is_live }).eq("code", "PT");
   }

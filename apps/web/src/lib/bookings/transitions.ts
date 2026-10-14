@@ -1,10 +1,10 @@
 export type BookingStatus =
-  | "open" | "assigned" | "accepted" | "confirmed"
+  | "pending_review" | "open" | "assigned" | "accepted" | "confirmed"
   | "in_progress" | "completed" | "cancelled" | "no_show";
 
 export type BookingAction =
   | "accept" | "decline" | "assign" | "cancel"
-  | "confirm" | "start" | "complete" | "no_show";
+  | "confirm" | "start" | "complete" | "no_show" | "approve";
 
 export type Actor = "professional" | "client" | "organisation" | "admin";
 
@@ -13,6 +13,10 @@ type Rule = { from: BookingStatus; action: BookingAction; actors: Actor[]; to: B
 // Single source of truth. S2 wires: accept, decline, assign, cancel.
 // The confirm/start/complete/no_show edges are defined for S3 (not yet exposed in UI).
 const RULES: Rule[] = [
+  // A private client's request held by the risk assessment (0092): an admin
+  // publishes it (approve) or declines it (cancel); the client may withdraw it.
+  { from: "pending_review", action: "approve", actors: ["admin"], to: "open" },
+  { from: "pending_review", action: "cancel", actors: ["client", "admin"], to: "cancelled" },
   { from: "open", action: "accept", actors: ["professional"], to: "accepted" },
   { from: "open", action: "decline", actors: ["professional"], to: "open" },
   { from: "open", action: "assign", actors: ["admin"], to: "assigned" },

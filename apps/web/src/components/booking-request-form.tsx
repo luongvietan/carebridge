@@ -9,11 +9,33 @@ import { Select } from "@/components/ui/select";
 import { DateTimePicker } from "@/components/ui/date-picker";
 import { MAX_SHIFT_HOURS } from "@/lib/validation/bookings";
 import { APP_TIME_ZONE, londonWallClockToUtc } from "@/lib/format/datetime";
+import { RiskAssessmentForm } from "@/components/risk-assessment-form";
+import { ROLE_FAMILY_BY_CODE, ROLE_FAMILY_LABEL } from "@/lib/risk-assessment/questionnaire";
+import { roleMatchesRecommendation, type RiskResult, type RiskSubmission } from "@/lib/risk-assessment/score";
+
+const RISK_COPY = {
+  "en-GB": {
+    recommended: "Recommended professional",
+    change: "Change my answers",
+    willReview: "Our team will review this request before it is published to professionals.",
+    differs: "This role differs from the recommendation, so our team will review the request before it is published.",
+    underReview: "Request received — under review",
+    underReviewNext: "Our team will review your request before it is published to professionals. We will e-mail you when it has been reviewed.",
+  },
+  "pt-PT": {
+    recommended: "Profissional recomendado",
+    change: "Alterar respostas",
+    willReview: "A nossa equipa vai analisar este pedido antes de o publicar aos profissionais.",
+    differs: "Esta categoria difere da recomendação, por isso a nossa equipa vai analisar o pedido antes de o publicar.",
+    underReview: "Pedido recebido — em análise",
+    underReviewNext: "A nossa equipa vai analisar o seu pedido antes de o publicar aos profissionais. Enviaremos um e-mail quando a análise estiver concluída.",
+  },
+} as const;
 
 const field =
   "mt-1 w-full rounded-xl border border-line bg-white px-3.5 py-2.5 text-sm text-brand-ink placeholder:text-muted focus:border-brand-strong focus:outline-none focus:ring-2 focus:ring-brand-strong/15";
 
-type Role = { id: string; name: string; categoryId: string; category: string };
+type Role = { id: string; name: string; categoryId: string; category: string; code?: string };
 type CareType = { id: string; name: string; description: string | null; categoryId: string };
 
 // Stable empty default so omitting the prop doesn't create a new array each render.
@@ -26,13 +48,22 @@ export function BookingRequestForm({
   careTypes = NO_CARE_TYPES,
   requesterType,
   locale = "en-GB",
+  emergencyNumber,
 }: {
   roles: Role[];
   careTypes?: CareType[];
   requesterType: "client" | "organisation";
   locale?: RequesterLocale;
+  /** Set for private clients: they complete the risk and needs assessment first. */
+  emergencyNumber?: string;
 }) {
   const t = requesterCopy[locale].booking;
+  const rc = RISK_COPY[locale];
+  const lang = locale === "pt-PT" ? "pt" : "en";
+  const needsAssessment = requesterType === "client" && !!emergencyNumber;
+  const [risk, setRisk] = useState<{ submission: RiskSubmission; result: RiskResult } | null>(null);
+  const [assessing, setAssessing] = useState(needsAssessment);
+  const [underReview, setUnderReview] = useState(false);
   const durations = Array.from({ length: MAX_SHIFT_HOURS }, (_, i) => {
     const h = i + 1;
     return { value: String(h), label: `${h} ${h === 1 ? t.hour : t.hours}` };
@@ -87,6 +118,7 @@ export function BookingRequestForm({
     const endIso = new Date(startIso.getTime() + Number(duration) * 3_600_000);
     const fd = new FormData(e.currentTarget);
     if (!review) { setReview(fd); return; }
+    if (needsAssessment && !risk) { setAssessing(true); return; }
     setPending(true);
     try {
       const result = await createBooking({
@@ -98,9 +130,13 @@ export function BookingRequestForm({
       locationAddress: fd.get("locationAddress") as string,
       locationPostcode: (fd.get("locationPostcode") as string) || undefined,
       notes: (fd.get("notes") as string) || undefined,
+      riskAssessment: risk?.submission,
       });
       if ("error" in result) setError(result.error);
-      else setSaved(true);
+      else {
+        setUnderReview(!!result.underReview);
+        setSaved(true);
+      }
     } catch {
       setError(locale === "pt-PT" ? "Não foi possível concluir a operação. Tente novamente." : "Could not complete the operation. Please try again.");
     } finally {
@@ -109,11 +145,47 @@ export function BookingRequestForm({
   }
 
   if (saved) return <div role="status" className="space-y-4 rounded-xl border border-line p-5">
-    <h2 className="font-semibold">{t.saved}</h2><p>{t.nextStep}</p>
+    <h2 className="font-semibold">{underReview ? rc.underReview : t.saved}</h2><p>{underReview ? rc.underReviewNext : t.nextStep}</p>
     <Link className="font-semibold text-brand-strong underline" href={listHref}>{t.viewBookings}</Link>
   </div>;
+  if (assessing && emergencyNumber) {
+    return (
+      <RiskAssessmentForm
+        lang={lang}
+        emergencyNumber={emergencyNumber}
+        initial={risk?.submission}
+        onComplete={(submission, result) => {
+          setRisk({ submission, result });
+          setAssessing(false);
+          setReview(null);
+          // Offer the recommended kind of professional first.
+          const recommended = roles.find((r) => r.code && ROLE_FAMILY_BY_CODE[r.code] === result.recommendedFamily);
+          if (recommended && !roles.some((r) => r.id === roleId && r.code && roleMatchesRecommendation(result.recommendedFamily, r.code))) {
+            setRoleId(recommended.id);
+            setCareTypeId("");
+          }
+        }}
+      />
+    );
+  }
+
+  const heldForReview =
+    !!risk && (risk.result.level === "high" || risk.result.level === "unclear");
+  const roleDiffers =
+    !!risk && !!selectedRole && !roleMatchesRecommendation(risk.result.recommendedFamily, selectedRole.code ?? "");
+
   return (
     <form onSubmit={handleSubmit} aria-busy={pending} aria-describedby={error ? "booking-error" : undefined} onChange={() => { if (review) setReview(null); }} className="space-y-4">
+      {risk && (
+        <section className="space-y-2 rounded-xl border border-line bg-surface p-4 text-sm">
+          <p>
+            <span className="block text-muted">{rc.recommended}</span>
+            <span className="font-semibold text-brand-ink">{ROLE_FAMILY_LABEL[risk.result.recommendedFamily][lang]}</span>
+          </p>
+          {heldForReview && <p>{rc.willReview}</p>}
+          <button type="button" onClick={() => setAssessing(true)} className="font-semibold underline">{rc.change}</button>
+        </section>
+      )}
       <p className="text-sm text-ink">{t.timezone}</p>
       <div className="block text-sm font-medium">
         {t.role}
@@ -121,7 +193,7 @@ export function BookingRequestForm({
           name="professionalRoleId"
           aria-label={t.role}
           required
-          defaultValue=""
+          value={roleId}
           onValueChange={(v) => {
             setReview(null);
             setRoleId(v);
@@ -131,6 +203,7 @@ export function BookingRequestForm({
           className="mt-1"
           options={roles.map((r) => ({ value: r.id, label: r.name, group: r.category }))}
         />
+        {roleDiffers && !heldForReview && <span role="status" className="mt-1 block text-xs font-normal text-ink">{rc.differs}</span>}
       </div>
       {availableCareTypes.length > 0 && (
         <div className="block text-sm font-medium">

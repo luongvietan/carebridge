@@ -26,7 +26,8 @@ export type BookingInsert = RateSnapshot & {
   location_postcode: string | null;
   notes: string | null;
   booking_type: "open_market";
-  status: "open";
+  /** `pending_review` when the risk assessment holds the request for an admin. */
+  status: "open" | "pending_review";
 };
 
 export function hoursBetween(startIso: string, endIso: string): number {
@@ -69,7 +70,11 @@ export function careTypeError(input: {
   return null;
 }
 
-export function buildBookingInsert(input: CreateBookingInput, rateCard: RateCard): BookingInsert {
+export function buildBookingInsert(
+  input: CreateBookingInput,
+  rateCard: RateCard,
+  status: BookingInsert["status"] = "open",
+): BookingInsert {
   const hasClient = !!input.privateClientId;
   const hasOrg = !!input.organisationId;
   if (hasClient === hasOrg) {
@@ -92,6 +97,6 @@ export function buildBookingInsert(input: CreateBookingInput, rateCard: RateCard
     location_postcode: input.locationPostcode ?? null,
     notes: input.notes ?? null,
     booking_type: "open_market",
-    status: "open",
+    status,
   };
 }

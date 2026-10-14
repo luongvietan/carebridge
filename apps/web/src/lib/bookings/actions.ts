@@ -19,6 +19,9 @@ import { activeRoleIds } from "@/lib/roles/assignments";
 import { sendNotification } from "@/lib/notifications/send";
 import { createBookingSchema } from "@/lib/validation/bookings";
 import { REQUESTER_ACCOUNT } from "./constants";
+import { reviewDecision, roleFamilyOf, scoreRisk, validateSubmission, type RiskSubmission } from "@/lib/risk-assessment/score";
+import { notifyAdminsOfReview } from "@/lib/risk-assessment/notify";
+import { notifyMatchingProfessionals } from "./notify-matches";
 import {
   writeAcceptBooking,
   writeAssignBooking,
@@ -30,7 +33,7 @@ import {
   writeUndoDecline,
 } from "./service-writes";
 
-export type BookingActionResult = { ok: true; id?: string } | { error: string };
+export type BookingActionResult = { ok: true; id?: string; underReview?: boolean } | { error: string };
 
 function toRateCard(row: {
   id: string;
@@ -104,7 +107,7 @@ export async function createBooking(form: unknown): Promise<BookingActionResult>
 
   const { data: role } = await admin
     .from("professional_roles")
-    .select("category_id, country_code")
+    .select("code, category_id, country_code")
     .eq("id", formData.professionalRoleId)
     .maybeSingle();
   if (!role) return { error: "That professional role is no longer available." };
@@ -121,6 +124,23 @@ export async function createBooking(form: unknown): Promise<BookingActionResult>
     .maybeSingle();
   if (!roleCountry || !isMarketOpen(role.country_code, roleCountry.is_live, isGateEnabled())) {
     return { error: "That professional role is not available yet." };
+  }
+
+  // Private clients answer the risk and needs assessment first; it is scored
+  // again here and decides whether the request goes live or waits for review.
+  let risk: { submission: RiskSubmission; result: ReturnType<typeof scoreRisk>; decision: ReturnType<typeof reviewDecision> } | null = null;
+  if (formData.requesterType === "client") {
+    const submission = formData.riskAssessment;
+    if (!submission) return { error: "Please complete the risk and needs assessment first." };
+    const invalid = validateSubmission(submission);
+    if (invalid === "emergency") {
+      return { error: "This sounds like an emergency. Call the emergency services now (112 in Portugal, 999 in the UK)." };
+    }
+    if (invalid === "outdated") return { error: "The assessment has been updated. Please reload the page and complete it again." };
+    if (invalid === "consent") return { error: "Please confirm consent to the assessment." };
+    if (invalid) return { error: "Please answer every question in the risk and needs assessment." };
+    const result = scoreRisk(submission.answers);
+    risk = { submission, result, decision: reviewDecision(result, role.code) };
   }
 
   const [{ count: careTypesInCategory }, { data: chosenCareType }] = await Promise.all([
@@ -175,6 +195,7 @@ export async function createBooking(form: unknown): Promise<BookingActionResult>
         notes: formData.notes,
       } satisfies CreateBookingInput,
       toRateCard(rateCard),
+      risk?.decision.requiresReview ? "pending_review" : "open",
     );
   } catch (e) {
     return { error: (e as Error).message };
@@ -183,22 +204,38 @@ export async function createBooking(form: unknown): Promise<BookingActionResult>
   const result = await writeCreateBooking(insert, user.id);
   if ("error" in result) return result;
 
-  // Notify the requester, plus every professional of the matching role who is
-  // currently eligible to accept — spec item 7: professionals receive booking
-  // notifications when matching work becomes available.
-  const { data: matches } = await admin
-    .from("professional_role_assignments")
-    .select("professionals(user_id, can_accept_bookings)")
-    .eq("professional_role_id", formData.professionalRoleId)
-    .eq("status", "active");
+  if (risk) {
+    const { error: riskError } = await admin.from("booking_risk_assessments").insert({
+      booking_id: result.id,
+      questionnaire_version: risk.submission.version,
+      respondent: risk.submission.respondent,
+      answers: risk.submission.answers,
+      score: risk.result.score,
+      risk_level: risk.result.level,
+      recommended_role_family: risk.result.recommendedFamily,
+      chosen_role_family: roleFamilyOf(role.code),
+      requires_review: risk.decision.requiresReview,
+      review_reasons: risk.decision.reasons,
+      consent_at: new Date().toISOString(),
+      created_by: user.id,
+    });
+    if (riskError) {
+      // Never leave a request live without its assessment.
+      await admin.from("bookings").delete().eq("id", result.id);
+      return { error: "Could not save the risk and needs assessment. Please try again." };
+    }
+    if (risk.decision.requiresReview) {
+      await Promise.all([
+        sendNotification("booking_under_review", user.id, { booking_id: result.id }),
+        notifyAdminsOfReview(result.id, risk.result.level),
+      ]);
+      return { ok: true, id: result.id, underReview: true };
+    }
+  }
+
   await Promise.all([
     sendNotification("booking_request", user.id, { booking_id: result.id }),
-    ...(matches ?? [])
-      .map((m) => m.professionals as { user_id: string | null; can_accept_bookings: boolean | null } | null)
-      .filter((p) => p?.can_accept_bookings)
-      .map((p) => p?.user_id)
-      .filter((id): id is string => Boolean(id))
-      .map((id) => sendNotification("booking_available", id, { booking_id: result.id })),
+    notifyMatchingProfessionals(result.id, formData.professionalRoleId),
   ]);
   return { ok: true, id: result.id };
 }
@@ -338,7 +375,8 @@ export async function cancelBooking(bookingId: string, reason?: string): Promise
   const t = applyTransition(booking.status, "cancel", actor);
   if (!t.ok) return { error: t.error };
 
-  const isLastMinute = new Date(booking.scheduled_start).getTime() - Date.now() < 24 * 3_600_000;
+  const isLastMinute =
+    booking.status !== "pending_review" && new Date(booking.scheduled_start).getTime() - Date.now() < 24 * 3_600_000;
   const result = await writeCancelBooking(bookingId, booking.status, user.id, actor, isLastMinute, reason);
   if ("error" in result) return result;
 

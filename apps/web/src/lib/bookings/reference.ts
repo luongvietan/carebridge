@@ -4,6 +4,8 @@ import type { MarketCountry } from "@/lib/marketing/market";
 
 export type BookingRole = {
   id: string;
+  /** Stable role code, used to match the risk assessment's recommendation. */
+  code: string;
   name: string;
   categoryId: string;
   category: string;
@@ -29,7 +31,7 @@ export async function fetchBookingReference(
   const [{ data: roles }, { data: careTypes }] = await Promise.all([
     supabase
       .from("professional_roles")
-      .select("id, name, category_id, role_categories(name, sort_order)")
+      .select("id, code, name, category_id, role_categories(name, sort_order)")
       .eq("is_active", true)
       .eq("country_code", country)
       .order("name"),
@@ -50,6 +52,7 @@ export async function fetchBookingReference(
   return {
     roles: sortedRoles.map((r) => ({
       id: r.id,
+      code: r.code,
       name: r.name,
       categoryId: r.category_id,
       category: r.role_categories?.name ?? "",

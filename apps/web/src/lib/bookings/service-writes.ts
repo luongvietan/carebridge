@@ -18,7 +18,7 @@ export async function writeCreateBooking(
   if (error || !booking) return { error: error?.message ?? "Could not create booking." };
 
   await Promise.all([
-    admin.from("booking_status_history").insert({ booking_id: booking.id, to_status: "open", changed_by: actorId }),
+    admin.from("booking_status_history").insert({ booking_id: booking.id, to_status: insert.status, changed_by: actorId }),
     admin.from("audit_log").insert({ actor_user_id: actorId, actor_type: "user", action: "booking.created", entity_type: "booking", entity_id: booking.id }),
   ]);
   return { ok: true, id: booking.id };

@@ -304,6 +304,77 @@ export type Database = {
           },
         ]
       }
+      booking_risk_assessments: {
+        Row: {
+          id: string
+          booking_id: string
+          questionnaire_version: string
+          respondent: string
+          answers: Json
+          score: number
+          risk_level: string
+          recommended_role_family: string
+          chosen_role_family: string | null
+          requires_review: boolean
+          review_reasons: string[]
+          consent_at: string
+          created_by: string
+          created_at: string
+          review_decision: string | null
+          review_note: string | null
+          reviewed_by: string | null
+          reviewed_at: string | null
+        }
+        Insert: {
+          id?: string
+          booking_id: string
+          questionnaire_version: string
+          respondent: string
+          answers: Json
+          score: number
+          risk_level: string
+          recommended_role_family: string
+          chosen_role_family?: string | null
+          requires_review: boolean
+          review_reasons?: string[]
+          consent_at: string
+          created_by: string
+          created_at?: string
+          review_decision?: string | null
+          review_note?: string | null
+          reviewed_by?: string | null
+          reviewed_at?: string | null
+        }
+        Update: {
+          id?: string
+          booking_id?: string
+          questionnaire_version?: string
+          respondent?: string
+          answers?: Json
+          score?: number
+          risk_level?: string
+          recommended_role_family?: string
+          chosen_role_family?: string | null
+          requires_review?: boolean
+          review_reasons?: string[]
+          consent_at?: string
+          created_by?: string
+          created_at?: string
+          review_decision?: string | null
+          review_note?: string | null
+          reviewed_by?: string | null
+          reviewed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_risk_assessments_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: true
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       booking_declines: {
         Row: {
           booking_id: string
@@ -3150,6 +3221,7 @@ export type Database = {
         | "health_safety"
         | "role_specific"
       booking_status:
+        | "pending_review"
         | "open"
         | "assigned"
         | "accepted"
@@ -3335,6 +3407,7 @@ export const Constants = {
         "role_specific",
       ],
       booking_status: [
+        "pending_review",
         "open",
         "assigned",
         "accepted",
