@@ -37,17 +37,19 @@ const FLAG_STYLE: Record<string, string> = {
 export default async function AdminBookingReviewPage() {
   const adminId = await requireAdmin();
   if (!adminId) return null;
-  const lang = (await getPortalLocale()) === "pt-PT" ? "pt" : "en";
   const admin = createServiceClient();
-  const { data: bookings } = await admin
+  const [locale, { data: me }, { data: bookings }] = await Promise.all([
+    getPortalLocale(),
+    admin.from("users").select("is_clinical_reviewer").eq("id", adminId).maybeSingle(),
+    admin
     .from("bookings")
     .select(
       "id, scheduled_start, duration_hours, location_address, location_postcode, notes, professional_role_id, professional_roles(name, country_code), care_types(name), private_clients(full_name, phone, email_contact), booking_risk_assessments(questionnaire_version, respondent, answers, score, risk_level, outcome, recommended_role_family, review_reasons, review_decision, client_message, reviewed_at), booking_safety_briefs(items)",
     )
     .eq("status", "pending_review")
-    .order("scheduled_start", { ascending: true });
-
-  const { data: me } = await admin.from("users").select("is_clinical_reviewer").eq("id", adminId).maybeSingle();
+    .order("scheduled_start", { ascending: true }),
+  ]);
+  const lang = locale === "pt-PT" ? "pt" : "en";
   const isClinicalReviewer = !!me?.is_clinical_reviewer;
   // Every view of the assessments is recorded under the reviewer's own account.
   if (bookings?.length) {
