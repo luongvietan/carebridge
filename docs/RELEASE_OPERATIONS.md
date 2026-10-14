@@ -2,6 +2,8 @@
 
 This checkout contains prepared changes, not a production deployment. Keep the access gate while reviewing. Do not load `supabase/seed.sql` into a live project: it contains test accounts and fixtures.
 
+For read-only probes, backup/restore drills, incident response, rollback and pending production staffing, use [Operations readiness](OPERATIONS_READINESS.md). Dependency review evidence is in [11 October verification](verification/DEPENDENCIES_2026-10-11.md).
+
 ## Verify locally
 
 1. Start Docker, then run `npx supabase start` and `npx supabase db reset --local` from the root. Reset destroys only the local test stack's fixtures.

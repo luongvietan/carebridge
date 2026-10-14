@@ -1,0 +1,27 @@
+name: Operations smoke check
+on:
+  workflow_dispatch:
+    inputs:
+      origin:
+        description: Canonical HTTPS site origin to check (no path)
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Read-only site and database probes
+        run: npm run ops:monitor -w @carebridge/web
+        env:
+          OPS_APP_ORIGIN: ${{ inputs.origin }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ vars.OPS_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.OPS_SUPABASE_ANON_KEY }}

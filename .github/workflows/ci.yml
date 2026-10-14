@@ -20,6 +20,9 @@ jobs:
 
       - run: npm ci
 
+      - name: Audit production dependencies
+        run: npm audit --omit=dev
+
       - name: Start Supabase and run pgTAP
         run: |
           supabase start

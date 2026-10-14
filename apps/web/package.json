@@ -8,9 +8,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "test": "vitest run --passWithNoTests && node --test scripts/readiness-policy.test.mjs",
+    "test": "vitest run --passWithNoTests && node --test scripts/readiness-policy.test.mjs scripts/ops-monitor.test.mjs",
     "e2e": "playwright test",
-    "readiness": "node --env-file-if-exists=.env.local scripts/check-readiness.mjs"
+    "readiness": "node --env-file-if-exists=.env.local scripts/check-readiness.mjs",
+    "ops:monitor": "node --env-file-if-exists=.env.local scripts/ops-monitor.mjs"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

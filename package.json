@@ -18,9 +18,15 @@
     "db:reset": "supabase db reset",
     "db:test": "supabase test db",
     "db:push": "supabase db push",
-    "doctor": "npx react-doctor@latest"
+    "doctor": "npx react-doctor@latest",
+    "ops:monitor": "npm run ops:monitor -w @carebridge/web --",
+    "ops:recovery": "pwsh -NoProfile -File scripts/local-recovery-drill.ps1"
+  },
+  "overrides": {
+    "uuid": "11.1.1"
   },
   "devDependencies": {
+    "exceljs": "^4.4.0",
     "react-doctor": "^0.5.6",
     "supabase": "^2.106.0"
   }
