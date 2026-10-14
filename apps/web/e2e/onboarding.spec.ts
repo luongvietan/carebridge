@@ -39,8 +39,9 @@ async function registerConfirmLogin(page: Page, api: APIRequestContext, email: s
   await page.locator('input[name="acceptedTerms"]').check();
   await page.getByRole("button", { name: /criar conta/i }).click();
   await expect(page.getByRole("heading", { name: /verifique o seu email/i })).toBeVisible();
-  await page.goto(await confirmationLink(api, email));
-  await page.goto("/login");
+  await page.goto(await confirmationLink(api, email), { waitUntil: "commit" });
+  await expect(page).toHaveURL(/\/login$/);
+  await expect(page.getByRole("heading", { level: 1, name: "Entrar" })).toBeVisible();
   await page.locator('input[name="email"]').fill(email);
   await page.locator('input[name="password"]').fill("password123");
   await page.getByRole("button", { name: /^entrar$/i }).click();

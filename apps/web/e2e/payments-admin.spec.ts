@@ -340,6 +340,7 @@ test("payout recording: admin records payout and marks it paid via UI", async ({
   // Fill in reference and click "Mark paid"
   await recordedRow.locator('input[placeholder="Reference"]').fill("REF-E2E-001");
   await recordedRow.getByRole("button", { name: /mark paid/i }).click();
+  await page.getByRole("dialog").getByRole("button", { name: /^confirm payment$/i }).click();
 
   // Row should disappear from recorded section after refresh
   await expect(recordedRow).toBeHidden({ timeout: 15_000 });

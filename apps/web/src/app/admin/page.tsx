@@ -118,7 +118,7 @@ export default async function AdminHome() {
                 </p>
                 <ul className="mt-2 space-y-1.5 text-sm">
                   {day.events.map((event) => (
-                    <li key={`${event.date}-${event.kind}-${event.title}-${event.href}`} className="flex flex-wrap items-center gap-2">
+                    <li key={event.id} className="flex flex-wrap items-center gap-2">
                       <span
                         className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                           event.kind === "expiry"

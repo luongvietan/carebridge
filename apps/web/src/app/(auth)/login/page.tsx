@@ -2,11 +2,9 @@
 
 import { RequiredMark } from "@/components/required-mark";
 import { Tr } from "@/components/portal-locale";
-import { useState } from "react";
+import { useActionState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { attemptSignIn } from "@/lib/auth/actions";
-import { SIGN_IN_ERROR } from "@/lib/auth/sign-in-messages";
+import { signInForm } from "@/lib/auth/actions";
 import { AuthShell } from "@/components/auth-shell";
 import { useAuthCopy } from "@/components/auth-locale";
 import { BackLink } from "@/components/back-link";
@@ -15,30 +13,8 @@ import { marketingButtonPrimary, marketingInput } from "@/lib/marketing-ui";
 export default function LoginPage() {
   const t = useAuthCopy().login;
   const back = useAuthCopy().backHome;
-  const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
-  const [pending, setPending] = useState(false);
-
-  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setPending(true);
-    setError(null);
-    const form = new FormData(e.currentTarget);
-    // The credential check runs server-side so failed attempts can be audited.
-    try {
-      const result = await attemptSignIn(String(form.get("email")), String(form.get("password")));
-      if (!result.ok) {
-        setError(result.error);
-        setPending(false);
-        return;
-      }
-      router.push(result.redirectTo);
-      router.refresh();
-    } catch {
-      setError(SIGN_IN_ERROR);
-      setPending(false);
-    }
-  }
+  const [result, formAction, pending] = useActionState(signInForm, null);
+  const error = result && !result.ok ? result.error : null;
 
   return (
     <AuthShell>
@@ -53,7 +29,7 @@ export default function LoginPage() {
         {t.intro}
       </p>
 
-      <form aria-busy={pending} method="post" onSubmit={onSubmit} className="mt-8 space-y-5">
+      <form aria-busy={pending} action={formAction} className="mt-8 space-y-5">
         <label className="block text-sm font-medium text-[#33433a]">
           {t.email}
           <RequiredMark /><input type="email" name="email" required className={marketingInput} />

@@ -97,6 +97,22 @@ export async function attemptSignIn(email: string, password: string): Promise<Si
   return { ok: true, redirectTo: roleHome((row?.account_type ?? "private_client") as AccountType) };
 }
 
+/** Form action keeps session-cookie updates and navigation in one action transition. */
+export async function signInForm(
+  _previous: SignInResult | null,
+  formData: FormData,
+): Promise<SignInResult> {
+  let result: SignInResult;
+  try {
+    result = await attemptSignIn(String(formData.get("email") ?? ""), String(formData.get("password") ?? ""));
+  } catch {
+    return { ok: false, error: SIGN_IN_ERROR };
+  }
+  // redirect throws: keep it outside the credential-error handler.
+  if (result.ok) redirect(result.redirectTo);
+  return result;
+}
+
 export async function signOut(): Promise<void> {
   const supabase = await createClient();
   const {

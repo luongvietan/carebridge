@@ -4,6 +4,8 @@ import type { Database } from "@/lib/supabase/types";
 export type UpcomingKind = "booking" | "expiry" | "payout";
 
 export type UpcomingEvent = {
+  /** Stable identity even when multiple rows share their date and title. */
+  id: string;
   /** London calendar date, `YYYY-MM-DD`. */
   date: string;
   kind: UpcomingKind;
@@ -76,6 +78,7 @@ export async function loadUpcoming(
 
   for (const booking of bookings ?? []) {
     events.push({
+      id: `booking-${booking.id}`,
       date: londonDate(booking.scheduled_start),
       kind: "booking",
       title: (booking.professional_roles as { name: string } | null)?.name ?? "Booking",
@@ -89,6 +92,7 @@ export async function loadUpcoming(
   for (const doc of documents ?? []) {
     if (!doc.expiry_date) continue;
     events.push({
+      id: `expiry-${doc.id}`,
       date: doc.expiry_date,
       kind: "expiry",
       title: (doc.document_types as { name: string } | null)?.name ?? "Document",
@@ -101,6 +105,7 @@ export async function loadUpcoming(
   // is shown today rather than invented into the future.
   for (const payout of payouts ?? []) {
     events.push({
+      id: `payout-${payout.id}`,
       date: todayDate,
       kind: "payout",
       title: "Payout awaiting payment",

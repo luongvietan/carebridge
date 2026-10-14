@@ -27,7 +27,7 @@ async function login(page: Page, email: string, urlPattern: RegExp) {
   await page.locator('input[name="email"]').fill(email);
   await page.locator('input[name="password"]').fill(PASSWORD);
   await page.getByRole("button", { name: /^(Sign in|Entrar)$/i }).click();
-  await expect(page).toHaveURL(urlPattern);
+  await expect(page).toHaveURL(urlPattern, { timeout: 15_000 });
 }
 
 async function attemptLogin(page: Page, email: string) {
@@ -247,6 +247,7 @@ async function suspendClientViaAccounts(page: Page, clientEmail: string) {
   await expect(row).toBeVisible({ timeout: 15_000 });
   await chooseFrom(page, row.getByRole("combobox"), "suspended");
   await row.getByRole("button", { name: /update account status/i }).click();
+  await page.getByRole("dialog").getByRole("button", { name: /confirm status change/i }).click();
   await expect(row.locator("td").nth(2)).toContainText("suspended", { timeout: 15_000 });
 }
 
@@ -349,7 +350,7 @@ test("admin suspends client account and fresh login is blocked", async ({ page, 
   const clientCtx = await browser.newContext();
   const clientPage = await clientCtx.newPage();
   await attemptLogin(clientPage, client.email);
-  await expect(clientPage.getByText(/account is suspended/i)).toBeVisible({ timeout: 15_000 });
+  await expect(clientPage.getByRole("alert").filter({ hasText: /account is suspended|conta está suspensa/i })).toBeVisible();
   await expect(clientPage).toHaveURL(/\/login/);
 
   await clientCtx.close();

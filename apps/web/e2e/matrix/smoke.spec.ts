@@ -33,6 +33,7 @@ async function login(page: Page, email: string) {
   await page.locator('input[name="password"]').fill(PASSWORD);
   await page.getByRole("button", { name: /^(Sign in|Entrar)$/i }).click();
   await expect(page).toHaveURL(/\/admin/, { timeout: 15_000 });
+  await expect(page.getByRole("heading", { level: 1, name: "Dashboard" })).toBeVisible();
 }
 
 test("public landing page renders", async ({ page }) => {
@@ -45,6 +46,25 @@ test("login form renders", async ({ page }) => {
   await page.goto("/login");
   await expect(page.locator('input[name="email"]')).toBeVisible();
   await expect(page.locator('input[name="password"]')).toBeVisible();
+});
+
+test("login supports labelled fields, keyboard navigation and narrow screens", async ({ page }) => {
+  await page.goto("/login");
+  await expect(page.getByRole("main")).toHaveCount(1);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
+  await expect(page.getByRole("link", { name: "Saltar para o conteúdo principal" })).toHaveAttribute("href", "#main-content");
+  const email = page.getByLabel(/email/i);
+  const password = page.getByLabel(/palavra-passe/i);
+  await email.focus();
+  await page.keyboard.type("keyboard@example.test");
+  await expect(email).toHaveValue("keyboard@example.test");
+  await page.keyboard.press("Tab");
+  await expect(password).toBeFocused();
+  await page.keyboard.type("local-keyboard-check");
+  await page.keyboard.press("Tab");
+  await expect(page.getByRole("button", { name: "Entrar", exact: true })).toBeFocused();
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
+  expect(overflow).toBe(false);
 });
 
 test("a legacy UK cookie keeps Portugal content and UK launching soon", async ({ page, context }) => {
@@ -61,7 +81,7 @@ test("public registration stays closed before Portugal approval", async ({ page 
   await sb.from("countries").update({ is_live: false }).eq("code", "PT");
   try {
     await page.goto("/register?as=professional");
-    await expect(page.getByRole("heading", { name: "Inscrições em breve" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "As inscrições abrem em breve" })).toBeVisible();
     await expect(page.locator('input[name="email"]')).toHaveCount(0);
   } finally {
     await sb.from("countries").update({ is_live: prior!.is_live }).eq("code", "PT");

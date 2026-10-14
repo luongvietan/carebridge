@@ -32,6 +32,8 @@ for (const [key, value] of Object.entries(e2eEnv)) {
 export default defineConfig({
   testDir: "./e2e",
   timeout: 90_000,
+  // Cold Next.js compilation and server actions may outlast Playwright's 5s default.
+  expect: { timeout: 15_000 },
   fullyParallel: false,
   // Tests share one local database, so run them serially to avoid cross-file
   // races on shared rows (rate cards, bookings, …).
@@ -40,11 +42,13 @@ export default defineConfig({
   reporter: [["list"], ["html", { open: "never" }]],
   use: { baseURL: "http://127.0.0.1:3100" },
   webServer: {
-    command: "npx next dev --webpack -H 127.0.0.1 -p 3100",
+    // Test the release runtime; dev hot reload can interrupt action/OTP navigation.
+    // Build receives the same local-only environment as the server and helpers.
+    command: "npx next build --webpack && npx next start -H 127.0.0.1 -p 3100",
     url: "http://127.0.0.1:3100",
-    // Must not reuse a dev server started with hosted `.env.local` credentials.
+    // Must not reuse a server built or started with hosted credentials.
     reuseExistingServer: false,
-    timeout: 180_000,
+    timeout: 300_000,
     env: e2eEnv,
   },
   projects: [
