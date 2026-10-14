@@ -94,7 +94,7 @@ export const requesterCopy = {
       saved: "Pedido de marcação criado",
       nextStep: "Acompanhe a atribuição, a confirmação e os pagamentos necessários na página de marcações.",
       viewBookings: "Ver marcações",
-      timezone: "Todas as horas seguem a hora de Londres (Europe/London), incluindo a hora de verão.",
+      timezone: "Todas as horas seguem a hora de Portugal continental (Europe/Lisbon), incluindo a hora de verão.",
 
       role: "Categoria profissional",
       selectRole: "Selecione uma categoria…",

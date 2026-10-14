@@ -171,3 +171,11 @@ export function clientResultKey(result: RiskResult): "standard" | "physio" | "re
   if (result.outcome === "P") return "physio";
   return "review";
 }
+
+/**
+ * Nursing (N) and red-risk requests are decided only by a clinical reviewer
+ * (Ana, 15 October 2026); admins handle general and non-clinical cases.
+ */
+export function needsClinicalReview(band: string | null | undefined, outcome: string | null | undefined): boolean {
+  return band === "red" || outcome === "N" || outcome === "X";
+}

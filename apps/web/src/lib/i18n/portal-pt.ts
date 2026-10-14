@@ -663,6 +663,12 @@ export const PORTAL_PT: Record<string, string> = {
   "More information requested": "Pedido de mais informações",
   "What the matched professional will see": "O que o profissional selecionado verá",
   "Review record": "Registo da análise",
+  "Nursing and red-risk requests can only be decided by a clinical reviewer. Your views and decisions are recorded in the audit log.":
+    "Os pedidos de enfermagem e de risco vermelho só podem ser decididos por um revisor clínico. As suas consultas e decisões ficam registadas no registo de auditoria.",
+  "Clinical review required": "Requer revisão clínica",
+  "This request needs a clinical reviewer. It stays on hold until a clinical reviewer approves it, asks for more information, changes the professional category or declines it.":
+    "Este pedido requer um revisor clínico. Fica pendente até que um revisor clínico o aprove, peça mais informações, altere a categoria profissional ou o recuse.",
+  "Only a clinical reviewer can decide nursing or red-risk requests.": "Só um revisor clínico pode decidir pedidos de enfermagem ou de risco vermelho.",
   "Reason and risk-control measures (internal)": "Fundamentação e medidas de controlo (interno)",
   "Professional category permitted": "Categoria profissional permitida",
   "Reassessment date": "Data de reavaliação",

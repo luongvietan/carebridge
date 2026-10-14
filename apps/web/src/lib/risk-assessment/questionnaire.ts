@@ -18,6 +18,18 @@
 
 export const QUESTIONNAIRE_VERSION = "2026-10-15-v1.0";
 
+/**
+ * Clinical review of the questions and override rules for the pilot, recorded
+ * in Ana's words (15 October 2026). A further review by a nurse registered
+ * with the Ordem dos Enfermeiros is being arranged separately by Ana.
+ */
+export const CLINICAL_REVIEW = {
+  version: QUESTIONNAIRE_VERSION,
+  statement: "Reviewed by Ana Dos Santos, UK Registered Nurse and Founder of CareBridge Connect.",
+  date: "2026-10-15",
+  pending: "Additional review by a nurse registered with the Portuguese Ordem dos Enfermeiros — arranged by Ana.",
+} as const;
+
 export type Lang = "en" | "pt";
 export type Text = Record<Lang, string>;
 export type Answers = Record<string, string>;

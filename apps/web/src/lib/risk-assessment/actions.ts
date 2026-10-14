@@ -9,7 +9,7 @@ import { writeCancelBooking } from "@/lib/bookings/service-writes";
 import { notifyMatchingProfessionals } from "@/lib/bookings/notify-matches";
 import { sendNotification } from "@/lib/notifications/send";
 import { buildSnapshot, type RateCard } from "@/lib/rates/snapshot";
-import { roleFamilyOf } from "./score";
+import { needsClinicalReview, roleFamilyOf } from "./score";
 import type { Database } from "@/lib/supabase/types";
 
 export type ReviewActionResult = { ok: true } | { error: string };
@@ -46,6 +46,13 @@ async function guard(bookingId: string) {
     .maybeSingle();
   if (!booking) return { ok: false, error: "Booking not found." } as const;
   if (booking.status !== "pending_review") return { ok: false, error: "This request is no longer waiting for review." } as const;
+  const [{ data: assessment }, { data: reviewer }] = await Promise.all([
+    admin.from("booking_risk_assessments").select("risk_level, outcome").eq("booking_id", bookingId).maybeSingle(),
+    admin.from("users").select("is_clinical_reviewer").eq("id", adminId).maybeSingle(),
+  ]);
+  if (needsClinicalReview(assessment?.risk_level, assessment?.outcome) && !reviewer?.is_clinical_reviewer) {
+    return { ok: false, error: "Only a clinical reviewer can decide nursing or red-risk requests." } as const;
+  }
   return { ok: true, adminId, admin, booking } as const;
 }
 

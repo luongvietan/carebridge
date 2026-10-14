@@ -7,6 +7,7 @@ import { getPortalLocale } from "@/lib/i18n/portal-server";
 import { formatLondon } from "@/lib/format/datetime";
 import {
   BAND_LABEL,
+  CLINICAL_REVIEW,
   FLAGS,
   OUTCOME_LABEL,
   RESPONDENT_OPTIONS,
@@ -15,7 +16,7 @@ import {
   type Outcome,
   type RoleFamily,
 } from "@/lib/risk-assessment/questionnaire";
-import { visibleQuestions, withRespondent } from "@/lib/risk-assessment/score";
+import { needsClinicalReview, visibleQuestions, withRespondent } from "@/lib/risk-assessment/score";
 import { BRIEF_LABEL } from "@/lib/risk-assessment/brief";
 
 export const dynamic = "force-dynamic";
@@ -34,7 +35,8 @@ const FLAG_STYLE: Record<string, string> = {
 
 /** Private-client requests the risk and needs assessment held: approve, ask for more, or decline. */
 export default async function AdminBookingReviewPage() {
-  if (!(await requireAdmin())) return null;
+  const adminId = await requireAdmin();
+  if (!adminId) return null;
   const lang = (await getPortalLocale()) === "pt-PT" ? "pt" : "en";
   const admin = createServiceClient();
   const { data: bookings } = await admin
@@ -44,6 +46,21 @@ export default async function AdminBookingReviewPage() {
     )
     .eq("status", "pending_review")
     .order("scheduled_start", { ascending: true });
+
+  const { data: me } = await admin.from("users").select("is_clinical_reviewer").eq("id", adminId).maybeSingle();
+  const isClinicalReviewer = !!me?.is_clinical_reviewer;
+  // Every view of the assessments is recorded under the reviewer's own account.
+  if (bookings?.length) {
+    await admin.from("audit_log").insert(
+      bookings.map((b) => ({
+        actor_user_id: adminId,
+        actor_type: "admin",
+        action: "risk_assessment.viewed",
+        entity_type: "booking",
+        entity_id: b.id,
+      })),
+    );
+  }
 
   const countries = [...new Set((bookings ?? []).flatMap((b) => (b.professional_roles?.country_code ? [b.professional_roles.country_code] : [])))];
   const { data: roles } = countries.length
@@ -64,6 +81,12 @@ export default async function AdminBookingReviewPage() {
       <p className="mt-2 text-sm text-ink">
         <Tr>{"The risk and needs assessment held these private-client requests. Professionals cannot see them until you approve them. The assessment is a screening and routing tool, not a diagnosis — your judgement decides."}</Tr>
       </p>
+      <p className="mt-2 text-sm text-ink">
+        <Tr>{"Nursing and red-risk requests can only be decided by a clinical reviewer. Your views and decisions are recorded in the audit log."}</Tr>
+      </p>
+      <p className="mt-2 text-xs text-muted">
+        {CLINICAL_REVIEW.statement} ({CLINICAL_REVIEW.version}, {CLINICAL_REVIEW.date}) {CLINICAL_REVIEW.pending}
+      </p>
 
       {(bookings ?? []).length === 0 && (
         <p className="mt-8 rounded-xl border border-line p-6 text-sm text-ink"><Tr>{"No requests are waiting for review."}</Tr></p>
@@ -74,6 +97,7 @@ export default async function AdminBookingReviewPage() {
           const ra = b.booking_risk_assessments;
           const answers = (ra?.answers ?? {}) as Record<string, string>;
           const band = ra?.risk_level ?? "red";
+          const clinical = !ra || needsClinicalReview(ra.risk_level, ra.outcome);
           const shown = ra ? visibleQuestions(withRespondent(ra.respondent, answers)) : [];
           const countryRoles = (roles ?? []).flatMap((r) =>
             r.country_code === b.professional_roles?.country_code
@@ -98,9 +122,16 @@ export default async function AdminBookingReviewPage() {
                     {b.private_clients?.email_contact ? ` · ${b.private_clients.email_contact}` : ""}
                   </p>
                 </div>
-                <span className={`rounded-full border px-3 py-1 text-sm font-semibold ${BAND_STYLE[band] ?? BAND_STYLE.red}`}>
-                  {BAND_LABEL[band as keyof typeof BAND_LABEL]?.[lang] ?? band} · {ra?.score ?? "—"}
-                </span>
+                <div className="flex flex-col items-end gap-2">
+                  <span className={`rounded-full border px-3 py-1 text-sm font-semibold ${BAND_STYLE[band] ?? BAND_STYLE.red}`}>
+                    {BAND_LABEL[band as keyof typeof BAND_LABEL]?.[lang] ?? band} · {ra?.score ?? "—"}
+                  </span>
+                  {clinical && (
+                    <span className="rounded-full bg-[#e8f0fb] px-3 py-1 text-xs font-semibold text-[#1d4f91]">
+                      <Tr>{"Clinical review required"}</Tr>
+                    </span>
+                  )}
+                </div>
               </div>
 
               {ra ? (
@@ -174,7 +205,13 @@ export default async function AdminBookingReviewPage() {
                 </p>
               )}
 
-              <RiskReviewActions bookingId={b.id} currentRoleId={b.professional_role_id} roles={countryRoles} />
+              {clinical && !isClinicalReviewer ? (
+                <p className="rounded-xl border border-line bg-surface p-3 text-sm text-ink">
+                  <Tr>{"This request needs a clinical reviewer. It stays on hold until a clinical reviewer approves it, asks for more information, changes the professional category or declines it."}</Tr>
+                </p>
+              ) : (
+                <RiskReviewActions bookingId={b.id} currentRoleId={b.professional_role_id} roles={countryRoles} />
+              )}
             </article>
           );
         })}

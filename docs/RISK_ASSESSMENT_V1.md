@@ -111,18 +111,50 @@ Every decision is written to the audit log.
 
 Alerts carry no health detail. The admin e-mail only says that a request is waiting.
 
+## Governance decisions (Ana, 15 October 2026)
+
+- **Clinical review of the questions and override rules for the pilot:** "Reviewed by Ana Dos Santos, UK
+  Registered Nurse and Founder of CareBridge Connect." This statement is in `CLINICAL_REVIEW` in
+  `questionnaire.ts` and is shown on the admin review page. Ana is arranging a further review by a nurse
+  registered with the Ordem dos Enfermeiros.
+
+- **Lawful basis:**
+  - Account and booking information: necessary to provide the requested service (Article 6(1)(b) GDPR).
+  - Health information: explicit consent (Articles 6(1)(a) and 9(2)(a) GDPR).
+
+  The notice in the form explains what is collected, why, and who can access it. It also covers retention,
+  withdrawal of consent through privacy@carebridgeconnects.com, and the person's rights.
+
+- **Retention:** migration 0095 adds `fn_purge_risk_assessments`, run daily at 03:30 by pg_cron. Every run is
+  written to the audit log.
+  - **Abandoned requests:** the assessment and safety brief are deleted 30 days later. This covers cancelled or
+    declined requests, and requests never staffed 30 days after their end. Unfinished forms are never stored in
+    the first place.
+  - **Served bookings:** the assessment and safety brief are deleted three years after the final service.
+  - **Exceptions:** nothing is deleted while the booking or its client has an open or investigating complaint,
+    incident or safeguarding concern, or while `retention_hold` is set (for example a legal claim).
+
+- **Who decides:**
+  - Admins decide general and non-clinical (amber) cases.
+  - Nursing (N) and red-risk (including X) requests stay on hold until a **clinical reviewer** decides them:
+    approve, request more information, change the professional category, or decline. Clinical reviewers are
+    accounts with `users.is_clinical_reviewer = true`. No account has this yet; grant it to Ana's own account.
+  - The server enforces the rule, and other admins see "Clinical review required".
+
+- **Individual accounts:** every decision and every opening of the review page is written to `audit_log` under
+  the reviewer's own user id. Shared logins must not be used. The hosted `admin@carebridgeconnect.co.uk`
+  account is a shared mailbox, so Ana needs a personal account.
+
+- **European Portuguese:** all Portuguese text was checked for Brazilian vocabulary, spelling and gerunds; none
+  was found. The booking form now refers to Portugal time, and the AI assistant is told never to use Brazilian
+  Portuguese.
+
 ## Not done for the pilot — needs Ana or a later phase
 
-- **Reviewing-nurse role:** reviews are done by admins. There is no separate nurse reviewer account, and no
-  "escalate to nurse" button.
+- **Granting the clinical-reviewer flag:** there is no screen for it yet. It is set once per person, by SQL.
 - **Reassessment triggers (section 16):** the date is recorded, but nothing re-prompts the client yet. Bookings
   are single shifts, so the 90-day continuing-service review applies once repeat bookings exist.
 - **Admin-editable weights (section 17):** weights change through the versioned config file in the repository,
   not through an admin screen. Historical assessments keep their version.
-- **Governance (section 18):**
-  - lawful basis and Article 9 condition: the notice currently cites explicit consent; Ana or her lawyer should
-    confirm;
-  - retention period for assessments;
-  - DPIA;
-  - clinical review of the questions by a Portuguese registered nurse.
+- **Governance (section 18):** the DPIA and the Ordem dos Enfermeiros review are Ana's to arrange.
 - The UK (999) path uses the same questions and has not been reviewed for the UK.

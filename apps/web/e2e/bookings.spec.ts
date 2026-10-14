@@ -352,6 +352,11 @@ test("Portugal: emergency answers stop the form; a high-risk request waits for a
     await adminPage.goto("/admin/bookings/review");
     const card = adminPage.locator("article", { hasText: location });
     await expect(card).toBeVisible();
+    // A nursing request waits for a clinical reviewer; an ordinary admin cannot decide it.
+    await expect(card.getByText("Clinical review required")).toBeVisible();
+    await expect(card.getByRole("button", { name: "Approve and publish" })).toHaveCount(0);
+    await sb.from("users").update({ is_clinical_reviewer: true }).eq("id", adminUser.userId);
+    await adminPage.reload();
     await card.getByLabel("Reason and risk-control measures (internal)").fill("Nurse confirmed by phone; medication plan seen.");
     await card.getByLabel("Instructions for the professional (added to the safety brief)").fill("Bring gloves.");
     await card.getByRole("button", { name: "Approve and publish" }).click();

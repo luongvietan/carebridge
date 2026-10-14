@@ -330,6 +330,8 @@ export type Database = {
           required_competency: string | null
           client_message: string | null
           reassess_on: string | null
+          retention_hold: boolean
+          retention_hold_reason: string | null
         }
         Insert: {
           id?: string
@@ -356,6 +358,8 @@ export type Database = {
           required_competency?: string | null
           client_message?: string | null
           reassess_on?: string | null
+          retention_hold?: boolean
+          retention_hold_reason?: string | null
         }
         Update: {
           id?: string
@@ -382,6 +386,8 @@ export type Database = {
           required_competency?: string | null
           client_message?: string | null
           reassess_on?: string | null
+          retention_hold?: boolean
+          retention_hold_reason?: string | null
         }
         Relationships: [
           {
@@ -2705,6 +2711,7 @@ export type Database = {
           email: string
           id: string
           is_active: boolean
+          is_clinical_reviewer: boolean
           is_founder: boolean
           last_login_at: string | null
           updated_at: string
@@ -2717,6 +2724,7 @@ export type Database = {
           email: string
           id: string
           is_active?: boolean
+          is_clinical_reviewer?: boolean
           is_founder?: boolean
           last_login_at?: string | null
           updated_at?: string
@@ -2729,6 +2737,7 @@ export type Database = {
           email?: string
           id?: string
           is_active?: boolean
+          is_clinical_reviewer?: boolean
           is_founder?: boolean
           last_login_at?: string | null
           updated_at?: string

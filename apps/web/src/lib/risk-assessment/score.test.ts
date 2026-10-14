@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { EMERGENCY_QUESTIONS, FLAGS, QUESTIONNAIRE_VERSION } from "./questionnaire";
 import {
   assessRisk,
+  needsClinicalReview,
   reviewDecision,
   roleAllowed,
   roleMatchesRecommendation,
@@ -257,5 +258,19 @@ describe("professional brief", () => {
     const brief = professionalBrief({ ...calm, D2: "3", M2: "specialist", M4: "yes", R4: "secured", S4: "known", R3: "higher_risk" });
     expect(brief).toEqual(expect.arrayContaining(["two_people", "hoist", "no_manual_lifting", "animals", "lone_working_risk"]));
     expect(brief.join(" ")).not.toMatch(/safeguard/);
+  });
+});
+
+describe("clinical review", () => {
+  it("reserves nursing and red-risk requests for a clinical reviewer", () => {
+    expect(needsClinicalReview("red", "A")).toBe(true);
+    expect(needsClinicalReview("amber", "N")).toBe(true);
+    expect(needsClinicalReview("red", "X")).toBe(true);
+    expect(needsClinicalReview("amber", "A")).toBe(false);
+    expect(needsClinicalReview("green", "G")).toBe(false);
+    const nursing = assess({ C1: "administer" });
+    expect(needsClinicalReview(nursing.band, nursing.outcome)).toBe(true);
+    const hazards = assess({ M3: "hazards" });
+    expect(needsClinicalReview(hazards.band, hazards.outcome)).toBe(false);
   });
 });
