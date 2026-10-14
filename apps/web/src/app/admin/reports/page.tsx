@@ -72,12 +72,14 @@ export default async function AdminReportsPage({
                       <a
                         className="text-brand-strong underline"
                         href={`/api/export/${name}?format=csv`}
+                        download
                         aria-label={`Download ${label} as CSV`}
                       ><Tr>{"CSV"}</Tr></a>
                       <span className="px-2 text-muted">·</span>
                       <a
                         className="text-brand-strong underline"
                         href={`/api/export/${name}?format=xlsx`}
+                        download
                         aria-label={`Download ${label} as Excel`}
                       ><Tr>{"Excel"}</Tr></a>
                     </td>
