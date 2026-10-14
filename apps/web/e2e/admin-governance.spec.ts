@@ -303,14 +303,14 @@ test("admin suspends and reinstates a professional via UI", async ({ page }) => 
       .single();
     expect(afterSuspend?.professional_status).toBe("temporarily_suspended");
     expect(afterSuspend?.can_accept_bookings).toBe(false);
+    // The action row is written after the status update, so poll it too.
+    const { count: actionCount } = await sb
+      .from("professional_status_actions")
+      .select("id", { count: "exact", head: true })
+      .eq("professional_id", pro.proId)
+      .eq("action_type", "suspend");
+    expect(actionCount).toBe(1);
   }).toPass({ timeout: 15_000 });
-
-  const { count: actionCount } = await sb
-    .from("professional_status_actions")
-    .select("id", { count: "exact", head: true })
-    .eq("professional_id", pro.proId)
-    .eq("action_type", "suspend");
-  expect(actionCount).toBe(1);
 
   await chooseFrom(page, statusSection.getByRole("combobox", { name: "Action" }), "reinstate");
   await statusSection.getByRole("button", { name: /apply action/i }).click();
