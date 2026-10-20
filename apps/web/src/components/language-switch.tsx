@@ -25,11 +25,11 @@ export function LanguageSwitch() {
     });
   }
   return <div className="relative shrink-0">
-    <div role="group" aria-label="Idioma / Language" className="flex items-center gap-1 text-xs font-semibold sm:text-sm">
+    <fieldset aria-label="Idioma / Language" className="m-0 flex min-w-0 items-center gap-1 border-0 p-0 text-xs font-semibold sm:text-sm">
       <button type="button" lang="pt-PT" aria-label="Português" aria-pressed={locale === "pt-PT"} disabled={pending} onClick={() => select("pt-PT")} className="min-h-10 min-w-9 rounded px-1 aria-pressed:bg-surface focus-visible:outline-2 focus-visible:outline-brand-strong disabled:opacity-50">PT</button>
       <span aria-hidden="true">|</span>
       <button type="button" lang="en" aria-label="English" aria-pressed={locale === "en-GB"} disabled={pending} onClick={() => select("en-GB")} className="min-h-10 min-w-9 rounded px-1 aria-pressed:bg-surface focus-visible:outline-2 focus-visible:outline-brand-strong disabled:opacity-50">EN</button>
-    </div>
+    </fieldset>
     {error && <p role="alert" className="absolute right-0 z-50 w-48 rounded border border-line bg-white p-2 text-xs text-danger">{locale === "pt-PT" ? "Não foi possível guardar o idioma. Tente novamente." : "Could not save language. Please try again."}</p>}
   </div>;
 }

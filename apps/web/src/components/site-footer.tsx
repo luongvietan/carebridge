@@ -13,10 +13,11 @@ const PT_FOOTER_LEGAL_LINKS = [
 ] as const;
 
 /** The footer in the visitor's market: its language, and its own disclaimers. */
+const ENGLISH_LEGAL_LABELS = ["Cookie policy", "Cancellation and refunds", "Complaints", "Legal notice"];
+
 export async function SiteFooter() {
   const content = await getContentForVisitor();
   const pt = (await getSelectedCountry()) === "PT";
-  const englishLabels = ["Cookie policy", "Cancellation and refunds", "Complaints", "Legal notice"];
   return (
     <SiteFooterView
       labels={content.ui.footer}
@@ -24,7 +25,7 @@ export async function SiteFooter() {
       emergencyDisclaimer={content.emergencyDisclaimer}
       consumerInfo={consumerInfoForLocale(content.locale, pt ? "PT" : "GB")}
       legalEntity={pt ? `${PT_LEGAL_ENTITY} · NIPC ${PT_NIPC}` : "CareBridge Connect Ltd"}
-      extraLegalLinks={pt ? PT_FOOTER_LEGAL_LINKS.map((link, i) => ({ ...link, label: content.locale === "en-GB" ? englishLabels[i] : link.label })) : []}
+      extraLegalLinks={pt ? PT_FOOTER_LEGAL_LINKS.map((link, i) => ({ ...link, label: content.locale === "en-GB" ? ENGLISH_LEGAL_LABELS[i] : link.label })) : []}
     />
   );
 }
