@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     return new Response("Invalid signature", { status: 400 });
   }
 
-  const status = paymentStatusForEvent(event.type);
+  const status = paymentStatusForEvent(event.type, event.data.object as { payment_status?: unknown });
   if (!status) return new Response("ignored", { status: 200 });
 
   const admin = createServiceClient();

@@ -1,5 +1,5 @@
+import { getPreferredLocale } from "@/lib/i18n/preference-server";
 import { makeT } from "@/lib/i18n/portal";
-import { getSelectedCountry } from "@/lib/marketing/market-server";
 
 import Link from "next/link";
 import { CtaPillLink } from "@/components/cta-pill-link";
@@ -15,7 +15,7 @@ const helpfulLinks = [
 ] as const;
 
 export default async function NotFound() {
-  const t = makeT((await getSelectedCountry()) === "PT" ? "pt-PT" : "en-GB");
+  const t = makeT(await getPreferredLocale());
   return (
     <>
       <SiteNav />

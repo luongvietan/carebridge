@@ -1,4 +1,5 @@
 "use client";
+import { referenceLabel } from "@/lib/i18n/reference-en";
 import { RequiredMark } from "@/components/required-mark";
 import { Tr } from "@/components/portal-locale";
 import { useActionState, useState } from "react";
@@ -65,6 +66,7 @@ export function ProfileForm({
   currentAvailabilityDays = NO_AVAILABILITY_DAYS,
   currentPhotoUrl = null,
   country = "GB",
+  locale = country === "PT" ? "pt-PT" : "en-GB",
 }: {
   roles: Role[];
   skills: Skill[];
@@ -74,10 +76,10 @@ export function ProfileForm({
   currentPhotoUrl?: string | null;
   /** The professional's country: it decides the language and the country-specific fields. */
   country?: "GB" | "PT";
+  locale?: "pt-PT" | "en-GB";
 }) {
   const isPortugal = country === "PT";
-  const locale = isPortugal ? "pt-PT" : "en-GB";
-  const p = onboardingCopy[locale].profile;
+  const p = country === "PT" && locale === "en-GB" ? { ...onboardingCopy[locale].profile, taxId: "NIF (Portuguese tax number)", taxIdPlaceholder: "9 digits", niss: "NISS (Social Security number)", nissPlaceholder: "11 digits", registrationBodyPlaceholder: "e.g. Ordem dos Enfermeiros, Ordem dos Fisioterapeutas" } : onboardingCopy[locale].profile;
   const [state, action, pending] = useActionState<ProfileResult, FormData>(saveProfile, null);
   const draft = state && "values" in state ? state.values : undefined;
   const [roleId, setRoleId] = useState(
@@ -156,13 +158,13 @@ export function ProfileForm({
             onValueChange={setRoleId}
             placeholder={p.selectRole}
             className="mt-1"
-            options={roles.map((r) => ({ value: r.id, label: r.name, group: r.category }))}
+            options={roles.map((r) => ({ value: r.id, label: referenceLabel(r.name, locale), group: referenceLabel(r.category, locale) }))}
           />
         </div>
         {register && referenceField === "ofsted_urn" && (
           <label className="block text-sm font-medium">
-            <legend>{REFERENCE_LABEL[register]}</legend>
-            {REFERENCE_LABEL[register]}
+            <legend>{referenceLabel(REFERENCE_LABEL[register], locale)}</legend>
+            {referenceLabel(REFERENCE_LABEL[register], locale)}
             <RequiredMark /><input
               name="ofstedRegistrationNumber"
               required
@@ -180,16 +182,16 @@ export function ProfileForm({
         )}
         {register && referenceField === "iss_authorisation" && (
           <label className="block text-sm font-medium">
-            {REFERENCE_LABEL[register]}
+            {referenceLabel(REFERENCE_LABEL[register], locale)}
             <RequiredMark /><input
               name="issAuthorisationNumber"
               required
-              placeholder={isPortugal ? "Conforme consta na autorização do ISS" : REFERENCE_PLACEHOLDER[register]}
+              placeholder={isPortugal ? (locale === "pt-PT" ? "Conforme consta na autorização do ISS" : "As recorded on the ISS authorisation") : REFERENCE_PLACEHOLDER[register]}
               defaultValue={v.issAuthorisationNumber}
               className={field}
             />
             <span className="mt-1 block text-xs font-normal text-muted">
-              {isPortugal
+              {locale === "pt-PT"
                 ? `Só uma ama licenciada pode ser listada como tal. Envie a sua autorização do ISS no passo seguinte — um administrador confirma-a junto da ${REGISTER_LABEL[register]} antes de poder aceitar marcações.`
                 : `Only an authorised Ama may be listed as one. Upload your ISS authorisation at the next step — an administrator confirms it with the ${REGISTER_LABEL[register]} before you can accept any bookings.`}
             </span>
@@ -290,7 +292,7 @@ export function ProfileForm({
         )}
         {register && referenceField === "registration_number" ? (
           <fieldset className="block text-sm font-medium">
-            <legend>{REFERENCE_LABEL[register]}</legend>
+            <legend>{referenceLabel(REFERENCE_LABEL[register], locale)}</legend>
             <input type="hidden" name="registrationBody" value={REGISTER_LABEL[register]} />
             <input
               name="registrationNumber"

@@ -1,5 +1,8 @@
 "use server";
-import { headers } from "next/headers";
+import { getPreferredLocale } from "@/lib/i18n/preference-server";
+import { cookies, headers } from "next/headers";
+import { isPreferredLocale, LOCALE_COOKIE } from "@/lib/i18n/preference";
+import { setPreferredLocale } from "@/lib/i18n/preference-actions";
 import { getSelectedCountry, isRegistrationOpen } from "@/lib/marketing/market-server";
 import { redirect } from "next/navigation";
 import { getAppUrl } from "@/lib/app-url";
@@ -94,6 +97,15 @@ export async function attemptSignIn(email: string, password: string): Promise<Si
 
   await recordSuccessfulSignIn(data.user.id, data.user.email ?? normalized);
 
+  const chosenLanguage = (await cookies()).get(LOCALE_COOKIE)?.value;
+  if (isPreferredLocale(chosenLanguage) && chosenLanguage !== data.user.user_metadata?.preferred_locale) {
+    const saved = await setPreferredLocale(chosenLanguage);
+    if ("error" in saved) {
+      await supabase.auth.signOut();
+      return { ok: false, error: saved.error };
+    }
+  }
+
   return { ok: true, redirectTo: roleHome((row?.account_type ?? "private_client") as AccountType) };
 }
 
@@ -156,6 +168,7 @@ export async function signUp(_prev: SignUpResult, formData: FormData): Promise<S
         // Picks the language of Supabase's own sign-up and password-reset
         // e-mails (see supabase/templates): "PT" → European Portuguese.
         market,
+        preferred_locale: await getPreferredLocale(),
       },
     },
   });

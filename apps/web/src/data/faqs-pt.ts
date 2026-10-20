@@ -38,7 +38,7 @@ export const faqsPt = [
   {
     question: "Existe uma avaliação de competências?",
     answer:
-      "Sim. Todos os profissionais têm de concluir uma avaliação online que abrange segurança e proteção, prevenção de infeção, proteção de dados, noções de medicação e conhecimentos específicos da função. A nota mínima é 80%, com um máximo de três tentativas. Após três falhas, novas tentativas ficam bloqueadas durante um período de revisão.",
+      "Sim. Na fase piloto, todos os profissionais respondem a 20 perguntas comuns sobre segurança e proteção, prevenção de infeção, proteção de dados, noções de medicação e limites profissionais. Os bancos por especialidade serão introduzidos mais tarde. Esta avaliação de integração não é uma qualificação acreditada e não substitui as habilitações ou inscrições legalmente exigidas. A nota mínima é 80%, com um máximo de três tentativas. Após três falhas, novas tentativas ficam bloqueadas durante um período de revisão.",
   },
   {
     question: "Como são tratados os pagamentos?",

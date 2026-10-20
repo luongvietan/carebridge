@@ -1,3 +1,4 @@
+import { getPreferredLocale } from "@/lib/i18n/preference-server";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { PayoutDetailsForm } from "@/components/payout-details-form";
@@ -25,13 +26,14 @@ export default async function PayoutDetailsPage() {
     }
   }
   const pt = (await getAccountCountry()) === "PT";
+  const locale = await getPreferredLocale();
   return (
     <main id="main-content" tabIndex={-1} className="mx-auto max-w-2xl px-4 py-10">
-      <h1 className="text-3xl font-bold">{pt ? "Dados de pagamento" : "Payout details"}</h1>
+      <h1 className="text-3xl font-bold">{locale === "pt-PT" ? "Dados de pagamento" : "Payout details"}</h1>
       <PayoutDetailsForm
         last4={last4}
         defaultKind={pt ? "iban" : "uk"}
-        locale={pt ? "pt-PT" : "en-GB"}
+        locale={locale}
       />
     </main>
   );

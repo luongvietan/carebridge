@@ -1,3 +1,4 @@
+import { getPreferredLocale } from "@/lib/i18n/preference-server";
 import type { Metadata } from "next";
 import { CtaBanner } from "@/components/cta-banner";
 import { FaqList } from "@/components/faq-list";
@@ -6,15 +7,13 @@ import { MarketingPageMotion } from "@/components/motion/marketing-page-motion";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteNav } from "@/components/site-nav";
 import { faqsForLocale } from "@/data/faqs-locale";
-import { localeForCountry } from "@/lib/marketing/market";
-import { getSelectedCountry } from "@/lib/marketing/market-server";
 import { marketingImages } from "@/data/marketing-images";
 import { marketingHeading, marketingSection, marketingSubheading } from "@/lib/marketing-ui";
 
 export const metadata: Metadata = { title: "FAQ — CareBridge Connect" };
 
 export default async function FaqPage() {
-  const locale = localeForCountry(await getSelectedCountry());
+  const locale = await getPreferredLocale();
   const pt = locale === "pt-PT";
   return (
     <MarketingPageMotion>

@@ -3,8 +3,16 @@ import { paymentStatusForEvent, refundInfoFromCharge } from "./events";
 
 describe("paymentStatusForEvent", () => {
   it("maps success events to succeeded", () => {
-    expect(paymentStatusForEvent("checkout.session.completed")).toBe("succeeded");
+    expect(paymentStatusForEvent("checkout.session.completed", { payment_status: "paid" })).toBe("succeeded");
     expect(paymentStatusForEvent("payment_intent.succeeded")).toBe("succeeded");
+  });
+  it("does not settle an unpaid or unverified checkout session", () => {
+    expect(paymentStatusForEvent("checkout.session.completed", { payment_status: "unpaid" })).toBeNull();
+    expect(paymentStatusForEvent("checkout.session.completed")).toBeNull();
+  });
+  it("settles delayed success and records delayed failure", () => {
+    expect(paymentStatusForEvent("checkout.session.async_payment_succeeded")).toBe("succeeded");
+    expect(paymentStatusForEvent("checkout.session.async_payment_failed")).toBe("failed");
   });
   it("maps failure to failed and refund to refunded", () => {
     expect(paymentStatusForEvent("payment_intent.payment_failed")).toBe("failed");

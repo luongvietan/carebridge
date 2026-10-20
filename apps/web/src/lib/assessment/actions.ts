@@ -8,8 +8,10 @@ import { getAccountCountry } from "@/lib/accounts/market-server";
 import { scorePercent, isPass, nextAttemptState, planNextCycle } from "./scoring";
 import { sendNotification } from "@/lib/notifications/send";
 import { recomputeRoleAssignments } from "@/lib/roles/assignments";
+import { getPreferredLocale } from "@/lib/i18n/preference-server";
+import { translatePilotQuestion } from "./translation";
 
-// CareBridge MVP assessment format: 15 common + 5 role-specific = 20 questions.
+// The PT pilot uses 20 common questions. Legacy GB retains 15 common + 5 specialist.
 const COMMON_PER_ATTEMPT = 15;
 const ROLE_SPECIFIC_PER_ATTEMPT = 5;
 
@@ -131,6 +133,7 @@ export async function startAttempt(requestedRoleId?: string): Promise<StartResul
   const user = await requireAuth();
   const professionalId = await ensureProfessional(user);
   if (!professionalId) return { error: "You must be signed in." };
+  const locale = await getPreferredLocale();
 
   // Service client: question bank holds correct answers and is admin-only by RLS,
   // so selection happens server-side and correct_option is never sent to the client.
@@ -179,8 +182,8 @@ export async function startAttempt(requestedRoleId?: string): Promise<StartResul
   if (inProgress) {
     const servedIds = (inProgress.served_question_ids as string[]) ?? [];
     const { data: qs } = await admin.from("assessment_question_bank").select(cols).in("id", servedIds);
-    if (prof?.country_code === "PT" && roleId) {
-      if (servedIds.length !== 20 || !roleAttemptReady(qs ?? [], roleId)) {
+    if (prof?.country_code === "PT") {
+      if (servedIds.length !== 20 || !roleAttemptReady(qs ?? [])) {
         return { error: "A avaliação desta função ainda está em preparação. Contacte a equipa CareBridge Connect." };
       }
     }
@@ -199,7 +202,7 @@ export async function startAttempt(requestedRoleId?: string): Promise<StartResul
         ok: true,
         attemptId: inProgress.id,
         attemptNumber: inProgress.attempt_number,
-        questions: resumed,
+        questions: prof?.country_code === "PT" ? resumed.map(q => translatePilotQuestion(q, locale)) : resumed,
         roleId,
         roleName,
       };
@@ -248,14 +251,14 @@ export async function startAttempt(requestedRoleId?: string): Promise<StartResul
         .eq("country_code", country)
     : { data: [] };
 
-  if (country === "PT" && !assessmentBankReady(commonPool?.length ?? 0, rolePool?.length ?? 0, !!roleId)) {
+  if (country === "PT" && !assessmentBankReady(commonPool?.length ?? 0)) {
     return { error: "A avaliação desta função ainda está em preparação. Contacte a equipa CareBridge Connect; esta tentativa não será contabilizada." };
   }
   const picked = pickStratified(
     commonPool ?? [],
-    rolePool ?? [],
-    COMMON_PER_ATTEMPT,
-    ROLE_SPECIFIC_PER_ATTEMPT,
+    country === "PT" ? [] : rolePool ?? [],
+    country === "PT" ? 20 : COMMON_PER_ATTEMPT,
+    country === "PT" ? 0 : ROLE_SPECIFIC_PER_ATTEMPT,
   );
   if (picked.length === 0) return { error: "No assessment questions are available yet." };
   const servedIds = picked.map((p) => p.id);
@@ -279,7 +282,7 @@ export async function startAttempt(requestedRoleId?: string): Promise<StartResul
     question_text: p.question_text,
     options: p.options as AssessmentOption[],
   }));
-  return { ok: true, attemptId: attempt.id, attemptNumber, questions, roleId, roleName };
+  return { ok: true, attemptId: attempt.id, attemptNumber, questions: country === "PT" ? questions.map(q => translatePilotQuestion(q, locale)) : questions, roleId, roleName };
 }
 
 export async function submitAttempt(
@@ -305,8 +308,8 @@ export async function submitAttempt(
     .from("assessment_question_bank")
     .select("id, correct_option, country_code, professional_role_id")
     .in("id", servedIds);
-  if (attempt.professional_role_id && await getAccountCountry(user) === "PT" &&
-      (servedIds.length !== 20 || !roleAttemptReady(questions ?? [], attempt.professional_role_id))) {
+  if (await getAccountCountry(user) === "PT" &&
+      (servedIds.length !== 20 || !roleAttemptReady(questions ?? []))) {
     return { error: "A avaliação desta função ainda está em preparação. Contacte a equipa CareBridge Connect." };
   }
   const correctById = new Map((questions ?? []).map((q) => [q.id, q.correct_option]));

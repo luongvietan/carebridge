@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { preferredLegalLang } from "@/lib/i18n/legal-server";
 import { BackLink } from "@/components/back-link";
 import { LegalDocument } from "@/components/legal-document";
 import { SiteFooter } from "@/components/site-footer";
@@ -8,7 +9,6 @@ import {
   PT_LEGAL_INDEX,
   PT_LEGAL_PACK,
   PT_LEGAL_ROUTES,
-  legalLangFromParam,
   type LegalDocKey,
   type LegalLang,
 } from "@/data/legal-copy-pt";
@@ -16,13 +16,13 @@ import {
 export type LegalSearchParams = Promise<Record<string, string | string[] | undefined>>;
 
 export async function ptLegalMetadata(docKey: LegalDocKey, searchParams: LegalSearchParams): Promise<Metadata> {
-  const lang = legalLangFromParam((await searchParams).lang);
+  const lang = await preferredLegalLang(searchParams);
   return { title: PT_LEGAL_PACK[lang][docKey].title };
 }
 
 /** `path` in the given language: Portuguese is the bare path, English adds `?lang=en`. */
 export function legalHref(path: string, lang: LegalLang): string {
-  return lang === "en" ? `${path}?lang=en` : path;
+  return `${path}?lang=${lang}`;
 }
 
 /** Links to the same page in the other language. */
@@ -36,7 +36,7 @@ export function LegalLanguageSwitch({ path, lang }: { path: string; lang: LegalL
   ) : (
     <div className="space-y-2 text-sm">
       <p>
-        <Link href={path} hrefLang="pt-PT" lang="pt-PT" className="font-semibold text-brand-strong hover:underline">
+        <Link href={legalHref(path, "pt")} hrefLang="pt-PT" lang="pt-PT" className="font-semibold text-brand-strong hover:underline">
           Versão portuguesa
         </Link>
       </p>
@@ -50,7 +50,7 @@ export function LegalLanguageSwitch({ path, lang }: { path: string; lang: LegalL
 
 /** One document of the Portuguese legal pack, in Portuguese or its English translation. */
 export async function PtLegalPage({ docKey, searchParams }: { docKey: LegalDocKey; searchParams: LegalSearchParams }) {
-  const lang = legalLangFromParam((await searchParams).lang);
+  const lang = await preferredLegalLang(searchParams);
   const doc = PT_LEGAL_PACK[lang][docKey];
   return (
     <>

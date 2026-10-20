@@ -13,6 +13,13 @@ function allStrings(v: unknown, out: string[] = []): string[] {
 }
 
 describe("marketing content per market", () => {
+  it("keeps Portugal roles and regulations when English is selected", () => {
+    const englishPortugal = contentForLocale("en-GB", "PT");
+    expect(englishPortugal.healthRoles.length + englishPortugal.childcareRoles.length).toBe(8);
+    expect(englishPortugal.ui.contact.phoneValue).toBe("+351 926 562 988");
+    expect(englishPortugal.showFounder).toBe(false);
+    expect(allStrings(englishPortugal).join(" ")).not.toMatch(/NMC|DBS|CQC|Ofsted|999/);
+  });
   it("falls back to the UK for anything that is not Portuguese", () => {
     expect(contentForLocale("en-GB")).toBe(en);
     expect(contentForLocale("fr-FR")).toBe(en);

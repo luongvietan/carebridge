@@ -1,4 +1,5 @@
 "use client";
+import { LanguageSwitch } from "@/components/language-switch";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -152,7 +153,8 @@ export function SiteNavClient({ dashboardHref, labels }: SiteNavClientProps) {
 
         <BrandLogo className="min-w-0 justify-self-center lg:justify-self-center" />
 
-        <div className="flex items-center justify-end gap-2">
+        <div className="flex items-center justify-end gap-1 sm:gap-2">
+          <LanguageSwitch />
           <div className="text-xs [&_a]:px-2 [&_a]:text-xs sm:[&_a]:px-4 sm:[&_a]:text-sm">{accountLink}</div>
           <div className="hidden sm:block"><CtaPillLink href="/contact">{labels.contactUs}</CtaPillLink></div>
         </div>

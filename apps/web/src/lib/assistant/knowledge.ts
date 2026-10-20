@@ -12,7 +12,7 @@ export type KnowledgeEntry = { title: string; body: string };
 const guideEn: KnowledgeEntry[] = [
   {
     title: "Which countries and languages does the platform serve?",
-    body: "CareBridge Connect serves the United Kingdom and Portugal. The homepage lets you choose a country, and the roles, compliance requirements, registration steps and language then follow that choice. The United Kingdom is live; Portugal is launching soon.",
+    body: "CareBridge Connect is preparing to launch first in Portugal. The United Kingdom is launching soon. Choose PT or EN independently of your market; language never changes local roles, compliance requirements or currency. Registration and bookings open only when enabled by the team.",
   },
   {
     title: "How do I register as a professional?",
@@ -39,7 +39,7 @@ const guideEn: KnowledgeEntry[] = [
 const guidePt: KnowledgeEntry[] = [
   {
     title: "Que países e línguas serve a plataforma?",
-    body: "A CareBridge Connect serve o Reino Unido e Portugal. Na página inicial escolhe o país e as funções, os requisitos de conformidade, o registo e a língua seguem essa escolha. O Reino Unido já está ativo; Portugal está em lançamento em breve.",
+    body: "A CareBridge Connect prepara o lançamento primeiro em Portugal. O Reino Unido estará disponível mais tarde. Escolha PT ou EN independentemente do mercado; o idioma não altera as categorias, os requisitos locais nem a moeda. O registo e as marcações só abrem quando forem ativados pela equipa.",
   },
   {
     title: "Como me registo como profissional?",

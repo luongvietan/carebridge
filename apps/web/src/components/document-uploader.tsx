@@ -1,4 +1,5 @@
 "use client";
+import { referenceLabel } from "@/lib/i18n/reference-en";
 import Link from "next/link";
 import { Tr, usePortalT } from "@/components/portal-locale";
 import { useState } from "react";
@@ -53,11 +54,13 @@ const field = "rounded-xl border border-line bg-white px-2 py-1.5 text-sm focus:
 export function DocumentUploader({
   items,
   locale = "en-GB",
+  country = "GB",
 }: {
   items: DocItem[];
   locale?: OnboardingLocale;
+  country?: "PT" | "GB";
 }) {
-  const d = onboardingCopy[locale].documents;
+  const d = country === "PT" && locale === "en-GB" ? { ...onboardingCopy[locale].documents, bankDetails: "Add your bank details securely so we can pay you in EUR.", bankDetailsLink: "Add bank details", issuingPlaceholder: "Issuing body (e.g. professional Ordem, optional)" } : onboardingCopy[locale].documents;
   const router = useRouter();
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -67,7 +70,7 @@ export function DocumentUploader({
     const fd = new FormData(e.currentTarget);
     fd.set("documentTypeId", item.typeId);
     if (item.hasExpiry && !String(fd.get("expiryDate") ?? "").trim()) {
-      setError(`${item.name}: ${d.expiryRequired}`);
+      setError(`${referenceLabel(item.name, locale)}: ${d.expiryRequired}`);
       return;
     }
     setBusy(item.typeId);
@@ -90,12 +93,12 @@ export function DocumentUploader({
 
       <div className="mt-6 divide-y divide-line border border-line">
         {items.map((item) => {
-          const guidance = guidanceFor(item.code);
+          const guidance = guidanceFor(item.code, locale);
           return (
           <div key={item.typeId} className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <span className="font-semibold">{item.name}</span>
+                <span className="font-semibold">{referenceLabel(item.name, locale)}</span>
                 {item.critical && <span className="ml-2 text-xs text-brand-strong">{d.critical}</span>}
                 {item.optional && <span className="ml-2 text-xs text-muted">{d.optional}</span>}
               </div>
@@ -118,7 +121,7 @@ export function DocumentUploader({
                   name="file"
                   variant="document"
                   required
-                  aria-label={`Upload ${item.name}`}
+                  aria-label={`${locale === "pt-PT" ? "Enviar" : "Upload"} ${referenceLabel(item.name, locale)}`}
                   existing={item.existing ?? null}
                 />
               </div>
@@ -157,7 +160,7 @@ export function DocumentUploader({
         })}
       </div>
 
-      {locale === "pt-PT" && (
+      {country === "PT" && (
         <p className="mt-6 text-sm text-ink">
           {d.bankDetails}{" "}
           <Link href="/professional/payout-details" className="font-semibold text-brand-strong hover:underline">

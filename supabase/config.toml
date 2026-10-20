@@ -244,15 +244,15 @@ otp_expiry = 3600
 # sender_name = "Admin"
 
 # Email templates (paths relative to project root when using Supabase CLI)
-# Both templates are bilingual: Portuguese when user_metadata.market = "PT"
-# (set at sign-up from the market cookie), English otherwise. The hosted
+# Both templates are bilingual: English when user_metadata.preferred_locale
+# is "en-GB", Portuguese by default. Language is independent of market. The hosted
 # project's templates are set in the dashboard — paste these files there.
 [auth.email.template.confirmation]
-subject = "{{ if eq (printf \"%v\" .Data.market) \"PT\" }}Confirme o seu email{{ else }}Confirm your email{{ end }} — CareBridge Connect"
+subject = "{{ if ne (printf \"%v\" .Data.preferred_locale) \"en-GB\" }}Confirme o seu email{{ else }}Confirm your email{{ end }} — CareBridge Connect Portugal"
 content_path = "./supabase/templates/confirmation.html"
 
 [auth.email.template.recovery]
-subject = "{{ if eq (printf \"%v\" .Data.market) \"PT\" }}Redefinir a palavra-passe{{ else }}Reset your password{{ end }} — CareBridge Connect"
+subject = "{{ if ne (printf \"%v\" .Data.preferred_locale) \"en-GB\" }}Redefinir a palavra-passe{{ else }}Reset your password{{ end }} — CareBridge Connect Portugal"
 content_path = "./supabase/templates/recovery.html"
 
 # [auth.email.template.invite]

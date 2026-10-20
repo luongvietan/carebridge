@@ -125,6 +125,24 @@ export const DOCUMENT_GUIDANCE: Record<string, DocumentGuidance> = {
   },
 };
 
-export function guidanceFor(code: string | null | undefined): DocumentGuidance | null {
-  return (code && DOCUMENT_GUIDANCE[code]) || null;
+const PT_GUIDANCE_EN: Record<string, string> = {
+  identificacao_direito_trabalho: "A valid Citizen Card (front and back), passport or residence permit allowing you to work in Portugal. The name must match your application.",
+  nif: "Proof of your Portuguese NIF: NIF card, Citizen Card or a certificate issued by Portal das Finanças.",
+  niss_comprovativo: "Proof of your NISS: Social Security card or a document from Segurança Social Direta.",
+  atividade_financas: "Proof of self-employment registered with Finanças, issued by Portal das Finanças (declaration of commencement or certificate of active registration).",
+  registo_criminal: "A Portuguese criminal record certificate issued by the criminal identification services (Justiça), for employment or professional practice.",
+  registo_criminal_menores: "A Portuguese criminal record certificate issued for regular contact with minors (Lei n.º 113/2009). A general certificate is insufficient.",
+  registo_criminal_estrangeiro: "If applicable: criminal record certificates from countries where you have recently lived, translated into Portuguese when not in Portuguese, English or Spanish.",
+  cedula_profissional: "A professional card or proof of valid registration with the Ordem dos Enfermeiros or Ordem dos Fisioterapeutas, with number and validity visible.",
+  qualificacoes_pt: "Diplomas or certificates of your academic and professional qualifications, such as a degree, vocational course or training in your field.",
+  seguro_responsabilidade_civil: "Current professional liability insurance policy or certificate, showing the insured person's name, cover amount and cover period.",
+  seguro_acidentes_trabalho: "Current workplace accident insurance policy or certificate for self-employed professionals, showing the cover period.",
+  referencias_pt: "A written reference from someone who supervised your work (employer, client or institution), rather than a friend or relative.",
+  historico_profissional: "Your CV showing employment history: roles, organisations, dates and reference contacts.",
+  primeiros_socorros: "A valid first aid certificate, ideally including a paediatric module, from a recognised training provider.",
+  autorizacao_iss: "Your childminder (Ama) licence/authorisation issued by Social Security (ISS), with its number visible.",
+};
+export function guidanceFor(code: string | null | undefined, locale?: string): DocumentGuidance | null {
+  const guidance = (code && DOCUMENT_GUIDANCE[code]) || null;
+  return guidance && code && locale === "en-GB" && PT_GUIDANCE_EN[code] ? { ...guidance, accepted: PT_GUIDANCE_EN[code] } : guidance;
 }

@@ -1,8 +1,8 @@
 "use server";
+import { getPreferredLocale } from "@/lib/i18n/preference-server";
 import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/service";
 import { createHash } from "node:crypto";
-import { getSelectedCountry } from "@/lib/marketing/market-server";
 import { renderEnquiryAcknowledgement, type EmailLocale } from "@/lib/email/render";
 import { sendEmail } from "@/lib/email/transport";
 
@@ -32,12 +32,11 @@ export async function submitContactMessage(
   }
 
   const admin = createServiceClient();
-  const locale: EmailLocale = (await getSelectedCountry()) === "PT" ? "pt-PT" : "en-GB";
   // Serialize submissions per mailbox inside the database, across instances.
-  const { data: outcome, error } = await admin.rpc("submit_contact_enquiry", {
+  const [{ data: outcome, error }, locale] = await Promise.all([admin.rpc("submit_contact_enquiry", {
     p_name: parsed.data.name, p_email: parsed.data.email,
     p_subject: parsed.data.subject ?? null, p_message: parsed.data.message,
-  });
+  }), getPreferredLocale()]);
   if (error) return { error: "Sorry — we couldn't save your message. Please try again." };
   if (outcome === "duplicate") {
     return { ok: true, acknowledgement: "duplicate", locale };

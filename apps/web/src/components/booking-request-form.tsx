@@ -1,4 +1,5 @@
 "use client";
+import { referenceLabel } from "@/lib/i18n/reference-en";
 import { RequiredMark } from "@/components/required-mark";
 import { Tr } from "@/components/portal-locale";
 import { useEffect, useRef, useState } from "react";
@@ -48,16 +49,19 @@ export function BookingRequestForm({
   careTypes = NO_CARE_TYPES,
   requesterType,
   locale = "en-GB",
+  country = "GB",
   emergencyNumber,
 }: {
   roles: Role[];
   careTypes?: CareType[];
   requesterType: "client" | "organisation";
   locale?: RequesterLocale;
+  country?: "PT" | "GB";
   /** Set for private clients: they complete the risk and needs assessment first. */
   emergencyNumber?: string;
 }) {
-  const t = requesterCopy[locale].booking;
+  const t = country === "PT" && locale === "en-GB" ? { ...requesterCopy[locale].booking, timezone: "All booking times use mainland Portugal time (Europe/Lisbon), including daylight saving time." } : requesterCopy[locale].booking;
+  const timeZone = country === "PT" ? "Europe/Lisbon" : APP_TIME_ZONE;
   const rc = RISK_COPY[locale];
   const lang = locale === "pt-PT" ? "pt" : "en";
   const needsAssessment = requesterType === "client" && !!emergencyNumber;
@@ -207,7 +211,7 @@ export function BookingRequestForm({
           }}
           placeholder={t.selectRole}
           className="mt-1"
-          options={bookableRoles.map((r) => ({ value: r.id, label: r.name, group: r.category }))}
+          options={bookableRoles.map((r) => ({ value: r.id, label: referenceLabel(r.name, locale), group: referenceLabel(r.category, locale) }))}
         />
         {roleDiffers && !heldForReview && <span role="status" className="mt-1 block text-xs font-normal text-ink">{rc.differs}</span>}
       </div>
@@ -222,7 +226,7 @@ export function BookingRequestForm({
             onValueChange={(v) => { setReview(null); setCareTypeId(v); }}
             placeholder={t.selectCareType}
             className="mt-1"
-            options={availableCareTypes.map((c) => ({ value: c.id, label: c.name }))}
+            options={availableCareTypes.map((c) => ({ value: c.id, label: referenceLabel(c.name, locale) }))}
           />
           {careTypeId && (
             <span className="mt-1 block text-xs font-normal text-muted">
@@ -263,7 +267,7 @@ export function BookingRequestForm({
             year: "numeric",
             hour: "2-digit",
             minute: "2-digit",
-            timeZone: APP_TIME_ZONE,
+            timeZone,
           })}
         </p>
       )}
@@ -286,10 +290,10 @@ export function BookingRequestForm({
         <p className="text-sm">{t.timezone}</p>
         <dl className="grid gap-2 text-sm">
           {[
-            [t.role, selectedRole?.name],
-            [t.careType, availableCareTypes.find((c) => c.id === careTypeId)?.name],
-            [t.start, startDate?.toLocaleString(t.dateLocale, { timeZone: APP_TIME_ZONE })],
-            [t.endsAt, endPreview?.toLocaleString(t.dateLocale, { timeZone: APP_TIME_ZONE })],
+            [t.role, referenceLabel(selectedRole?.name ?? "", locale)],
+            [t.careType, referenceLabel(availableCareTypes.find((c) => c.id === careTypeId)?.name ?? "", locale)],
+            [t.start, startDate?.toLocaleString(t.dateLocale, { timeZone })],
+            [t.endsAt, endPreview?.toLocaleString(t.dateLocale, { timeZone })],
             [t.location, review.get("locationAddress")],
             [t.postcode, review.get("locationPostcode")],
             [t.notes, review.get("notes")],

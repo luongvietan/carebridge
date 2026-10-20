@@ -1,4 +1,5 @@
 "use client";
+import { LanguageSwitch } from "@/components/language-switch";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -112,6 +113,7 @@ export function RoleNav({ areaLabel, items, email }: RoleNavProps) {
         </div>
 
         <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+          <LanguageSwitch />
           {email && (
             <span className="hidden max-w-[12rem] truncate text-sm text-ink md:block" title={email}>
               {email}

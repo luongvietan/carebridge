@@ -1,11 +1,11 @@
-{{/* Portuguese for users who registered from the Portugal market (user_metadata.market = "PT"); English otherwise, including users with no market recorded. */}}{{ $pt := eq (printf "%v" .Data.market) "PT" }}
+{{/* Language is independent of market; Portuguese is the default. */}}{{ $pt := ne (printf "%v" .Data.preferred_locale) "en-GB" }}
 <!DOCTYPE html>
 <html lang="{{ if $pt }}pt-PT{{ else }}en{{ end }}">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>{{ if $pt }}Redefinir a palavra-passe{{ else }}Reset your password{{ end }} — CareBridge Connect</title>
+  <title>{{ if $pt }}Redefinir a palavra-passe{{ else }}Reset your password{{ end }} — CareBridge Connect Portugal</title>
   <!--[if mso]>
   <noscript>
     <xml>
@@ -112,9 +112,9 @@
                 {{ if $pt }}Profissionais verificados de saúde e de cuidados infantis.{{ else }}Verified healthcare staffing, built on trust.{{ end }}
               </p>
               <p style="margin:0;font-size:12px;line-height:1.5;color:#9aa8a0;">
-                <a href="{{ .SiteURL }}" style="color:#2e7d32;text-decoration:none;">carebridgeconnect.co.uk</a>
+                <a href="{{ .SiteURL }}" style="color:#2e7d32;text-decoration:none;">carebridgeconnects.com</a>
                 &nbsp;·&nbsp;
-                <a href="mailto:info@carebridgeconnect.co.uk" style="color:#2e7d32;text-decoration:none;">info@carebridgeconnect.co.uk</a>
+                <a href="mailto:info@carebridgeconnects.com" style="color:#2e7d32;text-decoration:none;">info@carebridgeconnects.com</a><br />+351 926 562 988 · WhatsApp<br />{{ if $pt }}Normalmente respondemos no prazo de um dia útil.{{ else }}We normally reply within one working day.{{ end }}
               </p>
             </td>
           </tr>

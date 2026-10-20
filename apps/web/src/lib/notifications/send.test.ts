@@ -1,226 +1,62 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import {
-  localeForCountry,
-  recipientCountry,
-  renderTemplate,
-  sendNotification,
-  type ChannelSender,
-} from "./send";
-
-describe("renderTemplate", () => {
-  it("substitutes {{vars}} in subject and body", () => {
-    const out = renderTemplate(
-      { subject: "Booking {{id}}", body: "Hi {{name}}, booking {{id}} is confirmed." },
-      { id: "abc", name: "Jo" },
-    );
-    expect(out).toEqual({ subject: "Booking abc", body: "Hi Jo, booking abc is confirmed." });
-  });
-  it("replaces unknown vars with empty string", () => {
-    expect(renderTemplate({ subject: "{{x}}", body: "" }, {})).toEqual({ subject: "", body: "" });
-  });
-});
-
-describe("localeForCountry", () => {
-  it("maps Portuguese professionals to pt-PT and everyone else to English", () => {
-    expect(localeForCountry("PT")).toBe("pt-PT");
-    expect(localeForCountry("GB")).toBe("en-GB");
-    expect(localeForCountry(null)).toBe("en-GB");
-  });
-});
-
-describe("recipientCountry", () => {
-  it("uses immutable account country ahead of historical profiles", () => {
-    expect(recipientCountry({ accountCountry: "PT", professionalCountry: "GB" })).toBe("PT");
-    expect(recipientCountry({ accountCountry: "GB", organisationCountry: "PT" })).toBe("GB");
-  });
-  it("prefers the professional's, then the organisation's recorded country", () => {
-    expect(recipientCountry({ professionalCountry: "PT" })).toBe("PT");
-    expect(recipientCountry({ organisationCountry: "PT" })).toBe("PT");
-  });
-
-  it("falls back to the UK when no stored country is known", () => {
-    expect(recipientCountry({ accountCountry: "unknown" })).toBe("GB");
-    expect(recipientCountry({})).toBe("GB");
-  });
-});
-
-/**
- * Chainable Supabase stub: each builder method returns itself, terminal calls
- * consume a queue of per-table results — so a test can script exactly what
- * each successive query answers.
- */
-function makeAdmin(resultsByTable: Record<string, unknown[]>, signupMarket?: string) {
-  // One queue per table, shared across every from(table) call in a request —
-  // successive queries against the same table consume it in order.
-  const queues = new Map<string, unknown[]>();
-  const updates: Record<string, unknown>[] = [];
-  return {
-    updates,
-    auth: {
-      admin: {
-        getUserById: vi.fn(async () => ({
-          data: { user: { user_metadata: signupMarket ? { market: signupMarket } : {} } },
-        })),
-      },
-    },
-    from: vi.fn((table: string) => {
-      if (!queues.has(table)) queues.set(table, [...(resultsByTable[table] ?? [])]);
-      const queue = queues.get(table)!;
-      const next = () => ({ data: queue.length > 1 ? queue.shift() : queue[0] });
-      const chain = {
-        select: () => chain,
-        eq: () => chain,
-        insert: () => chain,
-        maybeSingle: async () => next(),
-        single: async () => next(),
-      };
-      return {
-        ...chain,
-        update: (value: Record<string, unknown>) => { updates.push(value); return { eq: async () => ({ data: null, error: null }) }; },
-      };
-    }),
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { renderTemplate, sendNotification } from "./send";
+const state = vi.hoisted(() => ({ locale: undefined as string | undefined, country: "PT", missing: false, missingTemplate: false, updates: vi.fn(), chosen: vi.fn() }));
+vi.mock("@/lib/supabase/service", () => ({ createServiceClient: () => ({ from: (table: string) => {
+  let locale = "";
+  const q = {
+    select: () => q,
+    eq: (key: string, value: string) => { if (key === "locale") { locale = value; state.chosen(value); } return q; },
+    insert: () => q,
+    update: (value: unknown) => { state.updates(value); return q; },
+    single: async () => result(), maybeSingle: async () => result(),
+    then: (resolve: (v: unknown) => void) => resolve({ error: null }),
   };
-}
-
-vi.mock("@/lib/supabase/service", () => ({
-  createServiceClient: () => mockAdmin,
-}));
-
-let mockAdmin: ReturnType<typeof makeAdmin>;
-
-const EN_TEMPLATE = { subject: "Hi {{name}}", body: "Booking {{id}}" };
-const PT_TEMPLATE = { subject: "Olá {{name}}", body: "Marcação {{id}}" };
-
-describe("sendNotification", () => {
-  it("keeps record-only delivery queued and missing recipients failed", async () => {
-    vi.stubEnv("RESEND_API_KEY", "");
-    mockAdmin = makeAdmin({ professionals: [{ country_code: "GB" }], notification_templates: [EN_TEMPLATE], users: [{ email: "a@b.co" }], notifications: [{ id: "n1" }] });
-    await sendNotification("booking_confirmation", "user1", {});
-    expect(mockAdmin.updates).not.toContainEqual(expect.objectContaining({ status: "sent" }));
-    mockAdmin = makeAdmin({ professionals: [{ country_code: "GB" }], notification_templates: [EN_TEMPLATE], users: [null], notifications: [{ id: "n1" }] });
-    await sendNotification("booking_confirmation", "user1", {}, vi.fn());
-    expect(mockAdmin.updates).toEqual([{ status: "failed" }]);
-    vi.unstubAllEnvs();
-  });
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  async function run(sender: ChannelSender) {
-    await sendNotification("booking_confirmation", "user1", { id: "b1", name: "Jo" }, sender);
+  function result() {
+    if (table === "users") return { data: state.missing ? null : { email: "a@example.test", country_code: state.country, preferred_locale: state.locale } };
+    if (table === "notifications") return { data: { id: "notice" } };
+    return { data: state.missingTemplate && locale === "pt-PT" ? null : { subject: locale === "pt-PT" ? "Olá {{name}}" : "Hello {{name}}", body: "Booking {{id}}" } };
   }
-
-  it("marks notification sent when sender succeeds", async () => {
-    mockAdmin = makeAdmin({
-      professionals: [{ country_code: "GB" }],
-      notification_templates: [EN_TEMPLATE],
-      users: [{ email: "a@b.co" }],
-      notifications: [{ id: "n1" }],
-    });
-    const sender: ChannelSender = vi.fn().mockResolvedValue(undefined);
-    await run(sender);
-    expect(sender).toHaveBeenCalledWith(
-      expect.objectContaining({ to: "a@b.co", subject: "Hi Jo", body: "Booking b1" }),
-    );
-    expect(mockAdmin.updates).toEqual([expect.objectContaining({ status: "sent", sent_at: expect.any(String) })]);
-    expect(sender).toHaveBeenCalledWith(expect.objectContaining({ html: expect.stringContaining("CareBridge Connect"), text: expect.stringContaining("Booking b1") }));
+  return q;
+} }) }));
+beforeEach(() => { vi.clearAllMocks(); state.locale = undefined; state.country = "PT"; state.missing = false; state.missingTemplate = false; });
+describe("notification language and delivery", () => {
+  it("substitutes variables and clears absent ones", () => {
+    expect(renderTemplate({ subject: "{{name}}", body: "{{id}} {{missing}}" }, { name: "Ana", id: 3 })).toEqual({ subject: "Ana", body: "3 " });
   });
-
-  it("marks notification failed when sender throws", async () => {
-    mockAdmin = makeAdmin({
-      professionals: [{ country_code: "GB" }],
-      notification_templates: [EN_TEMPLATE],
-      users: [{ email: "a@b.co" }],
-      notifications: [{ id: "n1" }],
-    });
-    const sender: ChannelSender = vi.fn().mockRejectedValue(new Error("smtp down"));
-    await expect(
-      sendNotification("booking_confirmation", "user1", { id: "b1", name: "Jo" }, sender),
-    ).resolves.toBeUndefined(); // best-effort: never throw
-    expect(mockAdmin.updates).toEqual([{ status: "failed" }]);
+  it.each(["PT", "GB"])("uses saved English independently of %s market", async (country) => {
+    state.country = country; state.locale = "en-GB";
+    const sender = vi.fn();
+    await sendNotification("booking_confirmation", "user", { name: "Ana", id: "b1" }, sender);
+    expect(state.chosen).toHaveBeenCalledExactlyOnceWith("en-GB");
+    expect(sender).toHaveBeenCalledWith(expect.objectContaining({ subject: "Hello Ana", html: expect.stringContaining('lang="en-GB"') }));
+    expect(state.updates).toHaveBeenCalledWith(expect.objectContaining({ status: "sent" }));
   });
-
-  it("sends a Portuguese professional the Portuguese variant", async () => {
-    mockAdmin = makeAdmin({
-      professionals: [{ country_code: "PT" }],
-      notification_templates: [PT_TEMPLATE],
-      users: [{ email: "a@b.co" }],
-      notifications: [{ id: "n1" }],
-    });
-    const sender: ChannelSender = vi.fn().mockResolvedValue(undefined);
-    await run(sender);
-    expect(sender).toHaveBeenCalledWith(
-      expect.objectContaining({ subject: "Olá Jo", body: "Marcação b1" }),
-    );
+  it.each([undefined, "pt-PT"])("uses Portuguese by default or explicit preference: %s", async (locale) => {
+    state.locale = locale; state.country = "GB";
+    const sender = vi.fn();
+    await sendNotification("booking_confirmation", "user", { name: "Ana" }, sender);
+    expect(state.chosen).toHaveBeenCalledExactlyOnceWith("pt-PT");
+    expect(sender).toHaveBeenCalledWith(expect.objectContaining({ subject: "Olá Ana" }));
   });
-
-  it("sends a Portuguese organisation the Portuguese variant", async () => {
-    mockAdmin = makeAdmin({
-      professionals: [null],
-      organisations: [{ country_code: "PT" }],
-      notification_templates: [PT_TEMPLATE],
-      users: [{ email: "a@b.co" }],
-      notifications: [{ id: "n1" }],
-    });
-    const sender: ChannelSender = vi.fn().mockResolvedValue(undefined);
-    await run(sender);
-    expect(sender).toHaveBeenCalledWith(expect.objectContaining({ subject: "Olá Jo" }));
+  it("falls back to an English template when the translation is missing", async () => {
+    state.missingTemplate = true;
+    const sender = vi.fn();
+    await sendNotification("booking_confirmation", "user", { name: "Ana" }, sender);
+    expect(state.chosen.mock.calls).toEqual([["pt-PT"], ["en-GB"]]);
+    expect(sender).toHaveBeenCalledWith(expect.objectContaining({ subject: "Hello Ana" }));
   });
-
-  it("sends a private client who signed up in Portugal the Portuguese variant", async () => {
-    mockAdmin = makeAdmin(
-      {
-        professionals: [null],
-        organisations: [null],
-        notification_templates: [PT_TEMPLATE],
-        users: [{ email: "a@b.co", country_code: "PT" }],
-        notifications: [{ id: "n1" }],
-      },
-      "PT",
-    );
-    const sender: ChannelSender = vi.fn().mockResolvedValue(undefined);
-    await run(sender);
-    expect(sender).toHaveBeenCalledWith(expect.objectContaining({ subject: "Olá Jo" }));
-  });
-
-  it("keeps Portuguese snapshot language despite changed Auth metadata and profile", async () => {
-    mockAdmin = makeAdmin({ professionals: [{ country_code: "GB" }], notification_templates: [PT_TEMPLATE], users: [{ email: "a@b.co", country_code: "PT" }], notifications: [{ id: "n1" }] }, "GB");
-    const sender: ChannelSender = vi.fn().mockResolvedValue(undefined);
-    await run(sender);
-    expect(sender).toHaveBeenCalledWith(expect.objectContaining({ html: expect.stringContaining('lang="pt-PT"') }));
-    expect(mockAdmin.auth.admin.getUserById).not.toHaveBeenCalled();
-  });
-
-  it("uses English for legacy null country instead of mutable Portuguese metadata", async () => {
-    mockAdmin = makeAdmin({ professionals: [null], organisations: [null], notification_templates: [EN_TEMPLATE], users: [{ email: "a@b.co", country_code: null }], notifications: [{ id: "n1" }] }, "PT");
-    const sender: ChannelSender = vi.fn().mockResolvedValue(undefined);
-    await run(sender);
-    expect(sender).toHaveBeenCalledWith(expect.objectContaining({ html: expect.stringContaining('lang="en-GB"') }));
-    expect(mockAdmin.auth.admin.getUserById).not.toHaveBeenCalled();
-  });
-
-  it("falls back to the English row when no Portuguese variant exists yet", async () => {
-    mockAdmin = makeAdmin({
-      // First terminal answer on notification_templates: pt-PT row missing.
-      professionals: [{ country_code: "PT" }],
-      notification_templates: [null, EN_TEMPLATE],
-      users: [{ email: "a@b.co" }],
-      notifications: [{ id: "n1" }],
-    });
-    const sender: ChannelSender = vi.fn().mockResolvedValue(undefined);
-    await run(sender);
-    expect(sender).toHaveBeenCalledWith(
-      expect.objectContaining({ subject: "Hi Jo", body: "Booking b1" }),
-    );
-  });
-
-  it("silently does nothing when neither variant exists", async () => {
-    mockAdmin = makeAdmin({
-      professionals: [{ country_code: "PT" }],
-      notification_templates: [null],
-    });
-    const sender: ChannelSender = vi.fn().mockResolvedValue(undefined);
-    await run(sender);
+  it("records a missing recipient or delivery failure without throwing", async () => {
+    state.missing = true;
+    const sender = vi.fn();
+    await sendNotification("booking_confirmation", "user", {}, sender);
     expect(sender).not.toHaveBeenCalled();
+    expect(state.updates).toHaveBeenCalledWith({ status: "failed" });
+    state.missing = false;
+    await sendNotification("booking_confirmation", "user", {}, vi.fn().mockRejectedValue(new Error("offline")));
+    expect(state.updates).toHaveBeenLastCalledWith({ status: "failed" });
+  });
+  it("keeps skipped delivery queued", async () => {
+    await sendNotification("booking_confirmation", "user", {}, vi.fn().mockResolvedValue("skipped"));
+    expect(state.updates).not.toHaveBeenCalled();
   });
 });

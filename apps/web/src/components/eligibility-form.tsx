@@ -7,7 +7,7 @@ import { employmentStatuses, mandatoryTrainingItems } from "@/lib/validation/onb
 import { OnboardingSteps } from "@/components/onboarding-steps";
 import { onboardingCopy, type OnboardingLocale } from "@/lib/onboarding/copy";
 
-export function EligibilityForm({ locale }: { locale: OnboardingLocale }) {
+export function EligibilityForm({ locale, country = "GB" }: { locale: OnboardingLocale; country?: "PT" | "GB" }) {
   const t = onboardingCopy[locale];
   const e = t.eligibility;
   const [state, action, pending] = useActionState<EligibilityResult, FormData>(
@@ -51,13 +51,13 @@ export function EligibilityForm({ locale }: { locale: OnboardingLocale }) {
             {employmentStatuses.map((s, i) => (
               <label key={s} className="flex items-center gap-2">
                 <input type="radio" name="employmentStatus" value={s} defaultChecked={i === 0} />
-                {e.employment[s]}
+                {country === "PT" && locale === "en-GB" && s === "nhs_employed" ? "Currently employed by the Serviço Nacional de Saúde (SNS)" : e.employment[s]}
               </label>
             ))}
           </div>
         </fieldset>
 
-        {locale !== "pt-PT" && (
+        {country !== "PT" && (
         <fieldset>
           <legend className="text-base font-semibold">{e.trainingLegend}</legend>
           <p className="mt-2 text-sm text-ink">

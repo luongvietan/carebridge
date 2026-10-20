@@ -38,7 +38,7 @@ export async function recordPayout(bookingId: string): Promise<PayoutResult> {
   const admin = createServiceClient();
 
   const { data: booking } = await admin
-    .from("bookings").select("id, status, assigned_professional_id, total_payout, requires_timesheet").eq("id", bookingId).single();
+    .from("bookings").select("id, status, assigned_professional_id, total_payout, requires_timesheet, snap_currency").eq("id", bookingId).single();
   if (!booking) return { error: "Booking not found." };
   if (booking.status !== "completed") return { error: "Booking is not completed." };
   if (!booking.assigned_professional_id) return { error: "Booking has no assigned professional." };
@@ -79,7 +79,7 @@ export async function recordPayout(bookingId: string): Promise<PayoutResult> {
 
   const { error } = await admin.from("payouts").insert({
     professional_id: booking.assigned_professional_id, booking_id: bookingId,
-    amount: payoutAmount, status: "recorded", recorded_by: adminId, recorded_at: new Date().toISOString(),
+    amount: payoutAmount, currency: booking.snap_currency.trim(), status: "recorded", recorded_by: adminId, recorded_at: new Date().toISOString(),
   });
   if (error) return { error: error.message };
   await admin.from("audit_log").insert({ actor_user_id: adminId, actor_type: "admin", action: "payout.recorded", entity_type: "booking", entity_id: bookingId });

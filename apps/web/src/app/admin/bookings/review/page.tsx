@@ -53,7 +53,7 @@ export default async function AdminBookingReviewPage() {
   const isClinicalReviewer = !!me?.is_clinical_reviewer;
   // Every view of the assessments is recorded under the reviewer's own account.
   if (bookings?.length) {
-    await admin.from("audit_log").insert(
+    const { error: auditError } = await admin.from("audit_log").insert(
       bookings.map((b) => ({
         actor_user_id: adminId,
         actor_type: "admin",
@@ -62,6 +62,7 @@ export default async function AdminBookingReviewPage() {
         entity_id: b.id,
       })),
     );
+    if (auditError) return <main id="main-content" className="p-8"><p role="alert"><Tr>{"Unable to record access. Please try again."}</Tr></p></main>;
   }
 
   const countries = [...new Set((bookings ?? []).flatMap((b) => (b.professional_roles?.country_code ? [b.professional_roles.country_code] : [])))];

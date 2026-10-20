@@ -9,8 +9,9 @@ const LABELS = {
     emergency: "Emergency services",
     services: "Services we support",
     servicesIntro:
-      "Services available through the platform are limited to the following non-regulated activities:",
-    servicesMore: "…and other non-regulated activities.",
+      "Support available through the platform depends on assessed needs and the professional’s qualifications and competence, and may include:",
+    servicesMore:
+      "Clinical care is provided only by appropriately qualified and authorised professionals.",
     audience: "Who the platform is for",
   },
   "pt-PT": {
@@ -18,8 +19,9 @@ const LABELS = {
     emergency: "Serviços de emergência",
     services: "Serviços que apoiamos",
     servicesIntro:
-      "Os serviços disponíveis através da plataforma limitam-se às seguintes atividades não reguladas:",
-    servicesMore: "…e outras atividades não reguladas.",
+      "O apoio disponível através da plataforma depende das necessidades avaliadas e das qualificações e competências do profissional, podendo incluir:",
+    servicesMore:
+      "Os cuidados clínicos são prestados apenas por profissionais devidamente qualificados e autorizados.",
     audience: "A quem se destina a plataforma",
   },
 } as const;

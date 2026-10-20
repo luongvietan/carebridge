@@ -2706,6 +2706,7 @@ export type Database = {
         Row: {
           account_status: Database["public"]["Enums"]["account_status"]
           country_code: string | null
+          preferred_locale: string
           account_type: Database["public"]["Enums"]["account_type"]
           created_at: string
           email: string
@@ -2719,6 +2720,7 @@ export type Database = {
         Insert: {
           account_status?: Database["public"]["Enums"]["account_status"]
           country_code?: string | null
+          preferred_locale?: string
           account_type: Database["public"]["Enums"]["account_type"]
           created_at?: string
           email: string
@@ -2732,6 +2734,7 @@ export type Database = {
         Update: {
           account_status?: Database["public"]["Enums"]["account_status"]
           country_code?: string | null
+          preferred_locale?: string
           account_type?: Database["public"]["Enums"]["account_type"]
           created_at?: string
           email?: string
@@ -3223,6 +3226,10 @@ export type Database = {
       }
     }
     Functions: {
+      review_booking: {
+        Args: { p_booking_id: string; p_admin_id: string; p_decision: string; p_review: Json; p_booking_patch: Json }
+        Returns: undefined
+      }
       amend_rate_card: {
         Args: {
           p_admin_id: string

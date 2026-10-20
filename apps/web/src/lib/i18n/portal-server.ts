@@ -1,10 +1,9 @@
-import { LOCALE_BY_COUNTRY } from "@/lib/marketing/market";
-import { getAccountCountry } from "@/lib/accounts/market-server";
-import { makeT, type PortalLocale, type T } from "@/lib/i18n/portal";
+import { getPreferredLocale } from "./preference-server";
+import { makeT, type T, type PortalLocale } from "@/lib/i18n/portal";
 
-/** The language of the signed-in app follows the account's persisted market. */
+/** Language is independent of the account's regulatory market. */
 export async function getPortalLocale(): Promise<PortalLocale> {
-  return LOCALE_BY_COUNTRY[await getAccountCountry()] as PortalLocale;
+  return getPreferredLocale();
 }
 
 /** `t` for server components. */

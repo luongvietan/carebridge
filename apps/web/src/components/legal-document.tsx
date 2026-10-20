@@ -1,7 +1,7 @@
+import { getPreferredLocale } from "@/lib/i18n/preference-server";
 import type { LegalSection } from "@/data/legal-copy";
 import type { LegalDoc, LegalLang } from "@/data/legal-copy-pt";
 import { PT_LEGAL_UPDATED } from "@/data/legal-copy-pt";
-import { getSelectedCountry } from "@/lib/marketing/market-server";
 
 type LegalDocumentProps = {
   title: string;
@@ -15,7 +15,7 @@ type LegalDocumentProps = {
 const UK_UPDATED = { iso: "2026-06-16", label: "16 June 2026" };
 
 export async function LegalDocument({ title, sections, intro, facts, lang }: LegalDocumentProps) {
-  const pt = lang ? lang === "pt" : (await getSelectedCountry()) === "PT";
+  const pt = lang ? lang === "pt" : (await getPreferredLocale()) === "pt-PT";
   const updated = lang
     ? { iso: PT_LEGAL_UPDATED.iso, label: PT_LEGAL_UPDATED[lang] }
     : pt

@@ -1,4 +1,5 @@
 "use client";
+import { referenceLabel } from "@/lib/i18n/reference-en";
 import { Tr } from "@/components/portal-locale";
 import { useReducer, useRef } from "react";
 import { ForwardLink } from "@/components/forward-link";
@@ -144,7 +145,7 @@ export function AssessmentRunner({
         {state.phase === "questions" && state.roleName && (
           <p className="mb-4 text-sm text-ink">
             {a.forRoleA}
-            <strong>{state.roleName}</strong>
+            <strong>{referenceLabel(state.roleName, locale)}</strong>
             {a.forRoleB}
           </p>
         )}

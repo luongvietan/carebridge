@@ -8,23 +8,23 @@ vi.mock("@/lib/notifications/send", () => ({ sendNotification: vi.fn() }));
 vi.mock("@/lib/roles/assignments", () => ({ recomputeRoleAssignments: vi.fn() }));
 vi.mock("@/lib/supabase/service", () => ({ createServiceClient: () => ({ from: (table: string) => {
   const data = table === "assessment_attempts"
-    ? { id: "attempt", professional_id: "pro", professional_role_id: "nurse", completed_at: null, served_question_ids: Array.from({ length: 20 }, (_, i) => `q${i}`) }
+    ? { id: "attempt", professional_id: "pro", professional_role_id: "nurse", attempt_number: 1, completed_at: null, served_question_ids: Array.from({ length: 20 }, (_, i) => `q${i}`) }
     : Array.from({ length: 20 }, (_, i) => ({ id: `q${i}`, correct_option: "a", country_code: "PT", professional_role_id: state.role }));
   const query = {
     select: () => query, eq: () => query, in: () => query,
     single: async () => ({ data }),
     then: (resolve: (value: unknown) => void) => resolve({ data }),
-    insert: state.writes, update: state.writes,
+    insert: (values: unknown) => { state.writes(values); return query; },
+    update: (values: unknown) => { state.writes(values); return query; },
   };
   return query;
 } }) }));
 
 import { submitAttempt } from "./actions";
 beforeEach(() => { state.writes.mockClear(); state.role = null; });
-it("cannot submit a previously served common-only PT role assessment", async () => {
+it("can complete the approved common-only PT pilot assessment", async () => {
   const answers = Object.fromEntries(Array.from({ length: 20 }, (_, i) => [`q${i}`, "a"]));
-  expect(await submitAttempt("attempt", answers)).toEqual({ error: expect.stringContaining("preparação") });
-  expect(state.writes).not.toHaveBeenCalled();
+  expect(await submitAttempt("attempt", answers)).toMatchObject({ ok: true, score: 100, passed: true });
 });
 it("cannot submit a PT assessment made entirely of another role's questions", async () => {
   state.role = "physio";

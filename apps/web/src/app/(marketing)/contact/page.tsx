@@ -1,10 +1,10 @@
+import { getPreferredLocale } from "@/lib/i18n/preference-server";
 import type { Metadata } from "next";
 import { PageHero } from "@/components/page-hero";
 import { SiteNav } from "@/components/site-nav";
 import { SiteFooter } from "@/components/site-footer";
 import { ContactForm } from "@/components/contact-form";
 import { getContentForVisitor } from "@/lib/i18n/server";
-import { getSelectedCountry } from "@/lib/marketing/market-server";
 
 import { CONTACT_EMAIL } from "@/lib/site";
 
@@ -17,8 +17,7 @@ const detailRows = [
 ];
 
 export default async function ContactPage() {
-  const { ui } = await getContentForVisitor();
-  const locale = (await getSelectedCountry()) === "PT" ? "pt-PT" : "en-GB";
+  const [{ ui }, locale] = await Promise.all([getContentForVisitor(), getPreferredLocale()]);
   const c = ui.contact;
   const values = { email: CONTACT_EMAIL, phone: c.phoneValue, address: c.addressValue };
   const details = detailRows.map(

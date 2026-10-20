@@ -3,6 +3,17 @@ import { renderEmail, renderEnquiryAcknowledgement } from "./render";
 import { sendEmail } from "./transport";
 
 describe("branded email", () => {
+  it("includes the Portugal signature and response time in both formats", () => {
+    for (const locale of ["en-GB", "pt-PT"]) {
+      const email = renderEmail({ subject: "Test", body: "Message", locale });
+      for (const content of [email.html, email.text]) {
+        expect(content).toContain("CareBridge Connect Portugal");
+        expect(content).toContain("+351 926 562 988");
+        expect(content).toContain("WhatsApp");
+        expect(content).toContain(locale === "pt-PT" ? "um dia útil" : "one working day");
+      }
+    }
+  });
   it("rejects header injection at the transport boundary and provider rejection", async () => {
     vi.stubEnv("RESEND_API_KEY", "test-only"); vi.stubEnv("RESEND_FROM", "CareBridge Connect <test@example.test>");
     const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({ ok: false, status: 503 } as Response);
@@ -38,7 +49,7 @@ describe("branded email", () => {
     vi.stubEnv("RESEND_FROM", "CareBridge Connect <test@example.test>");
     expect(await sendEmail(email, "contact-test")).toBe("sent");
     const request = fetchMock.mock.calls[0][1]!;
-    expect(JSON.parse(request.body as string)).toMatchObject({ html: email.html, text: email.text });
+    expect(JSON.parse(request.body as string)).toMatchObject({ from: "CareBridge Connect Portugal <test@example.test>", html: email.html, text: email.text });
     expect(request.headers).toHaveProperty("Idempotency-Key", "contact-test");
     fetchMock.mockRestore(); vi.unstubAllEnvs();
   });

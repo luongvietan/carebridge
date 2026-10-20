@@ -13,7 +13,7 @@ export function getSiteOrigin(): string {
 
 /** The public contact mailbox; set NEXT_PUBLIC_CONTACT_EMAIL when it moves domain. */
 export const CONTACT_EMAIL =
-  process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "info@carebridgeconnect.co.uk";
+  process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "info@carebridgeconnects.com";
 
 /** Optional UK phone number. Never show a fabricated placeholder number. */
 export const UK_CONTACT_PHONE = process.env.NEXT_PUBLIC_UK_PHONE?.trim() ?? "";

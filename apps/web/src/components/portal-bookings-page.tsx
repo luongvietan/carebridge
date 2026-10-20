@@ -33,7 +33,7 @@ export async function PortalBookingsPage({ newBookingHref }: { newBookingHref: s
     supabase.from("professional_roles").select("id, name"),
   ]);
 
-  const roleNames = new Map((roles ?? []).map((r) => [r.id, r.name]));
+  const roleNames = new Map((roles ?? []).map((r) => [r.id, t(r.name)]));
 
   // Load latest payment status per booking via service client (payments is admin-RLS).
   const bookingIds = (bookings ?? []).map((b) => b.id);

@@ -8,9 +8,8 @@ import { HomePageMotion } from "@/components/motion/home-page-motion";
 import { ServicesOfferSection } from "@/components/services-offer-section";
 import { SiteNav } from "@/components/site-nav";
 import { SiteFooter } from "@/components/site-footer";
-import { StatsBand } from "@/components/stats-band";
 import { faqsForLocale } from "@/data/faqs-locale";
-import { localeForCountry } from "@/lib/marketing/market";
+import { getPreferredLocale } from "@/lib/i18n/preference-server";
 import { getSelectedCountry, listMarkets } from "@/lib/marketing/market-server";
 import { getContentForVisitor, getDictionaryForVisitor } from "@/lib/i18n/server";
 import { marketingHeading, marketingSection, marketingSubheading } from "@/lib/marketing-ui";
@@ -19,14 +18,13 @@ export default async function HomePage() {
   // The markets, the visitor's choice and their language all come from server
   // state: the `countries` table owns what exists and what is live, the cookie
   // owns which one was picked.
-  const [markets, selectedCountry, t, content] = await Promise.all([
+  const [markets, selectedCountry, t, content, locale] = await Promise.all([
     listMarkets(),
     getSelectedCountry(),
     getDictionaryForVisitor(),
     getContentForVisitor(),
+    getPreferredLocale(),
   ]);
-
-  const locale = localeForCountry(selectedCountry);
 
   return (
     <HomePageMotion>
@@ -46,7 +44,6 @@ export default async function HomePage() {
         rolesLabel={content.ui.hero.verifiedRoles}
       />
 
-      <StatsBand />
 
       <AboutIntroSection />
 

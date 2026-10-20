@@ -126,6 +126,10 @@ export const dictionaries: Record<MarketLocale, Dictionary> = {
 };
 
 /** A locale's dictionary, falling back to English for anything unknown. */
-export function dictionaryForLocale(locale: string): Dictionary {
+export function dictionaryForLocale(locale: string, country?: "PT" | "GB"): Dictionary {
+  if (country === "PT" && locale === "en-GB") return { ...en,
+    heroHeadline: "Connecting Families and Organisations with Verified Healthcare and Childcare Professionals.",
+    heroSubheadline: "Trusted healthcare, home support and childcare in Portugal — with professional verification and ongoing document checks.",
+  };
   return dictionaries[locale as MarketLocale] ?? dictionaries["en-GB"];
 }

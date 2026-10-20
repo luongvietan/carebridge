@@ -4,6 +4,14 @@
  * "palavra-passe", "iniciar sessão" — not Brazilian or word-for-word.
  */
 export const PORTAL_PT: Record<string, string> = {
+  "Unable to record access. Please try again.": "Não foi possível registar o acesso. Tente novamente.",
+  "Technical checks for the deployed environment. Legal text, approved rates and common pilot content still need written approval before public launch. Specialist banks follow after the pilot.": "Verificações técnicas do ambiente publicado. Os textos legais, as tarifas e as perguntas comuns da fase piloto precisam de aprovação escrita antes do lançamento público. Os bancos por especialidade seguem após o piloto.",
+  " specialist questions (later phase)": " perguntas por especialidade (fase posterior)",
+  "Your onboarding assessment completion record is available after passing with 80% or above.": "O comprovativo da avaliação de integração fica disponível após aprovação com pelo menos 80%.",
+  "CareBridge onboarding assessment passed": "Avaliação de integração CareBridge concluída com aprovação",
+  "This records that": "Este documento regista que",
+  "has passed the CareBridge Connect onboarding assessment associated with the role of": "obteve aprovação na avaliação de integração CareBridge Connect associada à categoria de",
+  "This is not an accredited qualification and does not replace any legally required qualifications, registration or training.": "Este documento não é uma qualificação acreditada e não substitui as habilitações, a inscrição profissional ou a formação legalmente exigidas.",
   " (founder)": " (fundador)",
   s: "s",
   Closed: "Encerrada",

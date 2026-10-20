@@ -29,7 +29,7 @@ describe("answerFromKnowledge", () => {
   it("answers in English from the English content", () => {
     const { answer, matched } = answerFromKnowledge("What if a document expires?", "en-GB");
     expect(matched).toBe(true);
-    expect(answer).toMatch(/restricts/);
+    expect(answer).toMatch(/cannot accept new bookings/);
   });
 
   it("declines rather than guessing when nothing matches", () => {

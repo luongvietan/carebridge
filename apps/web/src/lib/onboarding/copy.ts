@@ -44,7 +44,7 @@ export const onboardingCopy = {
     },
     assessment: {
       title: "Competency assessment",
-      note: "You will be asked 20 questions — 15 covering core healthcare topics and 5 specific to your professional role — drawn at random and auto-scored. You need 80% to pass and have up to three attempts. Topics include safeguarding, infection prevention & control, GDPR, professional boundaries, documentation, medication awareness and health & safety.",
+      note: "You will be asked 20 common pilot questions, drawn at random and auto-scored. Specialist question banks will follow later. This is an onboarding assessment, not an accredited qualification. You need 80% to pass and have up to three attempts. Topics include safeguarding, infection prevention & control, GDPR, professional boundaries, documentation, medication awareness and health & safety.",
       begin: "Begin assessment",
       loading: "Loading…",
       forRoleA: "Assessment for the ",
@@ -55,7 +55,7 @@ export const onboardingCopy = {
       score: "Score:",
       passed: "Passed — the minimum is 80%.",
       toProfile: "Continue to profile",
-      certificate: "View your certificate",
+      certificate: "View assessment completion record",
       below: "Below the 80% pass mark. You may try again.",
       tryAgain: "Try again",
       usedAll: "You have used all three attempts. You may reapply after the lock period.",
@@ -159,7 +159,7 @@ export const onboardingCopy = {
     },
     assessment: {
       title: "Avaliação de competências",
-      note: "Serão feitas 20 perguntas — 15 sobre temas essenciais da saúde e 5 específicas da sua função — sorteadas e corrigidas automaticamente. Precisa de 80% para passar e tem até três tentativas. Os temas incluem proteção, prevenção e controlo de infeção, RGPD, limites profissionais, documentação, noções de medicação e segurança e saúde no trabalho.",
+      note: "Serão feitas 20 perguntas comuns da fase piloto, sorteadas e corrigidas automaticamente. Os bancos de perguntas por especialidade serão introduzidos mais tarde. Esta avaliação de integração não confere uma qualificação acreditada. Precisa de 80% para passar e tem até três tentativas. Os temas incluem proteção, prevenção e controlo de infeção, RGPD, limites profissionais, documentação, noções de medicação e segurança e saúde no trabalho.",
       begin: "Iniciar avaliação",
       loading: "A carregar…",
       forRoleA: "Avaliação para a função de ",

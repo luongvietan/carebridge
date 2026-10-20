@@ -10,10 +10,12 @@ export async function sendEmail(message: EmailMessage, idempotencyKey?: string):
   if (!key || !from) return "skipped";
   const headers = message.to + from + message.subject;
   if (["\r", "\n", "\u0000"].some((char) => headers.includes(char))) throw new Error("Invalid email header");
+  const address = /<([^<>]+)>$/.exec(from)?.[1] ?? from;
+  const brandedFrom = `CareBridge Connect Portugal <${address.trim()}>`;
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json", ...(idempotencyKey ? { "Idempotency-Key": idempotencyKey } : {}) },
-    body: JSON.stringify({ from, to: message.to, subject: message.subject, text: message.text, html: message.html }),
+    body: JSON.stringify({ from: brandedFrom, to: message.to, subject: message.subject, text: message.text, html: message.html }),
     signal: AbortSignal.timeout(10_000),
   });
   if (!response.ok) throw new Error(`Email provider rejected delivery (${response.status})`);

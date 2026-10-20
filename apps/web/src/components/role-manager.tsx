@@ -83,7 +83,7 @@ function RoleRow({ role }: { role: RoleCard }) {
     <section className="rounded-2xl border border-line bg-white p-6 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.10)]">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-bold text-heading">{role.roleName}</h2>
+          <h2 className="text-lg font-bold text-heading">{t(role.roleName)}</h2>
           {role.isPrimary && <p className="mt-0.5 text-xs text-[#6b7280]">{t("Your main role")}</p>}
         </div>
         <span
@@ -117,7 +117,7 @@ function RoleRow({ role }: { role: RoleCard }) {
               href={`/professional/onboarding/assessment?role=${role.roleId}`}
               className="mt-4 inline-flex text-sm text-brand-strong hover:text-brand-strong-hover"
             >
-              {t("Sit the {role} assessment", { role: role.roleName })}
+              {t("Sit the {role} assessment", { role: t(role.roleName) })}
             </ForwardLink>
           )}
           {role.assessmentLockedUntil && (
@@ -212,7 +212,7 @@ function AddRoleForm({ addable }: { addable: AddableRole[] }) {
       <label className="mt-4 block text-sm font-medium text-heading">
         {t("Role")}
         <Select
-          options={addable.map((r) => ({ value: r.id, label: r.name }))}
+          options={addable.map((r) => ({ value: r.id, label: t(r.name) }))}
           value={roleId}
           onValueChange={setRoleId}
           placeholder={t("Select a role…")}
@@ -223,7 +223,7 @@ function AddRoleForm({ addable }: { addable: AddableRole[] }) {
 
       {chosen?.register && (
         <label className="mt-4 block text-sm font-medium text-heading">
-          {REFERENCE_LABEL[chosen.register]}
+          {t(REFERENCE_LABEL[chosen.register])}
           <RequiredMark /><input
             name="registrationReference"
             required

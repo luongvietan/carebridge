@@ -1,4 +1,5 @@
 "use client";
+import { referenceLabel } from "@/lib/i18n/reference-en";
 import { RequiredMark } from "@/components/required-mark";
 import { Tr } from "@/components/portal-locale";
 import { useActionState, useState } from "react";
@@ -26,16 +27,18 @@ type Variant = "client" | "organisation";
 export function AccountRegisterForm({
   variant,
   locale = "en-GB",
+  country = "GB",
   saved,
 }: {
   variant: Variant;
   locale?: RequesterLocale;
+  country?: "PT" | "GB";
   /** The profile already on record, so the form opens filled in. */
   saved?: ClientFormValues | OrganisationFormValues;
 }) {
   const t = requesterCopy[locale].profile;
   // The CQC is a UK regulator: a Portuguese organisation has no such number.
-  const showCqc = locale === "en-GB";
+  const showCqc = country === "GB";
   const action = variant === "client" ? saveClientProfile : saveOrganisationProfile;
   const bookingsHref = variant === "client" ? "/client/bookings" : "/organisation/bookings";
   const [state, formAction, pending] = useActionState<AccountResult, FormData>(action, null);
@@ -134,8 +137,8 @@ export function AccountRegisterForm({
                   className="mt-1"
                   options={PT_ORGANISATION_CATEGORIES.map((c) => ({
                     value: c.code,
-                    label: c.label,
-                    group: c.group,
+                    label: referenceLabel(c.label, locale),
+                    group: referenceLabel(c.group, locale),
                   }))}
                 />
               </div>
@@ -153,7 +156,7 @@ export function AccountRegisterForm({
               </label>
               {licence && (
                 <label className="block text-sm font-medium">
-                  {LICENCE_LABEL[licence]}
+                  {referenceLabel(LICENCE_LABEL[licence], locale)}
                   <input name="licenceNumber" defaultValue={orgValues?.licenceNumber ?? ""} className={field} />
                   <span className="mt-1 block text-xs font-normal text-ink">{t.licenceHint}</span>
                 </label>

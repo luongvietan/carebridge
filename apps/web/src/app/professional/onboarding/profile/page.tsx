@@ -1,3 +1,4 @@
+import { getPreferredLocale } from "@/lib/i18n/preference-server";
 import { createClient } from "@/lib/supabase/server";
 import { ProfileForm } from "@/components/profile-form";
 import { guardOnboardingStep } from "@/lib/onboarding/guard";
@@ -81,6 +82,7 @@ export default async function ProfilePage() {
         .filter((d): d is number => d != null)}
       currentPhotoUrl={currentPhotoUrl}
       country={country}
+      locale={await getPreferredLocale()}
     />
   );
 }

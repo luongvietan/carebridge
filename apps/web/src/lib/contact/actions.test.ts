@@ -4,6 +4,7 @@ import { submitContactMessage } from "./actions";
 const mocks = vi.hoisted(() => ({ rpc: vi.fn(), send: vi.fn() }));
 vi.mock("@/lib/email/transport", () => ({ sendEmail: mocks.send }));
 vi.mock("@/lib/marketing/market-server", () => ({ getSelectedCountry: async () => "PT" }));
+vi.mock("@/lib/i18n/preference-server", () => ({ getPreferredLocale: async () => "pt-PT" }));
 vi.mock("@/lib/supabase/service", () => ({ createServiceClient: () => ({ rpc: mocks.rpc, from: () => {
   const chain = { select: () => chain, eq: () => chain, gte: () => chain, order: () => chain, limit: async () => ({ data: [], error: null }), insert: async () => ({ error: null }) };
   return chain;

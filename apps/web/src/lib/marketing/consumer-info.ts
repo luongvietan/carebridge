@@ -41,10 +41,16 @@ export function portugueseConsumerInfo(ral: {
 }
 
 /** What the footer shows for a market: Portugal only; the UK has no equivalent requirement here. */
-export function consumerInfoForLocale(locale: "en-GB" | "pt-PT"): ConsumerInfo | null {
-  if (locale !== "pt-PT") return null;
-  return portugueseConsumerInfo({
+export function consumerInfoForLocale(locale: "en-GB" | "pt-PT", country = locale === "pt-PT" ? "PT" : "GB"): ConsumerInfo | null {
+  if (country !== "PT") return null;
+  const info = portugueseConsumerInfo({
     name: process.env.NEXT_PUBLIC_PT_RAL_NAME,
     url: process.env.NEXT_PUBLIC_PT_RAL_URL,
   });
+  if (locale === "en-GB") {
+    info.complaintsBook.label = "Electronic complaints book (Livro de Reclamações)";
+    const name = process.env.NEXT_PUBLIC_PT_RAL_NAME?.trim();
+    info.disputeResolution.text = name ? `For a consumer dispute, you may contact the alternative dispute resolution body ${name}.` : "For a consumer dispute, you may contact an alternative dispute resolution body. The list is available on the Portuguese Consumer Portal.";
+  }
+  return info;
 }

@@ -1,3 +1,4 @@
+import { getAccountCountry } from "@/lib/accounts/market-server";
 import { ForwardLink } from "@/components/forward-link";
 import { createClient } from "@/lib/supabase/server";
 import { DocumentUploader, type DocItem } from "@/components/document-uploader";
@@ -73,7 +74,7 @@ export default async function DocumentsPage() {
       .order("created_at", { ascending: true }),
   ]);
 
-  // Latest non-superseded row per type wins (ordered ascending → last set).
+  // Latest non-superseded row per type wins (ordered ascending; last set).
   const statusByType = new Map((existing ?? []).map((d) => [d.document_type_id, d.verification_status]));
   const reasonByType = new Map((existing ?? []).map((d) => [d.document_type_id, d.rejection_reason]));
   const rowByType = new Map((existing ?? []).map((d) => [d.document_type_id, d]));
@@ -127,5 +128,5 @@ export default async function DocumentsPage() {
     };
   });
 
-  return <DocumentUploader items={items} locale={locale} />;
+  return <DocumentUploader country={await getAccountCountry()} items={items} locale={locale} />;
 }

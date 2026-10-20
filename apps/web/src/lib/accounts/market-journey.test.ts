@@ -1,5 +1,5 @@
 import { beforeEach, expect, it, vi } from "vitest";
-const fake = vi.hoisted(() => ({ country: null as string | null, snapshot: "PT" as string | null, type: "professional", metadata: "PT", readError: false, upsert: vi.fn(), selected: vi.fn(async () => "GB") }));
+const fake = vi.hoisted(() => ({ locale: undefined as string | undefined, cookie: undefined as string | undefined, country: null as string | null, snapshot: "PT" as string | null, type: "professional", metadata: "PT", readError: false, upsert: vi.fn(), selected: vi.fn(async () => "GB") }));
 vi.mock("@/lib/marketing/market-server", () => ({ getSelectedCountry: fake.selected }));
 vi.mock("@/lib/stripe/client", () => ({ createCustomer: async () => ({ id: "customer" }) }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: async () => ({ auth: { getUser: async () => ({ data: { user: { id: "user", user_metadata: { market: fake.metadata } } } }) } }) }));
@@ -8,20 +8,35 @@ vi.mock("@/lib/supabase/service", () => ({ createServiceClient: () => ({ from: (
   const query = { select: () => query, eq: () => query, maybeSingle: async () => ({ data, error: fake.readError ? { message: "unavailable" } : null }), upsert: async (row: unknown) => { fake.upsert(row); return { error: null }; } };
   return query;
 } }) }));
+vi.mock("next/headers", () => ({ cookies: async () => ({ get: () => ({ value: fake.cookie }) }) }));
+vi.mock("@/lib/auth/require-auth", () => ({ getAuthUser: async () => ({ id: "user", user_metadata: { market: fake.metadata, preferred_locale: fake.locale } }), requireAuth: async () => ({ id: "user", user_metadata: { market: fake.metadata } }) }));
+import { getAccountCountry } from "./market-server";
 import { getPortalLocale } from "@/lib/i18n/portal-server";
 import { getOnboardingLocale } from "@/lib/onboarding/locale";
 import { saveOrganisationProfile } from "./actions";
-beforeEach(() => { vi.clearAllMocks(); fake.country = null; fake.snapshot = "PT"; fake.type = "professional"; fake.metadata = "PT"; fake.readError = false; });
-it("uses signup PT locale before the first professional profile exists", async () => { expect(await getPortalLocale()).toBe("pt-PT"); });
-it("uses signup PT onboarding language before the first profile exists", async () => { expect(await getOnboardingLocale()).toBe("pt-PT"); });
-it("uses persisted GB locale despite PT signup metadata and visitor cookie", async () => { fake.country = "GB"; fake.snapshot = "GB"; expect(await getPortalLocale()).toBe("en-GB"); });
-it("uses persisted PT locale despite old GB signup metadata", async () => { fake.country = "PT"; fake.metadata = "GB"; expect(await getPortalLocale()).toBe("pt-PT"); });
-it("uses a safe GB legacy fallback for absent country snapshot despite mutable PT metadata", async () => { fake.snapshot = null; expect(await getPortalLocale()).toBe("en-GB"); });
-it("ignores changed auth metadata when the stored signup snapshot is PT", async () => { fake.metadata = "GB"; expect(await getPortalLocale()).toBe("pt-PT"); });
-it("prefers immutable PT snapshot over a changed GB professional profile", async () => { fake.country = "GB"; expect(await getPortalLocale()).toBe("pt-PT"); });
-it("does not guess account market when its persisted account cannot be read", async () => {
-  fake.readError = true; fake.type = "private_client";
-  await expect(getPortalLocale()).rejects.toThrow("Could not determine account country");
+beforeEach(() => { vi.clearAllMocks(); fake.country = null; fake.snapshot = "PT"; fake.type = "professional"; fake.metadata = "PT"; fake.readError = false; fake.locale = undefined; fake.cookie = undefined; });
+it("defaults both portal and onboarding to Portuguese independently of country", async () => {
+  fake.snapshot = "GB";
+  expect(await getPortalLocale()).toBe("pt-PT");
+  expect(await getOnboardingLocale()).toBe("pt-PT");
+});
+it("keeps Portugal market rules when English is selected", async () => {
+  fake.locale = "en-GB";
+  expect(await getPortalLocale()).toBe("en-GB");
+  expect(await getOnboardingLocale()).toBe("en-GB");
+  expect(await getAccountCountry()).toBe("PT");
+});
+it("lets an explicit cookie choose Portuguese for an English account", async () => {
+  fake.locale = "en-GB"; fake.cookie = "pt-PT";
+  expect(await getPortalLocale()).toBe("pt-PT");
+});
+it("preserves country snapshot despite changed profile or language", async () => {
+  fake.locale = "en-GB"; fake.country = "GB";
+  expect(await getAccountCountry()).toBe("PT");
+});
+it("fails closed when account market cannot be read", async () => {
+  fake.readError = true;
+  await expect(getAccountCountry()).rejects.toThrow("Could not determine account country");
 });
 it("persists signup PT for an organisation after changing the cookie", async () => {
   fake.type = "organisation";

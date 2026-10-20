@@ -1,3 +1,4 @@
+import { getPreferredLocale } from "@/lib/i18n/preference-server";
 import { AccountRegisterForm } from "@/components/account-register-form";
 import { getAccountCountry } from "@/lib/accounts/market-server";
 import { getAuthUser } from "@/lib/auth/require-auth";
@@ -17,13 +18,13 @@ async function savedProfile() {
 }
 
 export default async function OrganisationRegisterPage() {
-  const [country, saved] = await Promise.all([getAccountCountry(), savedProfile()]);
-  const pt = country === "PT";
+  const [country, saved, locale] = await Promise.all([getAccountCountry(), savedProfile(), getPreferredLocale()]);
+  const pt = locale === "pt-PT";
   return (
     <main id="main-content" tabIndex={-1} className="mx-auto max-w-2xl px-4 py-10">
       <h1 className="mt-1 text-3xl font-bold">{pt ? "Registe o seu perfil" : "Register your profile"}</h1>
       <div className="mt-8">
-        <AccountRegisterForm variant="organisation" locale={pt ? "pt-PT" : "en-GB"} saved={saved} />
+        <AccountRegisterForm variant="organisation" locale={locale} country={country} saved={saved} />
       </div>
     </main>
   );

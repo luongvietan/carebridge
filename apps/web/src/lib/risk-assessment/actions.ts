@@ -5,7 +5,6 @@ import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/auth/admin";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { applyTransition } from "@/lib/bookings/transitions";
-import { writeCancelBooking } from "@/lib/bookings/service-writes";
 import { notifyMatchingProfessionals } from "@/lib/bookings/notify-matches";
 import { sendNotification } from "@/lib/notifications/send";
 import { buildSnapshot, type RateCard } from "@/lib/rates/snapshot";
@@ -50,42 +49,31 @@ async function guard(bookingId: string) {
     admin.from("booking_risk_assessments").select("risk_level, outcome").eq("booking_id", bookingId).maybeSingle(),
     admin.from("users").select("is_clinical_reviewer").eq("id", adminId).maybeSingle(),
   ]);
-  if (needsClinicalReview(assessment?.risk_level, assessment?.outcome) && !reviewer?.is_clinical_reviewer) {
+  if ((!assessment || needsClinicalReview(assessment.risk_level, assessment.outcome)) && !reviewer?.is_clinical_reviewer) {
     return { ok: false, error: "Only a clinical reviewer can decide nursing or red-risk requests." } as const;
   }
   return { ok: true, adminId, admin, booking } as const;
 }
 
 async function recordReview(
-  admin: ReturnType<typeof createServiceClient>,
-  bookingId: string,
-  adminId: string,
-  decision: "approved" | "declined" | "more_info_requested",
-  input: ReviewInput,
-  permittedRoleId: string | null,
-) {
-  await admin
-    .from("booking_risk_assessments")
-    .update({
-      review_decision: decision,
-      review_note: clean(input.reason),
-      client_message: clean(input.clientMessage),
-      permitted_role_id: permittedRoleId,
-      requires_two_workers: !!input.requiresTwoWorkers,
-      required_competency: clean(input.requiredCompetency),
-      reassess_on: input.reassessOn && /^\d{4}-\d{2}-\d{2}$/.test(input.reassessOn) ? input.reassessOn : null,
-      reviewed_by: adminId,
-      reviewed_at: new Date().toISOString(),
-    })
-    .eq("booking_id", bookingId);
-  await admin.from("audit_log").insert({
-    actor_user_id: adminId,
-    actor_type: "admin",
-    action: `booking.review_${decision}`,
-    entity_type: "booking",
-    entity_id: bookingId,
-    summary: clean(input.reason),
+  admin: ReturnType<typeof createServiceClient>, bookingId: string, adminId: string,
+  decision: "approved" | "declined" | "more_info_requested", input: ReviewInput,
+  patch: Database["public"]["Tables"]["bookings"]["Update"] = {}, chosenRoleFamily?: string | null,
+): Promise<ReviewActionResult> {
+  if (input.reassessOn && (!/^\d{4}-\d{2}-\d{2}$/.test(input.reassessOn) ||
+      !Number.isFinite(Date.parse(input.reassessOn)) || new Date(input.reassessOn).toISOString().slice(0, 10) !== input.reassessOn)) {
+    return { error: "Choose a valid reassessment date." };
+  }
+  const { error } = await admin.rpc("review_booking", {
+    p_booking_id: bookingId, p_admin_id: adminId, p_decision: decision, p_booking_patch: patch,
+    p_review: {
+      reason: clean(input.reason), client_message: clean(input.clientMessage),
+      requires_two_workers: !!input.requiresTwoWorkers, required_competency: clean(input.requiredCompetency),
+      instructions: [clean(input.professionalInstructions), clean(input.requiredCompetency)].filter(Boolean).join("\n") || null,
+      reassess_on: input.reassessOn || null, chosen_role_family: chosenRoleFamily ?? null,
+    },
   });
+  return error ? { error: error.message } : { ok: true };
 }
 
 /**
@@ -105,6 +93,7 @@ export async function approveBookingReview(bookingId: string, input: ReviewInput
 
   const update: Database["public"]["Tables"]["bookings"]["Update"] = { status: "open" };
   let roleId = booking.professional_role_id;
+  let chosenRoleFamily: string | null = null;
   if (input.permittedRoleId && input.permittedRoleId !== booking.professional_role_id) {
     const [{ data: oldRole }, { data: newRole }, { data: rate }] = await Promise.all([
       admin.from("professional_roles").select("category_id, country_code").eq("id", booking.professional_role_id).single(),
@@ -132,35 +121,11 @@ export async function approveBookingReview(bookingId: string, input: ReviewInput
     // A type of care belongs to a category; drop it if the category changed.
     if (newRole.category_id !== oldRole?.category_id) update.care_type_id = null;
     roleId = newRole.id;
-    await admin
-      .from("booking_risk_assessments")
-      .update({ chosen_role_family: roleFamilyOf(newRole.code) })
-      .eq("booking_id", bookingId);
+    chosenRoleFamily = roleFamilyOf(newRole.code);
   }
+  const result = await recordReview(admin, bookingId, adminId, "approved", input, update, chosenRoleFamily);
+  if ("error" in result) return result;
 
-  const { data: updated, error } = await admin
-    .from("bookings")
-    .update(update)
-    .eq("id", bookingId)
-    .eq("status", "pending_review")
-    .select("id");
-  if (error) return { error: error.message };
-  if (!updated || updated.length === 0) return { error: "This request is no longer waiting for review." };
-
-  await Promise.all([
-    admin.from("booking_status_history").insert({
-      booking_id: bookingId, from_status: "pending_review", to_status: "open", changed_by: adminId, reason: clean(input.reason),
-    }),
-    recordReview(admin, bookingId, adminId, "approved", input, roleId),
-    admin
-      .from("booking_safety_briefs")
-      .update({
-        instructions: [clean(input.professionalInstructions), clean(input.requiredCompetency)].filter(Boolean).join("\n") || null,
-        requires_two_workers: !!input.requiresTwoWorkers,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("booking_id", bookingId),
-  ]);
   await Promise.all([
     sendNotification("booking_review_approved", booking.requester_user_id, { booking_id: bookingId, note: clean(input.clientMessage) ?? "" }),
     notifyMatchingProfessionals(bookingId, roleId),
@@ -175,7 +140,8 @@ export async function requestMoreInformation(bookingId: string, input: ReviewInp
   if (!g.ok) return { error: g.error };
   const { adminId, admin, booking } = g;
   if (!clean(input.clientMessage)) return { error: "Please write what you need from the client." };
-  await recordReview(admin, bookingId, adminId, "more_info_requested", input, null);
+  const result = await recordReview(admin, bookingId, adminId, "more_info_requested", input);
+  if ("error" in result) return result;
   await sendNotification("booking_review_more_info", booking.requester_user_id, { booking_id: bookingId, note: clean(input.clientMessage) ?? "" });
   revalidatePath("/admin/bookings/review");
   return { ok: true };
@@ -190,9 +156,8 @@ export async function declineBookingReview(bookingId: string, input: ReviewInput
   if (!message) return { error: "Please give the client a reason." };
   if (!applyTransition("pending_review", "cancel", "admin").ok) return { error: "This request is no longer waiting for review." };
 
-  const result = await writeCancelBooking(bookingId, "pending_review", adminId, "admin", false, clean(input.reason) ?? message);
+  const result = await recordReview(admin, bookingId, adminId, "declined", input);
   if ("error" in result) return result;
-  await recordReview(admin, bookingId, adminId, "declined", input, null);
   await sendNotification("booking_review_declined", booking.requester_user_id, { booking_id: bookingId, note: message });
   revalidatePath("/admin/bookings/review");
   return { ok: true };
@@ -214,12 +179,13 @@ export async function readSafetyBrief(
     .eq("booking_id", bookingId)
     .maybeSingle();
   if (!data) return null;
-  await createServiceClient().from("audit_log").insert({
+  const { error: auditError } = await createServiceClient().from("audit_log").insert({
     actor_user_id: user.id,
     actor_type: "user",
     action: "booking.safety_brief_viewed",
     entity_type: "booking",
     entity_id: bookingId,
   });
+  if (auditError) return null;
   return { items: data.items, instructions: data.instructions, requiresTwoWorkers: data.requires_two_workers };
 }

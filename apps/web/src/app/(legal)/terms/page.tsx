@@ -4,19 +4,19 @@ import { ArrowRight01Icon, Icon } from "@/components/ui/icon";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteNav } from "@/components/site-nav";
 import { LegalLanguageSwitch, legalHref, type LegalSearchParams } from "@/components/pt-legal-page";
+import { preferredLegalLang } from "@/lib/i18n/legal-server";
 import {
   PT_LEGAL_INDEX,
   PT_LEGAL_PACK,
   PT_LEGAL_ROUTES,
   PT_LEGAL_SUMMARIES,
-  legalLangFromParam,
   type LegalDocKey,
 } from "@/data/legal-copy-pt";
 import { getSelectedCountry } from "@/lib/marketing/market-server";
 
 export async function generateMetadata({ searchParams }: { searchParams: LegalSearchParams }): Promise<Metadata> {
   const pt = (await getSelectedCountry()) === "PT";
-  return { title: pt ? PT_LEGAL_INDEX[legalLangFromParam((await searchParams).lang)].title : "Terms & Conditions" };
+  return { title: pt ? PT_LEGAL_INDEX[await preferredLegalLang(searchParams)].title : "Terms & Conditions" };
 }
 
 const termsLinks = [
@@ -36,7 +36,7 @@ const termsLinks = [
 
 export default async function TermsPage({ searchParams }: { searchParams: LegalSearchParams }) {
   const pt = (await getSelectedCountry()) === "PT";
-  const lang = legalLangFromParam((await searchParams).lang);
+  const lang = await preferredLegalLang(searchParams);
   const links = pt
     ? (Object.keys(PT_LEGAL_ROUTES) as LegalDocKey[]).map((key) => ({
         href: legalHref(PT_LEGAL_ROUTES[key], lang),

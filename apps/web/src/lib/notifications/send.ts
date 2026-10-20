@@ -1,6 +1,7 @@
 import { createServiceClient } from "@/lib/supabase/service";
 import { renderEmail } from "@/lib/email/render";
 import { sendEmail, type EmailDelivery } from "@/lib/email/transport";
+import { resolveLocale } from "@/lib/i18n/preference";
 
 export type NotificationType =
   | "booking_request" | "booking_available" | "booking_confirmation" | "booking_cancellation"
@@ -27,47 +28,7 @@ export function renderTemplate(
 
 const defaultSender: ChannelSender = (msg) => sendEmail(msg);
 
-/**
- * Render the template for `type`, insert a notifications row, attempt delivery,
- * and mark the row sent/failed. Best-effort: never throws to the caller.
- */
-/** Pure: a professional's country maps to the locale their mail is written in. */
-export function localeForCountry(countryCode: string | null | undefined): string {
-  return countryCode === "PT" ? "pt-PT" : "en-GB";
-}
-
-/**
- * Immutable users.country_code is authoritative. Historical profile country
- * supports legacy null snapshots; accounts without either deliberately use GB.
- */
-export function recipientCountry(args: {
-  accountCountry?: string | null;
-  professionalCountry?: string | null;
-  organisationCountry?: string | null;
-}): string {
-  return [args.accountCountry, args.professionalCountry, args.organisationCountry]
-    .find((country) => country === "PT" || country === "GB") ?? "GB";
-}
-
-/** The template locale for a recipient: Portuguese for anyone in the Portuguese market. */
-async function localeForRecipient(
-  admin: ReturnType<typeof createServiceClient>,
-  recipientUserId: string,
-  accountCountry?: string | null,
-): Promise<string> {
-  if (accountCountry === "PT" || accountCountry === "GB") return localeForCountry(accountCountry);
-  const [{ data: pro }, { data: org }] = await Promise.all([
-    admin.from("professionals").select("country_code").eq("user_id", recipientUserId).maybeSingle(),
-    admin.from("organisations").select("country_code").eq("user_id", recipientUserId).maybeSingle(),
-  ]);
-  return localeForCountry(
-    recipientCountry({
-      professionalCountry: pro?.country_code,
-      organisationCountry: org?.country_code,
-    }),
-  );
-}
-
+/** Persist and deliver in the recipient's saved language, independently of market. */
 export async function sendNotification(
   type: NotificationType,
   recipientUserId: string,
@@ -77,11 +38,11 @@ export async function sendNotification(
   const admin = createServiceClient();
   try {
     const { data: u, error: recipientError } = await admin.from("users")
-      .select("email, country_code").eq("id", recipientUserId).maybeSingle();
+      .select("email, preferred_locale").eq("id", recipientUserId).maybeSingle();
     if (recipientError) throw new Error("Could not read notification recipient");
     // The recipient's language first, then that variant — falling back to the
     // English row wherever a translation has not landed yet.
-    const locale = await localeForRecipient(admin, recipientUserId, u?.country_code);
+    const locale = resolveLocale(null, u?.preferred_locale);
     let { data: tpl } = await admin
       .from("notification_templates")
       .select("subject, body")

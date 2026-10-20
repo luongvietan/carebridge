@@ -37,6 +37,7 @@ import {
 } from "@/data/marketing-copy-pt";
 import { marketingImages } from "@/data/marketing-images";
 import { UK_CONTACT_PHONE } from "@/lib/site";
+import { portugalEnglish } from "@/data/marketing-copy-pt-en";
 
 /** Which photo a role card uses: the health set or the childcare set, by position. */
 export type RoleImageRef = { set: "health" | "child"; index: number };
@@ -255,6 +256,8 @@ const pt: MarketingContent = {
   showFounder: false,
 };
 
-export function contentForLocale(locale: string): MarketingContent {
+const ptEn = portugalEnglish(en);
+export function contentForLocale(locale: string, country?: "PT" | "GB"): MarketingContent {
+  if (country === "PT" && locale !== "pt-PT") return ptEn;
   return locale === "pt-PT" ? pt : en;
 }

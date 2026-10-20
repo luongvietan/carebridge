@@ -6,6 +6,7 @@
  * Portuguese entry, so a new label cannot silently ship untranslated.
  */
 import { PORTAL_PT } from "@/lib/i18n/portal-pt";
+import { referenceLabel } from "./reference-en";
 
 export type PortalLocale = "en-GB" | "pt-PT";
 export type T = (text: string, vars?: Record<string, string | number>) => string;
@@ -38,7 +39,7 @@ function translatePt(text: string): string {
 
 export function makeT(locale: PortalLocale): T {
   return (text, vars) => {
-    let out = locale === "pt-PT" ? translatePt(text) : text;
+    let out = locale === "pt-PT" ? translatePt(text) : referenceLabel(text, locale);
     if (vars) {
       for (const [k, v] of Object.entries(vars)) out = out.replaceAll(`{${k}}`, String(v));
     }

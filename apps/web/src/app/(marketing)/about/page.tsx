@@ -8,7 +8,6 @@ import { MarketingPageHero } from "@/components/marketing-page-hero";
 import { MarketingPageMotion } from "@/components/motion/marketing-page-motion";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteNav } from "@/components/site-nav";
-import { StatsBand } from "@/components/stats-band";
 import { aboutContent } from "@/data/legal-copy";
 import { getContentForVisitor } from "@/lib/i18n/server";
 import { marketingImages } from "@/data/marketing-images";
@@ -45,7 +44,6 @@ export default async function AboutPage() {
         image={marketingImages.pageHero.about}
       />
 
-      <StatsBand />
 
         <section className={marketingSection}>
           <div data-reveal className="mx-auto max-w-3xl text-center">

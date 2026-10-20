@@ -1,4 +1,4 @@
-import { LOCALE_BY_COUNTRY } from "@/lib/marketing/market";
+import { getPreferredLocale } from "./preference-server";
 import { getSelectedCountry } from "@/lib/marketing/market-server";
 import { contentForLocale, type MarketingContent } from "@/lib/i18n/content";
 import { dictionaryForLocale, type Dictionary } from "@/lib/i18n/dictionary";
@@ -10,7 +10,7 @@ import { dictionaryForLocale, type Dictionary } from "@/lib/i18n/dictionary";
  */
 export async function getDictionaryForVisitor(): Promise<Dictionary> {
   const country = await getSelectedCountry();
-  return dictionaryForLocale(LOCALE_BY_COUNTRY[country]);
+  return dictionaryForLocale(await getPreferredLocale(), country);
 }
 
 /**
@@ -19,5 +19,5 @@ export async function getDictionaryForVisitor(): Promise<Dictionary> {
  */
 export async function getContentForVisitor(): Promise<MarketingContent> {
   const country = await getSelectedCountry();
-  return contentForLocale(LOCALE_BY_COUNTRY[country]);
+  return contentForLocale(await getPreferredLocale(), country);
 }

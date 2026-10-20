@@ -1,13 +1,15 @@
 export type PaymentStatus = "succeeded" | "failed" | "refunded";
 
 const MAP: Record<string, PaymentStatus> = {
-  "checkout.session.completed": "succeeded",
+  "checkout.session.async_payment_succeeded": "succeeded",
+  "checkout.session.async_payment_failed": "failed",
   "payment_intent.succeeded": "succeeded",
   "payment_intent.payment_failed": "failed",
   "charge.refunded": "refunded",
 };
 
-export function paymentStatusForEvent(eventType: string): PaymentStatus | null {
+export function paymentStatusForEvent(eventType: string, session?: { payment_status?: unknown }): PaymentStatus | null {
+  if (eventType === "checkout.session.completed") return session?.payment_status === "paid" ? "succeeded" : null;
   return MAP[eventType] ?? null;
 }
 

@@ -17,7 +17,7 @@ const checks = {
   legal_approval_recorded: process.env.LEGAL_APPROVED === "true",
   rates_approval_recorded: process.env.RATES_APPROVED === "true",
 };
-const report = { configuration: checks, database: null, approval: "Legal documents, rates, specialist questions and five-candidate trial require business approval." };
+const report = { configuration: checks, database: null, approval: "Legal documents, rates, common pilot questions and five-candidate trial require business approval. Specialist banks follow after the pilot." };
 if (!present("NEXT_PUBLIC_SUPABASE_URL") || !present("SUPABASE_SERVICE_ROLE_KEY")) {
   report.database = { error: "Missing database configuration" };
 } else {
@@ -41,7 +41,7 @@ if (!present("NEXT_PUBLIC_SUPABASE_URL") || !present("SUPABASE_SERVICE_ROLE_KEY"
       common_questions: common,
       role_coverage: roles.data.map(role => {
         const specialist = questions.data.filter(q => q.professional_role_id === role.id).length;
-        return { role: role.name, specialist_questions: specialist, complete: common >= 15 && specialist >= 5 };
+        return { role: role.name, specialist_questions: specialist, complete: common >= 20 };
       }),
       rate_card_roles: ptRateCards.length,
       rate_cards_ready: ptRateCards.length === roles.data.length,

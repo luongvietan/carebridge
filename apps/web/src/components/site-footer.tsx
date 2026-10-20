@@ -2,6 +2,7 @@ import { SiteFooterView } from "@/components/site-footer-view";
 import { PT_LEGAL_ENTITY, PT_NIPC } from "@/data/legal-copy-pt";
 import { getContentForVisitor } from "@/lib/i18n/server";
 import { consumerInfoForLocale } from "@/lib/marketing/consumer-info";
+import { getSelectedCountry } from "@/lib/marketing/market-server";
 
 /** Portugal's other legal documents, beside terms, important information and privacy. */
 const PT_FOOTER_LEGAL_LINKS = [
@@ -14,15 +15,16 @@ const PT_FOOTER_LEGAL_LINKS = [
 /** The footer in the visitor's market: its language, and its own disclaimers. */
 export async function SiteFooter() {
   const content = await getContentForVisitor();
-  const pt = content.locale === "pt-PT";
+  const pt = (await getSelectedCountry()) === "PT";
+  const englishLabels = ["Cookie policy", "Cancellation and refunds", "Complaints", "Legal notice"];
   return (
     <SiteFooterView
       labels={content.ui.footer}
       regulatoryDisclaimer={content.regulatoryDisclaimer}
       emergencyDisclaimer={content.emergencyDisclaimer}
-      consumerInfo={consumerInfoForLocale(content.locale)}
+      consumerInfo={consumerInfoForLocale(content.locale, pt ? "PT" : "GB")}
       legalEntity={pt ? `${PT_LEGAL_ENTITY} · NIPC ${PT_NIPC}` : "CareBridge Connect Ltd"}
-      extraLegalLinks={pt ? PT_FOOTER_LEGAL_LINKS : []}
+      extraLegalLinks={pt ? PT_FOOTER_LEGAL_LINKS.map((link, i) => ({ ...link, label: content.locale === "en-GB" ? englishLabels[i] : link.label })) : []}
     />
   );
 }

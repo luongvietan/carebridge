@@ -1,0 +1,87 @@
+{
+  "checks": [
+    {
+      "width": 1440,
+      "path": "/",
+      "lang": "en-GB",
+      "noOverflow": true
+    },
+    {
+      "width": 1440,
+      "path": "/login",
+      "lang": "en-GB",
+      "noOverflow": true
+    },
+    {
+      "width": 1440,
+      "path": "/services",
+      "lang": "en-GB",
+      "noOverflow": true
+    },
+    {
+      "width": 1440,
+      "path": "/faq",
+      "lang": "en-GB",
+      "noOverflow": true
+    },
+    {
+      "width": 1440,
+      "path": "/contact",
+      "lang": "en-GB",
+      "noOverflow": true
+    },
+    {
+      "width": 1440,
+      "path": "/terms",
+      "lang": "en-GB",
+      "noOverflow": true
+    },
+    {
+      "width": 375,
+      "path": "/",
+      "lang": "en-GB",
+      "noOverflow": true
+    },
+    {
+      "width": 375,
+      "path": "/login",
+      "lang": "en-GB",
+      "noOverflow": true
+    },
+    {
+      "width": 375,
+      "path": "/services",
+      "lang": "en-GB",
+      "noOverflow": true
+    },
+    {
+      "width": 375,
+      "path": "/faq",
+      "lang": "en-GB",
+      "noOverflow": true
+    },
+    {
+      "width": 375,
+      "path": "/contact",
+      "lang": "en-GB",
+      "noOverflow": true
+    },
+    {
+      "width": 375,
+      "path": "/terms",
+      "lang": "en-GB",
+      "noOverflow": true
+    }
+  ],
+  "fixtureRequests": [
+    "GET /rest/v1/countries?select=code%2Cname%2Ccurrency%2Clocale%2Cis_live&order=sort_order.asc",
+    "GET /rest/v1/countries?select=code%2Cname%2Ccurrency%2Clocale%2Cis_live&order=sort_order.asc",
+    "GET /rest/v1/countries?select=code%2Cname%2Ccurrency%2Clocale%2Cis_live&order=sort_order.asc",
+    "GET /rest/v1/countries?select=code%2Cname%2Ccurrency%2Clocale%2Cis_live&order=sort_order.asc",
+    "GET /rest/v1/countries?select=code%2Cname%2Ccurrency%2Clocale%2Cis_live&order=sort_order.asc",
+    "GET /rest/v1/countries?select=code%2Cname%2Ccurrency%2Clocale%2Cis_live&order=sort_order.asc",
+    "GET /rest/v1/countries?select=code%2Cname%2Ccurrency%2Clocale%2Cis_live&order=sort_order.asc",
+    "GET /rest/v1/countries?select=code%2Cname%2Ccurrency%2Clocale%2Cis_live&order=sort_order.asc",
+    "GET /rest/v1/countries?select=code%2Cname%2Ccurrency%2Clocale%2Cis_live&order=sort_order.asc"
+  ]
+}
