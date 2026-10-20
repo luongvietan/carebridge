@@ -57,7 +57,7 @@ async function seedAdmin(sb: SupabaseClient, stamp: number) {
     email,
     password: PASSWORD,
     email_confirm: true,
-    user_metadata: { market: "GB", account_type: "admin", full_name: "E2E Admin" },
+    user_metadata: { market: "GB", preferred_locale: "en-GB", account_type: "admin", full_name: "E2E Admin" },
   });
   if (error || !data.user) throw error ?? new Error("admin user");
   // Signup metadata can't grant admin (0031 hardening downgrades it to
@@ -72,7 +72,7 @@ async function seedClient(sb: SupabaseClient, stamp: number, market = "GB") {
     email,
     password: PASSWORD,
     email_confirm: true,
-    user_metadata: { account_type: "private_client", full_name: "E2E Client", market },
+    user_metadata: { account_type: "private_client", full_name: "E2E Client", market, preferred_locale: market === "PT" ? "pt-PT" : "en-GB" },
   });
   if (error || !data.user) throw error ?? new Error("client user");
   await new Promise((r) => setTimeout(r, 800));
@@ -95,7 +95,7 @@ async function seedEligiblePro(sb: SupabaseClient, stamp: number, roleId: string
     email,
     password: PASSWORD,
     email_confirm: true,
-    user_metadata: { account_type: "professional", full_name: name, market: role!.country_code },
+    user_metadata: { account_type: "professional", full_name: name, market: role!.country_code, preferred_locale: role!.country_code === "PT" ? "pt-PT" : "en-GB" },
   });
   if (error || !data.user) throw error ?? new Error("pro user");
   await new Promise((r) => setTimeout(r, 800));

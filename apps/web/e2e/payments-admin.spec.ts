@@ -58,7 +58,7 @@ async function seedAdmin(sb: SupabaseClient, stamp: number) {
     email,
     password: PASSWORD,
     email_confirm: true,
-    user_metadata: { market: "GB", account_type: "admin", full_name: "Pay E2E Admin" },
+    user_metadata: { market: "GB", preferred_locale: "en-GB", account_type: "admin", full_name: "Pay E2E Admin" },
   });
   if (error || !data.user) throw error ?? new Error("admin user");
   // Signup metadata can't grant admin (0031 hardening downgrades it to
@@ -73,7 +73,7 @@ async function seedClient(sb: SupabaseClient, stamp: number) {
     email,
     password: PASSWORD,
     email_confirm: true,
-    user_metadata: { market: "GB", account_type: "private_client", full_name: "Pay E2E Client" },
+    user_metadata: { market: "GB", preferred_locale: "en-GB", account_type: "private_client", full_name: "Pay E2E Client" },
   });
   if (error || !data.user) throw error ?? new Error("client user");
   await new Promise((r) => setTimeout(r, 800));
@@ -93,7 +93,7 @@ async function seedEligiblePro(sb: SupabaseClient, stamp: number, roleId: string
     email,
     password: PASSWORD,
     email_confirm: true,
-    user_metadata: { market: "GB", account_type: "professional", full_name: name },
+    user_metadata: { market: "GB", preferred_locale: "en-GB", account_type: "professional", full_name: name },
   });
   if (error || !data.user) throw error ?? new Error("pro user");
   await new Promise((r) => setTimeout(r, 800));
@@ -397,9 +397,26 @@ test("webhook: checkout.session.completed reconciles via metadata.payment_id and
   if (pmtErr || !pmtData) throw pmtErr ?? new Error("payments insert");
   const paymentId = pmtData.id as string;
 
-  // POST a checkout.session.completed event with metadata.payment_id set
+  // Completion can arrive before payment; it must leave the ledger pending.
+  const unpaid = signedEvent("checkout.session.completed", {
+    id: `${csId}_unpaid`,
+    payment_status: "unpaid",
+    payment_intent: intentId,
+    metadata: { payment_id: paymentId, booking_id: booking.id },
+  });
+  const unpaidResponse = await request.post("/api/stripe/webhook", {
+    headers: { "stripe-signature": unpaid.header, "content-type": "application/json" },
+    data: unpaid.payload,
+  });
+  expect(unpaidResponse.status()).toBe(200);
+  const { data: pending } = await sb.from("payments")
+    .select("status, paid_at, stripe_payment_intent_id").eq("id", paymentId).single();
+  expect(pending).toMatchObject({ status: "pending", paid_at: null, stripe_payment_intent_id: null });
+
+  // A paid completion reconciles using metadata and backfills the intent id.
   const { payload, header } = signedEvent("checkout.session.completed", {
     id: csId,
+    payment_status: "paid",
     payment_intent: intentId,
     metadata: { payment_id: paymentId, booking_id: booking.id },
   });

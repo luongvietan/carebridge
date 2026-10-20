@@ -18,7 +18,7 @@ async function seedAdmin(sb: SupabaseClient, stamp: number) {
     email,
     password: PASSWORD,
     email_confirm: true,
-    user_metadata: { market: "GB", account_type: "admin", full_name: "Matrix E2E Admin" },
+    user_metadata: { market: "GB", preferred_locale: "en-GB", account_type: "admin", full_name: "Matrix E2E Admin" },
   });
   if (error || !data.user) throw error ?? new Error("admin user");
   // Signup metadata can't grant admin (0031 hardening downgrades it to

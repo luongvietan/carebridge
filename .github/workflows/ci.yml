@@ -38,7 +38,7 @@ jobs:
         working-directory: apps/web
 
       - name: E2E (local Supabase, desktop and mobile browsers)
-        run: npm run e2e
+        run: npm run e2e -- --max-failures=1
         working-directory: apps/web
         env:
           NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321

@@ -28,7 +28,7 @@ test("a professional takes on a second role without disturbing the first", async
     email,
     password: "password123",
     email_confirm: true,
-    user_metadata: { market: "GB", account_type: "professional", full_name: proName },
+    user_metadata: { market: "GB", preferred_locale: "en-GB", account_type: "professional", full_name: proName },
   });
   expect(proUser.user).toBeTruthy();
 

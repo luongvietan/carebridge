@@ -65,7 +65,7 @@ test("professional completes the onboarding wizard and writes persist", async ({
   await expect(page.getByText(/^1\./)).toBeVisible();
   const { data: answers, error: answersError } = await sb.from("assessment_question_bank").select("id, correct_option").eq("country_code", "PT").eq("is_active", true).is("professional_role_id", null);
   expect(answersError).toBeNull();
-  expect(await page.locator("fieldset").count()).toBe(20);
+  expect(await page.locator('fieldset:has(input[type="radio"])').count()).toBe(20);
   for (const answer of answers ?? []) {
     const option = page.locator(`input[name="${answer.id}"][value="${answer.correct_option}"]`);
     if (await option.count()) await option.check();
@@ -139,16 +139,18 @@ test("professional completes the onboarding wizard and writes persist", async ({
     .eq("professional_id", prof!.id);
   expect(docs).toBeGreaterThan(0);
 
-  // A complete common bank does not substitute for absent specialist content.
+  // The PT pilot uses twenty common questions even when a role's specialist
+  // bank is empty; specialist content does not block another attempt.
   const { count: specialist, error: poolError } = await sb.from("assessment_question_bank").select("id", { count: "exact", head: true }).eq("professional_role_id", prof!.professional_role_id).eq("country_code", "PT").eq("is_active", true);
   expect(poolError).toBeNull();
   expect(specialist).toBe(0);
   const { count: attemptsBefore } = await sb.from("assessment_attempts").select("id", { count: "exact", head: true }).eq("professional_id", prof!.id);
   await page.goto(`/professional/onboarding/assessment?role=${prof!.professional_role_id}`);
   await page.getByRole("button", { name: /iniciar avaliação/i }).click();
-  await expect(page.getByText(/ainda está em preparação/i)).toBeVisible();
+  await expect(page.getByText(/^1\./)).toBeVisible();
+  expect(await page.locator('fieldset:has(input[type="radio"])').count()).toBe(20);
   const { count: attemptsAfter } = await sb.from("assessment_attempts").select("id", { count: "exact", head: true }).eq("professional_id", prof!.id);
-  expect(attemptsAfter).toBe(attemptsBefore);
+  expect(attemptsAfter).toBe(attemptsBefore! + 1);
 });
 
 test("a regulated professional activates only once documents are approved AND the register is checked", async ({ browser }) => {
@@ -162,7 +164,7 @@ test("a regulated professional activates only once documents are approved AND th
     email: adminEmail,
     password: "password123",
     email_confirm: true,
-    user_metadata: { account_type: "admin", full_name: "E2E Admin", market: "GB" },
+    user_metadata: { account_type: "admin", full_name: "E2E Admin", market: "GB", preferred_locale: "en-GB" },
   });
   expect(adminUser.user).toBeTruthy();
   // Signup metadata can't grant admin (0031 hardening); promote the test admin.

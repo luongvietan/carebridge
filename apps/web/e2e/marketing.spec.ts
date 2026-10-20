@@ -1,6 +1,29 @@
 import { test, expect } from "@playwright/test";
 import { localService } from "./local-market";
 
+test("language choice persists independently of the Portugal market", async ({ page, context }) => {
+  const sb = localService();
+  const { data: before, error } = await sb.from("countries").select("code,is_live").order("code");
+  if (error) throw error;
+  await page.goto("/");
+  await expect(page.locator("html")).toHaveAttribute("lang", "pt-PT");
+  const marketBefore = (await context.cookies()).find(cookie => cookie.name === "cbc_market")?.value;
+  await page.getByRole("button", { name: "English", exact: true }).click();
+  await expect(page.locator("html")).toHaveAttribute("lang", "en-GB");
+  await page.goto("/services");
+  await expect(page.locator("html")).toHaveAttribute("lang", "en-GB");
+  await expect(page.getByRole("button", { name: "English", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator("footer")).toContainText("NIPC");
+  expect((await context.cookies()).find(cookie => cookie.name === "cbc_market")?.value).toBe(marketBefore);
+  const { data: after, error: afterError } = await sb.from("countries").select("code,is_live").order("code");
+  if (afterError) throw afterError;
+  expect(after).toEqual(before);
+  await page.getByRole("button", { name: "Português", exact: true }).click();
+  await expect(page.locator("html")).toHaveAttribute("lang", "pt-PT");
+  await page.goto("/login");
+  await expect(page.locator("html")).toHaveAttribute("lang", "pt-PT");
+});
+
 /**
  * The homepage country switch reads `countries.is_live` from the database, so
  * this spec exercises the whole story on the local stack: Portugal starts as a
@@ -40,7 +63,7 @@ test("Portugal stays default and UK stays launching soon when Portugal opens", a
   await expect(uk).toContainText("em breve");
   await expect(markets.getByRole("button", { name: /Reino Unido/ })).toHaveCount(0);
 
-  // The dictionary follows the market: the hero and the journey speak Portuguese.
+  // With no saved language choice, the hero and journey default to Portuguese.
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
     "Ligamos Famílias e Organizações",
   );
