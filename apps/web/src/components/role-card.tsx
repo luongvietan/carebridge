@@ -4,6 +4,7 @@ import { ArrowUpRight01Icon, Icon } from "@/components/ui/icon";
 import { marketingCardShadow } from "@/lib/marketing-ui";
 
 type RoleCardProps = {
+  id?: string;
   title: string;
   description: string;
   image: string;
@@ -11,8 +12,8 @@ type RoleCardProps = {
   href?: string;
 };
 
-export function RoleCard({ title, description, image, alt, href }: RoleCardProps) {
-  const className = `group block rounded-[28px] bg-white p-3 ${marketingCardShadow} sm:rounded-[32px] sm:p-4`;
+export function RoleCard({ id, title, description, image, alt, href }: RoleCardProps) {
+  const className = `group block scroll-mt-24 rounded-[28px] bg-white p-3 ${marketingCardShadow} sm:rounded-[32px] sm:p-4`;
 
   const content = (
     <>
@@ -38,14 +39,14 @@ export function RoleCard({ title, description, image, alt, href }: RoleCardProps
 
   if (href) {
     return (
-      <Link href={href} data-reveal-child data-service-card className={className}>
+      <Link id={id} href={href} data-reveal-child data-service-card className={className}>
         {content}
       </Link>
     );
   }
 
   return (
-    <div data-reveal-child data-service-card className={className}>
+    <div id={id} data-reveal-child data-service-card className={className}>
       {content}
     </div>
   );

@@ -8,7 +8,7 @@ import { marketingHeading, marketingSection, marketingSubheading } from "@/lib/m
 export function HomeFaqSection({ faqs, locale = "en-GB" }: { faqs: readonly FaqEntry[]; locale?: string }) {
   const pt = locale === "pt-PT";
   return (
-    <section className={marketingSection}>
+    <section className={`${marketingSection} max-sm:pb-8`}>
       <div data-reveal className="text-center">
         <h2 className={marketingHeading}>{pt ? "Perguntas frequentes" : "Frequently asked questions"}</h2>
         <p className={marketingSubheading}>

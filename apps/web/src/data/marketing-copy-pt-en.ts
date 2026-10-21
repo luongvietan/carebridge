@@ -20,14 +20,14 @@ export function portugalEnglish(base: MarketingContent): MarketingContent {
       contact: { ...base.ui.contact, phoneValue: "+351 926 562 988", addressValue: PT_COMPANY_ADDRESS, whatsapp: "WhatsApp", whatsappValue: "+351 926 562 988" },
     },
     healthRoles: [
-      { title: "Registered nurses — Adults", description: "Nurses with valid professional registration providing adult care within their verified scope of practice.", image: { set: "health", index: 0 }, featuredOnHome: true },
+      { title: "Registered nurses — Adults", summary: "Adult nursing care from registered professionals, within their verified scope of practice.", description: "Nurses with valid professional registration providing adult care within their verified scope of practice.", image: { set: "health", index: 0 }, featuredOnHome: true },
       { title: "Registered nurses — Children", description: "Registered paediatric nurses supporting babies, children and young people within their professional competence.", image: { set: "health", index: 1 } },
       { title: "Registered nurses — Mental health", description: "Registered mental health nurses providing risk assessment, de-escalation and recovery-focused care within their scope of practice.", image: { set: "health", index: 2 } },
       { title: "Physiotherapists", description: "Physiotherapists registered with the Ordem dos Fisioterapeutas, providing rehabilitation and mobility support within their scope of practice.", image: { set: "health", index: 5 } },
-      { title: "Home-support professionals", description: support, image: { set: "health", index: 3 }, featuredOnHome: true },
+      { title: "Home-support professionals", summary: "Everyday support, meals and companionship, tailored to assessed needs and professional competence.", description: support, image: { set: "health", index: 3 }, featuredOnHome: true },
     ],
     childcareRoles: [
-      { title: "In-home childcare professionals", description: "Childcare in the family's home, full-time, part-time or overnight, with criminal-record and first-aid checks before booking.", image: { set: "child", index: 0 }, featuredOnHome: true },
+      { title: "In-home childcare professionals", summary: "Childcare at home, with criminal-record and first-aid checks before booking.", description: "Childcare in the family's home, full-time, part-time or overnight, with criminal-record and first-aid checks before booking.", image: { set: "child", index: 0 }, featuredOnHome: true },
       { title: "Babysitters", description: "Occasional, evening and short-notice childcare, with criminal-record and first-aid checks.", image: { set: "child", index: 2 } },
       { title: "Licensed childminders (Amas)", description: "Childminders caring for children in their own homes, with required authorisation from Segurança Social (ISS), checked before booking.", image: { set: "child", index: 1 } },
     ],

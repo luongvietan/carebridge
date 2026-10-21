@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ForwardLink } from "@/components/forward-link";
-import { roleImage } from "@/lib/i18n/content";
+import { roleAnchor, roleImage } from "@/lib/i18n/content";
 import { getContentForVisitor } from "@/lib/i18n/server";
 import { ArrowUpRight01Icon, Icon } from "@/components/ui/icon";
 import { marketingHeading, marketingSection, marketingSubheading } from "@/lib/marketing-ui";
@@ -11,20 +11,24 @@ function ServiceCard({
   description,
   image,
   alt,
+  href,
+  learnMore,
 }: {
   title: string;
   description: string;
   image: string;
   alt: string;
+  href: string;
+  learnMore: string;
 }) {
   return (
     <Link
-      href="/services"
+      href={href}
       data-reveal-child
       data-service-card
       className="group block rounded-[28px] bg-white p-3 shadow-[0_8px_30px_-12px_rgba(15,38,28,0.12)] sm:rounded-[32px] sm:p-4"
     >
-      <div className="relative aspect-[4/3] overflow-hidden rounded-[20px] sm:rounded-3xl">
+      <div className="relative aspect-[16/9] overflow-hidden rounded-[20px] sm:aspect-[4/3] sm:rounded-3xl">
         <Image
           src={image}
           alt={alt}
@@ -39,6 +43,9 @@ function ServiceCard({
       </div>
       <h3 className="mt-5 text-xl font-bold text-brand-ink">{title}</h3>
       <p className="mt-2 text-sm leading-relaxed text-ink">{description}</p>
+      <span className="mt-2 inline-flex min-h-11 items-center text-sm font-semibold text-brand-strong group-hover:underline">
+        {learnMore}<span className="sr-only"> — {title}</span>
+      </span>
     </Link>
   );
 }
@@ -62,7 +69,9 @@ export async function ServicesOfferSection() {
             <ServiceCard
               key={service.title}
               title={service.title}
-              description={service.description}
+              description={service.summary ?? service.description}
+              href={`/services#${roleAnchor(service.image)}`}
+              learnMore={ui.servicesOffer.learnMore}
               image={img.src}
               alt={img.alt}
             />

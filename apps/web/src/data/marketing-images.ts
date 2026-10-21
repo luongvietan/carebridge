@@ -46,27 +46,27 @@ export const marketingImages = {
   /** One image per professional role card, index-matched to `professionalRoles` */
   roleCards: [
     {
-      src: unsplash("photo-1576091160550-2173dba999ef", 600, 450),
-      alt: "Adult nurse preparing clinical equipment in a care setting",
+      src: pexels(6129688, 600, 450),
+      alt: "Nurse measuring an adult patient’s blood pressure",
     },
     {
-      src: pexels(3985163, 600, 450),
-      alt: "Children's nurse caring for a young child",
+      src: pexels(8460035, 600, 450),
+      alt: "Healthcare professional with a young child during a paediatric checkup",
     },
     {
       src: pexels(7176026, 600, 450),
       alt: "Mental health nurse listening to a person during a supportive conversation",
     },
     {
-      src: pexels(4167544, 600, 450),
-      alt: "Healthcare assistant supporting a patient during a consultation",
+      src: pexels(29372727, 600, 450),
+      alt: "Caregiver supporting an older woman at home",
     },
     {
-      src: pexels(6235047, 600, 450),
-      alt: "Support worker assisting a client in the community",
+      src: pexels(18509795, 600, 450),
+      alt: "Caregiver accompanying an older woman using a walking frame",
     },
     {
-      src: pexels(5215024, 600, 450),
+      src: pexels(20860617, 600, 450),
       alt: "Physiotherapist guiding a client through rehabilitation exercises",
     },
   ],
@@ -74,8 +74,8 @@ export const marketingImages = {
   /** One image per childcare role card */
   childcareRoleCards: [
     {
-      src: pexels(3661264, 600, 450),
-      alt: "Nanny reading a book with a young child at home",
+      src: pexels(3890481, 600, 450),
+      alt: "Adult reading a book with a young child at home",
     },
     {
       src: pexels(8422144, 600, 450),
@@ -86,8 +86,8 @@ export const marketingImages = {
       alt: "Babysitter playing with children in a living room",
     },
     {
-      src: pexels(4145153, 600, 450),
-      alt: "Parent and helper caring for a child together at home",
+      src: pexels(4609073, 600, 450),
+      alt: "Adult and two children reading a book together at home",
     },
   ],
 

@@ -25,6 +25,7 @@ export const professionalRolesPt: RoleCopy[] = [
   {
 
     title: "Enfermeiros/as — Adultos",
+    summary: "Cuidados de enfermagem para adultos, com cédula profissional válida e dentro do âmbito de prática.",
 
     featuredOnHome: true,
 
@@ -75,6 +76,7 @@ export const professionalRolesPt: RoleCopy[] = [
   {
 
     title: "Profissionais de Apoio Domiciliário",
+    summary: "Apoio no dia a dia, nas refeições e na companhia, de acordo com as necessidades e a competência profissional.",
 
     featuredOnHome: true,
 
@@ -95,6 +97,7 @@ export const childcareRolesPt: RoleCopy[] = [
   {
 
     title: "Cuidadores/as Infantis ao Domicílio",
+    summary: "Apoio infantil em casa da família, com verificação do registo criminal e dos primeiros socorros antes da marcação.",
 
     featuredOnHome: true,
 
@@ -514,6 +517,7 @@ export const uiPt = {
     more: "Os/as enfermeiros/as de pediatria e de saúde mental, fisioterapeutas, babysitters e amas licenciadas também estão disponíveis.",
 
     viewAll: "Ver todas as oito categorias",
+    learnMore: "Saber mais",
 
   },
 

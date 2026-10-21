@@ -68,9 +68,9 @@ const en: Dictionary = {
     },
   ],
   ctaKicker: "Join the marketplace",
-  ctaHeading: "Compliant staffing, ready when you need it",
+  ctaHeading: "Verified professionals, available when you need them.",
   ctaBody:
-    "Register as a verified professional, or create a booking request as a private client or organisation — with compliance, payments and audit trails built in.",
+    "Register as a verified professional or request a professional, with secure payments and support throughout the process.",
   joinProfessional: ctaLabels.joinProfessional,
   createBookingRequest: ctaLabels.createBookingRequest,
 };
@@ -113,9 +113,9 @@ const pt: Dictionary = {
     },
   ],
   ctaKicker: "Registe-se no marketplace",
-  ctaHeading: "Pessoal conforme, pronto quando precisar",
+  ctaHeading: "Profissionais verificados, disponíveis quando precisar.",
   ctaBody:
-    "Registe-se como profissional verificado, ou crie um pedido de marcação como cliente particular ou organização — com conformidade, pagamentos e trilhos de auditoria incluídos.",
+    "Registe-se como profissional verificado ou solicite um profissional, com pagamentos seguros e acompanhamento de todo o processo.",
   joinProfessional: "Registe-se como profissional",
   createBookingRequest: "Solicitar um profissional",
 };

@@ -47,9 +47,14 @@ export type RoleImageRef = { set: "health" | "child"; index: number };
 export type RoleCopy = {
   title: string;
   description: string;
+  summary?: string;
   featuredOnHome?: boolean;
   image: RoleImageRef;
 };
+
+export function roleAnchor(ref: RoleImageRef): string {
+  return `role-${ref.set}-${ref.index}`;
+}
 
 export function roleImage(ref: RoleImageRef): { src: string; alt: string } {
   const set = ref.set === "health" ? marketingImages.roleCards : marketingImages.childcareRoleCards;
@@ -106,6 +111,7 @@ const uiEn = {
     sub: "Healthcare and childcare professionals — from registered nurses and support workers to Ofsted-registered nannies — available for booking requests from families and organisations.",
     more: "Children's and mental health nurses, physiotherapists, nannies, childminders, babysitters and mother's helpers are also available.",
     viewAll: "View all ten roles",
+    learnMore: "Learn more",
   },
   compliance: {
     heading: "Verified professionals, continuous compliance",

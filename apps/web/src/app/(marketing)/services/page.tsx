@@ -8,7 +8,7 @@ import { RoleCard } from "@/components/role-card";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteNav } from "@/components/site-nav";
 import { marketingImages } from "@/data/marketing-images";
-import { roleImage } from "@/lib/i18n/content";
+import { roleAnchor, roleImage } from "@/lib/i18n/content";
 import { getContentForVisitor, getDictionaryForVisitor } from "@/lib/i18n/server";
 import {
   marketingCardShadow,
@@ -51,6 +51,7 @@ export default async function ServicesPage() {
               return (
                 <RoleCard
                   key={role.title}
+                  id={roleAnchor(role.image)}
                   title={role.title}
                   description={role.description}
                   image={img.src}
@@ -75,6 +76,7 @@ export default async function ServicesPage() {
               return (
                 <RoleCard
                   key={role.title}
+                  id={roleAnchor(role.image)}
                   title={role.title}
                   description={role.description}
                   image={img.src}

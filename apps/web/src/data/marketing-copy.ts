@@ -23,6 +23,7 @@ export const heroSubheadline =
 export const professionalRoles = [
   {
     title: "Adult Nurses",
+    summary: "Adult nursing care from NMC-registered professionals, within their verified scope of practice.",
     featuredOnHome: true,
     description:
       "NMC-registered adult nurses providing clinical care, medication management and assessments within their professional scope of practice, subject to verification and compliance requirements.",
@@ -39,12 +40,14 @@ export const professionalRoles = [
   },
   {
     title: "Healthcare Assistants",
+    summary: "Companionship, wellbeing and appointment support through non-regulated activities.",
     featuredOnHome: true,
     description:
       "Experienced HCAs providing companionship, wellbeing support, appointment and community access, sitting services and other non-regulated support activities. They do not provide regulated personal care services through CareBridge Connect.",
   },
   {
     title: "Support Workers",
+    summary: "Companionship, community access and everyday wellbeing support through non-regulated activities.",
     featuredOnHome: true,
     description:
       "Support Workers provide companionship, community access, appointment support, wellbeing support, respite sitting services and other non-regulated support activities.",

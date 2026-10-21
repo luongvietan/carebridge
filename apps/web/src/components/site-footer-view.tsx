@@ -74,7 +74,7 @@ export function SiteFooterView({
     { href: "/contact", label: labels.support },
   ];
   return (
-    <footer className="mt-24 bg-gradient-to-r from-[#0a2c1d] via-[#0f3d28] to-[#1a5238] text-[#cfe3d6]">
+    <footer className="mt-6 bg-gradient-to-r from-[#0a2c1d] via-[#0f3d28] to-[#1a5238] text-[#cfe3d6] sm:mt-16 lg:mt-24">
       <div className="mx-auto max-w-7xl px-5 py-14 lg:px-8 lg:py-16">
         <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
           <div>
@@ -119,22 +119,22 @@ export function SiteFooterView({
         </div>
 
         <div className="mt-14 flex flex-col gap-6 border-t border-white/10 pt-8 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-white/55">
-            <Link href="/terms" className="transition hover:text-white">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[15px] leading-7 text-white/85">
+            <Link href="/terms" className="inline-flex min-h-11 items-center transition hover:text-white">
               {labels.terms}
             </Link>
-            <span aria-hidden>|</span>
-            <Link href="/disclaimer" className="transition hover:text-white">
+            <span aria-hidden className="hidden sm:inline">|</span>
+            <Link href="/disclaimer" className="inline-flex min-h-11 items-center transition hover:text-white">
               {labels.importantInfo}
             </Link>
-            <span aria-hidden>|</span>
-            <Link href="/privacy" className="transition hover:text-white">
+            <span aria-hidden className="hidden sm:inline">|</span>
+            <Link href="/privacy" className="inline-flex min-h-11 items-center transition hover:text-white">
               {labels.privacy}
             </Link>
             {extraLegalLinks.map((link) => (
               <span key={link.href} className="contents">
-                <span aria-hidden>|</span>
-                <Link href={link.href} className="transition hover:text-white">
+                <span aria-hidden className="hidden sm:inline">|</span>
+                <Link href={link.href} className="inline-flex min-h-11 items-center transition hover:text-white">
                   {link.label}
                 </Link>
               </span>
@@ -162,9 +162,9 @@ export function SiteFooterView({
           </div>
         </div>
 
-        <div className="mt-8 space-y-3 rounded-xl border border-white/15 bg-white/5 px-5 py-4">
-          <p className="max-w-3xl text-sm leading-relaxed text-white/80">{regulatoryDisclaimer}</p>
-          <p className="max-w-3xl text-sm leading-relaxed text-white/70">{emergencyDisclaimer}</p>
+        <div className="mt-8 space-y-4 rounded-xl border border-white/15 bg-white/5 px-5 py-4">
+          <p className="max-w-3xl text-[15px] leading-7 text-white/85">{regulatoryDisclaimer}</p>
+          <p className="max-w-3xl text-[15px] leading-7 text-white/85">{emergencyDisclaimer}</p>
         </div>
         {consumerInfo && (
           <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5">
@@ -179,7 +179,7 @@ export function SiteFooterView({
               </span>
               {consumerInfo.complaintsBook.label}
             </a>
-            <p className="max-w-3xl text-xs leading-relaxed text-white/65">
+            <p className="max-w-3xl text-sm leading-7 text-white/80">
               {consumerInfo.disputeResolution.text}{" "}
               <a
                 href={consumerInfo.disputeResolution.href}
@@ -192,7 +192,7 @@ export function SiteFooterView({
             </p>
           </div>
         )}
-        <p className="mt-3 text-xs text-white/40" suppressHydrationWarning>
+        <p className="mt-4 text-sm leading-6 text-white/70" suppressHydrationWarning>
           © {new Date().getFullYear()} {legalEntity}. {labels.rights}
         </p>
       </div>
