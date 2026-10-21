@@ -1,0 +1,25 @@
+{
+  "event_id": "evt_3USsFtFuiNRzrLro1wds61Gg",
+  "concurrent_deliveries": [
+    {
+      "status": 200,
+      "outcome": "duplicate"
+    },
+    {
+      "status": 200,
+      "outcome": "duplicate"
+    },
+    {
+      "status": 200,
+      "outcome": "duplicate"
+    },
+    {
+      "status": 200,
+      "outcome": "duplicate"
+    }
+  ],
+  "final_status": "refunded",
+  "refunded_amount": 15,
+  "success_audits": 1,
+  "receipts": 1
+}

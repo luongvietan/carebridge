@@ -1,0 +1,11 @@
+{
+  "checked_at": "2026-10-21T05:45:19.430Z",
+  "scenario": "async-refund-failure",
+  "provider_status": "failed",
+  "payment": {
+    "status": "succeeded",
+    "refunded_amount": 0,
+    "refund_pending": false
+  },
+  "request": "failed"
+}

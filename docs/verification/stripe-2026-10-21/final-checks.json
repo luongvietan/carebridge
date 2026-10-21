@@ -1,0 +1,8 @@
+{
+  "checked_at": "2026-10-21T05:51:14.818Z",
+  "synthetic_users_inactive": 8,
+  "synthetic_bookings_cancelled": 2,
+  "private_gate_retained": true,
+  "unsigned_webhook_status": 400,
+  "unused_connectivity_session_expired": true
+}

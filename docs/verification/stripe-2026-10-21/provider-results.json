@@ -1,0 +1,43 @@
+{
+  "checked_at": "2026-10-21T05:43:09.968Z",
+  "sandbox": "acct_1UE8I3FuiNRzrLro",
+  "booking": "a68c62f2-2547-41a5-baab-283a244a3001",
+  "checkout": {
+    "id": "cs_test_a1YT6yhGHJH3GhszlejDTSPJr7HZxAID2bIfPL7uuI9vm7SA8G7eR3YC2F",
+    "status": "complete",
+    "locale": "en",
+    "currency": "eur",
+    "amount_total": 1500,
+    "adaptive_pricing": {
+      "enabled": false
+    }
+  },
+  "expired_session_verified": true,
+  "decline_status": "pending",
+  "decline_intent": "pi_3USsFtFuiNRzrLro1HPcZOP6",
+  "final_status": "refunded",
+  "final_intent": "pi_3USsFtFuiNRzrLro1HPcZOP6",
+  "amount": 15,
+  "currency": "EUR",
+  "refunded_amount": 15,
+  "audits": [
+    {
+      "action": "payment.failed"
+    },
+    {
+      "action": "payment.pending"
+    },
+    {
+      "action": "payment.succeeded"
+    },
+    {
+      "action": "payment.refund_succeeded"
+    },
+    {
+      "action": "payment.refund_requested"
+    },
+    {
+      "action": "payment.refund_succeeded"
+    }
+  ]
+}
