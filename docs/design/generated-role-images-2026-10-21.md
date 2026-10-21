@@ -1,0 +1,25 @@
+# CareBridge illustrative service photography
+
+Generated with the built-in Imagegen tool on 21 October 2026. These depict fictional people and illustrative service scenes; they are not portraits of CareBridge staff or clients.
+
+- `home-support-ai-v1.webp`: home-support role on homepage and services page.
+- `in-home-childcare-ai-v1.webp`: in-home childcare role on homepage and services page.
+- Landscape framing supports both 16:9 mobile and centered 4:3 desktop crops.
+
+## Prompts
+
+### carebridge-home-support
+
+Create one photorealistic landscape editorial photograph, 4:3 composition, for CareBridge Connect's 'home-support professionals' service card. Scene: a bright, lived-in contemporary Portuguese home with a small dining area, soft natural daylight, understated warm neutrals and a few muted green details. A friendly adult female professional caregiver in a plain muted forest-green polo sits beside an older woman in ordinary everyday clothing, supporting her independence while arranging a simple lunch and a glass of water on the table. Both people have relaxed, natural expressions and look toward each other, neither poses for the camera. Show BOTH complete heads, shoulders and their naturally positioned hands; no cut-off faces, no closeup of torsos. Eye-level medium-wide frame, subjects and essential activity comfortably within the central 70% of the frame so the same photograph can be cropped to 16:9 on mobile. Clear, respectful everyday non-medical support, believable home setting, realistic skin texture, wrinkles, fabric and food, ordinary uncluttered details. Subtle documentary realism, not a glossy advert. No hospital, scrubs, stethoscope, needles, medical procedures, credentials, logos, text, badges, watermark or embedded interface. This is an illustrative fictional service scene, not a photograph of a real CareBridge staff member.
+
+### carebridge-in-home-childcare
+
+Create one photorealistic landscape editorial photograph, 4:3 composition, for CareBridge Connect's 'in-home childcare professionals' service card. Scene: a bright lived-in contemporary Portuguese family living room, soft natural daylight, understated warm neutrals and a few muted green details. A friendly adult professional childcare caregiver in a plain muted forest-green short-sleeve top sits alongside one fully dressed child about 5 years old at a low wooden table, attentively helping the child with a simple age-appropriate wooden animal puzzle. Both look at the activity with relaxed natural expressions; the adult is clearly supervising and engaged, not staring at the camera. Show BOTH complete heads and shoulders, their natural hands and the puzzle clearly. Eye-level medium-wide frame, people and key activity within the central 70% so the photograph also crops naturally to 16:9 on mobile. A modest sofa, a few neatly stored books and toys softly in the background; clearly a family's home, not a classroom or clinic. Respectful candid documentary style, realistic skin and fabric texture, believable hands and puzzle pieces, calm and reassuring, no glossy staged advertisement. No medical equipment, uniforms resembling scrubs, text, logos, credential badges, watermark, embedded interface or extra children. This is an illustrative fictional service scene, not a photograph of real CareBridge staff or customers.
+
+### carebridge-home-support-final
+
+Edit the supplied fictional editorial home-support image. Keep the same two fictional people, realistic features, clothing, respectful home meal-support activity, room and natural photographic style. Reframe as a WIDE 16:9 landscape photograph, pull the camera back so both complete heads have clear breathing room above them and the caregiver's hands, lunch plate and glass all remain fully visible. Arrange both people and all essential interaction within the central 65 percent of image width so a centered 4:3 desktop crop preserves both faces and the meal. The native 16:9 frame will also be used uncropped on mobile. Do not enlarge faces into closeup. Show a little more natural room around them, keeping people and meal as the clear subject. No text, logo, watermark, badges or medical equipment. Output one single finished 16:9 photograph.
+
+### carebridge-in-home-childcare-final
+
+Edit the supplied fictional editorial childcare image. Keep the same fictional adult caregiver and fully dressed child, realistic features, clothing, wooden animal puzzle activity, room and natural photographic style. Reframe as a WIDE 16:9 landscape photograph, pull camera back so both complete heads have generous breathing room above them, especially the caregiver's hair, and the hands and puzzle remain fully visible below. Place both people and the puzzle interaction comfortably in the central 65 percent of image width so a centered 4:3 desktop crop preserves both faces and the activity. The native 16:9 frame will also be used uncropped on mobile. Show a little more of the family living room around them without distracting from their attentive activity. No text, logos, watermarks, badges, medical equipment or extra people. Output one single finished 16:9 photograph.

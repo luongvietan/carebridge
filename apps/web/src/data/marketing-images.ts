@@ -1,5 +1,5 @@
 /**
- * Curated marketing photography — Pexels (primary) + Unsplash (portraits/clinical).
+ * Curated marketing photography — Pexels, Unsplash and local illustrative images.
  * Each slot uses a distinct image; no repeats across sections.
  */
 
@@ -58,8 +58,8 @@ export const marketingImages = {
       alt: "Mental health nurse listening to a person during a supportive conversation",
     },
     {
-      src: pexels(29372727, 600, 450),
-      alt: "Caregiver supporting an older woman at home",
+      src: "/images/roles/home-support-ai-v1.webp",
+      alt: "Illustrative scene of a caregiver helping an older woman with a meal at home",
     },
     {
       src: pexels(18509795, 600, 450),
@@ -74,8 +74,8 @@ export const marketingImages = {
   /** One image per childcare role card */
   childcareRoleCards: [
     {
-      src: pexels(3890481, 600, 450),
-      alt: "Adult reading a book with a young child at home",
+      src: "/images/roles/in-home-childcare-ai-v1.webp",
+      alt: "Illustrative scene of a childcare caregiver helping a child with a wooden puzzle at home",
     },
     {
       src: pexels(8422144, 600, 450),
