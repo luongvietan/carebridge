@@ -11,6 +11,7 @@ describe('checkoutSessionForPayment',()=>{
     const api=client();
     const result=await checkoutSessionForPayment(api,payment,urls);
     expect(result.id).toBe('cs_test_one');
+    expect(api.create.mock.calls[0][0]).toHaveProperty('adaptive_pricing.enabled',false);
     expect(api.create).toHaveBeenCalledWith(expect.objectContaining({locale:'en',client_reference_id:'booking-one',line_items:[{quantity:1,price_data:{currency:'eur',unit_amount:12550,product_data:{name:'CareBridge Connect — booking booking-'}}}],success_url:'https://carebridge.example/client/bookings?checkout=returned&session_id={CHECKOUT_SESSION_ID}',metadata:{booking_id:'booking-one',payment_id:'payment-one'}}),{idempotencyKey:'checkout:payment-one'});
   });
   it('reuses the existing open Stripe session without creating another',async()=>{

@@ -18,6 +18,7 @@ export async function checkoutSessionForPayment(
   } else {
     session = await sessions.create({
       mode: 'payment', locale: payment.checkout_locale, client_reference_id: payment.booking_id,
+      adaptive_pricing: { enabled: false },
       line_items: [{ quantity: 1, price_data: {
         currency: payment.currency.trim().toLowerCase(), unit_amount: amount,
         // Send no clinical roles or care details to a payment processor.
