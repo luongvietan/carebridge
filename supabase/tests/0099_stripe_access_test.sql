@@ -1,0 +1,16 @@
+begin;
+select plan(12);
+select has_column('payments','stripe_checkout_session_id');
+select has_column('payments','checkout_locale');
+select has_column('payments','refund_pending');
+select has_table('stripe_refund_requests');
+select has_table('stripe_refund_items');
+select ok((select relrowsecurity from pg_class where oid='public.stripe_refund_items'::regclass),'refund ledger is protected by RLS');
+select ok(has_function_privilege('service_role','reconcile_stripe_event(jsonb)','execute'),'service can reconcile payments');
+select ok(not has_function_privilege('authenticated','reconcile_stripe_event(jsonb)','execute'),'authenticated cannot forge a payment event');
+select ok(not has_function_privilege('anon','reconcile_stripe_event(jsonb)','execute'),'anonymous cannot forge a payment event');
+select ok(not has_function_privilege('authenticated','request_stripe_refund(uuid,uuid,text)','execute'),'authenticated cannot impersonate a refund admin');
+select ok(not has_function_privilege('authenticated','reconcile_stripe_refund(jsonb)','execute'),'authenticated cannot forge a refund');
+select ok(has_function_privilege('service_role','request_stripe_refund(uuid,uuid,text)','execute'),'service can request audited refunds');
+select * from finish();
+rollback;

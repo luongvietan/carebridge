@@ -58,9 +58,11 @@ export async function recordPayout(bookingId: string): Promise<PayoutResult> {
   // blocks the payout entirely; PARTIAL refunds (refunded_amount, payment stays
   // `succeeded`) are deducted from the payout per the Audit-v3 policy so the
   // platform margin is preserved.
-  const { data: bookingPayments } = await admin.from("payments")
-    .select("status, refunded_at, refunded_amount").eq("booking_id", bookingId);
+  const { data: bookingPayments, error: paymentError } = await admin.from("payments")
+    .select("status, refunded_at, refunded_amount, refund_pending").eq("booking_id", bookingId);
+  if (paymentError) return { error: 'Could not verify payment status.' };
   const rows = bookingPayments ?? [];
+  if (rows.some(p=>p.refund_pending)) return {error:'A refund is pending; this payout is on hold.'};
   if (rows.some((p) => p.refunded_at !== null)) {
     return { error: "Payment for this booking has been fully refunded; no payout will be made." };
   }
@@ -109,11 +111,13 @@ export async function markPayoutPaid(payoutId: string, method: string, reference
   // exceeds what was recorded means the recorded amount is stale (the partial
   // refund landed between record and pay) — block so an admin re-records the net.
   if (payout.booking_id) {
-    const { data: bookingPayments } = await admin
+    const { data: bookingPayments, error: paymentError } = await admin
       .from("payments")
-      .select("refunded_at, refunded_amount")
+      .select("refunded_at, refunded_amount, refund_pending")
       .eq("booking_id", payout.booking_id);
+    if (paymentError) return { error: 'Could not verify payment status.' };
     const rows = bookingPayments ?? [];
+    if (rows.some(p=>p.refund_pending)) return {error:'A refund is pending; this payout is on hold.'};
     if (rows.some((p) => p.refunded_at !== null)) {
       return { error: "Payment for this booking has been refunded; this payout cannot be paid." };
     }

@@ -6,14 +6,10 @@ import { BackLink } from "@/components/back-link";
 import { createServiceClient } from "@/lib/supabase/service";
 import { requireAdmin } from "@/lib/auth/admin";
 import { RecordPayoutButton, MarkPayoutPaidForm } from "@/components/payout-actions";
-import { formatGbpMoney } from "@/lib/format/money";
+import { formatMoney } from "@/lib/format/money";
 import { netPayoutAmount } from "@/lib/payouts/record";
 
 export const dynamic = "force-dynamic";
-
-function formatMoney(amount: number | null | undefined) {
-  return formatGbpMoney(amount);
-}
 
 export default async function AdminPayoutsPage() {
   if (!(await requireAdmin())) redirect("/login");
@@ -22,7 +18,7 @@ export default async function AdminPayoutsPage() {
   // 1. Completed bookings with a succeeded payment and NO payout yet.
   const { data: completedBookings } = await admin
     .from("bookings")
-    .select("id, scheduled_start, total_payout, assigned_professional_id, professionals(id, full_name)")
+    .select("id, scheduled_start, total_payout, snap_currency, assigned_professional_id, professionals(id, full_name)")
     .eq("status", "completed")
     .not("assigned_professional_id", "is", null)
     .order("scheduled_start", { ascending: false });
@@ -39,7 +35,7 @@ export default async function AdminPayoutsPage() {
       .from("payments")
       .select("booking_id, refunded_amount")
       .in("booking_id", completedIds)
-      .eq("status", "succeeded");
+      .eq("status", "succeeded").eq('refund_pending',false);
     succeededBookingIds = new Set((paidPayments ?? []).map((p) => p.booking_id));
     for (const p of paidPayments ?? []) {
       if (!p.booking_id) continue;
@@ -146,9 +142,9 @@ export default async function AdminPayoutsPage() {
                       <td className="p-3">{prof?.full_name ?? "—"}</td>
                       <td className="p-3">{last4 ? `****${last4}` : "—"}</td>
                       <td className="p-3">
-                        {formatMoney(net)}
+                        {formatMoney(net,b.snap_currency)}
                         {refunded > 0 && (
-                          <span className="block text-xs text-[#684e1b]"><Tr>{"after"}</Tr>{formatMoney(refunded)}<Tr>{"refund (of"}</Tr>{formatMoney(b.total_payout)})
+                          <span className="block text-xs text-[#684e1b]"><Tr>{"after"}</Tr>{formatMoney(refunded,b.snap_currency)}<Tr>{"refund (of"}</Tr>{formatMoney(b.total_payout,b.snap_currency)})
                           </span>
                         )}
                       </td>
@@ -188,7 +184,7 @@ export default async function AdminPayoutsPage() {
                     <tr key={p.id}>
                       <td className="p-3">{prof?.full_name ?? "—"}</td>
                       <td className="p-3">{last4 ? `****${last4}` : "—"}</td>
-                      <td className="p-3">{formatMoney(p.amount)}</td>
+                      <td className="p-3">{formatMoney(p.amount,p.currency)}</td>
                       <td className="p-3">
                         <MarkPayoutPaidForm payoutId={p.id} />
                       </td>

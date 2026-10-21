@@ -1655,6 +1655,9 @@ export type Database = {
       }
       payments: {
         Row: {
+          refund_pending: boolean
+          checkout_locale: string
+          stripe_checkout_session_id: string | null
           amount: number
           booking_id: string
           created_at: string
@@ -1671,6 +1674,9 @@ export type Database = {
         Insert: {
           amount: number
           booking_id: string
+          checkout_locale?: string
+          stripe_checkout_session_id?: string | null
+          refund_pending?: boolean
           created_at?: string
           currency?: string
           id?: string
@@ -1685,6 +1691,9 @@ export type Database = {
         Update: {
           amount?: number
           booking_id?: string
+          checkout_locale?: string
+          stripe_checkout_session_id?: string | null
+          refund_pending?: boolean
           created_at?: string
           currency?: string
           id?: string
@@ -3226,6 +3235,9 @@ export type Database = {
       }
     }
     Functions: {
+      reconcile_stripe_event: { Args: { p_event: Json }; Returns: Json }
+      request_stripe_refund: { Args: { p_payment_id: string; p_actor_id: string; p_reason: string }; Returns: Json }
+      reconcile_stripe_refund: { Args: { p_event: Json }; Returns: Json }
       review_booking: {
         Args: { p_booking_id: string; p_admin_id: string; p_decision: string; p_review: Json; p_booking_patch: Json }
         Returns: undefined

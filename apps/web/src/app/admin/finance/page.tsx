@@ -12,6 +12,7 @@ import { londonDateRangeToUtc } from "@/lib/format/datetime";
 import { Select } from "@/components/ui/select";
 import { loadBookingFinance } from "@/lib/finance/load-bookings";
 import { MONEY_STATE_HINT, MONEY_STATE_LABEL } from "@/lib/finance/booking-finance";
+import { RefundPaymentControl } from '@/components/refund-payment-control';
 
 export const dynamic = "force-dynamic";
 
@@ -43,7 +44,7 @@ export default async function AdminFinancePage({
   // Payments — join bookings(id, scheduled_start) and payer.
   let paymentsQuery = admin
     .from("payments")
-    .select("id, booking_id, amount, refunded_amount, currency, status, created_at, payer_user_id, bookings(id, scheduled_start)")
+    .select("id, booking_id, amount, refunded_amount, refund_pending, stripe_payment_intent_id, currency, status, created_at, payer_user_id, bookings(id, scheduled_start)")
     .order("created_at", { ascending: false });
   if (gte) paymentsQuery = paymentsQuery.gte("created_at", gte);
   if (lt) paymentsQuery = paymentsQuery.lt("created_at", lt);
@@ -334,6 +335,8 @@ export default async function AdminFinancePage({
                         <span className="rounded-full bg-surface px-2.5 py-0.5 text-xs font-medium text-ink">
                           {p.status.replace(/_/g, " ")}
                         </span>
+                        {p.refund_pending&&<p className="mt-2 text-xs text-ink">{t('Refund is pending. Payout is on hold.')}</p>}
+                        {p.status==='succeeded'&&p.stripe_payment_intent_id&&Number(p.amount)>refunded&&<RefundPaymentControl paymentId={p.id} remaining={Number(p.amount)-refunded} currency={p.currency} pending={p.refund_pending}/>}
                       </td>
                     </tr>
                   );

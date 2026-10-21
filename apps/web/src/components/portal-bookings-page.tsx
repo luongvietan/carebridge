@@ -1,4 +1,5 @@
 import { TableScroll } from "@/components/table-scroll";
+import { PaymentReturnNotice } from '@/components/payment-return-notice';
 import { AdminTableHeader } from "@/components/admin-table-header";
 import { getPortalLocale, getPortalT } from "@/lib/i18n/portal-server";
 import { createClient } from "@/lib/supabase/server";
@@ -98,6 +99,7 @@ export async function PortalBookingsPage({ newBookingHref }: { newBookingHref: s
         </Link>
       </div>
 
+      <PaymentReturnNotice />
       {hoursForReview.length > 0 && (
         <section className="mt-10">
           <h2 className="text-xl font-bold">{t("Hours awaiting your confirmation")}</h2>
@@ -124,7 +126,7 @@ export async function PortalBookingsPage({ newBookingHref }: { newBookingHref: s
             <tbody className="divide-y divide-line">
               {bookings.map((b) => {
                 const payStatus = paymentStatusByBooking.get(b.id) ?? null;
-                const needsPay = PAYABLE.has(b.status) && payStatus !== "succeeded";
+                const needsPay = PAYABLE.has(b.status) && payStatus !== "succeeded" && payStatus !== "refunded";
                 return (
                   <tr key={b.id}>
                     <td className="p-3">{formatLondon(b.scheduled_start, locale)}</td>
