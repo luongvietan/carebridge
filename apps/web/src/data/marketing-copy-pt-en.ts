@@ -31,7 +31,7 @@ export function portugalEnglish(base: MarketingContent): MarketingContent {
       { title: "Babysitters", description: "Occasional, evening and short-notice childcare, with criminal-record and first-aid checks.", image: { set: "child", index: 2 } },
       { title: "Licensed childminders (Amas)", description: "Childminders caring for children in their own homes, with required authorisation from Segurança Social (ISS), checked before booking.", image: { set: "child", index: 1 } },
     ],
-    childcareCareTypes: ["Full-time", "Part-time", "After-school support", "Overnight", "Holiday care", "Urgent childcare"],
+    childcareCareTypes: base.childcareCareTypes,
     supportedServices: ["Washing and dressing", "Toileting and continence support", "Mobility and transfers", "Meal preparation", "Companionship", "Community and appointment support", "Respite support", "Support after hospital discharge", "Overnight support"],
     verificationChecklist: verification,
     complianceFeatures: [

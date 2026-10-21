@@ -23,7 +23,7 @@ export const metadata: Metadata = { title: "Professional roles — CareBridge Co
 
 export default async function ServicesPage() {
   const [content, t] = await Promise.all([getContentForVisitor(), getDictionaryForVisitor()]);
-  const { ui, healthRoles, childcareRoles, childcareCareTypes, supportedServices } = content;
+  const { ui, healthRoles, childcareRoles, childcareCareTypes, childcareSupport } = content;
   const s = ui.servicesPage;
   return (
     <MarketingPageMotion>
@@ -102,16 +102,16 @@ export default async function ServicesPage() {
           </div>
         </section>
 
-        <section className={`${marketingSection} pt-0`}>
+        <section id="childcare-support" className={`${marketingSection} scroll-mt-24 pt-0`}>
           <div data-reveal className="text-center">
             <h2 className={marketingHeading}>{s.servicesHeading}</h2>
             <p className={`${marketingSubheading} max-w-2xl`}>
-              {s.servicesSub}
+              {childcareSupport.description}
             </p>
           </div>
 
           <div data-reveal-stagger className="mx-auto mt-10 grid max-w-3xl gap-3 sm:grid-cols-2">
-            {supportedServices.map((service) => (
+            {childcareSupport.services.map((service) => (
               <div
                 key={service}
                 data-reveal-child
@@ -121,9 +121,6 @@ export default async function ServicesPage() {
               </div>
             ))}
           </div>
-          <p className="mx-auto mt-6 max-w-2xl text-center text-sm text-ink">
-            {s.andOthers}
-          </p>
         </section>
 
         <section className={`${marketingSection} pt-0`}>

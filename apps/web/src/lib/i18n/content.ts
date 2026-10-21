@@ -10,6 +10,7 @@ import {
   aboutFeatures,
   childcareCareTypes,
   childcareRoles,
+  childcareSupport,
   complianceFeatures,
   emergencyDisclaimer,
   importantInformation,
@@ -25,6 +26,7 @@ import {
   aboutFeaturesPt,
   childcareCareTypesPt,
   childcareRolesPt,
+  childcareSupportPt,
   complianceFeaturesPt,
   emergencyDisclaimerPt,
   importantInformationPt,
@@ -187,6 +189,7 @@ export type MarketingContent = {
   healthRoles: RoleCopy[];
   childcareRoles: RoleCopy[];
   childcareCareTypes: readonly string[];
+  childcareSupport: { description: string; services: readonly string[] };
   supportedServices: readonly string[];
   complianceFeatures: readonly { title: string; bullets: readonly string[] }[];
   verificationChecklist: readonly string[];
@@ -220,6 +223,7 @@ const en: MarketingContent = {
     image: { set: "child", index: i },
   })),
   childcareCareTypes,
+  childcareSupport,
   supportedServices,
   complianceFeatures,
   verificationChecklist,
@@ -238,6 +242,7 @@ const pt: MarketingContent = {
   healthRoles: professionalRolesPt,
   childcareRoles: childcareRolesPt,
   childcareCareTypes: childcareCareTypesPt,
+  childcareSupport: childcareSupportPt,
   supportedServices: supportedServicesPt,
   complianceFeatures: complianceFeaturesPt,
   verificationChecklist: verificationChecklistPt,

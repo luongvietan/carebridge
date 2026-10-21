@@ -83,11 +83,26 @@ export const childcareRoles = [
 export const childcareCareTypes = [
   "Full-time",
   "Part-time",
-  "After-school care",
-  "Overnight",
-  "Holiday childcare",
-  "Emergency childcare",
+  "After-school support",
+  "Overnight support",
+  "Holiday support",
+  "Occasional or last-minute childcare support",
 ] as const;
+
+export const childcareSupport = {
+  description:
+    "Childcare support tailored to each family's needs, including after-school, overnight, holiday or occasional support. All services are provided by verified professionals in line with their experience and qualifications.",
+  services: [
+    "After-school support",
+    "Overnight support",
+    "Holiday support",
+    "Occasional or last-minute childcare support",
+    "Meal preparation for children",
+    "Age-appropriate play and activities",
+    "Accompaniment to activities and appointments",
+    "Support for children with additional needs, where the professional has appropriate experience",
+  ],
+} as const;
 
 export const stats = [
   { value: "100%", label: "Verified before first booking" },

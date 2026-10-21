@@ -142,15 +142,30 @@ export const childcareCareTypesPt = [
 
   "Apoio após a escola",
 
-  "Durante a noite",
+  "Apoio noturno",
 
-  "Cuidados nas férias",
+  "Apoio durante as férias",
 
-  "Cuidados de emergência",
+  "Apoio infantil pontual ou de última hora",
 
 ] as const;
 
 
+
+export const childcareSupportPt = {
+  description:
+    "Apoio infantil adaptado às necessidades de cada família, incluindo acompanhamento após a escola, durante a noite, nas férias ou de forma pontual. Todos os serviços são prestados por profissionais verificados, de acordo com a sua experiência e qualificações.",
+  services: [
+    "Apoio após a escola",
+    "Apoio noturno",
+    "Apoio durante as férias",
+    "Apoio infantil pontual ou de última hora",
+    "Preparação de refeições para crianças",
+    "Brincadeiras e atividades adequadas à idade",
+    "Acompanhamento a atividades e compromissos",
+    "Apoio a crianças com necessidades adicionais, quando o profissional tenha experiência adequada",
+  ],
+} as const;
 
 export const supportedServicesPt = [
 
